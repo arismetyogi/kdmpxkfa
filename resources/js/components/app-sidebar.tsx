@@ -14,7 +14,7 @@ export function AppSidebar() {
 
     // Check if user has admin or manager role
     const isAdminOrManager = user?.roles?.some((role: { name: string }) =>
-        ['admin', 'manager'].includes(role.name)
+        ['super-admin', 'admin', 'manager'].includes(role.name)
     );
 
     // Define navigation items based on user role

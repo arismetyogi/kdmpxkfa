@@ -3,21 +3,28 @@
 use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Role;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome');
+    return Inertia::render('welcome');
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Regular user dashboard
     Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
+        return Inertia::render('dashboard');
     })->name('dashboard');
 
     // Admin routes with role-based access
-    Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['role:admins|super-admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+        
+        // Role management routes with explicit model binding
         Route::get('/roles', [AdminController::class, 'roles'])->name('roles');
+        Route::post('/roles', [AdminController::class, 'storeRole'])->name('roles.store');
+        Route::put('/roles/{role}', [AdminController::class, 'updateRole'])->name('roles.update')->where('role', '[0-9]+');
+        Route::delete('/roles/{role}', [AdminController::class, 'destroyRole'])->name('roles.destroy')->where('role', '[0-9]+');
+        
         Route::get('/permissions', [AdminController::class, 'permissions'])->name('permissions');
         Route::get('/users', [AdminController::class, 'users'])->name('users');
     });
@@ -26,6 +33,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['permission:view dashboard'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard-alt', [AdminController::class, 'dashboard'])->name('dashboard-alt');
     });
+});
+
+// Add explicit route model binding for Role
+Route::bind('role', function ($value) {
+    return \Spatie\Permission\Models\Role::findOrFail($value);
 });
 
 require __DIR__.'/settings.php';

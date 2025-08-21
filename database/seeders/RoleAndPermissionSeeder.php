@@ -20,18 +20,18 @@ class RoleAndPermissionSeeder extends Seeder
         $permissions = [
             'view users',
             'create users',
-            'edit users',
+            'update users',
             'delete users',
             'view roles',
             'create roles',
-            'edit roles',
+            'update roles',
             'delete roles',
             'view permissions',
             'create permissions',
-            'edit permissions',
+            'update permissions',
             'delete permissions',
             'view dashboard',
-            'access settings',
+            'view admin dashboard',
         ];
 
         foreach ($permissions as $permission) {
@@ -39,15 +39,31 @@ class RoleAndPermissionSeeder extends Seeder
         }
 
         // Create roles and assign permissions
+        $superAdminRole = Role::create(['name' => 'super-admin']);
+        $superAdminRole->givePermissionTo(Permission::all());
+        
         $adminRole = Role::create(['name' => 'admin']);
-        $adminRole->givePermissionTo(Permission::all());
+        $adminRole->givePermissionTo([
+            'view users',
+            'create users',
+            'update users',
+            'view roles',
+            'create roles',
+            'update roles',
+            'view permissions',
+            'create permissions',
+            'update permissions',
+            'view admin dashboard',
+            'view dashboard',
+        ]);
 
         $managerRole = Role::create(['name' => 'manager']);
         $managerRole->givePermissionTo([
             'view users',
-            'edit users',
+            'view roles',
+            'view permissions',
             'view dashboard',
-            'access settings',
+            'view admin dashboard',
         ]);
 
         $userRole = Role::create(['name' => 'user']);
