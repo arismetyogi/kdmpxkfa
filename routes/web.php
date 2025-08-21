@@ -21,18 +21,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
 
         // Role management routes with explicit model binding
-        Route::get('/roles', [AdminController::class, 'roles'])->name('roles');
-        Route::post('/roles', [AdminController::class, 'storeRole'])->name('roles.store');
-        Route::put('/roles/{role}', [AdminController::class, 'updateRole'])->name('roles.update');
-        Route::delete('/roles/{role}', [AdminController::class, 'destroyRole'])->name('roles.destroy');
+        Route::prefix('roles')->name('roles.')->group(function () {
+            Route::get('', [AdminController::class, 'roles'])->name('index');
+            Route::post('', [AdminController::class, 'storeRole'])->name('store');
+            Route::put('/{role}', [AdminController::class, 'updateRole'])->name('update');
+            Route::delete('/{role}', [AdminController::class, 'destroyRole'])->name('destroy');
+        });
 
         Route::get('/permissions', [AdminController::class, 'permissions'])->name('permissions');
 
+        // User management routes with explicit model binding
         Route::prefix('users')->name('users.')->group(function () {
-            Route::get('/', [UserController::class, 'index'])->name('index');
-            Route::post('/', [UserController::class, 'store'])->name('store');
+            Route::get('', [UserController::class, 'index'])->name('index');
+            Route::post('', [UserController::class, 'store'])->name('store');
             Route::put('/{user}', [UserController::class, 'update'])->name('update');
-            Route::delete('/', [UserController::class, 'destroy'])->name('destroy');
+            Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
         });
     });
 
@@ -45,6 +48,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // Add explicit route model binding for Role
 Route::bind('role', function ($value) {
     return \Spatie\Permission\Models\Role::findOrFail($value);
+});
+
+// Add explicit route model binding for Role
+Route::bind('user', function ($value) {
+    return \App\Models\User::findOrFail($value);
 });
 
 require __DIR__ . '/settings.php';

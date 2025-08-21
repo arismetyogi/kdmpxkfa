@@ -72,33 +72,25 @@ export default function UserFormModal({ isOpen, onClose, user, roles }: UserForm
         e.preventDefault();
 
         if (isEditing && user?.id) {
-            try {
-                form.put(route('admin.users.update', user.id), {
-                    onSuccess: () => onClose(),
-                });
-            } catch (error: unknown) {
-                if (error instanceof Error) {
-                    toast.error(error.message);
-                } else {
-                    toast.error('An unexpected error occurred.');
-                }
-            } finally {
-                toast.success('User updated successfully.');
-            }
+            form.put(route('admin.users.update', user.id), {
+                onSuccess: () => {
+                    onClose();
+                    toast.success('User updated successfully.');
+                },
+                onError: (e) => {
+                    toast.error('Failed to update user.', e);
+                },
+            });
         } else {
-            try {
-                form.post(route('admin.users.store'), {
-                    onSuccess: () => onClose(),
-                });
-            }  catch (error: unknown) {
-                if (error instanceof Error) {
-                    toast.error(error.message);
-                } else {
-                    toast.error('An unexpected error occurred.');
-                }
-            } finally {
-                toast.success('User created successfully');
-            }
+            form.post(route('admin.users.store'), {
+                onSuccess: () => {
+                    onClose();
+                    toast.success('User created successfully');
+                },
+                onError: (e) => {
+                    toast.error('An unexpected error occurred.', e);
+                },
+            });
         }
     };
 
@@ -181,6 +173,8 @@ export default function UserFormModal({ isOpen, onClose, user, roles }: UserForm
                                 id="password_confirmation"
                                 name="password_confirmation"
                                 type="password"
+                                value={form.data.password_confirmation}
+                                onChange={(e) => form.setData('password_confirmation', e.target.value)}
                                 placeholder="Enter password confirmation"
                                 className="mt-1"
                             />

@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
@@ -57,9 +58,10 @@ class UserController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password'])
         ]);
-        if (!empty($validated['role'])) {
-            $role = Role::whereIn('id', $validated['role'])->get();
-            $user->syncRole($role);
+
+        Log::info($validated);
+        if (!empty($validated['roles'])) {
+            $user->syncRoles($validated['roles']);
         }
 
         return redirect()->route('admin.users.index')->with('success', 'Role created successfully.');
@@ -76,7 +78,7 @@ class UserController extends Controller
             'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')->ignore($user)],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user)],
             'password' => array_merge(
-                ['sometimes', 'string', 'max:255', 'confirmed'],
+                ['nullable', 'string', 'max:255', 'confirmed'],
                 App::environment('production')
                     ? [Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()]
                     : [Password::min(6)], // more relaxed rule in non-production
@@ -100,16 +102,17 @@ class UserController extends Controller
             ]);
         }
 
-        if (!empty($validated['role'])) {
-            $roles = Role::whereIn('id', $validated['roles'])->get();
-            $user->syncRoles($roles);
+        if (!empty($validated['roles'])) {
+            $user->syncRoles($validated['roles']);
         }
+
+        return redirect()->route('admin.users.index')->with('success', 'User update successfully.');
     }
 
     public function destroy(Request $request, User $user)
     {
         // Check if user has permission to delete roles
-        if (!$request->user()->can('delete roles')) {
+        if (!$request->user()->can('delete users')) {
             abort(403, 'Unauthorized action.');
         }
 

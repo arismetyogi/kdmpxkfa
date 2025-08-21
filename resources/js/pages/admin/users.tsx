@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import UserFormModal from '@/components/Admin/UserFormModal';
 import { Button } from '@/components/ui/button';
+import DeleteUserModal from '@/components/Admin/DeleteUserModal';
 
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -38,13 +39,13 @@ export default function AdminUsers({ users, roles, permissions }: AdminUserProps
         setIsCreateModalOpen(true);
     };
 
-    const handleEditUser = (role: User) => {
-        setSelectedUser(role);
+    const handleEditUser = (user: User) => {
+        setSelectedUser(user);
         setIsEditModalOpen(true);
     };
 
-    const handleDeleteUser = (role: User) => {
-        setSelectedUser(role);
+    const handleDeleteUser = (user: User) => {
+        setSelectedUser(user);
         setIsDeleteModalOpen(true);
     };
 
@@ -216,6 +217,9 @@ export default function AdminUsers({ users, roles, permissions }: AdminUserProps
 
             {/* Edit User Modal */}
             <UserFormModal isOpen={isEditModalOpen} onClose={closeModals} user={selectedUser} roles={roles} />
+
+            {/* Delete User Modal */}
+            <DeleteUserModal isOpen={isDeleteModalOpen} onClose={closeModals} user={selectedUser} />
         </AppLayout>
     );
 }

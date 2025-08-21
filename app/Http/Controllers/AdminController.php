@@ -74,7 +74,7 @@ class AdminController extends Controller
             $role->syncPermissions($permissions);
         }
 
-        return redirect()->route('admin.roles')->with('success', 'Role created successfully.');
+        return redirect()->route('admin.roles.index')->with('success', 'Role created successfully.');
     }
 
     /**
@@ -100,7 +100,7 @@ class AdminController extends Controller
             $role->syncPermissions($permissions);
         }
 
-        return redirect()->route('admin.roles')->with('success', 'Role updated successfully.');
+        return redirect()->route('admin.roles.index')->with('success', 'Role updated successfully.');
     }
 
     /**
@@ -115,12 +115,12 @@ class AdminController extends Controller
 
         // Prevent deletion of system roles
         if (in_array($role->name, ['super-admin', 'admin', 'user'])) {
-            return redirect()->route('admin.roles')->with('error', 'System roles cannot be deleted.');
+            return redirect()->route('admin.roles.index')->with('error', 'System roles cannot be deleted.');
         }
 
         $role->delete();
 
-        return redirect()->route('admin.roles')->with('success', 'Role deleted successfully.');
+        return redirect()->route('admin.roles.index')->with('success', 'Role deleted successfully.');
     }
 
     /**
