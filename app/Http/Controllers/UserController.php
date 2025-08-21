@@ -46,6 +46,7 @@ class UserController extends Controller
                     ? [Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()]
                     : [Password::min(6)], // more relaxed rule in non-production
             ),
+            'password_confirmation' => ['required_if:password,', 'same:password'],
             'roles' => ['array'],
             'roles.*' => ['exists:roles,id'],
         ]);
