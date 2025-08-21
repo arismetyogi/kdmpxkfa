@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
@@ -18,15 +19,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Admin routes with role-based access
     Route::middleware(['role:admins|super-admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
-        
+
         // Role management routes with explicit model binding
         Route::get('/roles', [AdminController::class, 'roles'])->name('roles');
         Route::post('/roles', [AdminController::class, 'storeRole'])->name('roles.store');
         Route::put('/roles/{role}', [AdminController::class, 'updateRole'])->name('roles.update');
         Route::delete('/roles/{role}', [AdminController::class, 'destroyRole'])->name('roles.destroy');
-        
+
         Route::get('/permissions', [AdminController::class, 'permissions'])->name('permissions');
-        Route::get('/users', [AdminController::class, 'users'])->name('users');
+
+        Route::prefix('users')->name('users.')->group(function () {
+            Route::get('/', [UserController::class, 'index'])->name('index');
+            Route::post('/', [UserController::class, 'store'])->name('store');
+            Route::put('/{user}', [UserController::class, 'update'])->name('update');
+            Route::delete('/', [UserController::class, 'destroy'])->name('destroy');
+        });
     });
 
     // Alternative: Use permission-based middleware
@@ -40,5 +47,5 @@ Route::bind('role', function ($value) {
     return \Spatie\Permission\Models\Role::findOrFail($value);
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

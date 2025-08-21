@@ -114,7 +114,7 @@ class AdminController extends Controller
         }
 
         // Prevent deletion of system roles
-        if (in_array($role->name, ['admin', 'user'])) {
+        if (in_array($role->name, ['super-admin', 'admin', 'user'])) {
             return redirect()->route('admin.roles')->with('error', 'System roles cannot be deleted.');
         }
 
@@ -135,22 +135,6 @@ class AdminController extends Controller
 
         return Inertia::render('admin/permissions', [
             'permissions' => Permission::all(),
-        ]);
-    }
-
-    /**
-     * Display the users management page.
-     */
-    public function users(Request $request)
-    {
-        // Check if user has permission to view users
-        if (! $request->user()->can('view users')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        return Inertia::render('admin/users', [
-            'users' => \App\Models\User::with('roles', 'permissions')->get(),
-            'roles' => Role::all(),
         ]);
     }
 }

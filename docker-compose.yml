@@ -1,0 +1,78 @@
+services:
+    # Laravel API Backend
+    app:
+        build:
+            context: ./laravel-backend
+            dockerfile: Dockerfile
+        container_name: mini-ecommerce-api
+        restart: unless-stopped
+        working_dir: /var/www
+        volumes:
+            - ./laravel-backend:/var/www
+        networks:
+            - mini-ecommerce
+
+    # Nginx Service
+    webserver:
+        image: nginx:alpine
+        container_name: mini-ecommerce-webserver
+        restart: unless-stopped
+        ports:
+            - "8000:80"
+        volumes:
+            - ./laravel-backend:/var/www
+            - ./laravel-backend/docker/nginx:/etc/nginx/conf.d
+        networks:
+            - mini-ecommerce
+
+    # MySQL Database
+    db:
+        image: mysql:8.0
+        container_name: mini-ecommerce-db
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: mini_ecommerce
+            MYSQL_ROOT_PASSWORD: secret
+            MYSQL_PASSWORD: secret
+            MYSQL_USER: laravel
+        volumes:
+            - dbdata:/var/lib/mysql
+        ports:
+            - "3306:3306"
+        networks:
+            - mini-ecommerce
+
+    # Redis
+    redis:
+        image: redis:alpine
+        container_name: mini-ecommerce-redis
+        restart: unless-stopped
+        ports:
+            - "6379:6379"
+        networks:
+            - mini-ecommerce
+
+    # Next.js Frontend
+#    frontend:
+#        build:
+#            context: .
+#            dockerfile: Dockerfile.frontend
+#        container_name: mini-ecommerce-frontend
+#        restart: unless-stopped
+#        ports:
+#            - "3000:3000"
+#        environment:
+#            - NEXT_PUBLIC_API_URL=http://webserver:80
+#        volumes:
+#            - .:/app
+#            - /app/node_modules
+#        networks:
+#            - mini-ecommerce
+
+networks:
+    mini-ecommerce:
+        driver: bridge
+
+volumes:
+    dbdata:
+        driver: local

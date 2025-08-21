@@ -9,6 +9,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { toast } from 'sonner';
 
 interface Role {
     id: number;
@@ -74,7 +75,10 @@ export default function DeleteRoleModal({
                     <Form
                         method="delete"
                         action={route('admin.roles.destroy', role.id)}
-                        onSuccess={() => onClose()}
+                        onSuccess={() => {
+                            onClose()
+                            toast.success('Role deleted successfully')
+                        }}
                     >
                         <Button
                             type="submit"

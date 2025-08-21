@@ -13,6 +13,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { toast } from 'sonner';
 
 interface Permission {
     id: number;
@@ -79,10 +80,12 @@ export default function RoleFormModal({
             form.put(route('admin.roles.update', role.id), {
                 onSuccess: () => onClose(),
             });
+            toast.success('Role updated successfully')
         } else {
             form.post(route('admin.roles.store'), {
                 onSuccess: () => onClose(),
             });
+            toast.success('Role created successfully')
         }
     };
 

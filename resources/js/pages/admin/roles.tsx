@@ -14,10 +14,9 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import RoleFormModal from '@/components/Admin/RoleFormModal';
 import DeleteRoleModal from '@/components/Admin/DeleteRoleModal';
-import FlashMessage from '@/components/ui/flash-message';
 
 interface Role {
     id: number;
@@ -48,7 +47,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function AdminRoles({ roles, permissions }: AdminRolesProps) {
-    const { auth, flash } = usePage<SharedData>().props;
+    const { auth } = usePage<SharedData>().props;
     const user = auth.user;
 
     // Modal states
@@ -56,19 +55,6 @@ export default function AdminRoles({ roles, permissions }: AdminRolesProps) {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedRole, setSelectedRole] = useState<Role | null>(null);
-    const [flashMessage, setFlashMessage] = useState<string | null>(null);
-    const [flashType, setFlashType] = useState<'success' | 'error' | 'info'>('info');
-
-    // Handle flash messages
-    useEffect(() => {
-        if (flash?.success) {
-            setFlashMessage(flash.success);
-            setFlashType('success');
-        } else if (flash?.error) {
-            setFlashMessage(flash.error);
-            setFlashType('error');
-        }
-    }, [flash]);
 
     const formatPermissionName = (permission: string) => {
         return permission
@@ -114,20 +100,9 @@ export default function AdminRoles({ roles, permissions }: AdminRolesProps) {
         setSelectedRole(null);
     };
 
-    const closeFlashMessage = () => {
-        setFlashMessage(null);
-    };
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Role Management" />
-
-            {/* Flash Message */}
-            <FlashMessage
-                message={flashMessage}
-                type={flashType}
-                onClose={closeFlashMessage}
-            />
 
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
                 <div className="flex items-center justify-between">
