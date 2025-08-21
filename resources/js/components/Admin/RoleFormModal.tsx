@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Form, useForm } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 import { Save, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,16 +30,14 @@ interface RoleFormModalProps {
     onClose: () => void;
     role?: Role | null;
     permissions: Permission[];
-    isSubmitting?: boolean;
 }
 
 export default function RoleFormModal({
     isOpen,
     onClose,
     role,
-    permissions
+    permissions,
 }: RoleFormModalProps) {
-
     const isEditing = !!role?.id;
 
     const form = useForm({
@@ -47,7 +45,7 @@ export default function RoleFormModal({
         permissions: role?.permissions?.map((p) => p.id) || [],
     });
 
-    // Reset form when modal closes/opens
+    // reset form when modal opens/closes or role changes
     useEffect(() => {
         if (isOpen) {
             form.setData({
@@ -56,7 +54,7 @@ export default function RoleFormModal({
             });
             form.clearErrors();
         }
-    }, [form, isOpen, role]);
+    }, [isOpen, role]);
 
     const handlePermissionToggle = (permissionId: number) => {
         form.setData(
@@ -67,24 +65,25 @@ export default function RoleFormModal({
         );
     };
 
-    const submit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (isEditing && role?.id) {
-            form.put(route('roles.update', role.id), {
-                onSuccess: () => onClose(),
-            });
-        } else {
-            form.post(route('roles.store'), {
-                onSuccess: () => onClose(),
-            });
-        }
-    };
-
     const formatPermissionName = (permission: string) => {
         return permission
             .split(' ')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
+    };
+
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (isEditing && role?.id) {
+            form.put(route('admin.roles.update', role.id), {
+                onSuccess: () => onClose(),
+            });
+        } else {
+            form.post(route('admin.roles.store'), {
+                onSuccess: () => onClose(),
+            });
+        }
     };
 
     return (
@@ -101,8 +100,9 @@ export default function RoleFormModal({
                     </DialogDescription>
                 </DialogHeader>
 
-                <Form onSubmit={submit} className="space-y-6">
+                <form onSubmit={submit} className="space-y-6">
                     <div className="space-y-4">
+                        {/* Role Name */}
                         <div>
                             <Label htmlFor="name">Role Name</Label>
                             <Input
@@ -121,6 +121,7 @@ export default function RoleFormModal({
                             )}
                         </div>
 
+                        {/* Permissions */}
                         <div>
                             <Label className="text-base font-medium">Permissions</Label>
                             <div className="mt-3 grid grid-cols-2 gap-3 max-h-60 overflow-y-auto border rounded-md p-3">
@@ -166,7 +167,7 @@ export default function RoleFormModal({
                             )}
                         </Button>
                     </DialogFooter>
-                </Form>
+                </form>
             </DialogContent>
         </Dialog>
     );

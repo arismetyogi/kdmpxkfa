@@ -22,8 +22,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Role management routes with explicit model binding
         Route::get('/roles', [AdminController::class, 'roles'])->name('roles');
         Route::post('/roles', [AdminController::class, 'storeRole'])->name('roles.store');
-        Route::put('/roles/{role}', [AdminController::class, 'updateRole'])->name('roles.update')->where('role', '[0-9]+');
-        Route::delete('/roles/{role}', [AdminController::class, 'destroyRole'])->name('roles.destroy')->where('role', '[0-9]+');
+        Route::put('/roles/{role}', [AdminController::class, 'updateRole'])->name('roles.update');
+        Route::delete('/roles/{role}', [AdminController::class, 'destroyRole'])->name('roles.destroy');
         
         Route::get('/permissions', [AdminController::class, 'permissions'])->name('permissions');
         Route::get('/users', [AdminController::class, 'users'])->name('users');
