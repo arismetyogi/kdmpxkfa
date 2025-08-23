@@ -58,7 +58,7 @@ export default function PermissionFormModal({
                 onSuccess: () => onClose(),
             });
             toast.success('Permission created successfully')
-        }
+    }
     };
 
     return (
