@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -22,20 +23,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Role management routes with explicit model binding
         Route::prefix('roles')->name('roles.')->group(function () {
-            Route::get('', [AdminController::class, 'roles'])->name('index');
-            Route::post('', [AdminController::class, 'storeRole'])->name('store');
+            Route::get('/', [AdminController::class, 'roles'])->name('index');
+            Route::post('/', [AdminController::class, 'storeRole'])->name('store');
             Route::put('/{role}', [AdminController::class, 'updateRole'])->name('update');
             Route::delete('/{role}', [AdminController::class, 'destroyRole'])->name('destroy');
         });
 
-        Route::get('/permissions', [AdminController::class, 'permissions'])->name('permissions');
-
+        Route::prefix('permissions')->name('permissions.')->group(function () {
+            Route::get('/', [AdminController::class, 'permissions'])->name('index');
+            Route::post('/', [AdminController::class, 'storePermission'])->name('store');
+        });
         // User management routes with explicit model binding
-        Route::prefix('users')->name('users.')->group(function () {
-            Route::get('', [UserController::class, 'index'])->name('index');
-            Route::post('', [UserController::class, 'store'])->name('store');
+        Route::prefix('/users')->name('users.')->group(function () {
+            Route::get('/', [UserController::class, 'index'])->name('index');
+            Route::post('/', [UserController::class, 'store'])->name('store');
             Route::put('/{user}', [UserController::class, 'update'])->name('update');
             Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+        });
+
+        // Product management routes with explicit model binding
+        Route::prefix('/products')->name('products.')->group(function () {
+            Route::get('', [ProductController::class, 'index'])->name('index');
+            Route::post('', [UserController::class, 'store'])->name('store');
+            Route::put('/{product}', [UserController::class, 'update'])->name('update');
+            Route::delete('/{product}', [UserController::class, 'destroy'])->name('destroy');
         });
     });
 
@@ -48,6 +59,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // Add explicit route model binding for Role
 Route::bind('role', function ($value) {
     return \Spatie\Permission\Models\Role::findOrFail($value);
+});
+// Add explicit route model binding for Permission
+Route::bind('permission', function ($value) {
+    return \Spatie\Permission\Models\Permission::findOrFail($value);
 });
 
 // Add explicit route model binding for Role

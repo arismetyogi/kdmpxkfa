@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Shield, Users, Settings } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Shield, Users, Settings, Package, Key } from 'lucide-react';
 import AppLogo from './app-logo';
 
 export function AppSidebar() {
@@ -25,6 +25,11 @@ export function AppSidebar() {
             icon: Shield,
         },
         {
+            title: 'Product Management',
+            href: '/admin/products',
+            icon: Package,
+        },
+        {
             title: 'User Management',
             href: '/admin/users',
             icon: Users,
@@ -33,6 +38,11 @@ export function AppSidebar() {
             title: 'Role Management',
             href: '/admin/roles',
             icon: Settings,
+        },
+        {
+            title: 'Permission Management',
+            href: '/admin/permissions',
+            icon: Key,
         },
     ] : [
         {

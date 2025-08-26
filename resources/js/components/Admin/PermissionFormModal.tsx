@@ -22,7 +22,7 @@ interface Permission {
 interface PermissionFormModalProps {
     isOpen: boolean;
     onClose: () => void;
-    permission: Permission;
+    permission?: Permission;
 }
 
 export default function PermissionFormModal({

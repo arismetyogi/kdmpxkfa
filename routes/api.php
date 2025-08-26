@@ -18,6 +18,8 @@ Route::prefix('v1')->group(function () {
         Route::post('refresh', [SsoController::class, 'refresh']);
     });
 
+    Route::get('/products', [\App\Http\Controllers\Api\ProductController::class, 'index']);
+
     // Public product routes
 //    Route::get('products', [ProductController::class, 'index']);
 //    Route::get('products/{product}', [ProductController::class, 'show']);

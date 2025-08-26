@@ -137,4 +137,20 @@ class AdminController extends Controller
             'permissions' => Permission::all(),
         ]);
     }
+
+    public function storePermission(Request $request)
+    {
+        // Check if user has permission to create roles
+        if (! $request->user()->can('create permissions')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255', 'unique:permissions,name'],
+        ]);
+
+        $permission = Permission::create(['name' => $validated['name']]);
+
+        return redirect()->route('admin.permissions.index')->with('success', 'Permission created successfully.');
+    }
 }

@@ -47,9 +47,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function AdminRoles({ roles, permissions }: AdminRolesProps) {
-    const { auth } = usePage<SharedData>().props;
-    const user = auth.user;
-
     // Modal states
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);

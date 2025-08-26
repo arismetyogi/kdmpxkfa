@@ -56,3 +56,24 @@ export interface User {
     permissions?: Permission[];
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export interface Product {
+    id: number;
+    name: string;
+    sku: string;
+    category: Category;
+    base_uom: string;
+    price: number;
+    weight: number;
+    length: number;
+    width: number;
+    height: number;
+    image_url: string;
+    image_alt: string;
+    is_active: boolean;
+}
+
+export interface Category {
+    id: number;
+    name: string;
+}
