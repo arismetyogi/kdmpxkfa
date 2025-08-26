@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SsoController;
 use App\Http\Controllers\UserController;
@@ -20,6 +21,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+
+    Route::get('/orders/products', [OrderController::class , 'index'])->name('orders.products');
+    Route::get('/orders/cart', [OrderController::class , 'cart'])->name('orders.cart');
+    Route::get('/orders/po', [OrderController::class , 'po'])->name('orders.po');
+    Route::get('/orders/history', [OrderController::class , 'history'])->name('orders.history');
+//    Route::get('penerimaan', [PenerimaanController::class , 'index'])->name('penerimaan');
+//    Route::get('penerimaan/history', [PenerimaanController::class , 'create'])->name('history');
 
     // Admin routes with role-based access
     Route::middleware(['role:admins|super-admin'])->prefix('admin')->name('admin.')->group(function () {

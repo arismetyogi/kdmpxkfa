@@ -39,6 +39,7 @@ export interface SharedData {
     auth: Auth;
     ziggy: Config & { location: string };
     sidebarOpen: boolean;
+    ssoBaseUrl: string;
     [key: string]: unknown;
 }
 
@@ -57,11 +58,22 @@ export interface User {
     [key: string]: unknown; // This allows for additional properties...
 }
 
+export interface Category {
+    id: number;
+    main_category: string;
+    subcategory1?: string;
+    subcategory2?: string;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface Product {
     id: number;
     name: string;
+    description: string;
     sku: string;
-    category: string;
+    category_id?: number;
+    category?: Category;
     base_uom: string;
     price: number;
     weight: number;
@@ -71,4 +83,15 @@ export interface Product {
     image_url: string;
     image_alt: string;
     is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface CartItem {
+    name: string;
+    image: string;
+    qty: string;
+    packaging: string;
+    price: number;
+    quantity: number;
 }

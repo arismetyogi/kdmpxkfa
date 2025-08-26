@@ -12,13 +12,13 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', '*' ],
 
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
         env('FRONTEND_URL', 'http://localhost:3000'),
-        env('SSO_DIGIKOPERASI_URL', 'https://koperasi.berasumkm.id/'),
+        env('SSO_DIGIKOPERASI_URL', 'https://koperasi.berasumkm.id'),
     ],
 
     'allowed_origins_patterns' => [],
@@ -27,7 +27,7 @@ return [
 
     'exposed_headers' => [],
 
-    'max_age' => 0,
+    'max_age' => 300,
 
     'supports_credentials' => true,
 ];

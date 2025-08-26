@@ -1,286 +1,210 @@
+import React, { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Product } from '@/types';
-import { useForm } from '@inertiajs/react';
-import { Loader2, Save } from 'lucide-react';
-import React, { useEffect } from 'react';
-import { toast } from 'sonner';
-
-interface Category {
-    id?: number;
-    name?: string;
-}
+import { Select, SelectItem } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Category, Product } from '@/types';
+import { mockCategories } from '@/data/mockData';
 
 interface ProductFormModalProps {
     isOpen: boolean;
     onClose: () => void;
-    product?: Product | null;
-    categories?: Category[] | null;
+    product: Product | null;
+    onSubmit?: (product: Partial<Product>) => void;
+    categories?: Category[];
 }
 
-export default function ProductFormModal({ isOpen, onClose, product, categories }: ProductFormModalProps) {
-    const isEditing = !!product?.id;
-
-    const availableCategories = categories ?? [
-        { id: 1, name: 'category 1' },
-        { id: 2, name: 'category 2' },
-    ];
-
-    type ProductForm = {
-        name: string;
-        sku: string;
-        category: Category;
-        base_uom: string;
-        price: number | null;
-        weight: number | null;
-        length: number | null;
-        width: number | null;
-        height: number | null;
-        image_url: string;
-        image_alt: string;
-        is_active: boolean;
-    };
-
-    const form = useForm<ProductForm>({
-        name: product?.name || '',
-        sku: product?.sku || '',
-        category: product?.category || ({} as Category),
-        base_uom: product?.base_uom || '',
-        price: product?.price ?? null,
-        weight: product?.weight ?? null,
-        length: product?.length ?? null,
-        width: product?.width ?? null,
-        height: product?.height ?? null,
-        image_url: product?.image_url || product?.image_alt || '',
-        image_alt: product?.image_alt || '',
-        is_active: product?.is_active ?? false,
+export default function ProductFormModal({
+                                             isOpen,
+                                             onClose,
+                                             product,
+                                             onSubmit,
+                                             categories = mockCategories
+                                         }: ProductFormModalProps) {
+    const [formData, setFormData] = useState<Partial<Product>>({
+        name: '',
+        sku: '',
+        description: '',
+        category_id: undefined,
+        length: 0,
+        width: 0,
+        height: 0,
+        price: 0,
+        is_active: true,
     });
 
-    // reset form when modal opens/closes or category changes
     useEffect(() => {
-        if (isOpen) {
-            form.setData({
-                name: product?.name || '',
-                sku: product?.sku || '',
-                category: product?.category || undefined,
-                base_uom: product?.base_uom || '',
-                price: product?.price || null,
-                weight: product?.weight || null,
-                length: product?.length || null,
-                width: product?.width || null,
-                height: product?.height || null,
-                image_url: product?.image_url || product?.image_alt || '',
-                image_alt: product?.image_alt || '',
-                is_active: product?.is_active || false,
-            });
-            form.clearErrors();
-        }
-    }, [isOpen, product]);
-
-    const submit = (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (isEditing && product?.id) {
-            form.put(route('admin.products.update', product.id), {
-                onSuccess: () => {
-                    onClose();
-                    toast.success('Product updated successfully.');
-                },
-                onError: (e) => {
-                    toast.error('Failed to update product.', e);
-                },
-            });
+        if (product) {
+            setFormData(product);
         } else {
-            form.post(route('admin.products.store'), {
-                onSuccess: () => {
-                    onClose();
-                    toast.success('Product created successfully');
-                },
-                onError: (e) => {
-                    toast.error('An unexpected error occurred.', e);
-                },
+            setFormData({
+                name: '',
+                sku: '',
+                category_id: undefined,
+                length: 0,
+                width: 0,
+                height: 0,
+                description: '',
+                price: 0,
+                is_active: true,
             });
         }
+    }, [product]);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (onSubmit) {
+            onSubmit(formData);
+        }
+        onClose();
     };
 
-    return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
-                <DialogHeader>
-                    <DialogTitle>{isEditing ? 'Edit Product' : 'Create New Product'}</DialogTitle>
-                    <DialogDescription>
-                        {isEditing ? 'Update the product details below.' : 'Fill in the details to create a new product.'}
-                    </DialogDescription>
-                </DialogHeader>
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value, type } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: name === 'category_id' ? (value ? parseInt(value) : undefined) :
+                type === 'number' ? parseFloat(value) || 0 :
+                    type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+        }));
+    };
 
-                <form onSubmit={submit} className="space-y-6">
-                    <div className="space-y-4">
-                        {/* Product Name */}
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+            <div className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between p-6 border-b">
+                    <h2 className="text-lg font-semibold">
+                        {product ? 'Edit Product' : 'Create Product'}
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                        <X className="h-5 w-5" />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
                             <Label htmlFor="name">Product Name</Label>
                             <Input
                                 id="name"
                                 name="name"
-                                value={form.data.name}
-                                onChange={(e) => form.setData('name', e.target.value)}
-                                placeholder="Enter product's full name"
+                                value={formData.name}
+                                onChange={handleInputChange}
                                 required
-                                className="mt-1"
                             />
-                            {form.errors.name && <p className="mt-1 text-sm text-red-600">{form.errors.name}</p>}
                         </div>
-
-                        {/* SKU Id */}
                         <div>
-                            <Label htmlFor="sku">SKU ID</Label>
+                            <Label htmlFor="sku">SKU</Label>
                             <Input
                                 id="sku"
                                 name="sku"
-                                value={form.data.sku}
-                                onChange={(e) => form.setData('sku', e.target.value)}
-                                placeholder="Enter sku"
+                                value={formData.sku}
+                                onChange={handleInputChange}
                                 required
-                                className="mt-1"
                             />
-                            {form.errors.sku && <p className="mt-1 text-sm text-red-600">{form.errors.sku}</p>}
-                        </div>
-
-                        {/* Category */}
-                        <div>
-                            <Label className="text-base font-medium">Category</Label>
-                            <Select
-                                value={form.data.category.id?.toString() ?? ""}
-                                onValueChange={(value) => {
-                                    const selected = availableCategories.find((c) => c.id?.toString() === value);
-                                    form.setData('category', selected ?? {} as Category);
-                                }}
-                            >
-                                <SelectTrigger className="w-[180px]">
-                                    <SelectValue placeholder="Select category" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {availableCategories.map((c) => (
-                                        <SelectItem key={c.id} value={c.id?.toString() ?? ""}>
-                                            {c.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {/* Base UOM */}
-                        <div>
-                            <Label htmlFor="base_uom">Satuan</Label>
-                            <Input
-                                id="base_uom"
-                                name="base_uom"
-                                value={form.data.base_uom}
-                                onChange={(e) => form.setData('base_uom', e.target.value)}
-                                placeholder="Enter base UOM"
-                                required
-                                className="mt-1"
-                            />
-                            {form.errors.base_uom && <p className="mt-1 text-sm text-red-600">{form.errors.base_uom}</p>}
-                        </div>
-
-                        {/* Price */}
-                        <div>
-                            <Label htmlFor="price">Harga Satuan</Label>
-                            <Input
-                                id="price"
-                                name="price"
-                                value={Number(form.data.price)}
-                                onChange={(e) => form.setData('price', e.target.value === '' ? null : Number(e.target.value))}
-                                placeholder="Enter base UOM"
-                                required
-                                className="mt-1"
-                            />
-                            {form.errors.price && <p className="mt-1 text-sm text-red-600">{form.errors.price}</p>}
-                        </div>
-
-                        {/* Weight */}
-                        <div>
-                            <Label htmlFor="sku">Berat</Label>
-                            <Input
-                                id="weight"
-                                name="weight"
-                                value={Number(form.data.weight)}
-                                onChange={(e) => form.setData('weight', e.target.value === '' ? null : Number(e.target.value))}
-                                placeholder="Enter base UOM"
-                                required
-                                className="mt-1"
-                            />
-                            {form.errors.weight && <p className="mt-1 text-sm text-red-600">{form.errors.weight}</p>}
-                        </div>
-
-                        {/* Dimension */}
-                        <div className="flex items-center gap-2 space-x-1">
-                            <Label htmlFor="length">PanjangXLebarXTinggi</Label>
-                            <div>
-                                <Input
-                                    id="length"
-                                    name="length"
-                                    value={Number(form.data.length)}
-                                    onChange={(e) => form.setData('length', e.target.value === '' ? null : Number(e.target.value))}
-                                    placeholder="P"
-                                    required
-                                    className="mt-1"
-                                />
-                                {form.errors.length && <p className="mt-1 text-sm text-red-600">{form.errors.length}</p>}
-                            </div>
-                            x
-                            <div>
-                                <Input
-                                    id="width"
-                                    name="width"
-                                    type="number"
-                                    value={Number(form.data.width)}
-                                    onChange={(e) => form.setData('width', e.target.value === '' ? null : Number(e.target.value))}
-                                    placeholder="L"
-                                    required
-                                    className="mt-1"
-                                />
-                                {form.errors.width && <p className="mt-1 text-sm text-red-600">{form.errors.width}</p>}
-                            </div>
-                            x
-                            <div>
-                                <Input
-                                    id="height"
-                                    name="height"
-                                    value={Number(form.data.height)}
-                                    onChange={(e) => form.setData('height', e.target.value === '' ? null : Number(e.target.value))}
-                                    placeholder="T"
-                                    required
-                                    className="mt-1"
-                                />
-                                {form.errors.height && <p className="mt-1 text-sm text-red-600">{form.errors.height}</p>}
-                            </div>
                         </div>
                     </div>
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={onClose} disabled={form.processing}>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor="category_id">Category</Label>
+                            <Select
+                                id="category_id"
+                                name="category_id"
+                                defaultValue={formData.category_id?.toString() || ''}
+                                onValueChange={handleInputChange}
+                            >
+                                <SelectItem value="">Select Category</SelectItem>
+                                {categories.map((category) => (
+                                    <SelectItem key={category.id} value={category.id.toString()}>
+                                        {category.main_category}
+                                        {category.subcategory1 && ` > ${category.subcategory1}`}
+                                        {category.subcategory2 && ` > ${category.subcategory2}`}
+                                    </SelectItem>
+                                ))}
+                            </Select>
+                        </div>
+                        <div>
+                            <Label htmlFor="price">Price</Label>
+                            <Input
+                                id="price"
+                                name="price"
+                                type="number"
+                                step="0.01"
+                                value={formData.price}
+                                onChange={handleInputChange}
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <Label>Dimensions (cm)</Label>
+                        <div className="grid grid-cols-3 gap-2">
+                            <Input
+                                name="length"
+                                type="number"
+                                placeholder="Length"
+                                value={formData.length}
+                                onChange={handleInputChange}
+                            />
+                            <Input
+                                name="width"
+                                type="number"
+                                placeholder="Width"
+                                value={formData.width}
+                                onChange={handleInputChange}
+                            />
+                            <Input
+                                name="height"
+                                type="number"
+                                placeholder="Height"
+                                value={formData.height}
+                                onChange={handleInputChange}
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea
+                            id="description"
+                            name="description"
+                            value={formData.description}
+                            onChange={handleInputChange}
+                            rows={3}
+                        />
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                        <input
+                            type="checkbox"
+                            id="is_active"
+                            name="is_active"
+                            checked={formData.is_active}
+                            onChange={handleInputChange}
+                            className="rounded border-gray-300"
+                        />
+                        <Label htmlFor="is_active">Active Product</Label>
+                    </div>
+
+                    <div className="flex justify-end space-x-3 pt-4">
+                        <Button type="button" variant="outline" onClick={onClose}>
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={form.processing || !form.data.name.trim()}>
-                            {form.processing ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Saving...
-                                </>
-                            ) : (
-                                <>
-                                    <Save className="mr-2 h-4 w-4" />
-                                    {isEditing ? 'Update Product' : 'Create Product'}
-                                </>
-                            )}
+                        <Button type="submit">
+                            {product ? 'Update Product' : 'Create Product'}
                         </Button>
-                    </DialogFooter>
+                    </div>
                 </form>
-            </DialogContent>
-        </Dialog>
+            </div>
+        </div>
     );
 }
