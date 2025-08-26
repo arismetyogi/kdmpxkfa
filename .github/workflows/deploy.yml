@@ -1,0 +1,79 @@
+name: Laravel CI/CD to GCP Server
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow on pushes to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+
+      - name: Install Composer Dependencies
+        run: composer install --optimize-autoloader --no-dev --no-progress --no-interaction --prefer-dist
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '24'
+
+      - name: Install NPM Dependencies
+        run: |
+          npm install
+          npm run build
+
+      - name: Synchronize Files to Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SOURCE: "."
+          REMOTE_HOST: ${{ secrets.VPS_HOST }}
+          REMOTE_USER: ${{ secrets.VPS_USER }}
+          TARGET: "/home/${{ secrets.VPS_USER }}/deploy-temp"
+          ARGS: "--archive --delete --no-group"
+          #            sudo chmod -R ug+rwX /var/www/html/storage /var/www/html/bootstrap/cache
+          POST_SCRIPT: |
+            sudo rm -rf /var/www/html/*
+
+      - name: Run Artisan Commands
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          #dotenv source: cat .env.production | base64 -w 0 > .env.base64
+          #            sudo rm -rf /var/www/html/*
+          #            sudo mv /home/${{ secrets.VPS_USER }}/deploy-temp/* /var/www/html
+          script: |
+            sudo mkdir /var/www/html
+            sudo chown -R $USER:www-data /var/www/html
+
+            sudo php /var/www/html artisan down
+            sudo rsync -hvrPtgoD /home/${{ secrets.VPS_USER }}/deploy-temp/* /var/www/html
+
+            cd /var/www/html
+            sudo chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
+
+            echo "${{ secrets.DOT_ENV_PRODUCTION }}" | base64 --decode > .env
+            php artisan migrate --force
+
+            php artisan key:generate
+
+            php artisan config:clear
+            php artisan cache:clear
+            php artisan route:clear
+            php artisan view:clear
+            php artisan optimize:clear
+            php artisan optimize
+            php artisan storage:link
+
+            sudo chown -R www-data:www-data /var/www/html/storage
+            sudo chown -R www-data:www-data /var/www/html/bootstrap/cache
