@@ -29,6 +29,15 @@ export function AppSidebar() {
             href: '/admin/products',
             icon: Package,
         },
+    ] : [
+        {
+            title: 'Dashboard',
+            href: '/dashboard',
+            icon: LayoutGrid,
+        },
+    ];
+
+    const adminNavItems: NavItem[] = isAdminOrManager ? [
         {
             title: 'User Management',
             href: '/admin/users',
@@ -43,14 +52,8 @@ export function AppSidebar() {
             title: 'Permission Management',
             href: '/admin/permissions',
             icon: Key,
-        },
-    ] : [
-        {
-            title: 'Dashboard',
-            href: '/dashboard',
-            icon: LayoutGrid,
-        },
-    ];
+        }
+    ]: [];
 
     // Determine the logo link based on user role
     const logoHref = isAdminOrManager ? '/admin' : '/dashboard';
@@ -70,7 +73,8 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain label="Home" items={mainNavItems} />
+                <NavMain label="System" items={adminNavItems} />
             </SidebarContent>
 
             <SidebarFooter>

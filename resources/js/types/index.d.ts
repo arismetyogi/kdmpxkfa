@@ -61,7 +61,7 @@ export interface Product {
     id: number;
     name: string;
     sku: string;
-    category: Category;
+    category: string;
     base_uom: string;
     price: number;
     weight: number;
@@ -71,9 +71,4 @@ export interface Product {
     image_url: string;
     image_alt: string;
     is_active: boolean;
-}
-
-export interface Category {
-    id: number;
-    name: string;
 }

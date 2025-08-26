@@ -23,8 +23,6 @@ Route::prefix('v1')->group(function () {
     // Public product routes
 //    Route::get('products', [ProductController::class, 'index']);
 //    Route::get('products/{product}', [ProductController::class, 'show']);
-//    Route::get('categories', [CategoryController::class, 'index']);
-//    Route::get('categories/{category}', [CategoryController::class, 'show']);
 });
 
 // Protected routes

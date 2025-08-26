@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('external_id')->nullable()->index(); // ID from origin app
+            $table->boolean('onboarding_completed')->default(false);
 
             $table->index(['email', 'is_active']);
             $table->index(['external_id', 'is_active']);

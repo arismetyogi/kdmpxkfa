@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SsoController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -10,6 +11,9 @@ use Spatie\Permission\Models\Role;
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
+
+Route::get('sso/callback', [SsoController::class, 'callback']);
+Route::post('refresh', [SsoController::class, 'refresh']);
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Regular user dashboard

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -27,21 +28,13 @@ class ProductController extends Controller
 
         $faker = fake();
         // Dummy Data
-        $dummyCategories = [];
-        for ($i = 0; $i < 5; $i++) {
-            $dummyCategories[] = [
-                'id' => $faker->unique()->numberBetween(1, 5),
-                'name' => $faker->word,
-            ];
-        }
-
         $dummyProducts = [];
         for ($i = 0; $i < 19; $i++) {
             $dummyProducts[] = [
                 'id' => $faker->unique()->randomNumber(5),
                 'sku' => $faker->unique()->uuid(),
                 'name' => $faker->words(3, true),
-                'category' => $faker->randomNumber(collect($dummyCategories)->count()),
+                'category' => $faker->unique()->slug(),
                 'price' => $faker->randomFloat(2, 10, 1000),
                 'weight' => $faker->numberBetween(100, 1000),
                 'length' => $faker->numberBetween(2, 30),
@@ -52,8 +45,7 @@ class ProductController extends Controller
         }
 
         return Inertia::render('admin/products', [
-            'products' => $dummyProducts,
-            'categories' => $dummyCategories,
+            'products' => Product::all()
         ]);
     }
 

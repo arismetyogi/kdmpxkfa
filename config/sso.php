@@ -13,10 +13,8 @@ return [
     */
     'allowed_origins' => [
         'digikoperasi' => [
-            'url' => env('SSO_DIGIKOPERASI_URL', 'https://koperasi.berasumkm.id/'),
+            'url' => env('SSO_DIGIKOPERASI_URL', 'https://koperasi.berasumkm.id'),
             'api_key' => env('SSO_DIGIKOPERASI_API_KEY'),
-            'secret' => env('SSO_DIGIKOPERASI_SECRET'),
-            'algorithm' => env('SSO_DIGIKOPERASI_ALGORITHM', 'HS256'),
         ],
     ],
 

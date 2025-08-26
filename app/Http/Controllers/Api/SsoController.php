@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\Auth\SsoService;
 use App\Traits\HasApiReponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class SsoController extends Controller
@@ -13,24 +14,24 @@ class SsoController extends Controller
     use HasApiReponse;
 
     public function __construct(
-        private readonly SsoService $ssoService
+        private readonly SSOService $ssoService
     ) {}
 
     /**
      * Handle SSO callback from Digikoperasi
      */
-    public function callback(Request $request): JsonResponse
+    public function callback(Request $request): RedirectResponse
     {
         try {
             $ssoToken = $request->query('sso_token');
             $state = $request->query('state');
 
             if (!$ssoToken) {
-                throw new \Exception('Missing sso_token parameter');
+                return redirect('/login?error=sso_failed&message=missing_token');
             }
 
             if (!$state) {
-                throw new \Exception('Missing state parameter');
+                return redirect('/login?error=sso_failed&message=missing_state');
             }
 
             $result = $this->ssoService->handleCallback([
@@ -38,32 +39,32 @@ class SsoController extends Controller
                 'state' => $state
             ]);
 
+            $sessionCookie = cookie(
+                'auth_session',
+                $result['token'],
+                config('sso.token_expiry') / 60, // Convert seconds to minutes
+                '/',
+                null,
+                true, // secure
+                true  // httpOnly
+            );
+
             if ($result['requires_onboarding']) {
-                return $this->successResponse([
-                    'access_token' => $result['token'],
-                    'token_type' => 'Bearer',
-                    'expires_in' => config('sso.token_expiry'),
-                    'requires_onboarding' => true,
-                    'user' => $result['user'],
-                    'prefilled_data' => $result['prefilled_data'],
-                    'redirect_url' => config('sso.redirect_urls.onboarding')
-                ], 'Authentication successful. Onboarding required.');
+                return redirect('/onboarding')
+                    ->withCookie($sessionCookie)
+                    ->with('user_data', $result['user'])
+                    ->with('prefilled_data', $result['prefilled_data']);
             }
 
-            return $this->successResponse([
-                'access_token' => $result['token'],
-                'token_type' => 'Bearer',
-                'expires_in' => config('sso.token_expiry'),
-                'user' => $result['user'],
-                'redirect_url' => config('sso.redirect_urls.success')
-            ], 'Authentication successful.');
+            $targetUrl = $request->query('redirect_to', '/dashboard');
+            return redirect($targetUrl)
+                ->withCookie($sessionCookie)
+                ->with('user_data', $result['user']);
 
         } catch (\Exception $e) {
-            return $this->errorResponse('error', 401, [
-                'message' => 'Authentication failed: ' . $e->getMessage(),
-                'redirect_url' => $this->ssoService->buildFailureRedirectUrl('token_validation_failed'),
-                'show_digikoperasi_login' => true
-            ]);
+            return redirect('/login?error=sso_failed&message=' . urlencode($e->getMessage()));
+        } catch (\Throwable $e) {
+            return redirect('/login?error=sso_failed&message=' . urlencode($e->getMessage()));
         }
     }
 

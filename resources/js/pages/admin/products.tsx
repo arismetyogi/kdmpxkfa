@@ -1,15 +1,14 @@
-import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, Category, Product } from '@/types';
-import { Head } from '@inertiajs/react';
-import { Edit, PackageX, Plus, Trash2 } from 'lucide-react';
-import React, { useState } from 'react';
+import DeleteProductModal from '@/components/Admin/DeleteProductModal';
+import ProductFormModal from '@/components/Admin/ProductFormModal';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import ProductFormModal from '@/components/Admin/ProductFormModal';
-import { Button } from '@/components/ui/button';
-import DeleteProductModal from '@/components/Admin/DeleteProductModal';
-
+import AppLayout from '@/layouts/app-layout';
+import { BreadcrumbItem, Product } from '@/types';
+import { Head } from '@inertiajs/react';
+import { Edit, PackageX, Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -24,10 +23,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface AdminProductProps {
     products: Product[];
-    categories: Category[];
 }
 
-export default function AdminProducts({ products, categories}: AdminProductProps) {
+export default function AdminProducts({ products }: AdminProductProps) {
     // Modal states
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -55,10 +53,9 @@ export default function AdminProducts({ products, categories}: AdminProductProps
         setSelectedProduct(null);
     };
 
-    const totalActive = products.filter(product => product.is_active).length;
+    const totalActive = products.filter((product) => product.is_active).length;
 
-    const totalInactive = products.filter(product =>
-        !product.is_active).length;
+    const totalInactive = products.filter((product) => !product.is_active).length;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -128,25 +125,17 @@ export default function AdminProducts({ products, categories}: AdminProductProps
                                 {products.map((product) => (
                                     <TableRow key={product.id}>
                                         <TableCell>
-                                            <div className="flex items-center space-x-2">
-                                                <p className="h-4 w-4 text-muted-foreground" />
-                                                <span>{product.name}</span>
-                                            </div>
+                                            <span>{product.name}</span>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="flex items-center space-x-2">
-                                                <p className="h-4 w-4 text-muted-foreground" />
-                                                <span>{product.sku}</span>
-                                            </div>
+                                            <span>{product.sku}</span>
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex flex-wrap gap-1">
                                                 {product.category ? (
-                                                        <Badge  variant="secondary" className={`text-xs`}>
-                                                            {product.category.name}
-                                                        </Badge>
+                                                    <span className={`text-xs`}>{product.category}</span>
                                                 ) : (
-                                                    <span className="text-sm text-muted-foreground">No role assigned</span>
+                                                    <span className="text-sm text-muted-foreground">Others</span>
                                                 )}
                                             </div>
                                         </TableCell>
@@ -187,10 +176,10 @@ export default function AdminProducts({ products, categories}: AdminProductProps
             </div>
 
             {/* Create Product Modal */}
-            <ProductFormModal isOpen={isCreateModalOpen} onClose={closeModals} product={null} categories={categories} />
+            <ProductFormModal isOpen={isCreateModalOpen} onClose={closeModals} product={null} />
 
             {/* Edit Product Modal */}
-            <ProductFormModal isOpen={isEditModalOpen} onClose={closeModals} product={selectedProduct} categories={categories} />
+            <ProductFormModal isOpen={isEditModalOpen} onClose={closeModals} product={selectedProduct} />
 
             {/* Delete Product Modal */}
             <DeleteProductModal isOpen={isDeleteModalOpen} onClose={closeModals} product={selectedProduct} />
