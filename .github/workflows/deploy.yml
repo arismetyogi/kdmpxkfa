@@ -39,9 +39,9 @@ jobs:
           REMOTE_USER: ${{ secrets.VPS_USER }}
           TARGET: "/home/${{ secrets.VPS_USER }}/deploy-temp"
           ARGS: "--archive --delete --no-group"
-          #            sudo chmod -R ug+rwX /var/www/html/storage /var/www/html/bootstrap/cache
+          #            sudo chmod -R ug+rwX /var/www/laravel_app/storage /var/www/laravel_app/bootstrap/cache
           POST_SCRIPT: |
-            sudo rm -rf /var/www/html/*
+            sudo rm -rf /var/www/laravel_app/*
 
       - name: Run Artisan Commands
         uses: appleboy/ssh-action@v1
@@ -50,17 +50,17 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           #dotenv source: cat .env.production | base64 -w 0 > .env.base64
-          #            sudo rm -rf /var/www/html/*
-          #            sudo mv /home/${{ secrets.VPS_USER }}/deploy-temp/* /var/www/html
+          #            sudo rm -rf /var/www/laravel_app/*
+          #            sudo mv /home/${{ secrets.VPS_USER }}/deploy-temp/* /var/www/laravel_app
           script: |
-            sudo mkdir /var/www/html
-            sudo chown -R $USER:www-data /var/www/html
+            sudo mkdir /var/www/laravel_app
+            sudo chown -R $USER:www-data /var/www/laravel_app
 
-            sudo php /var/www/html artisan down
-            sudo rsync -hvrPtgoD /home/${{ secrets.VPS_USER }}/deploy-temp/* /var/www/html
+            sudo php /var/www/laravel_app artisan down
+            sudo rsync -hvrPtgoD /home/${{ secrets.VPS_USER }}/deploy-temp/* /var/www/laravel_app
 
-            cd /var/www/html
-            sudo chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
+            cd /var/www/laravel_app
+            sudo chmod -R 777 /var/www/laravel_app/storage /var/www/laravel_app/bootstrap/cache
 
             echo "${{ secrets.DOT_ENV_PRODUCTION }}" | base64 --decode > .env
             php artisan migrate --force
@@ -75,5 +75,5 @@ jobs:
             php artisan optimize
             php artisan storage:link
 
-            sudo chown -R www-data:www-data /var/www/html/storage
-            sudo chown -R www-data:www-data /var/www/html/bootstrap/cache
+            sudo chown -R www-data:www-data /var/www/laravel_app/storage
+            sudo chown -R www-data:www-data /var/www/laravel_app/bootstrap/cache

@@ -98,7 +98,7 @@ export default function Index() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Medicines" />
+            <Head title="Products" />
             <div className="flex flex-col lg:flex-row gap-6 p-6">
                 {/* Sidebar Filters */}
                 <div className="lg:w-1/4 w-full">
