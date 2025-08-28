@@ -46,6 +46,8 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        $user->assignRole('user');
+
         Auth::login($user);
 
         $dashRoute = !$user->hasRole('user') ? 'admin.dashboard' : 'dashboard';

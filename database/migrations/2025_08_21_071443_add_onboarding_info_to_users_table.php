@@ -34,8 +34,8 @@ return new class extends Migration
             $table->dropColumn('tenant_name');
             $table->dropColumn('phone');
             $table->dropColumn('onboarding_completed');
-            $table->dropIndex('users_external_id_index');
-            $table->dropIndex('users_tenant_id_index');
+            $table->dropIndex('external_id');
+            $table->dropIndex('tenant_id');
         });
     }
 };

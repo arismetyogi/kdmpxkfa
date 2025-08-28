@@ -101,6 +101,7 @@ export default function OnboardingPage({ prefilled_data }: OnboardingPageProps) 
                             value={data.tenant_name}
                             onChange={(e) => setData("tenant_name", e.target.value)}
                             className="w-full mt-1 p-2 border rounded-lg"
+                            disabled
                         />
                     </div>
 
