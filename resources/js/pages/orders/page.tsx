@@ -7,6 +7,7 @@ import { CartItem, type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { ShoppingCart } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -218,44 +219,68 @@ export default function IndexPage() {
 
             {/* 🔹 Modal Detail Produk */}
             <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
-                <DialogContent className="max-w-lg">
+                <DialogContent className="w-[95%] sm:max-w-lg md:max-w-2xl max-h-[90vh] overflow-y-auto">
                     {selectedProduct && (
                         <>
                             <DialogHeader>
                                 <DialogTitle>{selectedProduct.name}</DialogTitle>
-                                <DialogDescription>{selectedProduct.description}</DialogDescription>
+                                <DialogDescription>
+                                    {selectedProduct.description || "Tidak ada deskripsi tersedia."}
+                                </DialogDescription>
                             </DialogHeader>
 
-                            <div className="flex flex-col gap-4 sm:flex-row">
-                                <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full rounded-lg border sm:w-1/3" />
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <img
+                                    src={selectedProduct.image}
+                                    alt={selectedProduct.name}
+                                    className="w-full sm:w-1/3 rounded-lg border object-cover"
+                                />
                                 <div className="flex-1 space-y-2">
-                                    <p>
-                                        <strong>Harga:</strong> Rp{selectedProduct.price.toLocaleString()}
-                                    </p>
-                                    <p>
-                                        <strong>Stok:</strong> {selectedProduct.stock > 0 ? selectedProduct.stock : 'Habis'}
-                                    </p>
-                                    <p>
-                                        <strong>Kategori:</strong> {selectedProduct.category}
-                                    </p>
-                                    <p>
-                                        <strong>Kemasan:</strong> {selectedProduct.packaging}
-                                    </p>
-                                    <p>
-                                        <strong>Kuantitas:</strong> {selectedProduct.qty}
-                                    </p>
-
-                                    {/* <button
-                    onClick={() => {
-                      addToCart(selectedProduct);
-                      setSelectedProduct(null);
-                    }}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                  >
-                    Tambah ke Keranjang
-                  </button> */}
+                                    <p><strong>Harga:</strong> Rp{selectedProduct.price.toLocaleString()}</p>
+                                    <p><strong>Stok:</strong> {selectedProduct.stock > 0 ? selectedProduct.stock : "Habis"}</p>
+                                    <p><strong>Kategori:</strong> {selectedProduct.category}</p>
+                                    <p><strong>Kemasan:</strong> {selectedProduct.packaging}</p>
+                                    <p><strong>Kuantitas:</strong> {selectedProduct.qty}</p>
                                 </div>
                             </div>
+
+                            {/* 🔹 Tabs untuk Benefit & Dosage */}
+                            <Tabs defaultValue="benefit" className="mt-4">
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="benefit">Benefit</TabsTrigger>
+                                    <TabsTrigger value="dosage">Dosage</TabsTrigger>
+                                </TabsList>
+
+                                <TabsContent value="benefit" className="mt-2 text-sm text-gray-700">
+                                    {selectedProduct.benefit && selectedProduct.benefit.length > 0 ? (
+                                        <ul className="list-disc pl-5 space-y-1">
+                                            {selectedProduct.benefit.map((item: string, idx: number) => (
+                                                <li key={idx}>{item}</li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        "Belum ada informasi benefit."
+                                    )}
+                                </TabsContent>
+
+                                <TabsContent value="dosage" className="mt-2 text-sm text-gray-700">
+                                    <div className="space-y-1">
+                                        {selectedProduct.dosage.split('. ').map((line: string, idx: number) => {
+                                            const formatted = line
+                                                .replace(/Dewasa:/g, '<strong>Dewasa:</strong>')
+                                                .replace(/Anak-anak:/g, '<strong>Anak-anak:</strong>');
+                                            return (
+                                                <p
+                                                    key={idx}
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: formatted + (line.endsWith('.') ? '' : '.'),
+                                                    }}
+                                                />
+                                            );
+                                        })}
+                                    </div>
+                                </TabsContent>
+                            </Tabs>
                         </>
                     )}
                 </DialogContent>
