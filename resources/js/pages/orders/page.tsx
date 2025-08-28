@@ -2,12 +2,12 @@ import Filters from '@/components/Filters';
 import ProductCard from '@/components/ProductCard';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import AppLayout from '@/layouts/app-layout';
 import { CartItem, type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { ShoppingCart } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AppHeaderLayout from '@/layouts/app/app-header-layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -146,23 +146,23 @@ export default function IndexPage() {
     }
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppHeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Products" />
-            <div className="flex flex-col lg:flex-row gap-6 p-6">
+            <div className="flex flex-col gap-6 p-6 lg:flex-row">
                 {/* Sidebar Filters */}
-                <div className="lg:w-1/4 w-full">
+                <div className="w-full lg:w-1/4">
                     <Filters onFilterChange={setFilters} />
                 </div>
 
                 {/* Product Section */}
                 <div className="flex-1">
-                    <h1 className="text-2xl font-bold mb-4 text-blue-800">Medicine Catalog</h1>
+                    <h1 className="mb-4 text-2xl font-bold text-blue-800">Medicine Catalog</h1>
 
-                    <div className="flex flex-col sm:flex-row justify-between gap-2 mb-4">
+                    <div className="mb-4 flex flex-col justify-between gap-2 sm:flex-row">
                         <input
                             type="text"
                             placeholder="Search Products..."
-                            className="w-full sm:w-1/2 border px-3 py-2 rounded-md"
+                            className="w-full rounded-md border px-3 py-2 sm:w-1/2"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -187,13 +187,9 @@ export default function IndexPage() {
                             <p className="text-lg font-medium">Produk yang anda cari tidak ditemukan</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                             {filteredProducts.map((p, i) => (
-                                <div
-                                    key={i}
-                                    onClick={() => setSelectedProduct(p)}
-                                    className="cursor-pointer"
-                                >
+                                <div key={i} onClick={() => setSelectedProduct(p)} className="cursor-pointer">
                                     <ProductCard product={p} addToCart={addToCart} />
                                 </div>
                             ))}
@@ -203,44 +199,52 @@ export default function IndexPage() {
             </div>
 
             {/* 🔹 Floating Cart Button */}
-            <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6">
-                <a href="/pemesanan/cart" className="relative">
-                    <button className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg">
+            <div className="fixed right-4 bottom-4 sm:right-6 sm:bottom-6">
+                <Link href={route('orders.cart')} className="relative">
+                    <button className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg sm:h-14 sm:w-14">
                         <ShoppingCart size={24} className="sm:size-8" />
                     </button>
 
                     {totalItems > 0 && (
-                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
-              {totalItems}
-            </span>
+                        <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white sm:h-6 sm:w-6">
+                            {totalItems}
+                        </span>
                     )}
-                </a>
+                </Link>
             </div>
 
             {/* 🔹 Modal Detail Produk */}
             <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
-                <DialogContent className="w-[95%] sm:max-w-lg md:max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-h-[90vh] w-[95%] overflow-y-auto sm:max-w-lg md:max-w-2xl">
                     {selectedProduct && (
                         <>
                             <DialogHeader>
                                 <DialogTitle>{selectedProduct.name}</DialogTitle>
-                                <DialogDescription>
-                                    {selectedProduct.description || "Tidak ada deskripsi tersedia."}
-                                </DialogDescription>
+                                <DialogDescription>{selectedProduct.description || 'Tidak ada deskripsi tersedia.'}</DialogDescription>
                             </DialogHeader>
 
-                            <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="flex flex-col gap-4 sm:flex-row">
                                 <img
                                     src={selectedProduct.image}
                                     alt={selectedProduct.name}
-                                    className="w-full sm:w-1/3 rounded-lg border object-cover"
+                                    className="w-full rounded-lg border object-cover sm:w-1/3"
                                 />
                                 <div className="flex-1 space-y-2">
-                                    <p><strong>Harga:</strong> Rp{selectedProduct.price.toLocaleString()}</p>
-                                    <p><strong>Stok:</strong> {selectedProduct.stock > 0 ? selectedProduct.stock : "Habis"}</p>
-                                    <p><strong>Kategori:</strong> {selectedProduct.category}</p>
-                                    <p><strong>Kemasan:</strong> {selectedProduct.packaging}</p>
-                                    <p><strong>Kuantitas:</strong> {selectedProduct.qty}</p>
+                                    <p>
+                                        <strong>Harga:</strong> Rp{selectedProduct.price.toLocaleString()}
+                                    </p>
+                                    <p>
+                                        <strong>Stok:</strong> {selectedProduct.stock > 0 ? selectedProduct.stock : 'Habis'}
+                                    </p>
+                                    <p>
+                                        <strong>Kategori:</strong> {selectedProduct.category}
+                                    </p>
+                                    <p>
+                                        <strong>Kemasan:</strong> {selectedProduct.packaging}
+                                    </p>
+                                    <p>
+                                        <strong>Kuantitas:</strong> {selectedProduct.qty}
+                                    </p>
                                 </div>
                             </div>
 
@@ -253,13 +257,13 @@ export default function IndexPage() {
 
                                 <TabsContent value="benefit" className="mt-2 text-sm text-gray-700">
                                     {selectedProduct.benefit && selectedProduct.benefit.length > 0 ? (
-                                        <ul className="list-disc pl-5 space-y-1">
+                                        <ul className="list-disc space-y-1 pl-5">
                                             {selectedProduct.benefit.map((item: string, idx: number) => (
                                                 <li key={idx}>{item}</li>
                                             ))}
                                         </ul>
                                     ) : (
-                                        "Belum ada informasi benefit."
+                                        'Belum ada informasi benefit.'
                                     )}
                                 </TabsContent>
 
@@ -285,6 +289,6 @@ export default function IndexPage() {
                     )}
                 </DialogContent>
             </Dialog>
-        </AppLayout>
+        </AppHeaderLayout>
     );
 }

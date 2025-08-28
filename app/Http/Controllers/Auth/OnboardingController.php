@@ -1,0 +1,58 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class OnboardingController extends Controller
+{
+    /**
+     * Show onboarding form with prefilled data
+     */
+    public function create(Request $request)
+    {
+        $prefilled = session('prefilled_data') ?? [
+            'email' => $request->user()->email ?? $request['email'],
+            'name' => $request->user()->name ?? $request['name'],
+            'phone' => $request['phone'] ?? null,
+            'tenant_id' => $request['tenant_id'] ?? null,
+            'tenant_name' => $request['tenant_name'] ?? null,
+        ];
+
+        return Inertia::render('auth/onboarding', [
+            'prefilled_data' => $prefilled,
+        ]);
+    }
+
+    /**
+     * Handle onboarding form submission
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name'        => ['required', 'string', 'max:255'],
+            'phone'       => ['nullable', 'string', 'max:20'],
+            'tenant_name' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $user = $request->user();
+
+        // Update user profile
+        $user->update([
+            'name' => $validated['name'],
+            'onboarding_completed' => true,
+        ]);
+
+        // Optional: if you store phone/tenant_name in a related profile table
+        if (method_exists($user, 'profile')) {
+            $user->profile()->updateOrCreate([], [
+                'phone'       => $validated['phone'],
+                'tenant_name' => $validated['tenant_name'],
+            ]);
+        }
+
+        return redirect()->intended(route('orders.products'))->with('success', 'Onboarding completed successfully!');
+    }
+}

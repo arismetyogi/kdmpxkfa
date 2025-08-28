@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SsoController;
@@ -16,6 +17,11 @@ Route::get('/', function () {
 Route::get('sso/callback', [SsoController::class, 'callback']);
 Route::post('refresh', [SsoController::class, 'refresh']);
 
+Route::middleware('auth')->group(function () {
+    Route::get('/onboarding', [OnboardingController::class, 'create'])->name('onboarding.create');
+    Route::post('/onboarding', [OnboardingController::class, 'store'])->name('onboarding.store');
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     // Regular user dashboard
     Route::get('/dashboard', function () {
@@ -26,6 +32,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders/cart', [OrderController::class , 'cart'])->name('orders.cart');
     Route::get('/orders/po', [OrderController::class , 'po'])->name('orders.po');
     Route::get('/orders/history', [OrderController::class , 'history'])->name('orders.history');
+
 //    Route::get('penerimaan', [PenerimaanController::class , 'index'])->name('penerimaan');
 //    Route::get('penerimaan/history', [PenerimaanController::class , 'create'])->name('history');
 

@@ -4,6 +4,7 @@ import { type BreadcrumbItem } from "@/types";
 import { Head } from "@inertiajs/react";
 import { ShoppingCart, Package, Wallet } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import AppHeaderLayout from '@/layouts/app/app-header-layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: "Dashboard", href: "/dashboard" },
@@ -35,7 +36,7 @@ export default function Dashboard() {
     ];
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppHeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
             <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 overflow-x-auto">
                 {/* Summary Cards */}
@@ -124,6 +125,6 @@ export default function Dashboard() {
                     </CardContent>
                 </Card>
             </div>
-        </AppLayout>
+        </AppHeaderLayout>
     );
 }

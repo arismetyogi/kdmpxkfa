@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from "@/types";
+import AppHeaderLayout from '@/layouts/app/app-header-layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: "History Pemesanan", href: "orders/history" },
@@ -29,7 +30,7 @@ export default function OrderHistory() {
   }
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
+    <AppHeaderLayout breadcrumbs={breadcrumbs}>
       <div className="p-4 md:p-6 max-w-6xl mx-auto">
         <div className="grid gap-6">
           {/* Cooperative Info */}
@@ -135,6 +136,6 @@ export default function OrderHistory() {
           </Card>
         </div>
       </div>
-    </AppLayout>
+    </AppHeaderLayout>
   );
 }

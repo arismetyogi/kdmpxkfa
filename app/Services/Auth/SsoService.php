@@ -8,6 +8,7 @@ use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
 readonly class SsoService
@@ -66,91 +67,92 @@ readonly class SsoService
      * Validate SSO token with Digikoperasi backend
      * @throws \Exception
      */
-//    private function validateSSOTokenWithDigikoperasi(string $token, ?string $state): array
-//    {
-//        $payload = [
-//            'sso_token' => $token,
-//            'state'     => $state,
-//        ];
-//
-//        try {
-//            $response = Http::withHeaders([
-//                'Content-Type' => 'application/json',
-//                'x-api-key'    => config('sso.allowed_origins.digikoperasi.api_key'),
-//            ])->withBody(
-//                json_encode($payload),
-//                'application/json'
-//            )->post(config('sso.allowed_origins.digikoperasi.url') . '/redirect-sso/validate');
-//
-//            Log::debug('SSO Validate Request Body: ', $payload);
-//
-//            Log::debug('SSO Validate Response: ', [
-//                'status'   => $response->status(),
-//                'body'     => $response->body(),
-//            ]);
-//
-//            if (!$response->successful()) {
-//                throw new \Exception('Token validation failed with Digikoperasi: ' . $response->body());
-//            }
-//
-//            $responseData = $response->json();
-//
-//            if (!isset($responseData['success']) || !$responseData['success']) {
-//                throw new \Exception('Invalid SSO token: ' . ($responseData['message'] ?? 'Unknown error'));
-//            }
-//
-//            return $responseData['data'];
-//
-//        } catch (\Exception $e) {
-//            throw new \Exception('SSO validation failed: ' . $e->getMessage());
-//        }
-//    }
     private function validateSSOTokenWithDigikoperasi(string $token, ?string $state): array
     {
-        $payload = ['sso_token' => $token, 'state' => $state,];
-        $base = rtrim(config('sso.allowed_origins.digikoperasi.url', ''), '/');
-        $url = $base . '/redirect-sso/validate';
-        // Log initial details
-        Log::debug('SSO validate target', ['url' => $url, 'payload' => $payload]);
-        // optional: file to store Guzzle raw debug (createable by web server)
-        $debugFile = storage_path('logs/sso_http_debug.log');
+        $payload = [
+            'sso_token' => $token,
+            'state' => $state,
+        ];
+
         try {
             $client = Http::withHeaders([
                 'Content-Type' => 'application/json',
-                'x-api-key' => config('sso.allowed_origins.digikoperasi.api_key')
-            ])->withOptions([
-                // Guzzle debug to file so you can inspect raw request and response
-                'debug' => fopen($debugFile, 'a')]);
-            // Try sending as JSON (most likely) Log::debug('Attempting POST as JSON');
-            $response = $client->post($url, $payload);
-            // Laravel sends JSON when array provided
-            Log::debug('Response status', ['status' => $response->status()]);
-            Log::debug('Response headers', ['headers' => $response->headers()]);
-            Log::debug('Response body', ['body' => $response->body()]);
-            // If server says method not allowed (405) try alternate content type
-            if ($response->status() === 405) {
-                Log::warning('Got 405, retrying as x-www-form-urlencoded (asForm)');
-                $response = Http::withHeaders(['x-api-key' => config('sso.allowed_origins.digikoperasi.api_key'), 'Accept' => 'application/json',])->asForm()->withOptions(['debug' => fopen($debugFile, 'a')])->post($url, $payload);
-                Log::debug('Retry Response status', ['status' => $response->status()]);
-                Log::debug('Retry Response headers', ['headers' => $response->headers()]);
-                Log::debug('Retry Response body', ['body' => $response->body()]);
-            }
+                'x-api-key' => config('sso.allowed_origins.digikoperasi.api_key'),
+            ]);
+            $response = $client->post(config('sso.allowed_origins.digikoperasi.url') . '/redirect-sso/validate', $payload);
+
+            Log::debug('SSO Validate Request Body: ', $payload);
+
+            Log::debug('SSO Validate Response: ', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
             if (!$response->successful()) {
-                // include response status, headers and body in exception to help debug
-                $msg = sprintf("Token validation failed with Digikoperasi: status=%s, body=%s, headers=%s",
-                    $response->status(), $response->body(), json_encode($response->headers()));
-                throw new \Exception($msg);
+                throw new \Exception('Token validation failed with Digikoperasi: ' . $response->body());
             }
+
             $responseData = $response->json();
+
             if (!isset($responseData['success']) || !$responseData['success']) {
-                throw new \Exception('Invalid SSO token: ' . ($responseData['message'] ?? json_encode($responseData)));
+                throw new \Exception('Invalid SSO token: ' . ($responseData['message'] ?? 'Unknown error'));
             }
-            return $responseData['data'] ?? [];
+
+            Log::info($responseData);
+
+            return $responseData['data'];
+
         } catch (\Exception $e) {
-            // capture debug file location in the message so you can inspect raw HTTP exchange
-            throw new \Exception('SSO validation failed: ' . $e->getMessage() . ' (see ' . $debugFile . ' for raw request/response)');
+            throw new \Exception('SSO validation failed: ' . $e->getMessage());
         }
     }
+
+//    private function validateSSOTokenWithDigikoperasi(string $token, ?string $state): array
+//    {
+//        $payload = ['sso_token' => $token, 'state' => $state,];
+//        $base = rtrim(config('sso.allowed_origins.digikoperasi.url', ''), '/');
+//        $url = $base . '/redirect-sso/validate';
+//        // Log initial details
+//        Log::debug('SSO validate target', ['url' => $url, 'payload' => $payload]);
+//        // optional: file to store Guzzle raw debug (createable by web server)
+//        $debugFile = storage_path('logs/sso_http_debug.log');
+//        try {
+//            $client = Http::withHeaders([
+//                'Content-Type' => 'application/json',
+//                'x-api-key' => config('sso.allowed_origins.digikoperasi.api_key')
+//            ])->withOptions([
+//                // Guzzle debug to file so you can inspect raw request and response
+//                'debug' => fopen($debugFile, 'a')]);
+//            // Try sending as JSON (most likely) Log::debug('Attempting POST as JSON');
+//            $response = $client->post($url, $payload);
+//            // Laravel sends JSON when array provided
+//            Log::debug('Response status', ['status' => $response->status()]);
+//            Log::debug('Response headers', ['headers' => $response->headers()]);
+//            Log::debug('Response body', ['body' => $response->body()]);
+//            // If server says method not allowed (405) try alternate content type
+//            if ($response->status() === 405) {
+//                Log::warning('Got 405, retrying as x-www-form-urlencoded (asForm)');
+//                $response = Http::withHeaders(['x-api-key' => config('sso.allowed_origins.digikoperasi.api_key'), 'Accept' => 'application/json',])->asForm()->withOptions(['debug' => fopen($debugFile, 'a')])->post($url, $payload);
+//                Log::debug('Retry Response status', ['status' => $response->status()]);
+//                Log::debug('Retry Response headers', ['headers' => $response->headers()]);
+//                Log::debug('Retry Response body', ['body' => $response->body()]);
+//            }
+//            if (!$response->successful()) {
+//                // include response status, headers and body in exception to help debug
+//                $msg = sprintf("Token validation failed with Digikoperasi: status=%s, body=%s, headers=%s",
+//                    $response->status(), $response->body(), json_encode($response->headers()));
+//                throw new \Exception($msg);
+//            }
+//            $responseData = $response->json();
+//            if (!isset($responseData['success']) || !$responseData['success']) {
+//                throw new \Exception('Invalid SSO token: ' . ($responseData['message'] ?? json_encode($responseData)));
+//            }
+//            return $responseData['data'] ?? [];
+//        } catch (\Exception $e) {
+//            // capture debug file location in the message so you can inspect raw HTTP exchange
+//            throw new \Exception('SSO validation failed: ' . $e->getMessage() . ' (see ' . $debugFile . ' for raw request/response)');
+//        }
+//    }
 
     /**
      * Validate JWT signature (fallback method)
@@ -171,8 +173,7 @@ readonly class SsoService
     /**
      * Find existing user or create new one
      */
-    private
-    function findOrCreateUser(array $userData): User
+    private function findOrCreateUser(array $userData): User
     {
         $user = User::where('external_id', $userData['sub'])->first();
 
@@ -192,9 +193,11 @@ readonly class SsoService
             ]);
         } else {
             if (!$user->external_id) {
-                $user->update(['external_id' => $userData['user_id']]);
+                $user->update(['external_id' => $userData['sub']]);
             }
         }
+
+        $user->assignRole('user');
 
         return $user;
     }
@@ -202,24 +205,22 @@ readonly class SsoService
     /**
      * Create SSO session record
      */
-    private
-    function createSSOSession(User $user, array $callbackData, array $userData): void
+    private function createSSOSession(User $user, array $callbackData, array $userData): void
     {
-        SsoSession::where('user_id', $user->id)
-            ->where('origin_app', $callbackData['origin_app'] ?? 'https://koperasi.berasumkm.id/')
-            ->where('expires_at', '<', now())
-            ->delete();
+        // Regenerate session ID for security (avoid session fixation)
+        Session::invalidate();
+        Session::regenerateToken();
 
-        SsoSession::create([
+        // Store metadata in the Laravel session
+        Session::put('sso', [
             'user_id' => $user->id,
-            'session_token' => Str::random(64),
             'origin_app' => $callbackData['origin_app'] ?? 'https://koperasi.berasumkm.id/',
             'expires_at' => now()->addSeconds(config('sso.session_expiry')),
             'metadata' => json_encode([
                 'callback_data' => $callbackData,
                 'user_data' => $userData,
                 'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent()
+                'user_agent' => request()->userAgent(),
             ])
         ]);
     }
@@ -232,8 +233,7 @@ readonly class SsoService
     {
         return [
             'email' => $userData['email'] ?? null,
-            'first_name' => $userData['first_name'] ?? $userData['name'] ?? null,
-            'last_name' => $userData['last_name'] ?? null,
+            'name' => $userData['name'] ?? null,
             'phone' => $userData['phone'] ?? null,
             'tenant_id' => $userData['tenant_id'] ?? null,
             'tenant_name' => $userData['tenant_name'] ?? null,

@@ -16,6 +16,7 @@ import {
     DialogDescription,
     DialogFooter,
 } from "@/components/ui/dialog";
+import AppHeaderLayout from '@/layouts/app/app-header-layout';
 
 // 🔹 Breadcrumbs
 const breadcrumbs: BreadcrumbItem[] = [
@@ -49,7 +50,7 @@ export default function PurchaseOrderPage() {
     const total = subtotal + ppn;
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppHeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Purchase Order" />
 
             <div className="p-4 md:p-6 space-y-6">
@@ -209,6 +210,6 @@ export default function PurchaseOrderPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </AppLayout>
+        </AppHeaderLayout>
     );
 }

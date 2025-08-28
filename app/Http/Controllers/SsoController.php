@@ -7,6 +7,7 @@ use App\Services\Auth\SsoService;
 use App\Traits\HasApiReponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class SsoController extends Controller
 {
@@ -14,16 +15,19 @@ class SsoController extends Controller
 
     public function __construct(
         private readonly SsoService $ssoService
-    ) {}
+    )
+    {
+    }
 
     /**
      * Handle SSO callback from Digikoperasi
      */
-    public function callback(Request $request): JsonResponse
+    public function callback(Request $request)
     {
         try {
             $ssoToken = $request->query('sso_token');
             $state = $request->query('state');
+
 
             if (!$ssoToken) {
                 throw new \Exception('Missing sso_token parameter');
@@ -39,31 +43,15 @@ class SsoController extends Controller
             ]);
 
             if ($result['requires_onboarding']) {
-                return $this->successResponse([
-                    'access_token' => $result['token'],
-                    'token_type' => 'Bearer',
-                    'expires_in' => config('sso.token_expiry'),
-                    'requires_onboarding' => true,
-                    'user' => $result['user'],
-                    'prefilled_data' => $result['prefilled_data'],
-                    'redirect_url' => config('sso.redirect_urls.onboarding')
-                ], 'Authentication successful. Onboarding required.');
+                return redirect(route('onboarding.create'))->with('prefilled_data', $result['prefilled_data']);
             }
 
-            return $this->successResponse([
-                'access_token' => $result['token'],
-                'token_type' => 'Bearer',
-                'expires_in' => config('sso.token_expiry'),
-                'user' => $result['user'],
-                'redirect_url' => config('sso.redirect_urls.success')
-            ], 'Authentication successful.');
+            return redirect(route('orders.products'))->withSuccess('Login sukses.');
 
         } catch (\Exception $e) {
-            return $this->errorResponse('error', 401, [
-                'message' => 'Authentication failed: ' . $e->getMessage(),
-                'redirect_url' => $this->ssoService->buildFailureRedirectUrl('token_validation_failed'),
-                'show_digikoperasi_login' => true
-            ]);
+            return back()->with('error', $e->getMessage());
+        } catch (\Throwable $e) {
+            return back()->with('error', $e->getMessage());
         }
     }
 

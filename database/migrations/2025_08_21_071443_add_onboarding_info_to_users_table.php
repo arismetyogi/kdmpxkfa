@@ -14,8 +14,11 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->string('external_id')->nullable()->index(); // ID from origin app
             $table->boolean('onboarding_completed')->default(false);
+            $table->string('tenant_id')->nullable()->index();
+            $table->string('tenant_name')->nullable();
+            $table->string('phone')->nullable();
 
-            $table->index(['email', 'is_active']);
+            $table->index(['tenant_id', 'is_active']);
             $table->index(['external_id', 'is_active']);
         });
     }
@@ -27,8 +30,12 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('external_id');
+            $table->dropColumn('tenant_id');
+            $table->dropColumn('tenant_name');
+            $table->dropColumn('phone');
+            $table->dropColumn('onboarding_completed');
             $table->dropIndex('users_external_id_index');
-            $table->dropIndex('users_is_active_index');
+            $table->dropIndex('users_tenant_id_index');
         });
     }
 };

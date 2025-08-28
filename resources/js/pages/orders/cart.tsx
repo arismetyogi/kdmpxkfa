@@ -3,6 +3,7 @@ import { Head, Link } from "@inertiajs/react";
 import { useState, useEffect } from "react";
 import { type BreadcrumbItem, CartItem } from '@/types';
 import { ShoppingBag } from "lucide-react";
+import AppHeaderLayout from '@/layouts/app/app-header-layout';
 
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -49,7 +50,7 @@ export default function Cart() {
     const grandTotal = subtotal + ppn;
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppHeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Cart" />
             <div className="p-6">
                 <h1 className="text-2xl font-bold mb-4 text-blue-800">🛒 Shopping Cart</h1>
@@ -141,6 +142,6 @@ export default function Cart() {
                     ← Kembali ke katalog
                 </Link>
             </div>
-        </AppLayout>
+        </AppHeaderLayout>
     );
 }
