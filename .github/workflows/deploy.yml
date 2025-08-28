@@ -75,5 +75,5 @@ jobs:
             php artisan optimize
             php artisan storage:link
 
-            sudo chown -R www-data:www-data /var/www/laravel_app/storage
-            sudo chown -R www-data:www-data /var/www/laravel_app/bootstrap/cache
+            sudo chown -R www-data:www-data /var/www/laravel_app
+            sudo chown -R www-data:www-data /var/www/laravel_app/*

@@ -183,7 +183,7 @@ export default function PurchaseOrderPage() {
                         <Button variant="outline" onClick={() => setShowCancelDialog(false)}>
                             Tidak
                         </Button>
-                        <Link href="/orders/cart">
+                        <Link href={route('orders.cart')}>
                             <Button variant="destructive">Ya, Batalkan</Button>
                         </Link>
                     </DialogFooter>
