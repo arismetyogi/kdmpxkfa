@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Search, Filter } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from "@/types";
 import AppHeaderLayout from '@/layouts/app/app-header-layout';
 

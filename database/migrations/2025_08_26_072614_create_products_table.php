@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('sku');
             $table->string('name');
             $table->string('slug');
-            $table->string('category')->default('Obat');
+            $table->unsignedBigInteger('category_id')->nullable()->default(1226);
             $table->float('price');
             $table->integer('weight')->default(100);
             $table->integer('length')->nullable();
@@ -24,6 +24,7 @@ return new class extends Migration
             $table->integer('height')->nullable();
             $table->boolean('is_active')->default(true);
             $table->string('image')->nullable();
+            $table->boolean('is_featured')->default(false);
             $table->timestamps();
         });
     }
