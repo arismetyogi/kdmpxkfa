@@ -28,10 +28,12 @@ readonly class SsoService
         return DB::transaction(function () use ($data) {
             $userData = $this->validateSSOTokenWithDigikoperasi($data['sso_token'], $data['state'] ?? null);
 
-            Log::debug('callback service: ', $userData);
+            Log::debug('Callback validate token: ', $userData);
 
             // Find or create user
             $user = $this->findOrCreateUser($userData);
+
+            Log::debug('Callback user: ', $user->toArray());
 
             // Create SSO session
             $this->createSSOSession($user, $data, $userData);
@@ -93,21 +95,21 @@ readonly class SsoService
                 'body' => $response->body(),
             ]);
 
-            if (!$response->successful()) {
-                throw new \Exception('Token validation failed with Digikoperasi: ' . $response->body());
-            }
-
             $responseData = $response->json();
 
-//            if (!isset($responseData['success']) || !$responseData['success']) {
-//                throw new \Exception('Invalid SSO token: ' . ($responseData['message'] ?? 'Unknown error'));
-//            }
-            Log::debug('Response: data: ', $responseData);
+            if (!$response->ok() || !isset($responseData['data'])) {
+                throw new \Exception('Invalid response from SSO server: ' . $response->body());
+            }
+
+            Log::debug('Response data parsed: ',['data' => $responseData['data']]);
 
             return $responseData['data'];
 
         } catch (\Exception $e) {
-            Log::debug('Error: ', (array)$e->getMessage());
+            Log::error('SSO validation failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             throw new \Exception('SSO validation failed: ' . $e->getMessage());
         }
     }
@@ -191,17 +193,12 @@ readonly class SsoService
                 'external_id' => $userData['user']['sub'],
                 'username' => Str::before($userData['user']['email'], '@'),
                 'email' => $userData['user']['email'],
-                'email_verified_at' => isset($userData['user']['email_verified']) && $userData['user']['email_verified'] ? now() : null,
+                'email_verified_at' => now(),
                 'onboarding_completed' => false,
                 'is_active' => true
             ]);
-        } else {
-            if (!$user->external_id) {
-                $user->update(['external_id' => $userData['user']['sub']]);
-            }
+            $user->assignRole('user');
         }
-
-        $user->assignRole('user');
 
         return $user;
     }
@@ -218,7 +215,7 @@ readonly class SsoService
         // Store metadata in the Laravel session
         Session::put('sso', [
             'user_id' => $user->id,
-            'origin_app' => $callbackData['source_app'] ?? 'https://koperasi.berasumkm.id/',
+            'origin_app' => 'https://koperasi.berasumkm.id/',
             'expires_at' => now()->addSeconds(config('sso.session_expiry')),
             'metadata' => json_encode([
                 'callback_data' => $callbackData,
