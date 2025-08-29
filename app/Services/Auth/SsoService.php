@@ -13,11 +13,11 @@ use Illuminate\Support\Str;
 
 readonly class SsoService
 {
-    public function __construct(
-        private JWTService $jwtService
-    )
-    {
-    }
+//    public function __construct(
+//        private JWTService $jwtService
+//    )
+//    {
+//    }
 
     /**
      * Handle SSO callback and authenticate user
@@ -36,20 +36,20 @@ readonly class SsoService
             // Create SSO session
             $this->createSSOSession($user, $data, $userData);
 
-            $tokenPayload = [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'external_id' => $user->external_id,
-            ];
+//            $tokenPayload = [
+//                'user_id' => $user->id,
+//                'email' => $user->email,
+//                'external_id' => $user->external_id,
+//            ];
 
-            $accessToken = $this->jwtService->generateToken($tokenPayload);
-            $refreshToken = $this->jwtService->generateRefreshToken($tokenPayload);
+//            $accessToken = $this->jwtService->generateToken($tokenPayload);
+//            $refreshToken = $this->jwtService->generateRefreshToken($tokenPayload);
 
             $result = [
-                'access_token' => $accessToken,
-                'refresh_token' => $refreshToken,
-                'token_type' => 'Bearer',
-                'expires_in' => config('jwt.ttl', 3600),
+//                'access_token' => $accessToken,
+//                'refresh_token' => $refreshToken,
+//                'token_type' => 'Bearer',
+//                'expires_in' => config('jwt.ttl', 3600),
                 'user' => $user->load('profile'),
                 'requires_onboarding' => !$user->onboarding_completed
             ];
