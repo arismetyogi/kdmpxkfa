@@ -75,13 +75,16 @@ readonly class SsoService
         ];
 
         try {
+            $url = config('sso.allowed_origins.digikoperasi.url' . '/redirect-sso/validate');
+
             $client = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'x-api-key' => config('sso.allowed_origins.digikoperasi.api_key'),
             ])
                 ->withBody(json_encode($payload), 'application/json');
-            $response = $client->post(config('sso.allowed_origins.digikoperasi.url') . '/redirect-sso/validate');
+            $response = $client->post($url);
 
+            Log::debug('SSO URL: ', $url);
             Log::debug('SSO head: ', (array)$client);
             Log::debug('SSO Validate Request Body: ', $payload);
 
@@ -160,42 +163,41 @@ readonly class SsoService
      * Validate JWT signature (fallback method)
      * @throws \Exception
      */
-    private
-    function validateJWTToken(string $token): array
-    {
-        try {
-            $decoded = $this->jwtService->validateToken($token);
-            return $decoded['data'] ?? $decoded;
-
-        } catch (\Exception $e) {
-            throw new \Exception('Invalid JWT token: ' . $e->getMessage());
-        }
-    }
+//    private function validateJWTToken(string $token): array
+//    {
+//        try {
+//            $decoded = $this->jwtService->validateToken($token);
+//            return $decoded['data'] ?? $decoded;
+//
+//        } catch (\Exception $e) {
+//            throw new \Exception('Invalid JWT token: ' . $e->getMessage());
+//        }
+//    }
 
     /**
      * Find existing user or create new one
      */
     private function findOrCreateUser(array $userData): User
     {
-        $user = User::where('external_id', $userData['sub'])->first();
+        $user = User::where('external_id', $userData['user']['sub'])->first();
 
         if (!$user) {
-            $user = User::where('email', $userData['email'])->first();
+            $user = User::where('email', $userData['user']['email'])->first();
         }
 
         if (!$user) {
             $user = User::create([
                 'uuid' => Str::uuid(),
-                'external_id' => $userData['sub'],
-                'username' => Str::before($userData['email'], '@'),
-                'email' => $userData['email'],
-                'email_verified_at' => isset($userData['email_verified']) && $userData['email_verified'] ? now() : null,
+                'external_id' => $userData['user']['sub'],
+                'username' => Str::before($userData['user']['email'], '@'),
+                'email' => $userData['user']['email'],
+                'email_verified_at' => isset($userData['user']['email_verified']) && $userData['user']['email_verified'] ? now() : null,
                 'onboarding_completed' => false,
                 'is_active' => true
             ]);
         } else {
             if (!$user->external_id) {
-                $user->update(['external_id' => $userData['sub']]);
+                $user->update(['external_id' => $userData['user']['sub']]);
             }
         }
 
@@ -216,7 +218,7 @@ readonly class SsoService
         // Store metadata in the Laravel session
         Session::put('sso', [
             'user_id' => $user->id,
-            'origin_app' => $callbackData['origin_app'] ?? 'https://koperasi.berasumkm.id/',
+            'origin_app' => $callbackData['source_app'] ?? 'https://koperasi.berasumkm.id/',
             'expires_at' => now()->addSeconds(config('sso.session_expiry')),
             'metadata' => json_encode([
                 'callback_data' => $callbackData,
