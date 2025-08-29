@@ -77,7 +77,7 @@ readonly class SsoService
         ];
 
         try {
-            $url = config('sso.allowed_origins.digikoperasi.url' . '/redirect-sso/validate');
+            $url = rtrim(config('sso.allowed_origins.digikoperasi.url'), '/') . '/redirect-sso/validate';
 
             $client = Http::withHeaders([
                 'Content-Type' => 'application/json',
@@ -86,8 +86,8 @@ readonly class SsoService
                 ->withBody(json_encode($payload), 'application/json');
             $response = $client->post($url);
 
-            Log::debug('SSO URL: ', $url);
-            Log::debug('SSO head: ', (array)$client);
+            Log::debug('SSO URL: ', ['url' => $url]);
+            Log::debug('SSO head: ', $client->getOptions());
             Log::debug('SSO Validate Request Body: ', $payload);
 
             Log::debug('SSO Validate Response: ', [
@@ -96,12 +96,11 @@ readonly class SsoService
             ]);
 
             $responseData = $response->json();
+            Log::debug('Response data parsed: ',['data' => $responseData['data']]);
 
             if (!$response->ok() || !isset($responseData['data'])) {
                 throw new \Exception('Invalid response from SSO server: ' . $response->body());
             }
-
-            Log::debug('Response data parsed: ',['data' => $responseData['data']]);
 
             return $responseData['data'];
 
@@ -181,18 +180,18 @@ readonly class SsoService
      */
     private function findOrCreateUser(array $userData): User
     {
-        $user = User::where('external_id', $userData['user']['sub'])->first();
+        $user = User::where('external_id', $userData['sub'])->first();
 
         if (!$user) {
-            $user = User::where('email', $userData['user']['email'])->first();
+            $user = User::where('email', $userData['email'])->first();
         }
 
         if (!$user) {
             $user = User::create([
                 'uuid' => Str::uuid(),
-                'external_id' => $userData['user']['sub'],
-                'username' => Str::before($userData['user']['email'], '@'),
-                'email' => $userData['user']['email'],
+                'external_id' => $userData['sub'],
+                'username' => Str::before($userData['email'], '@'),
+                'email' => $userData['email'],
                 'email_verified_at' => now(),
                 'onboarding_completed' => false,
                 'is_active' => true
@@ -209,8 +208,7 @@ readonly class SsoService
     private function createSSOSession(User $user, array $callbackData, array $userData): void
     {
         // Regenerate session ID for security (avoid session fixation)
-        Session::invalidate();
-        Session::regenerateToken();
+        Session::regenerate(true);
 
         // Store metadata in the Laravel session
         Session::put('sso', [
