@@ -2,7 +2,7 @@ import Filters from '@/components/Filters';
 import ProductCard from '@/components/ProductCard';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CartItem, type BreadcrumbItem } from '@/types';
+import { CartItem, type BreadcrumbItem, OrderProducts } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ShoppingCart } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -17,44 +17,48 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function IndexPage() {
-    const products = [
+    const products: OrderProducts[] = [
         {
             name: 'KF FACIAL TISSUE 200S ANIMAL',
             price: 15000,
-            stock: 20,
-            qty: '10pcs',
+            inventory: 20,
             category: 'Barang',
-            packaging: 'Barang',
+            order_unit: 'PCS',
+            content: 1,
+            base_uom: 'PCS',
             image: 'https://placehold.co/400',
             description: 'Tisu wajah isi besar, lembut dan aman untuk kulit wajah sehari-hari..',
         },
         {
             name: 'FITUNO TAB SALUT (BLISTER 3X10 TAB)-BJN',
             price: 10000,
-            stock: 20,
-            qty: '10pcs',
+            inventory: 20,
             category: 'Obat',
-            packaging: 'Tablet',
+            order_unit: 'BLT',
+            content: 1,
+            base_uom: 'TAB',
             image: 'https://placehold.co/400',
             description: 'Suplemen herbal untuk bantu tingkatkan daya tahan tubuh dan pemulihan stamina.',
         },
         {
-            name: '',
+            name: 'sample syrup',
             price: 15000,
-            stock: 0,
-            qty: '250ml',
+            inventory: 0,
             category: 'Antibiotik',
-            packaging: 'Syrup',
+            order_unit: 'BTL',
+            content: 1,
+            base_uom: 'BTL',
             image: 'https://placehold.co/400',
             description: '',
         },
         {
             name: 'ENKASARI HERBAL 120ML',
             price: 25000,
-            stock: 20,
-            qty: '15pcs',
+            inventory: 20,
             category: 'Obat',
-            packaging: 'Tablet',
+            order_unit: 'BTL',
+            content: 1,
+            base_uom: 'BTL',
             image: 'https://placehold.co/400',
             description:
                 'Cairan kumur herbal alami untuk menjaga kesehatan mulut dan tenggorokan. Formulanya membantu mengatasi bau mulut, sariawan, dan meredakan radang tenggorokan. Dengan bahan-bahan pilihan, memberikan sensasi segar dan nyaman setelah digunakan. Ideal untuk kebersihan mulut sehari-hari.',
@@ -62,10 +66,11 @@ export default function IndexPage() {
         {
             name: 'MAGASIDA TABLET (DUS 10 TAB)-BJN',
             price: 20000,
-            stock: 20,
-            qty: '15pcs',
+            inventory: 20,
             category: 'Obat',
-            packaging: 'Tablet',
+            order_unit: 'STR',
+            content: 10,
+            base_uom: 'TAB',
             image: 'https://placehold.co/400',
             description:
                 'Obat yang digunakan untuk mengatasi gangguan pada saluran pencernaan seperti gastritis, perut kembung, maag, dispepsia, hiatus hernia, tukak lambung dan tukak usus duabelas jari',
@@ -73,10 +78,11 @@ export default function IndexPage() {
         {
             name: 'BATUGIN ELIXIR BT 120 ML - BJN',
             price: 65000,
-            stock: 20,
-            qty: '15pcs',
+            inventory: 20,
             category: 'Obat',
-            packaging: 'Syrup',
+            order_unit: 'BTL',
+            content: 1,
+            base_uom: 'Syrup',
             image: 'https://placehold.co/400',
             description: 'Obat herbal pereda batu ginjal, sirup 120ml dari BJN',
         },
@@ -86,7 +92,7 @@ export default function IndexPage() {
     const [sortBy, setSortBy] = useState('name-asc');
     const [filters, setFilters] = useState({ categories: ['Semua Produk'], packages: ['Semua Package'] });
     const [cart, setCart] = useState<CartItem[]>([]);
-    const [selectedProduct, setSelectedProduct] = useState<any | null>(null); // 🔹 modal state
+    const [selectedProduct, setSelectedProduct] = useState<OrderProducts | null>(null); // 🔹 modal state
 
     // 🔹 Hitung total unique item dalam cart
     const totalItems = cart.length;
@@ -128,7 +134,7 @@ export default function IndexPage() {
         filteredProducts = filteredProducts.filter((p) => {
             const matchCategory = activeCategories.length === 0 || activeCategories.includes(p.category);
 
-            const matchPackage = activePackages.length === 0 || activePackages.includes(p.packaging);
+            const matchPackage = activePackages.length === 0 || activePackages.includes(p.order_unit);
 
             return matchCategory && matchPackage;
         });
@@ -234,16 +240,16 @@ export default function IndexPage() {
                                         <strong>Harga:</strong> Rp{selectedProduct.price.toLocaleString()}
                                     </p>
                                     <p>
-                                        <strong>Stok:</strong> {selectedProduct.stock > 0 ? selectedProduct.stock : 'Habis'}
+                                        <strong>Stok:</strong> {selectedProduct.inventory > 0 ? selectedProduct.inventory : 'Habis'}
                                     </p>
                                     <p>
                                         <strong>Kategori:</strong> {selectedProduct.category}
                                     </p>
                                     <p>
-                                        <strong>Kemasan:</strong> {selectedProduct.packaging}
+                                        <strong>Kemasan:</strong> {selectedProduct.order_unit}
                                     </p>
                                     <p>
-                                        <strong>Kuantitas:</strong> {selectedProduct.qty}
+                                        <strong>Kuantitas:</strong> {selectedProduct.content}
                                     </p>
                                 </div>
                             </div>
@@ -256,32 +262,32 @@ export default function IndexPage() {
                                 </TabsList>
 
                                 <TabsContent value="benefit" className="mt-2 text-sm text-gray-700">
-                                    {selectedProduct.benefit && selectedProduct.benefit.length > 0 ? (
-                                        <ul className="list-disc space-y-1 pl-5">
-                                            {selectedProduct.benefit.map((item: string, idx: number) => (
-                                                <li key={idx}>{item}</li>
-                                            ))}
-                                        </ul>
-                                    ) : (
-                                        'Belum ada informasi benefit.'
-                                    )}
+                                    {/*{selectedProduct.benefit && selectedProduct.benefit.length > 0 ? (*/}
+                                    {/*    <ul className="list-disc space-y-1 pl-5">*/}
+                                    {/*        {selectedProduct.benefit.map((item: string, idx: number) => (*/}
+                                    {/*            <li key={idx}>{item}</li>*/}
+                                    {/*        ))}*/}
+                                    {/*    </ul>*/}
+                                    {/*) : (*/}
+                                    {/*    'Belum ada informasi benefit.'*/}
+                                    {/*)}*/}
                                 </TabsContent>
 
                                 <TabsContent value="dosage" className="mt-2 text-sm text-gray-700">
                                     <div className="space-y-1">
-                                        {selectedProduct.dosage.split('. ').map((line: string, idx: number) => {
-                                            const formatted = line
-                                                .replace(/Dewasa:/g, '<strong>Dewasa:</strong>')
-                                                .replace(/Anak-anak:/g, '<strong>Anak-anak:</strong>');
-                                            return (
-                                                <p
-                                                    key={idx}
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: formatted + (line.endsWith('.') ? '' : '.'),
-                                                    }}
-                                                />
-                                            );
-                                        })}
+                                        {/*{selectedProduct.dosage.split('. ').map((line: string, idx: number) => {*/}
+                                        {/*    const formatted = line*/}
+                                        {/*        .replace(/Dewasa:/g, '<strong>Dewasa:</strong>')*/}
+                                        {/*        .replace(/Anak-anak:/g, '<strong>Anak-anak:</strong>');*/}
+                                        {/*    return (*/}
+                                        {/*        <p*/}
+                                        {/*            key={idx}*/}
+                                        {/*            dangerouslySetInnerHTML={{*/}
+                                        {/*                __html: formatted + (line.endsWith('.') ? '' : '.'),*/}
+                                        {/*            }}*/}
+                                        {/*        />*/}
+                                        {/*    );*/}
+                                        {/*})}*/}
                                     </div>
                                 </TabsContent>
                             </Tabs>

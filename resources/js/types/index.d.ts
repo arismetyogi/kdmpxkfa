@@ -87,6 +87,18 @@ export interface Product {
     updated_at: string;
 }
 
+export interface OrderProducts {
+    name: string;
+    description: string;
+    category: string;
+    price: number;
+    inventory: number;
+    order_unit: string;
+    base_uom: string;
+    content: number;
+    image: string;
+}
+
 export interface CartItem {
     name: string;
     image: string;
