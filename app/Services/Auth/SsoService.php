@@ -189,11 +189,12 @@ readonly class SsoService
         if (!$user) {
             $user = User::create([
                 'uuid' => Str::uuid(),
-                'external_id' => $userData['sub'],
+                'name' => $userData['name'],
                 'username' => Str::before($userData['email'], '@'),
                 'email' => $userData['email'],
                 'email_verified_at' => now(),
                 'onboarding_completed' => false,
+                'external_id' => $userData['sub'],
                 'is_active' => true
             ]);
             $user->assignRole('user');
