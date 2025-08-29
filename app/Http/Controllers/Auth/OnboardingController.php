@@ -43,15 +43,9 @@ class OnboardingController extends Controller
         $user->update([
             'name' => $validated['name'],
             'onboarding_completed' => true,
+            'phone' => $validated['phone'],
+            'tenant_name' => $validated['tenant_name'],
         ]);
-
-        // Optional: if you store phone/tenant_name in a related profile table
-        if (method_exists($user, 'profile')) {
-            $user->profile()->updateOrCreate([], [
-                'phone'       => $validated['phone'],
-                'tenant_name' => $validated['tenant_name'],
-            ]);
-        }
 
         return redirect()->intended(route('orders.products'))->with('success', 'Onboarding completed successfully!');
     }

@@ -5,6 +5,7 @@ namespace App\Services\Auth;
 use App\Models\SsoSession;
 use App\Models\User;
 use Illuminate\Log\Logger;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -209,6 +210,7 @@ readonly class SsoService
     private function createSSOSession(User $user, array $callbackData, array $userData): void
     {
         // Regenerate session ID for security (avoid session fixation)
+        Auth::login($user);
         Session::regenerate(true);
 
         // Store metadata in the Laravel session

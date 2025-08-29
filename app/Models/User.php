@@ -28,6 +28,9 @@ class User extends Authenticatable
         'password',
         'is_active',
         'avatar',
+        'onboarding_completed',
+        'phone',
+        'tenant_name',
     ];
 
     /**
