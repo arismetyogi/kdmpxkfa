@@ -42,9 +42,9 @@ class SsoController extends Controller
                 'state' => $state
             ]);
 
-            if ($result['requires_onboarding']) {
-                return redirect(route('onboarding.create'))->with('prefilled_data', $result['prefilled_data']);
-            }
+//            if ($result['requires_onboarding']) {
+//                return redirect(route('onboarding.create'))->with('prefilled_data', $result['prefilled_data']);
+//            }
 
             return redirect(route('orders.products'))->withSuccess('Login sukses.');
 

@@ -50,7 +50,7 @@ readonly class SsoService
 //                'refresh_token' => $refreshToken,
 //                'token_type' => 'Bearer',
 //                'expires_in' => config('jwt.ttl', 3600),
-                'user' => $user->load('profile'),
+                'user' => $user,
                 'requires_onboarding' => !$user->onboarding_completed
             ];
 
@@ -78,9 +78,11 @@ readonly class SsoService
             $client = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'x-api-key' => config('sso.allowed_origins.digikoperasi.api_key'),
-            ]);
-            $response = $client->post(config('sso.allowed_origins.digikoperasi.url') . '/redirect-sso/validate', $payload);
+            ])
+                ->withBody(json_encode($payload), 'application/json');
+            $response = $client->post(config('sso.allowed_origins.digikoperasi.url') . '/redirect-sso/validate');
 
+            Log::debug('SSO head: ', (array)$client);
             Log::debug('SSO Validate Request Body: ', $payload);
 
             Log::debug('SSO Validate Response: ', [

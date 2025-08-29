@@ -13,7 +13,7 @@ return [
     */
     'allowed_origins' => [
         'digikoperasi' => [
-            'url' => env('SSO_DIGIKOPERASI_URL', 'https://koperasi.berasumkm.id'),
+            'url' => env('SSO_DIGIKOPERASI_URL', 'https://gatekeeper-stg.berasumkm.id'),
             'api_key' => env('SSO_DIGIKOPERASI_API_KEY'),
         ],
     ],
