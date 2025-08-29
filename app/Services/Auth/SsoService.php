@@ -99,15 +99,15 @@ readonly class SsoService
 
             $responseData = $response->json();
 
-            if (!isset($responseData['success']) || !$responseData['success']) {
-                throw new \Exception('Invalid SSO token: ' . ($responseData['message'] ?? 'Unknown error'));
-            }
-
-            Log::info($responseData);
+//            if (!isset($responseData['success']) || !$responseData['success']) {
+//                throw new \Exception('Invalid SSO token: ' . ($responseData['message'] ?? 'Unknown error'));
+//            }
+            Log::debug('Response: data: ', $responseData);
 
             return $responseData['data'];
 
         } catch (\Exception $e) {
+            Log::debug('Error: ', (array)$e->getMessage());
             throw new \Exception('SSO validation failed: ' . $e->getMessage());
         }
     }
