@@ -14,7 +14,7 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->seedCategories();
+//        $this->seedCategories();
         $this->seedProducts();
     }
 
@@ -103,7 +103,7 @@ class ProductSeeder extends Seeder
                 'description' => $item['description'] ?? '',
                 'dosage' => $item['dosage'] ? json_decode($item['dosage'], true) : null,
                 'pharmacology' => $item['pharmacology'] ?? '',
-                'price' => $item['price'] ?? 0,
+                'price' => $item['price'] ?? 1.00,
                 'base_uom' => $item['base_uom'] ?? '',
                 'order_unit' => $item['order_unit'] ?? '',
                 'content' => $item['content'] ?? 1,

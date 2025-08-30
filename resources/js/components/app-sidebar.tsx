@@ -23,6 +23,11 @@ export function AppSidebar() {
                   icon: Shield,
               },
               {
+                  title: 'Category Management',
+                  href: '/admin/categories',
+                  icon: Package,
+              },
+              {
                   title: 'Product Management',
                   href: '/admin/products',
                   icon: Package,
@@ -45,6 +50,20 @@ export function AppSidebar() {
                   icon: History,
               },
           ];
+
+    const orderManagementNavItems: NavItem[] = isAdminOrManager?
+        [
+            {
+                title: 'Pending Orders',
+                href: '/admin/orders',
+                icon: ShoppingCart,
+            },
+            {
+                title: 'Completed Orders',
+                href: '#',
+                icon: ShoppingCart,
+            }
+        ] : [];
 
     const adminNavItems: NavItem[] = isAdminOrManager
         ? [
@@ -85,6 +104,7 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain label="Home" items={mainNavItems} />
+                {isAdminOrManager && <NavMain label="Orders" items={orderManagementNavItems} />}
                 {isAdminOrManager && <NavMain label="System" items={adminNavItems} />}
             </SidebarContent>
 

@@ -5,10 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { BreadcrumbItem, Product, Category } from '@/types';
+import { BreadcrumbItem, Product, Category, Paginated } from '@/types';
 import { Edit, PackageX, Plus, Trash2 } from 'lucide-react';
-import { mockProducts, mockCategories } from '@/data/mockData';
 import AppLayout from '@/layouts/app-layout';
+import { Link } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -22,15 +22,12 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 interface AdminProductProps {
-    products?: Product[];
-    categories?: Category[];
+    products: Paginated<Product>;
+    categories: Category[];
 }
 
-export default function AdminProducts({
-                                          products: initialProducts,
-                                          categories = mockCategories
-                                      }: AdminProductProps) {
-    const [products, setProducts] = useState<Product[]>(initialProducts || mockProducts);
+export default function AdminProducts({ products, categories }: AdminProductProps) {
+    const [product, setProduct] = useState<Product[]>([]);
 
     // Modal states
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -63,32 +60,29 @@ export default function AdminProducts({
     const handleSubmitProduct = (productData: Partial<Product>) => {
         if (selectedProduct) {
             // Update existing product
-            const selectedCategory = categories.find(c => c.id === productData.category_id);
-            setProducts(prev => prev.map(p =>
+            const selectedCategory = categories?.find(c => c.id === productData.category_id);
+            setProduct(prev => prev.map(p =>
                 p.id === selectedProduct.id
                     ? {
                         ...p,
                         ...productData,
-                        category: selectedCategory,
+                        category: selectedCategory ?? p.category,
                         updated_at: new Date().toISOString()
                     }
                     : p
             ));
         } else {
             // Create new product
-            const selectedCategory = categories.find(c => c.id === productData.category_id);
+            const selectedCategory = categories?.find(c => c.id === productData.category_id);
             const newProduct: Product = {
-                id: Math.max(...products.map(p => p.id)) + 1,
                 ...productData as Product,
-                category: selectedCategory,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
+                category: selectedCategory
             };
-            setProducts(prev => [...prev, newProduct]);
+            setProduct(prev => [...prev, newProduct]);
         }
     };
-    const totalActive = products.filter((product) => product.is_active).length;
-    const totalInactive = products.filter((product) => !product.is_active).length;
+    const totalActive = products.data.filter((product) => product.is_active).length;
+    const totalInactive = products.data.filter((product) => !product.is_active).length;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -110,7 +104,7 @@ export default function AdminProducts({
                             <CardTitle className="text-sm font-medium">Total Products</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{products.length}</div>
+                            <div className="text-2xl font-bold">{products.data.length}</div>
                             <p className="text-xs text-gray-600">Total products in the system</p>
                         </CardContent>
                     </Card>
@@ -144,6 +138,7 @@ export default function AdminProducts({
                         <Table>
                             <TableHeader>
                                 <TableRow>
+                                    <TableHead/>
                                     <TableHead>Name</TableHead>
                                     <TableHead>SKU ID</TableHead>
                                     <TableHead>Category</TableHead>
@@ -153,8 +148,21 @@ export default function AdminProducts({
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {products.map((product) => (
+                                {products.data.map((product) => (
                                     <TableRow key={product.id}>
+                                        <TableCell>
+                                            {product.image_url ? (
+                                                <img
+                                                    src={product.image_url}
+                                                    alt={product.name}
+                                                    className="w-16 h-16 object-cover rounded-lg"
+                                                />
+                                            ) : (
+                                                <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center text-xs text-gray-500">
+                                                    No Image
+                                                </div>
+                                            )}
+                                        </TableCell>
                                         <TableCell>
                                             <span className="font-medium">{product.name}</span>
                                         </TableCell>
@@ -213,6 +221,21 @@ export default function AdminProducts({
                         </Table>
                     </CardContent>
                 </Card>
+                {/* Pagination */}
+                <div className="flex gap-2">
+                    {products.links.map((link, idx) => (
+                        <Link
+                            key={idx}
+                            href={link.url ?? "#"}
+                            className={`px-3 py-1 rounded ${
+                                link.active
+                                    ? "bg-blue-600 text-white"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            }`}
+                            dangerouslySetInnerHTML={{ __html: link.label }}
+                        />
+                    ))}
+                </div>
             </div>
 
             {/* Create Product Modal */}

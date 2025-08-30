@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug');
             $table->unsignedBigInteger('category_id')->nullable()->default(1226);
-            $table->float('price');
+            $table->float('price')->default(1);
             $table->integer('weight')->default(100);
             $table->integer('length')->nullable();
             $table->integer('width')->nullable();

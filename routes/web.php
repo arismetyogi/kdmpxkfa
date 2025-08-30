@@ -63,9 +63,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Product management routes with explicit model binding
         Route::prefix('/products')->name('products.')->group(function () {
             Route::get('', [ProductController::class, 'index'])->name('index');
-            Route::post('', [UserController::class, 'store'])->name('store');
-            Route::put('/{product}', [UserController::class, 'update'])->name('update');
-            Route::delete('/{product}', [UserController::class, 'destroy'])->name('destroy');
+            Route::post('', [ProductController::class, 'store'])->name('store');
+            Route::put('/{product}', [ProductController::class, 'update'])->name('update');
+            Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
         });
     });
 

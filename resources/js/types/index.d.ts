@@ -71,10 +71,14 @@ export interface Product {
     id: number;
     name: string;
     description: string;
+    dosage: Array<string>;
+    pharmacology: string;
     sku: string;
     category_id?: number;
     category?: Category;
     base_uom: string;
+    order_unit: string;
+    content: number;
     price: number;
     weight: number;
     length: number;
@@ -83,8 +87,7 @@ export interface Product {
     image_url: string;
     image_alt: string;
     is_active: boolean;
-    created_at: string;
-    updated_at: string;
+    brand: string;
 }
 
 export interface OrderProducts {
@@ -107,3 +110,12 @@ export interface CartItem {
     price: number;
     quantity: number;
 }
+
+export interface Paginated<T> {
+    data: T[];
+    links: {
+        url: string | null;
+        label: string;
+        active: boolean;
+    }[];
+};

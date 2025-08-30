@@ -2,17 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
-use Spatie\Permission\Models\Role;
 
 class ProductController extends Controller
 {
@@ -28,7 +25,8 @@ class ProductController extends Controller
         }
 
         return Inertia::render('admin/products', [
-            'products' => Product::all()
+            'products' => Product::with('category')->paginate(10)->withQueryString(),
+            'categories' => Category::all(),
         ]);
     }
 
