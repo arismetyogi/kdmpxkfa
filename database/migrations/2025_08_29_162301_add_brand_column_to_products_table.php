@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::table('products', function (Blueprint $table) {
             $table->string('brand')->nullable();
+            $table->text('description')->nullable();
+            $table->json('dosage')->nullable();
+            $table->text('pharmacology')->nullable();
+            $table->string('base_uom');
+            $table->string('order_unit');
+            $table->integer('content');
             $table->string('image_alt')->nullable();
 
             $table->unique(['sku', 'brand']);
@@ -26,6 +32,12 @@ return new class extends Migration
     {
         Schema::table('products', function (Blueprint $table) {
             $table->dropColumn('brand');
+            $table->dropColumn('description');
+            $table->dropColumn('dosage');
+            $table->dropColumn('pharmacology');
+            $table->dropColumn('base_uom');
+            $table->dropColumn('order_unit');
+            $table->dropColumn('content');
             $table->dropColumn('image_alt');
 
             $table->dropUnique(['sku', 'brand']);

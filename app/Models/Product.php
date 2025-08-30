@@ -9,4 +9,27 @@ class Product extends Model
 {
     /** @use HasFactory<\Database\Factories\ProductFactory> */
     use HasFactory;
+
+    protected $fillable = [
+        'sku',
+        'name',
+        'slug',
+        'category_id',
+        'weight',
+        'length',
+        'width',
+        'height',
+        'brand',
+        'description',
+        'dosage',
+        'pharmacology',
+        'base_uom',
+        'order_unit',
+        'content',
+        'price',
+    ];
+
+    protected $casts = [
+        'dosage' => 'array',
+    ];
 }
