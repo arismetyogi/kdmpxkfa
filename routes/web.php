@@ -53,20 +53,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/', [AdminController::class, 'storePermission'])->name('store');
         });
         // User management routes with explicit model binding
-        Route::prefix('/users')->name('users.')->group(function () {
-            Route::get('/', [UserController::class, 'index'])->name('index');
-            Route::post('/', [UserController::class, 'store'])->name('store');
-            Route::put('/{user}', [UserController::class, 'update'])->name('update');
-            Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
-        });
+        Route::resource('users',UserController::class);
 
         // Product management routes with explicit model binding
-        Route::prefix('/products')->name('products.')->group(function () {
-            Route::get('', [ProductController::class, 'index'])->name('index');
-            Route::post('', [ProductController::class, 'store'])->name('store');
-            Route::put('/{product}', [ProductController::class, 'update'])->name('update');
-            Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
-        });
+        Route::resource('products',ProductController::class);
     });
 
     // Alternative: Use permission-based middleware
@@ -82,11 +72,6 @@ Route::bind('role', function ($value) {
 // Add explicit route model binding for Permission
 Route::bind('permission', function ($value) {
     return \Spatie\Permission\Models\Permission::findOrFail($value);
-});
-
-// Add explicit route model binding for Role
-Route::bind('user', function ($value) {
-    return \App\Models\User::findOrFail($value);
 });
 
 require __DIR__ . '/settings.php';
