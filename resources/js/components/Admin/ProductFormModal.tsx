@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Category, Product } from '@/types';
 import { X } from 'lucide-react';
@@ -12,10 +12,10 @@ interface ProductFormModalProps {
     onClose: () => void;
     product: Product | null;
     onSubmit?: (product: Partial<Product>) => void;
-    categories?: Category[];
+    categories: Category[];
 }
 
-export default function ProductFormModal({ isOpen, onClose, product, onSubmit, categories = [] }: ProductFormModalProps) {
+export default function ProductFormModal({ isOpen, onClose, onSubmit, product, categories }: ProductFormModalProps) {
     const [formData, setFormData] = useState<Partial<Product>>({
         name: '',
         sku: '',
@@ -32,7 +32,7 @@ export default function ProductFormModal({ isOpen, onClose, product, onSubmit, c
         height: 0,
         weight: 0,
         price: 0,
-        image_url: '',
+        image: '',
         image_alt: '',
         is_active: true,
     });
@@ -57,7 +57,7 @@ export default function ProductFormModal({ isOpen, onClose, product, onSubmit, c
                 height: 0,
                 weight: 0,
                 price: 0,
-                image_url: '',
+                image: '',
                 image_alt: '',
                 is_active: true,
             });
@@ -143,12 +143,15 @@ export default function ProductFormModal({ isOpen, onClose, product, onSubmit, c
                         <div>
                             <Label htmlFor="category_id">Category</Label>
                             <Select defaultValue={formData.category_id?.toString() || ''} onValueChange={handleCategoryChange}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a category" />
+                                </SelectTrigger>
                                 <SelectContent>
-                                    {categories.map((category) => (
-                                        <SelectItem key={category.id} value={category.id.toString()}>
-                                            {category.main_category}
-                                            {category.subcategory1 && ` > ${category.subcategory1}`}
-                                            {category.subcategory2 && ` > ${category.subcategory2}`}
+                                    {categories.map((cat) => (
+                                        <SelectItem key={cat.id} value={cat.id.toString()}>
+                                            {cat.main_category}
+                                            {cat.subcategory1 && ` > ${cat.subcategory1}`}
+                                            {cat.subcategory2 && ` > ${cat.subcategory2}`}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -212,8 +215,8 @@ export default function ProductFormModal({ isOpen, onClose, product, onSubmit, c
                     {/* Image */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <Label htmlFor="image_url">Image URL</Label>
-                            <Input id="image_url" name="image_url" value={formData.image_url} onChange={handleInputChange} />
+                            <Label htmlFor="image">Image URL</Label>
+                            <Input id="image" name="image" value={formData.image} onChange={handleInputChange} />
                         </div>
                         <div>
                             <Label htmlFor="image_alt">Image Alt</Label>

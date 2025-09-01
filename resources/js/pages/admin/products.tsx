@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { BreadcrumbItem, Product, Category, Paginated } from '@/types';
 import { Edit, PackageX, Plus, Trash2 } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -27,9 +27,7 @@ interface AdminProductProps {
 }
 
 export default function AdminProducts({ products, categories }: AdminProductProps) {
-    const [product, setProduct] = useState<Product[]>([]);
-
-    // Modal states
+// Modal states
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -58,27 +56,32 @@ export default function AdminProducts({ products, categories }: AdminProductProp
     };
 
     const handleSubmitProduct = (productData: Partial<Product>) => {
+
+        // Transform into plain payload for backend
+        const payload: Record<string, any> = {
+            sku: productData.sku,
+            name: productData.name,
+            category_id: productData.category_id, // ✅ only ID, not whole category
+            base_uom: productData.base_uom,
+            price: productData.price,
+            weight: productData.weight,
+            length: productData.length,
+            width: productData.width,
+            height: productData.height,
+            image_url: productData.image,
+            image_alt: productData.image_alt,
+            is_active: productData.is_active,
+        };
         if (selectedProduct) {
             // Update existing product
-            const selectedCategory = categories?.find(c => c.id === productData.category_id);
-            setProduct(prev => prev.map(p =>
-                p.id === selectedProduct.id
-                    ? {
-                        ...p,
-                        ...productData,
-                        category: selectedCategory ?? p.category,
-                        updated_at: new Date().toISOString()
-                    }
-                    : p
-            ));
+            router.put(route('admin.products.update', selectedProduct.id), payload, {
+                onSuccess: () => closeModals(),
+            });
         } else {
             // Create new product
-            const selectedCategory = categories?.find(c => c.id === productData.category_id);
-            const newProduct: Product = {
-                ...productData as Product,
-                category: selectedCategory
-            };
-            setProduct(prev => [...prev, newProduct]);
+            router.post(route('admin.products.store'), payload, {
+                onSuccess: () => closeModals(),
+            });
         }
     };
     const totalActive = products.data.filter((product) => product.is_active).length;
@@ -151,9 +154,9 @@ export default function AdminProducts({ products, categories }: AdminProductProp
                                 {products.data.map((product) => (
                                     <TableRow key={product.id}>
                                         <TableCell>
-                                            {product.image_url ? (
+                                            {product.image ? (
                                                 <img
-                                                    src={product.image_url}
+                                                    src={product.image}
                                                     alt={product.name}
                                                     className="w-16 h-16 object-cover rounded-lg"
                                                 />

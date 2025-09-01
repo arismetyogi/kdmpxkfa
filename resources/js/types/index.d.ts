@@ -84,7 +84,7 @@ export interface Product {
     length: number;
     width: number;
     height: number;
-    image_url: string;
+    image: string;
     image_alt: string;
     is_active: boolean;
     brand: string;

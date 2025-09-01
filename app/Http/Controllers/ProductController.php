@@ -24,8 +24,12 @@ class ProductController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        $products = Product::with('category');
+
+        $paginatedProducts = $products->latest()->paginate(15);
+
         return Inertia::render('admin/products', [
-            'products' => Product::with('category')->paginate(10)->withQueryString(),
+            'products' => $paginatedProducts,
             'categories' => Category::all(),
         ]);
     }
@@ -36,6 +40,7 @@ class ProductController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+//        TODO! implement product CRUD with image upload
         $validated = $request->validate([
             'sku' => ['required', Rule::unique('products', 'sku')],
             'name' => ['required', 'string', 'max:255'],
@@ -79,7 +84,6 @@ class ProductController extends Controller
             'content' => $validated['content'],
             'brand' => $validated['brand'],
         ]);
-
 
         return redirect()->route('admin.products.index')->with('success', 'Product created successfully.');
     }

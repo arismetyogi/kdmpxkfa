@@ -12,6 +12,7 @@
         "php": "^8.2",
         "firebase/php-jwt": "^6.11",
         "inertiajs/inertia-laravel": "2.x-dev",
+        "intervention/image-laravel": "^1.5",
         "laravel/framework": "^12.0",
         "laravel/passport": "^13.1",
         "laravel/tinker": "^2.10.1",
