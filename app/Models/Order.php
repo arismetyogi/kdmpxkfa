@@ -8,6 +8,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
+    protected $fillable = [
+        'order_number',
+        'user_id',
+        'status',
+        'subtotal',
+        'tax_amount',
+        'shipping_amount',
+        'discount_amount',
+        'total_price',
+        'source_of_fund',
+        'tenant_id',
+    ];
     protected $casts = [
         'subtotal' => 'decimal:2',
         'tax_amount' => 'decimal:2',

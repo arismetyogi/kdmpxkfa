@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\OnboardingController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SsoController;
@@ -29,9 +30,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     Route::get('/orders/products', [OrderController::class , 'index'])->name('orders.products');
-    Route::get('/orders/cart', [OrderController::class , 'cart'])->name('orders.cart');
-    Route::get('/orders/po', [OrderController::class , 'po'])->name('orders.po');
-    Route::get('/orders/history', [OrderController::class , 'history'])->name('orders.history');
+//    Route::get('/orders/cart', [OrderController::class , 'cart'])->name('orders.cart');
+//    Route::get('/orders/po', [OrderController::class , 'po'])->name('orders.po');
+//    Route::get('/orders/history', [OrderController::class , 'history'])->name('orders.history');
+
+    Route::resource('carts', CartController::class);
+    Route::get('/checkout', [CartController::class, 'checkoutForm'])->name('checkout');
+    Route::get('/payment', [CartController::class, 'paymentForm'])->name('payment');
+    Route::post('/checkout/process', [CartController::class, 'processCheckout'])->name('checkout.process');
+    Route::post('/payment/process', [CartController::class, 'processPayment'])->name('payment.process');
+    Route::get('/order-complete/{order}', [CartController::class, 'orderComplete'])->name('order.complete');
+
 
 //    Route::get('penerimaan', [PenerimaanController::class , 'index'])->name('penerimaan');
 //    Route::get('penerimaan/history', [PenerimaanController::class , 'create'])->name('history');

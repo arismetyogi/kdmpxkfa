@@ -38,24 +38,20 @@ return new class extends Migration
             $table->decimal('total_price', 20, 2)->default(0);
 
             // Billing Information
-//            $table->string('billing_first_name');
-//            $table->string('billing_last_name');
-//            $table->string('billing_email');
-//            $table->string('billing_phone')->nullable();
-//            $table->text('billing_address');
-//            $table->string('billing_city');
-//            $table->string('billing_state');
-//            $table->string('billing_zip');
-//            $table->string('billing_country');
+            $table->string('billing_name');
+            $table->string('billing_email');
+            $table->string('billing_phone')->nullable();
+            $table->text('billing_address');
+            $table->string('billing_city');
+            $table->string('billing_state');
+            $table->string('billing_zip');
 
             // Shipping Information
-//            $table->string('shipping_first_name')->nullable();
-//            $table->string('shipping_last_name')->nullable();
-//            $table->text('shipping_address')->nullable();
-//            $table->string('shipping_city')->nullable();
-//            $table->string('shipping_state')->nullable();
-//            $table->string('shipping_zip')->nullable();
-//            $table->string('shipping_country')->nullable();
+            $table->string('shipping_name')->nullable();
+            $table->text('shipping_address')->nullable();
+            $table->string('shipping_city')->nullable();
+            $table->string('shipping_state')->nullable();
+            $table->string('shipping_zip')->nullable();
 
             // Shipping Details
             $table->string('shipping_method')->default('standard');

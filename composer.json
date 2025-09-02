@@ -17,6 +17,7 @@
         "laravel/passport": "^13.1",
         "laravel/tinker": "^2.10.1",
         "predis/predis": "^3.2",
+        "spatie/laravel-medialibrary": "^11.14",
         "spatie/laravel-permission": "*",
         "tightenco/ziggy": "^2.4"
     },

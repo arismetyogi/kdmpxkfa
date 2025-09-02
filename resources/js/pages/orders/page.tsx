@@ -16,7 +16,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function IndexPage() {
+export default function OrdersIndexPage() {
     const products: OrderProducts[] = [
         {
             name: 'KF FACIAL TISSUE 200S ANIMAL',
@@ -208,7 +208,7 @@ export default function IndexPage() {
 
             {/* 🔹 Floating Cart Button */}
             <div className="fixed right-4 bottom-4 sm:right-6 sm:bottom-6">
-                <Link href={route('orders.cart')} className="relative">
+                <Link href={route('carts.index')} className="relative">
                     <button className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg sm:h-14 sm:w-14">
                         <ShoppingCart size={24} className="sm:size-8" />
                     </button>
