@@ -23,26 +23,29 @@ class CartController extends Controller
         );
     }
 
-    public function store(Request $request, Product $product, CartService $cartService)
+    public function store(Request $request, CartService $cartService)
     {
+//        dump('Product: ', $request->json()->get('productId'));
         $request->mergeIfMissing((['quantity' => 1]));
 
         $data = $request->validate([
             'quantity' => ['nullable', 'integer', 'min:1'],
         ]);
-        $cartService->addItemToCart($product, $data['quantity']);
+        $cartService->addItemToCart(Product::find($request['productId']), $data['quantity']);
 
         return back()->with('success', 'Item added to cart successfully.');
     }
 
-    public function update(Request $request, Product $product, CartService $cartService)
+    public function update(Request $request, CartService $cartService)
     {
+        dump($request->all());
         $request->validate([
             'quantity' => ['integer', 'min:1']
         ]);
 
         $quantity = $request->input('quantity');
-        $cartService->updateItemQuantity($product->id, $quantity);
+        $cartService->updateItemQuantity($request['product'], $quantity);
+
 
         return back()->with('success', 'Item quantity updated successfully.');
     }

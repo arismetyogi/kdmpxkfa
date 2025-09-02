@@ -9,7 +9,7 @@ class OrderController extends Controller
 {
     public function index()
     {
-        return Inertia::render('orders/page', []);
+        return Inertia::render('orders/index', []);
     }
 
     public function cart()

@@ -36,7 +36,7 @@ const mainNavItems: NavItem[] = [
 const rightNavItems: NavItem[] = [
     {
         title: 'Cart',
-        href: '/orders/cart',
+        href: '/carts',
         icon: ShoppingCart,
     },
     {

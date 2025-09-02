@@ -1,4 +1,3 @@
-import AppLayout from "@/layouts/app-layout";
 import { Head, Link } from "@inertiajs/react";
 import { useState, useEffect } from "react";
 import { type BreadcrumbItem, CartItem } from '@/types';
@@ -68,11 +67,11 @@ export default function Cart() {
                                 className="flex justify-between items-center border p-4 rounded-lg shadow-sm"
                             >
                                 <div className="flex items-center gap-4">
-                                    <img
-                                        src={item.image}
-                                        alt={item.name}
-                                        className="w-16 h-16 rounded-md object-cover"
-                                    />
+                                    {/*<img*/}
+                                    {/*    src={item.image}*/}
+                                    {/*    alt={item.name}*/}
+                                    {/*    className="w-16 h-16 rounded-md object-cover"*/}
+                                    {/*/>*/}
                                     <div>
                                         <h2 className="font-semibold">{item.name}</h2>
                                         <p className="text-sm text-gray-600">

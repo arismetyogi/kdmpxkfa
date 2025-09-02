@@ -68,7 +68,6 @@ return new class extends Migration
             // Indexes
             $table->index(['user_id', 'status']);
             $table->index(['transaction_number']);
-            $table->index(['payment_status']);
             $table->index(['created_at']);
         });
     }

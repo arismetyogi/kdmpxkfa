@@ -204,7 +204,7 @@ export default function PurchaseOrderPage() {
                         <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
                             Batal
                         </Button>
-                        <Link href={route('orders.history')}>
+                        <Link href={route('orders.products')}>
                             <Button>Ya, Simpan</Button>
                         </Link>
                     </DialogFooter>

@@ -91,6 +91,7 @@ export interface Product {
 }
 
 export interface OrderProducts {
+    id: number;
     name: string;
     description: string;
     category: string;

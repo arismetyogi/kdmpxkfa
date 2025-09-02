@@ -28,7 +28,7 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
         setUpdatingItems((prev) => new Set(prev).add(itemKey))
 
         router.put(
-            route('cart.update', { product: item.product_id }),
+            route('carts.update', { product: item.product_id }),
             {
                 quantity: newQuantity,
             },
@@ -45,7 +45,7 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
     }
 
     const removeItem = (item: CartItem) => {
-        router.delete(route('cart.delete', { product: item.product_id }))
+        router.delete(route('carts.delete', { product: item.product_id }))
     }
 
     const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -97,30 +97,6 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
         <HeaderLayout>
             <div className="container mx-auto px-4 py-8">
                 {/* Breadcrumb */}
-                <div className="mb-6">
-                    <nav className="flex" aria-label="Breadcrumb">
-                        <ol className="flex items-center space-x-4">
-                            <li>
-                                <Link href="/" className="text-gray-500 hover:text-gray-700">
-                                    Home
-                                </Link>
-                            </li>
-                            <li>
-                                <div className="flex items-center">
-                                    <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
-                                    <span className="ml-4 text-gray-500">Shopping Cart</span>
-                                </div>
-                            </li>
-                        </ol>
-                    </nav>
-                </div>
-
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                     {/* Cart Items */}
                     <div className="lg:col-span-2">
@@ -146,7 +122,7 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
                                                 <div className="ml-4 flex-1">
                                                     <h3 className="text-lg font-medium text-gray-800">
                                                         <Link
-                                                            href={route('product.detail', { slug: item.slug })}
+                                                            // href={route('product.detail', { slug: item.slug })}
                                                             className="hover:text-indigo-600"
                                                         >
                                                             {item.name}
@@ -219,7 +195,7 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
                                 Proceed to Checkout
                             </button>
                             <Link
-                                href="/"
+                                href={route('orders.products')}
                                 className="mt-3 block w-full rounded-md border border-gray-300 px-4 py-3 text-center text-gray-700 hover:bg-gray-50"
                             >
                                 Continue Shopping

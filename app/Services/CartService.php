@@ -66,12 +66,12 @@ class CartService
         Cookie::queue(self::COOKIE_NAME, json_encode($cartItems), self::COOKIE_LIFETIME);
     }
 
-    public function updateItemQuantity(int $productId, int $quantity, array $optionIds = []): void
+    public function updateItemQuantity(int $productId, int $quantity): void
     {
         if (Auth::check()) {
-            $this->updateItemQuantityToDatabase($productId, $quantity, $optionIds);
+            $this->updateItemQuantityToDatabase($productId, $quantity);
         } else {
-            $this->updateItemQuantityToCookies($productId, $quantity, $optionIds);
+            $this->updateItemQuantityToCookies($productId, $quantity);
         }
     }
 
@@ -94,28 +94,31 @@ class CartService
                     $cartItems = $this->getCartItemsFromCookies();
                 }
 
+
                 $productIds = collect($cartItems)->map(fn($item) => $item['product_id']);
 
                 $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
 
                 $cartItemData = [];
                 foreach ($cartItems as $cartItem) {
-                    $product = data_get($products, $cartItem['product_id']);
+                    $product = $products->get($cartItem['product_id']);
+
                     if (!$product) continue;
 
-                    $imageUrl = null;
-                    if (!$imageUrl) {
-                        $imageUrl = $product->getFirstMediaUrl('images', 'small');
-                    }
+//                    $imageUrl = null;
+//                    if (!$imageUrl) {
+//                        $imageUrl = $product->getFirstMediaUrl('images', 'small') ;
+//                    dump($imageUrl);
+//                    }
 
                     $cartItemData[] = [
-                        'id' => $cartItem['id'],
+                        'id' => $cartItem['id'] ?? null ,
                         'product_id' => $product->id,
                         'name' => $product->name,
                         'slug' => $product->slug,
                         'quantity' => $cartItem['quantity'],
-                        'price' => $cartItem['price'],
-                        'image' => $imageUrl ?: $product->getFirstMediaUrl('images', 'small'),
+                        'price' => $product->price,
+//                        'image' => $imageUrl,
                     ];
                 }
                 $this->cachedCartItems = $cartItemData;
@@ -143,7 +146,6 @@ class CartService
             $cartItem->user_id = $userId;
             $cartItem->product_id = $productId;
             $cartItem->quantity = $quantity;
-            $cartItem->price = $price;
         }
         $cartItem->save();
     }
@@ -168,13 +170,13 @@ class CartService
     public function getCartItemsFromDatabase(): array
     {
         $userId = Auth::id();
-        return Cart::where('user_id', $userId)->get()
+        return Cart::with('product')
+            ->where('user_id', $userId)->get()
             ->map(function ($item) {
                 return [
                     'id' => $item->id,
                     'product_id' => $item->product_id,
                     'quantity' => $item->quantity,
-                    'price' => $item->price,
                 ];
             })
             ->toArray();

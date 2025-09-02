@@ -19,6 +19,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function OrdersIndexPage() {
     const products: OrderProducts[] = [
         {
+            id: 1,
             name: 'KF FACIAL TISSUE 200S ANIMAL',
             price: 15000,
             inventory: 20,
@@ -30,6 +31,7 @@ export default function OrdersIndexPage() {
             description: 'Tisu wajah isi besar, lembut dan aman untuk kulit wajah sehari-hari..',
         },
         {
+            id: 2,
             name: 'FITUNO TAB SALUT (BLISTER 3X10 TAB)-BJN',
             price: 10000,
             inventory: 20,
@@ -41,6 +43,7 @@ export default function OrdersIndexPage() {
             description: 'Suplemen herbal untuk bantu tingkatkan daya tahan tubuh dan pemulihan stamina.',
         },
         {
+            id: 3,
             name: 'sample syrup',
             price: 15000,
             inventory: 0,
@@ -52,6 +55,7 @@ export default function OrdersIndexPage() {
             description: '',
         },
         {
+            id: 4,
             name: 'ENKASARI HERBAL 120ML',
             price: 25000,
             inventory: 20,
@@ -64,6 +68,7 @@ export default function OrdersIndexPage() {
                 'Cairan kumur herbal alami untuk menjaga kesehatan mulut dan tenggorokan. Formulanya membantu mengatasi bau mulut, sariawan, dan meredakan radang tenggorokan. Dengan bahan-bahan pilihan, memberikan sensasi segar dan nyaman setelah digunakan. Ideal untuk kebersihan mulut sehari-hari.',
         },
         {
+            id: 5,
             name: 'MAGASIDA TABLET (DUS 10 TAB)-BJN',
             price: 20000,
             inventory: 20,
@@ -76,6 +81,7 @@ export default function OrdersIndexPage() {
                 'Obat yang digunakan untuk mengatasi gangguan pada saluran pencernaan seperti gastritis, perut kembung, maag, dispepsia, hiatus hernia, tukak lambung dan tukak usus duabelas jari',
         },
         {
+            id: 6,
             name: 'BATUGIN ELIXIR BT 120 ML - BJN',
             price: 65000,
             inventory: 20,
@@ -104,23 +110,6 @@ export default function OrdersIndexPage() {
             setCart(JSON.parse(storedCart));
         }
     }, []);
-
-    // 🔹 Fungsi Add to Cart
-    const addToCart = (product: Omit<CartItem, 'quantity'>) => {
-        setCart((prevCart) => {
-            const existing = prevCart.find((item) => item.name === product.name);
-            let newCart;
-            if (existing) {
-                newCart = prevCart.map((item) => (item.name === product.name ? { ...item, quantity: item.quantity + 1 } : item));
-            } else {
-                newCart = [...prevCart, { ...product, quantity: 1 }];
-            }
-
-            // Simpan ke localStorage
-            localStorage.setItem('cart', JSON.stringify(newCart));
-            return newCart;
-        });
-    };
 
     // 🔹 filter berdasarkan search
     let filteredProducts = products.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
@@ -198,7 +187,7 @@ export default function OrdersIndexPage() {
                                 <div key={i}
                                      // onClick={() => setSelectedProduct(p)}
                                      className="cursor-pointer">
-                                    <ProductCard product={p} addToCart={addToCart} />
+                                    <ProductCard product={p}/>
                                 </div>
                             ))}
                         </div>
