@@ -7,7 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Services\CartService;
-use App\Services\TransactionService;
+use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -177,7 +177,7 @@ class CartController extends Controller
         ]);
     }
 
-    public function processPayment(Request $request, CartService $cartService, TransactionService $transactionService)
+    public function processPayment(Request $request, CartService $cartService, DigikopTransactionService $transactionService)
     {
         // Check if billing information exists in session
         if (! session('checkout.billing')) {
@@ -195,8 +195,6 @@ class CartController extends Controller
 
             // Validate credit limit using tenant_id
             $creditValidation = $transactionService->validateCreditLimit($user->tenant_id, $totalAmount);
-
-            dd($creditValidation);
 
             if (!$creditValidation['valid']) {
                 return back()->with('error', $creditValidation['message']);

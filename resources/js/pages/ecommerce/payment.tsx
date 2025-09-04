@@ -102,7 +102,7 @@ export default function PaymentPage({
                                     </div>
 
                                     <div className="flex items-center">
-                                        <input
+                                        <input disabled
                                             type="radio"
                                             id="va"
                                             name="payment_method"
