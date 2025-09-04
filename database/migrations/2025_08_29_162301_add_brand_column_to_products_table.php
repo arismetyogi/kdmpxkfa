@@ -37,7 +37,6 @@ return new class extends Migration
             $table->dropColumn('base_uom');
             $table->dropColumn('order_unit');
             $table->dropColumn('content');
-            $table->dropColumn('image_alt');
 
             $table->dropUnique(['sku', 'brand']);
         });

@@ -26,17 +26,17 @@ class SsoController extends Controller
             $ssoToken = $request->query('sso_token');
             $state = $request->query('state');
 
-            if (!$ssoToken) {
+            if (! $ssoToken) {
                 return redirect('/login?error=sso_failed&message=missing_token');
             }
 
-            if (!$state) {
+            if (! $state) {
                 return redirect('/login?error=sso_failed&message=missing_state');
             }
 
             $result = $this->ssoService->handleCallback([
                 'sso_token' => $ssoToken,
-                'state' => $state
+                'state' => $state,
             ]);
 
             $sessionCookie = cookie(
@@ -57,14 +57,15 @@ class SsoController extends Controller
             }
 
             $targetUrl = $request->query('redirect_to', '/dashboard');
+
             return redirect($targetUrl)
                 ->withCookie($sessionCookie)
                 ->with('user_data', $result['user']);
 
         } catch (\Exception $e) {
-            return redirect('/login?error=sso_failed&message=' . urlencode($e->getMessage()));
+            return redirect('/login?error=sso_failed&message='.urlencode($e->getMessage()));
         } catch (\Throwable $e) {
-            return redirect('/login?error=sso_failed&message=' . urlencode($e->getMessage()));
+            return redirect('/login?error=sso_failed&message='.urlencode($e->getMessage()));
         }
     }
 
@@ -111,7 +112,7 @@ class SsoController extends Controller
             $user = auth()->user();
 
             return $this->successResponse([
-                'user' => $user->load('profile')
+                'user' => $user->load('profile'),
             ]);
 
         } catch (\Exception $e) {

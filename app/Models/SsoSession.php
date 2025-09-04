@@ -39,7 +39,7 @@ class SsoSession extends Model
      */
     public function isActive(): bool
     {
-        return !$this->isExpired();
+        return ! $this->isExpired();
     }
 
     /**

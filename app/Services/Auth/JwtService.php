@@ -2,18 +2,21 @@
 
 namespace App\Services\Auth;
 
+use Firebase\JWT\BeforeValidException;
+use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use Firebase\JWT\ExpiredException;
 use Firebase\JWT\SignatureInvalidException;
-use Firebase\JWT\BeforeValidException;
 use Illuminate\Support\Facades\Cache;
 
 class JwtService
 {
     private string $secret;
+
     private string $algorithm;
+
     private int $ttl;
+
     private int $refreshTtl;
 
     public function __construct()
@@ -53,7 +56,7 @@ class JwtService
             'exp' => $now + $this->refreshTtl,
             'nbf' => $now,
             'jti' => uniqid(),
-            'type' => 'refresh'
+            'type' => 'refresh',
         ]);
 
         return JWT::encode($tokenPayload, $this->secret, $this->algorithm);
@@ -61,6 +64,7 @@ class JwtService
 
     /**
      * Decode and validate JWT token
+     *
      * @throws \Exception
      */
     public function validateToken(string $token): array
@@ -72,6 +76,7 @@ class JwtService
             }
 
             $decoded = JWT::decode($token, new Key($this->secret, $this->algorithm));
+
             return (array) $decoded;
 
         } catch (ExpiredException $e) {
@@ -81,7 +86,7 @@ class JwtService
         } catch (BeforeValidException $e) {
             throw new \Exception('Token is not yet valid');
         } catch (\Exception $e) {
-            throw new \Exception('Invalid token: ' . $e->getMessage());
+            throw new \Exception('Invalid token: '.$e->getMessage());
         }
     }
 
@@ -90,7 +95,7 @@ class JwtService
      */
     public function blacklistToken(string $token): void
     {
-        if (!config('jwt.blacklist_enabled')) {
+        if (! config('jwt.blacklist_enabled')) {
             return;
         }
 
@@ -114,7 +119,7 @@ class JwtService
      */
     private function isBlacklisted(string $token): bool
     {
-        if (!config('jwt.blacklist_enabled')) {
+        if (! config('jwt.blacklist_enabled')) {
             return false;
         }
 
@@ -130,6 +135,7 @@ class JwtService
 
     /**
      * Refresh token
+     *
      * @throws \Exception
      */
     public function refreshToken(string $refreshToken): array

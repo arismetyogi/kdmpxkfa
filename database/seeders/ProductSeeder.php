@@ -22,8 +22,9 @@ class ProductSeeder extends Seeder
     {
         $filePath = database_path('seeders/data/categories.csv');
 
-        if (!file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             $this->command->error("CSV file not found: $filePath");
+
             return;
         }
 
@@ -32,7 +33,7 @@ class ProductSeeder extends Seeder
 
         if (($handle = fopen($filePath, 'r')) !== false) {
             while (($row = fgetcsv($handle, 1000, ',')) !== false) {
-                if (!$header) {
+                if (! $header) {
                     $header = $row; // first row as header
                 } else {
                     $data[] = array_combine($header, $row);
@@ -57,8 +58,9 @@ class ProductSeeder extends Seeder
     {
         $filePath = database_path('seeders/data/products.csv');
 
-        if (!file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             $this->command->error("CSV file not found: $filePath");
+
             return;
         }
 
@@ -67,7 +69,7 @@ class ProductSeeder extends Seeder
 
         if (($handle = fopen($filePath, 'r')) !== false) {
             while (($row = fgetcsv($handle, 1000, ',')) !== false) {
-                if (!$header) {
+                if (! $header) {
                     $header = $row;
                 } else {
                     $data[] = array_combine($header, $row);
@@ -84,7 +86,7 @@ class ProductSeeder extends Seeder
             $name = $baseName;
             $counter = 1;
             while (Product::where('name', $name)->exists()) {
-                $name = $baseName . " ($counter)";
+                $name = $baseName." ($counter)";
                 $counter++;
             }
 
@@ -92,7 +94,7 @@ class ProductSeeder extends Seeder
             $slug = $baseSlug;
             $counter = 1;
             while (Product::where('slug', $slug)->exists()) {
-                $slug = $baseSlug . '-' . $counter;
+                $slug = $baseSlug.'-'.$counter;
                 $counter++;
             }
 

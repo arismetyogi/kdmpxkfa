@@ -14,7 +14,7 @@ trait HasApiReponse
         return response()->json([
             'success' => true,
             'message' => $message,
-            'data' => $data
+            'data' => $data,
         ], $code);
     }
 
@@ -25,10 +25,10 @@ trait HasApiReponse
     {
         $response = [
             'success' => false,
-            'message' => $message
+            'message' => $message,
         ];
 
-        if (!empty($errors)) {
+        if (! empty($errors)) {
             $response['errors'] = $errors;
         }
 

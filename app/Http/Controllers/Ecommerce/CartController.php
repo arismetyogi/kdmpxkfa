@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Ecommerce;
 
+use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Services\CartService;
+use App\Services\TransactionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -25,7 +27,7 @@ class CartController extends Controller
 
     public function store(Request $request, CartService $cartService)
     {
-//        dump('Product: ', $request->json()->get('productId'));
+        //        dump('Product: ', $request->json()->get('productId'));
         $request->mergeIfMissing((['quantity' => 1]));
 
         $data = $request->validate([
@@ -40,12 +42,11 @@ class CartController extends Controller
     {
         dump($request->all());
         $request->validate([
-            'quantity' => ['integer', 'min:1']
+            'quantity' => ['integer', 'min:1'],
         ]);
 
         $quantity = $request->input('quantity');
         $cartService->updateItemQuantity($request['product'], $quantity);
-
 
         return back()->with('success', 'Item quantity updated successfully.');
     }
@@ -91,31 +92,6 @@ class CartController extends Controller
             'billingData' => $billingData,
             'shippingData' => $shippingData,
             'sameAsBilling' => $sameAsBilling,
-        ]);
-    }
-
-    // Show payment form
-    public function paymentForm(CartService $cartService)
-    {
-        // Check if billing information exists in session
-        if (!session('checkout.billing')) {
-            return redirect()->route('checkout')->with('error', 'Please complete billing information first.');
-        }
-
-        //check cart empty
-        if ($cartService->getTotalQuantity() == 0) {
-            return redirect()->route('carts.index')->with('error', 'Your cart is empty.');
-        }
-
-        return Inertia::render('ecommerce/payment', [
-            'cartItems' => $cartService->getCartItems(),
-            'totalPrice' => $cartService->getTotalPrice(),
-            'totalQuantity' => $cartService->getTotalQuantity(),
-            'subtotal' => $cartService->getSubTotal(),
-            'shipping_amount' => 0,
-            'tax' => 0,
-            'billing' => session('checkout.billing'),
-            'shipping' => session('checkout.shipping'),
         ]);
     }
 
@@ -169,25 +145,63 @@ class CartController extends Controller
                 'state' => $validated['shipping_state'],
                 'zip' => $validated['shipping_zip'],
                 'country' => $validated['shipping_country'],
-            ]
+            ],
         ]);
 
         // Redirect to payment page
         return redirect()->route('payment');
     }
 
-    public function processPayment(Request $request, CartService $cartService)
+    // Show payment form
+    public function paymentForm(CartService $cartService)
     {
         // Check if billing information exists in session
-        if (!session('checkout.billing')) {
+        if (! session('checkout.billing')) {
+            return redirect()->route('checkout')->with('error', 'Please complete billing information first.');
+        }
+
+        // check cart empty
+        if ($cartService->getTotalQuantity() == 0) {
+            return redirect()->route('carts.index')->with('error', 'Your cart is empty.');
+        }
+
+        return Inertia::render('ecommerce/payment', [
+            'cartItems' => $cartService->getCartItems(),
+            'totalPrice' => $cartService->getTotalPrice(),
+            'totalQuantity' => $cartService->getTotalQuantity(),
+            'subtotal' => $cartService->getSubTotal(),
+            'shipping_amount' => 0,
+            'tax' => 0,
+            'billing' => session('checkout.billing'),
+            'shipping' => session('checkout.shipping'),
+        ]);
+    }
+
+    public function processPayment(Request $request, CartService $cartService, TransactionService $transactionService)
+    {
+        // Check if billing information exists in session
+        if (! session('checkout.billing')) {
             return redirect()->route('checkout')->with('error', 'Please complete billing information first.');
         }
 
         $request->validate([
-            'payment_method' => 'required|string|in:card,paypal,apple-pay,cod',
+            'payment_method' => 'required|string|in:va,cad',
         ]);
 
         try {
+            // Validate credit limit before processing payment
+            $user = auth()->user();
+            $totalAmount = $cartService->getTotalPrice();
+
+            // Validate credit limit using tenant_id
+            $creditValidation = $transactionService->validateCreditLimit($user->tenant_id, $totalAmount);
+
+            dd($creditValidation);
+
+            if (!$creditValidation['valid']) {
+                return back()->with('error', $creditValidation['message']);
+            }
+
             DB::beginTransaction();
 
             $billingData = session('checkout.billing');
@@ -200,32 +214,33 @@ class CartController extends Controller
 
             // Create the order
             $order = Order::create([
-                'order_number' => Order::generateTransactionNumber(),
+                'transaction_number' => Order::generateTransactionNumber(),
                 'user_id' => auth()->id(),
                 'tenant_id' => auth()->user()->tenant_id,
                 'source_of_fund' => 'pinjaman',
+                'account_no' => '', // This would need to be set based on your business logic
+                'account_bank' => '', // This would need to be set based on your business logic
+                'payment_type' => 'cad',
+                'payment_method' => $request->payment_method,
+                'va_number' => '', // This would need to be set based on your business logic
                 'status' => 'pending',
                 'subtotal' => $cartService->getSubTotal(),
                 'tax_amount' => $cartService->getSubTotal() * 0.11, // You can calculate tax based on your business logic
                 'shipping_amount' => 0, // You can calculate shipping based on your business logic
                 'discount_amount' => 0,
                 'total_price' => $cartService->getSubTotal() * 1.11,
-                'billing_first_name' => $billingData['first_name'],
-                'billing_last_name' => $billingData['last_name'],
+                'billing_name' => $billingData['first_name'] . ' ' . $billingData['last_name'],
                 'billing_email' => $billingData['email'],
                 'billing_phone' => $billingData['phone'],
                 'billing_address' => $billingData['address'],
                 'billing_city' => $billingData['city'],
                 'billing_state' => $billingData['state'],
                 'billing_zip' => $billingData['zip'],
-                'billing_country' => $billingData['country'],
-                'shipping_first_name' => $shippingData['first_name'],
-                'shipping_last_name' => $shippingData['last_name'],
+                'shipping_name' => $shippingData['first_name'] . ' ' . $shippingData['last_name'],
                 'shipping_address' => $shippingData['address'],
                 'shipping_city' => $shippingData['city'],
                 'shipping_state' => $shippingData['state'],
                 'shipping_zip' => $shippingData['zip'],
-                'shipping_country' => $shippingData['country'],
                 'customer_notes' => $billingData['notes'] ?? null,
             ]);
 
@@ -233,7 +248,7 @@ class CartController extends Controller
             foreach ($cartItems as $cartItem) {
                 $product = Product::find($cartItem['product_id']);
 
-                if (!$product) {
+                if (! $product) {
                     continue;
                 }
 
@@ -263,13 +278,14 @@ class CartController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error('Order creation failed: ' . $e->getMessage());
+            Log::error('Order creation failed: '.$e->getMessage());
 
             return back()->with('error', 'Failed to create order. Please try again.');
         } catch (\Throwable $e) {
             DB::rollBack();
 
-            Log::error('Order creation failed: ' . $e->getMessage());
+            Log::error('Order creation failed: '.$e->getMessage());
+
             return back()->with('error', 'Failed to create order. Please try again.');
         }
     }
@@ -284,23 +300,21 @@ class CartController extends Controller
         return Inertia::render('ecommerce/order-completed', [
             'order' => [
                 'id' => $order->id,
-                'order_number' => $order->order_number,
+                'order_number' => $order->transaction_number,
                 'status' => $order->status,
-                'payment_status' => $order->payment_status,
+                'payment_status' => $order->payment_method,
                 'total_price' => $order->total_price,
-                'billing_full_name' => $order->billing_full_name,
+                'billing_full_name' => $order->billing_name,
                 'billing_email' => $order->billing_email,
                 'billing_address' => $order->billing_address,
                 'billing_city' => $order->billing_city,
                 'billing_state' => $order->billing_state,
                 'billing_zip' => $order->billing_zip,
-                'billing_country' => $order->billing_country,
-                'shipping_full_name' => $order->shipping_full_name,
+                'shipping_full_name' => $order->shipping_name,
                 'shipping_address' => $order->shipping_address,
                 'shipping_city' => $order->shipping_city,
                 'shipping_state' => $order->shipping_state,
                 'shipping_zip' => $order->shipping_zip,
-                'shipping_country' => $order->shipping_country,
                 'created_at' => $order->created_at->format('M d, Y H:i'),
                 'order_items' => $order->orderItems->map(function ($item) {
                     return [

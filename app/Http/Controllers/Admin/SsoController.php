@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Services\Auth\SsoService;
 use App\Traits\HasApiReponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class SsoController extends Controller
 {
@@ -15,9 +14,7 @@ class SsoController extends Controller
 
     public function __construct(
         private readonly SsoService $ssoService
-    )
-    {
-    }
+    ) {}
 
     /**
      * Handle SSO callback from Digikoperasi
@@ -28,18 +25,17 @@ class SsoController extends Controller
             $ssoToken = $request->query('sso_token');
             $state = $request->query('state');
 
-
-            if (!$ssoToken) {
+            if (! $ssoToken) {
                 throw new \Exception('Missing sso_token parameter');
             }
 
-            if (!$state) {
+            if (! $state) {
                 throw new \Exception('Missing state parameter');
             }
 
             $result = $this->ssoService->handleCallback([
                 'sso_token' => $ssoToken,
-                'state' => $state
+                'state' => $state,
             ]);
 
             if ($result['requires_onboarding']) {
@@ -98,7 +94,7 @@ class SsoController extends Controller
             $user = auth()->user();
 
             return $this->successResponse([
-                'user' => $user->load('profile')
+                'user' => $user->load('profile'),
             ]);
 
         } catch (\Exception $e) {

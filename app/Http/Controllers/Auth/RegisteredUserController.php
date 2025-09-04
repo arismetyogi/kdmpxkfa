@@ -50,7 +50,8 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        $dashRoute = !$user->hasRole('user') ? 'admin.dashboard' : 'dashboard';
+        $dashRoute = ! $user->hasRole('user') ? 'admin.dashboard' : 'dashboard';
+
         return redirect()->intended(route($dashRoute, absolute: false));
     }
 }

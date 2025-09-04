@@ -12,11 +12,11 @@ class ImageUploader
     public static function uploadImage(UploadedFile $image, string $folder, int $maxWidth = 1200): string
     {
         try {
-            $filename = uniqid() . '_' . time() . '.webp';
+            $filename = uniqid().'_'.time().'.webp';
             $folder = trim($folder, '/');
             $storagePath = "uploads/{$folder}/{$filename}";
 
-            $manager = new ImageManager(new Driver());
+            $manager = new ImageManager(new Driver);
             $image = $manager->read($image);
 
             if ($image->width() > $maxWidth) {
@@ -27,9 +27,11 @@ class ImageUploader
             $encodedImage = $image->toWebp($webQuality);
 
             Storage::disk('public')->put($storagePath, $encodedImage->toString());
+
             return str_replace('public/', '/storage/', $storagePath);
         } catch (\Exception $e) {
             report($e);
+
             return '';
         }
     }
@@ -38,7 +40,7 @@ class ImageUploader
     {
         try {
             if ($path) {
-                if (!Storage::disk('public')->exists($path)) {
+                if (! Storage::disk('public')->exists($path)) {
                     return false;
                 }
                 Storage::disk('public')->delete($path);
@@ -47,6 +49,7 @@ class ImageUploader
             return true;
         } catch (\Exception $e) {
             report($e);
+
             return false;
         }
     }

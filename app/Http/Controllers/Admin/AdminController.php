@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
@@ -42,6 +43,7 @@ class AdminController extends Controller
 
         $roles = Role::with('permissions')->get()->map(function ($role) {
             $role->users_count = $role->users()->count();
+
             return $role;
         });
 
@@ -69,7 +71,7 @@ class AdminController extends Controller
 
         $role = Role::create(['name' => $validated['name']]);
 
-        if (!empty($validated['permissions'])) {
+        if (! empty($validated['permissions'])) {
             $permissions = Permission::whereIn('id', $validated['permissions'])->get();
             $role->syncPermissions($permissions);
         }

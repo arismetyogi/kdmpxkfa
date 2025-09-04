@@ -12,7 +12,7 @@ return [
 
     'secret' => env('SSO_DSN_SECRET'),
 
-    'algorithm' => env('SSO_DIGIKOPERASI_ALGORITHM','HS256'),
+    'algorithm' => env('SSO_DIGIKOPERASI_ALGORITHM', 'HS256'),
 
     'ttl' => env('SSO_TOKEN_EXPIRY', 3600), // 1 hour
 

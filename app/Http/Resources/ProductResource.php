@@ -35,7 +35,7 @@ class ProductResource extends JsonResource
             'brand' => $this->brand,
             'image' => $this->getFirstMediaUrl('images'), // 👈 provide preview URL
             'is_active' => $this->is_active,
-            'is_featured' => $this->is_featured
+            'is_featured' => $this->is_featured,
         ];
     }
 }

@@ -9,17 +9,42 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Order extends Model
 {
     protected $fillable = [
-        'order_number',
+        'transaction_number',
         'user_id',
+        'tenant_id',
         'status',
+        'source_of_fund',
+        'account_no',
+        'account_bank',
+        'payment_type',
+        'payment_method',
+        'va_number',
         'subtotal',
         'tax_amount',
         'shipping_amount',
         'discount_amount',
         'total_price',
-        'source_of_fund',
-        'tenant_id',
+        'billing_name',
+        'billing_email',
+        'billing_phone',
+        'billing_address',
+        'billing_city',
+        'billing_state',
+        'billing_zip',
+        'shipping_name',
+        'shipping_address',
+        'shipping_city',
+        'shipping_state',
+        'shipping_zip',
+        'shipping_method',
+        'tracking_number',
+        'estimated_delivery',
+        'shipped_at',
+        'delivered_at',
+        'customer_notes',
+        'admin_notes',
     ];
+
     protected $casts = [
         'subtotal' => 'decimal:2',
         'tax_amount' => 'decimal:2',
@@ -51,4 +76,15 @@ class Order extends Model
         return "{$prefix}{$apotekCode}{$date}{$random}";
     }
 
+    // Accessor for billing full name (assuming it's the same as billing_name)
+    public function getBillingFullNameAttribute(): string
+    {
+        return $this->billing_name;
+    }
+
+    // Accessor for shipping full name (assuming it's the same as shipping_name)
+    public function getShippingFullNameAttribute(): string
+    {
+        return $this->shipping_name ?? $this->billing_name;
+    }
 }

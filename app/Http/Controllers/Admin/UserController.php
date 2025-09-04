@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -14,14 +15,13 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-
     /**
      * Display the users management page.
      */
     public function index(Request $request)
     {
         // Check if user has permission to view users
-        if (!$request->user()->can('view users')) {
+        if (! $request->user()->can('view users')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -33,7 +33,7 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        if (!$request->user()->can('create users')) {
+        if (! $request->user()->can('create users')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -56,11 +56,11 @@ class UserController extends Controller
             'name' => $validated['name'],
             'username' => $validated['username'],
             'email' => $validated['email'],
-            'password' => Hash::make($validated['password'])
+            'password' => Hash::make($validated['password']),
         ]);
 
         Log::info($validated);
-        if (!empty($validated['roles'])) {
+        if (! empty($validated['roles'])) {
             $user->syncRoles($validated['roles']);
         }
 
@@ -69,7 +69,7 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        if (!$request->user()->can('update users')) {
+        if (! $request->user()->can('update users')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -87,12 +87,12 @@ class UserController extends Controller
             'roles.*' => ['exists:roles,id'],
         ]);
 
-        if (!empty($validated['[password]'])) {
+        if (! empty($validated['[password]'])) {
             $user->update([
                 'name' => $validated['name'],
                 'username' => $validated['username'],
                 'email' => $validated['email'],
-                'password' => Hash::make($validated['password'])
+                'password' => Hash::make($validated['password']),
             ]);
         } else {
             $user->update([
@@ -102,7 +102,7 @@ class UserController extends Controller
             ]);
         }
 
-        if (!empty($validated['roles'])) {
+        if (! empty($validated['roles'])) {
             $user->syncRoles($validated['roles']);
         }
 
@@ -112,7 +112,7 @@ class UserController extends Controller
     public function destroy(Request $request, User $user)
     {
         // Check if user has permission to delete roles
-        if (!$request->user()->can('delete users')) {
+        if (! $request->user()->can('delete users')) {
             abort(403, 'Unauthorized action.');
         }
 

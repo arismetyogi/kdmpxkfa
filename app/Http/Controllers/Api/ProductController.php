@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Traits\HasApiReponse;
 use Illuminate\Http\Request;
-use function Pest\Laravel\json;
 
 class ProductController extends Controller
 {
@@ -39,6 +38,6 @@ class ProductController extends Controller
             ];
         }
 
-            return $this->successResponse($dummyProducts);
+        return $this->successResponse($dummyProducts);
     }
 }

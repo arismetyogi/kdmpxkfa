@@ -32,8 +32,10 @@ class OnboardingController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
-            'phone'       => ['nullable', 'string', 'max:20'],
+            'email' => 'required|string|email|max:255',
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'tenant_id' => ['required', 'string', 'max:255'],
             'tenant_name' => ['nullable', 'string', 'max:255'],
         ]);
 
@@ -41,9 +43,11 @@ class OnboardingController extends Controller
 
         // Update user profile
         $user->update([
+            'email' => $validated['email'],
             'name' => $validated['name'],
             'onboarding_completed' => true,
             'phone' => $validated['phone'],
+            'tenant_id' => $validated['tenant_id'],
             'tenant_name' => $validated['tenant_name'],
         ]);
 

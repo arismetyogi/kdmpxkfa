@@ -3,7 +3,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { History, Key, LayoutGrid, Package, Settings, Shield, ShoppingCart, Users } from 'lucide-react';
+import { History, Key, LayoutGrid, Package, Settings, Shield, ShoppingCart, Tag, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 export function AppSidebar() {
@@ -25,7 +25,7 @@ export function AppSidebar() {
               {
                   title: 'Category Management',
                   href: '/admin/categories',
-                  icon: Package,
+                  icon: Tag,
               },
               {
                   title: 'Product Management',
@@ -54,15 +54,10 @@ export function AppSidebar() {
     const orderManagementNavItems: NavItem[] = isAdminOrManager?
         [
             {
-                title: 'Pending Orders',
+                title: 'Orders',
                 href: '/admin/orders',
                 icon: ShoppingCart,
             },
-            {
-                title: 'Completed Orders',
-                href: '#',
-                icon: ShoppingCart,
-            }
         ] : [];
 
     const adminNavItems: NavItem[] = isAdminOrManager

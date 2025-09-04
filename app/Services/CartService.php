@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\Log;
 class CartService
 {
     private ?array $cachedCartItems = null;
+
     private const COOKIE_NAME = 'cartItems';
+
     protected const COOKIE_LIFETIME = 60 * 24 * 365;
 
     public function addItemToCart(Product $product, int $quantity = 1): void
@@ -23,7 +25,7 @@ class CartService
             // save to the database
             $this->saveItemToDatabase($product->id, $quantity, $price);
         } else {
-            //save to the cookie
+            // save to the cookie
             $this->saveItemToCookies($product->id, $quantity, $price);
         }
     }
@@ -94,7 +96,6 @@ class CartService
                     $cartItems = $this->getCartItemsFromCookies();
                 }
 
-
                 $productIds = collect($cartItems)->map(fn($item) => $item['product_id']);
 
                 $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
@@ -103,31 +104,34 @@ class CartService
                 foreach ($cartItems as $cartItem) {
                     $product = $products->get($cartItem['product_id']);
 
-                    if (!$product) continue;
+                    if (!$product) {
+                        continue;
+                    }
 
-//                    $imageUrl = null;
-//                    if (!$imageUrl) {
-//                        $imageUrl = $product->getFirstMediaUrl('images', 'small') ;
-//                    dump($imageUrl);
-//                    }
+                    $imageUrl = null;
+                    if (!$imageUrl) {
+                        $imageUrl = $product->getFirstMediaUrl('images');
+                    }
 
                     $cartItemData[] = [
-                        'id' => $cartItem['id'] ?? null ,
+                        'id' => $cartItem['id'] ?? null,
                         'product_id' => $product->id,
                         'name' => $product->name,
                         'slug' => $product->slug,
                         'quantity' => $cartItem['quantity'],
                         'price' => $product->price,
-//                        'image' => $imageUrl,
+                        'image' => $imageUrl,
                     ];
                 }
                 $this->cachedCartItems = $cartItemData;
             }
+
             return $this->cachedCartItems;
         } catch (\Exception $e) {
-            //throw $th;
+            // throw $th;
             Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
         }
+
         return [];
     }
 
@@ -142,7 +146,7 @@ class CartService
         if ($cartItem) {
             $cartItem->quantity = $cartItem->quantity + $quantity;
         } else {
-            $cartItem = new Cart();
+            $cartItem = new Cart;
             $cartItem->user_id = $userId;
             $cartItem->product_id = $productId;
             $cartItem->quantity = $quantity;
@@ -170,6 +174,7 @@ class CartService
     public function getCartItemsFromDatabase(): array
     {
         $userId = Auth::id();
+
         return Cart::with('product')
             ->where('user_id', $userId)->get()
             ->map(function ($item) {
@@ -208,7 +213,7 @@ class CartService
                 $existingItem->quantity = $cartItem['quantity'];
                 $existingItem->save();
             } else {
-                $newItem = new Cart();
+                $newItem = new Cart;
                 $newItem->user_id = $userId;
                 $newItem->product_id = $cartItem['product_id'];
                 $newItem->quantity = $cartItem['quantity'];
@@ -227,6 +232,7 @@ class CartService
         foreach ($this->getCartItems() as $cartItem) {
             $totalQuantity += $cartItem['quantity'];
         }
+
         return $totalQuantity;
     }
 
@@ -236,6 +242,7 @@ class CartService
         foreach ($this->getCartItems() as $cartItem) {
             $totalPrice += $cartItem['price'] * $cartItem['quantity'];
         }
+
         return $totalPrice;
     }
 
@@ -245,6 +252,7 @@ class CartService
         foreach ($this->getCartItems() as $cartItem) {
             $totalPrice += $cartItem['price'] * $cartItem['quantity'];
         }
+
         return $totalPrice;
     }
 
@@ -256,6 +264,7 @@ class CartService
         } else {
             $cartCount = count($this->getCartItemsFromCookies());
         }
+
         return $cartCount;
     }
 }

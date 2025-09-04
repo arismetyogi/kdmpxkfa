@@ -16,9 +16,9 @@ class CategoryResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'main_category'=> $this->main_category,
-            'subcategory1'=> $this->subcategory1,
-            'subcategory2'=> $this->subcategory2,
-            ];
+            'main_category' => $this->main_category,
+            'subcategory1' => $this->subcategory1,
+            'subcategory2' => $this->subcategory2,
+        ];
     }
 }

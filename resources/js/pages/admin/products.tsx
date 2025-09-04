@@ -25,9 +25,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface AdminProductProps {
     products: Paginated<Product>;
     categories: Category[];
+    allProducts: number;
+    activeProducts: number;
 }
 
-export default function AdminProducts({ products, categories }: AdminProductProps) {
+export default function AdminProducts({ products, categories, allProducts, activeProducts }: AdminProductProps) {
     // Modal states
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -114,8 +116,6 @@ export default function AdminProducts({ products, categories }: AdminProductProp
             });
         }
     };
-    const totalActive = products.data.filter((product) => product.is_active).length;
-    const totalInactive = products.data.filter((product) => !product.is_active).length;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -137,7 +137,7 @@ export default function AdminProducts({ products, categories }: AdminProductProp
                             <CardTitle className="text-sm font-medium">Total Products</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{products.data.length}</div>
+                            <div className="text-2xl font-bold">{allProducts}</div>
                             <p className="text-xs text-gray-600">Total products in the system</p>
                         </CardContent>
                     </Card>
@@ -146,7 +146,7 @@ export default function AdminProducts({ products, categories }: AdminProductProp
                             <CardTitle className="text-sm font-medium">Active Products</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{totalActive}</div>
+                            <div className="text-2xl font-bold">{activeProducts}</div>
                             <p className="text-xs text-gray-600">Total active products</p>
                         </CardContent>
                     </Card>
@@ -156,7 +156,7 @@ export default function AdminProducts({ products, categories }: AdminProductProp
                             <PackageX className="h-4 w-4 text-red-300" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{totalInactive}</div>
+                            <div className="text-2xl font-bold">{allProducts - activeProducts}</div>
                             <p className="text-xs text-gray-600">Total inactive products</p>
                         </CardContent>
                     </Card>
@@ -182,8 +182,8 @@ export default function AdminProducts({ products, categories }: AdminProductProp
                             </TableHeader>
                             <TableBody>
                                 {products.data.map((product) => (
-                                    <TableRow key={product.id} onClick={() => handleShowProduct(product)} className='cursor-pointer'>
-                                        <TableCell>
+                                    <TableRow key={product.id}>
+                                        <TableCell onClick={() => handleShowProduct(product)} className='cursor-pointer'>
                                             {product.image ? (
                                                 <img src={product.image} alt={product.name} className="h-16 w-16 rounded-lg object-cover" />
                                             ) : (
@@ -192,10 +192,10 @@ export default function AdminProducts({ products, categories }: AdminProductProp
                                                 </div>
                                             )}
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell onClick={() => handleShowProduct(product)} className='cursor-pointer'>
                                             <span className="font-medium">{product.name}</span>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell onClick={() => handleShowProduct(product)} className='cursor-pointer'>
                                             <span className="text-sm text-gray-600">{product.sku}</span>
                                         </TableCell>
                                         <TableCell>

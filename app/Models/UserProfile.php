@@ -34,7 +34,7 @@ class UserProfile extends Model
 
     public function getFullNameAttribute(): string
     {
-        return $this->first_name . ' ' . $this->last_name;
+        return $this->first_name.' '.$this->last_name;
     }
 
     public function getFullAddressAttribute(): string
@@ -43,7 +43,7 @@ class UserProfile extends Model
             $this->address,
             $this->city,
             $this->postal_code,
-            $this->country
+            $this->country,
         ]);
 
         return implode(', ', $parts);

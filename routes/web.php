@@ -1,15 +1,14 @@
 <?php
 
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\SsoController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\OnboardingController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\SsoController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\Ecommerce\CartController;
+use App\Http\Controllers\Ecommerce\OrderController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use Spatie\Permission\Models\Role;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -29,10 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
-    Route::get('/orders/products', [OrderController::class , 'index'])->name('orders.products');
-//    Route::get('/orders/cart', [OrderController::class , 'cart'])->name('orders.cart');
-//    Route::get('/orders/po', [OrderController::class , 'po'])->name('orders.po');
-//    Route::get('/orders/history', [OrderController::class , 'history'])->name('orders.history');
+    Route::get('/orders/products', [OrderController::class, 'index'])->name('orders.products');
 
     Route::resource('carts', CartController::class);
     Route::get('/checkout', [CartController::class, 'checkoutForm'])->name('checkout');
@@ -40,10 +36,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/checkout/process', [CartController::class, 'processCheckout'])->name('checkout.process');
     Route::post('/payment/process', [CartController::class, 'processPayment'])->name('payment.process');
     Route::get('/order-complete/{order}', [CartController::class, 'orderComplete'])->name('order.complete');
-
-
-//    Route::get('penerimaan', [PenerimaanController::class , 'index'])->name('penerimaan');
-//    Route::get('penerimaan/history', [PenerimaanController::class , 'create'])->name('history');
 
     // Admin routes with role-based access
     Route::middleware(['role:admins|super-admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -62,13 +54,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/', [AdminController::class, 'storePermission'])->name('store');
         });
         // User management routes with explicit model binding
-        Route::resource('users',UserController::class);
+        Route::resource('users', UserController::class);
 
         // Product management routes with explicit model binding
-        Route::resource('products',ProductController::class);
-        
+        Route::resource('products', ProductController::class);
+
         // Category management routes
-        Route::resource('categories', App\Http\Controllers\CategoryController::class);
+        Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
     });
 
     // Alternative: Use permission-based middleware
@@ -86,5 +78,5 @@ Route::bind('permission', function ($value) {
     return \Spatie\Permission\Models\Permission::findOrFail($value);
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';

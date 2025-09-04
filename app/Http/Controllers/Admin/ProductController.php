@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Http\Resources\PaginatedResourceResponse;
 use App\Http\Resources\ProductResource;
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -17,14 +17,13 @@ use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 
 class ProductController extends Controller
 {
-
     /**
      * Display the products management page.
      */
     public function index(Request $request)
     {
         // Check if user has permission to view products
-        if (!$request->user()->can('view products')) {
+        if (! $request->user()->can('view products')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -33,16 +32,18 @@ class ProductController extends Controller
 
         $paginatedProducts = $products->latest()->paginate(15);
 
-//        dd($paginatedProducts);
+        //        dd($paginatedProducts);
         return Inertia::render('admin/products', [
             'products' => PaginatedResourceResponse::make($paginatedProducts, ProductResource::class),
+            'allProducts' => Product::all()->count(),
+            'activeProducts' => Product::active()->get()->count(),
             'categories' => Category::all(),
         ]);
     }
 
     public function store(Request $request)
     {
-        if (!$request->user()->can('create products')) {
+        if (! $request->user()->can('create products')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -112,7 +113,7 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        if (!$request->user()->can('update products')) {
+        if (! $request->user()->can('update products')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -137,7 +138,7 @@ class ProductController extends Controller
         ]);
 
         $slug = Str::slug($validated['name']);
-        $productExistBySlug = Product::where('slug', $slug)->where('name', '!=', $product->name )->first();
+        $productExistBySlug = Product::where('slug', $slug)->where('name', '!=', $product->name)->first();
 
         if ($productExistBySlug) {
             return back()->withErrors([
@@ -179,7 +180,7 @@ class ProductController extends Controller
     public function destroy(Request $request, Product $product)
     {
         // Check if user has permission to delete roles
-        if (!$request->user()->can('delete products')) {
+        if (! $request->user()->can('delete products')) {
             abort(403, 'Unauthorized action.');
         }
 
