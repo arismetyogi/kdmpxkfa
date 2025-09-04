@@ -16,13 +16,13 @@ interface ProductFormModalProps {
 }
 
 export default function ProductFormModal({ isOpen, onClose, onSubmit, product, categories }: ProductFormModalProps) {
-    const [formData, setFormData] = useState<Partial<Product> & { image?: string | File }>({
+    const [formData, setFormData] = useState<Omit<Partial<Product>, 'category_id'> & {category_id?: string; image?: string | File }>({
         name: '',
         sku: '',
         description: '',
         dosage: [],
         pharmacology: '',
-        category_id: undefined,
+        category_id: '',
         base_uom: '',
         order_unit: '',
         content: 1,
@@ -42,7 +42,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
         if (product) {
             setFormData({
                 ...product,
-                category_id: product.category_id ?? undefined, // ensure numeric or undefined
+                category_id: product.category_id?.toString() ?? undefined, // ensure string or undefined
                 image: product.image ?? '', // keep string (URL) from MediaLibrary);
             });
             // Set image preview if product has an image
@@ -56,7 +56,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                 description: '',
                 dosage: [],
                 pharmacology: '',
-                category_id: undefined,
+                category_id: '',
                 base_uom: '',
                 order_unit: '',
                 content: 1,
@@ -76,7 +76,10 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (onSubmit) {
-            onSubmit(formData);
+            onSubmit({
+                ...formData,
+                category_id: formData.category_id ? parseInt(formData.category_id) : undefined,
+            });
         }
         onClose();
     };
@@ -120,7 +123,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
     const handleCategoryChange = (value: string) => {
         setFormData((prev) => ({
             ...prev,
-            category_id: value ? parseInt(value) : undefined,
+            category_id: value,
         }));
     };
 
@@ -169,7 +172,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                         </div>
                         <div>
                             <Label htmlFor="category_id">Category</Label>
-                            <Select value={formData.category_id?.toString() || ''} onValueChange={handleCategoryChange}>
+                            <Select value={formData.category_id} onValueChange={handleCategoryChange}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select a category" />
                                 </SelectTrigger>
