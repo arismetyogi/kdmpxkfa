@@ -10,12 +10,14 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, HasRoles, HasUuid, Notifiable;
+    use HasApiTokens, HasFactory, HasRoles, HasUuid, Notifiable, InteractsWithMedia;
 
     /**
      * The attributes that are mass assignable.
@@ -64,13 +66,21 @@ class User extends Authenticatable
         return $this->hasOne(UserProfile::class);
     }
 
-    public function ssoSessions(): HasMany
-    {
-        return $this->hasMany(SsoSession::class);
-    }
-
     public function apotek(): BelongsTo
     {
         return $this->belongsTo(Apotek::class);
     }
+
+    public function scopeAdmin($query)
+    {
+        return $query->whereDoesntHave('roles', function ($q) {
+            $q->where('name', 'user');
+        });
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
 }

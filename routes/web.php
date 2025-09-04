@@ -53,7 +53,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/', [AdminController::class, 'permissions'])->name('index');
             Route::post('/', [AdminController::class, 'storePermission'])->name('store');
         });
-        // User management routes with explicit model binding
+
+        Route::resource('admins', AdminController::class);
         Route::resource('users', UserController::class);
 
         // Product management routes with explicit model binding

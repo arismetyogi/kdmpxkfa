@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PaginatedResourceResponse;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -25,8 +27,17 @@ class UserController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        $users = User::query()->whereDoesntHave('roles', function ($q) {
+            $q->where('name', '!=', 'user');
+        });
+
+        $paginatedUsers = $users->latest()->paginate(15);
+
         return Inertia::render('admin/users', [
-            'users' => \App\Models\User::with('roles', 'permissions')->get(),
+            'users' => PaginatedResourceResponse::make($paginatedUsers, UserResource::class),
+            'allUsers' => User::all()->count(),
+            'adminUsers' => User::admin()->get()->count(),
+            'activeUsers' => User::active()->get()->count(),
             'roles' => Role::all(),
         ]);
     }

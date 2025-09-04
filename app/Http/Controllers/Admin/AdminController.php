@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PaginatedResourceResponse;
+use App\Http\Resources\UserResource;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -11,6 +14,27 @@ use Spatie\Permission\Models\Role;
 
 class AdminController extends Controller
 {
+    public function index(Request $request)
+    {
+        // Check if user has permission to view users
+        if (! $request->user()->can('view users')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $admins = User::query()->whereDoesntHave('roles', function ($q) {
+            $q->where('name', 'user');
+        });
+
+        $paginatedAdmins = $admins->latest()->paginate(15);
+
+        return Inertia::render('admin/admins', [
+            'admins' => PaginatedResourceResponse::make($paginatedAdmins, UserResource::class),
+            'allAdmins' => $admins->count(),
+            'adminAdmins' => $admins->get()->count(),
+            'activeAdmins' => $admins->active()->get()->count(),
+            'roles' => Role::where('name', '!=', 'user')->get(),
+        ]);
+    }
     /**
      * Display the admin dashboard.
      */
