@@ -9,6 +9,7 @@ import { BreadcrumbItem, Category, Paginated, Product } from '@/types';
 import { Link, router } from '@inertiajs/react';
 import { Edit, PackageX, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import ProductShowModal from "@/components/Admin/ProductShowModal";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -32,6 +33,12 @@ export default function AdminProducts({ products, categories }: AdminProductProp
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [isShowModalOpen, setIsShowModalOpen] = useState(false);
+
+    const handleShowProduct = (product: Product) => {
+        setSelectedProduct(product);
+        setIsShowModalOpen(true)
+    }
 
     const handleCreateProduct = () => {
         setSelectedProduct(null);
@@ -49,6 +56,7 @@ export default function AdminProducts({ products, categories }: AdminProductProp
     };
 
     const closeModals = () => {
+        setIsShowModalOpen(false);
         setIsCreateModalOpen(false);
         setIsEditModalOpen(false);
         setIsDeleteModalOpen(false);
@@ -174,7 +182,7 @@ export default function AdminProducts({ products, categories }: AdminProductProp
                             </TableHeader>
                             <TableBody>
                                 {products.data.map((product) => (
-                                    <TableRow key={product.id}>
+                                    <TableRow key={product.id} onClick={() => handleShowProduct(product)} className='cursor-pointer'>
                                         <TableCell>
                                             {product.image ? (
                                                 <img src={product.image} alt={product.name} className="h-16 w-16 rounded-lg object-cover" />
@@ -245,6 +253,13 @@ export default function AdminProducts({ products, categories }: AdminProductProp
                     ))}
                 </div>
             </div>
+
+            {/* Show Product Modal */}
+            <ProductShowModal
+                isOpen={isShowModalOpen}
+                onClose={closeModals}
+                product={selectedProduct}
+            />
 
             {/* Create Product Modal */}
             <ProductFormModal

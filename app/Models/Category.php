@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Category extends Model
 {
     protected $fillable = [
+        'id', // Make ID fillable as requested
         'main_category',
         'subcategory1',
         'subcategory2',

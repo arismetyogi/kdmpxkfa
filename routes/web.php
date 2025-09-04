@@ -66,6 +66,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Product management routes with explicit model binding
         Route::resource('products',ProductController::class);
+        
+        // Category management routes
+        Route::resource('categories', App\Http\Controllers\CategoryController::class);
     });
 
     // Alternative: Use permission-based middleware
