@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('base_uom');
             $table->string('order_unit');
             $table->integer('content');
-            $table->string('image_alt')->nullable();
 
             $table->unique(['sku', 'brand']);
         });

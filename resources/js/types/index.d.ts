@@ -69,11 +69,12 @@ export interface Category {
 
 export interface Product {
     id: number;
+    sku: string;
     name: string;
+    slug: string;
     description: string;
     dosage: Array<string>;
     pharmacology: string;
-    sku: string;
     category_id?: number;
     category?: Category;
     base_uom: string;
@@ -81,14 +82,36 @@ export interface Product {
     content: number;
     price: number;
     weight: number;
-    length: number;
-    width: number;
-    height: number;
-    image: string;
-    image_alt: string;
+    length?: number;
+    width?: number;
+    height?: number;
+    brand?: string;
+    image?: any;
     is_active: boolean;
-    brand: string;
+    is_featured: boolean;
 }
+
+export interface Order {
+    transaction_number: string;
+    tenant_id: string; // id koperasi
+    status: string;
+    merchant_id: string;
+    merchant_name: string;
+    total_nominal: number;
+    is_for_sale: boolean;
+    account_no: string;
+    account_bank: string;
+    payment_type: string;
+    payment_method: string;
+    va_number: string;
+    timestamp: string;
+    products?: Product[];
+    product_detail: {
+        sku: string;
+        quantity: number;
+    }[]; //Relasi ke Product
+}
+
 
 export interface OrderProducts {
     id: number;
@@ -119,4 +142,11 @@ export interface Paginated<T> {
         label: string;
         active: boolean;
     }[];
+    meta: {
+        current_page: number;
+        last_page: number;
+        total: number;
+        from: number;
+        to: number;
+    };
 };

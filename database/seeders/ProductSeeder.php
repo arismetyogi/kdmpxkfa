@@ -14,7 +14,7 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-//        $this->seedCategories();
+        $this->seedCategories();
         $this->seedProducts();
     }
 

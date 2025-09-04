@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ProductResource;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -9,7 +11,9 @@ class OrderController extends Controller
 {
     public function index()
     {
-        return Inertia::render('orders/index', []);
+        $products = Product::with('category')->latest()->paginate(15);
+        $productResource = ProductResource::collection($products);
+        return Inertia::render('orders/index', compact('productResource'));
     }
 
     public function cart()

@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
 import DeleteProductModal from '@/components/Admin/DeleteProductModal';
 import ProductFormModal from '@/components/Admin/ProductFormModal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { BreadcrumbItem, Product, Category, Paginated } from '@/types';
-import { Edit, PackageX, Plus, Trash2 } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
+import { BreadcrumbItem, Category, Paginated, Product } from '@/types';
 import { Link, router } from '@inertiajs/react';
+import { Edit, PackageX, Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -27,7 +27,7 @@ interface AdminProductProps {
 }
 
 export default function AdminProducts({ products, categories }: AdminProductProps) {
-// Modal states
+    // Modal states
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -56,30 +56,52 @@ export default function AdminProducts({ products, categories }: AdminProductProp
     };
 
     const handleSubmitProduct = (productData: Partial<Product>) => {
+        // Create FormData for proper file upload handling
+        const formData = new FormData();
 
-        // Transform into plain payload for backend
-        const payload: Record<string, any> = {
-            sku: productData.sku,
-            name: productData.name,
-            category_id: productData.category_id, // ✅ only ID, not whole category
-            base_uom: productData.base_uom,
-            price: productData.price,
-            weight: productData.weight,
-            length: productData.length,
-            width: productData.width,
-            height: productData.height,
-            image_url: productData.image,
-            image_alt: productData.image_alt,
-            is_active: productData.is_active,
-        };
-        if (selectedProduct) {
-            // Update existing product
-            router.put(route('admin.products.update', selectedProduct.id), payload, {
-                onSuccess: () => closeModals(),
+        // Add all product data to form
+        formData.append('sku', productData.sku || '');
+        formData.append('name', productData.name || '');
+        formData.append('description', productData.description || '');
+        formData.append('pharmacology', productData.pharmacology || '');
+        formData.append('category_id', productData.category_id?.toString() || '');
+        formData.append('base_uom', productData.base_uom || '');
+        formData.append('order_unit', productData.order_unit || '');
+        formData.append('content', productData.content?.toString() || '1');
+        formData.append('brand', productData.brand || '');
+        formData.append('price', productData.price?.toString() || '0');
+        formData.append('weight', productData.weight?.toString() || '0');
+        formData.append('length', productData.length?.toString() || '0');
+        formData.append('width', productData.width?.toString() || '0');
+        formData.append('height', productData.height?.toString() || '0');
+        formData.append('is_active', productData.is_active ? '1' : '0');
+
+        // Handle dosage array
+        if (productData.dosage && Array.isArray(productData.dosage)) {
+            productData.dosage.forEach((dose, index) => {
+                formData.append(`dosage[${index}]`, dose);
             });
+        }
+
+        // Append image if File
+        if (productData.image instanceof File) {
+            formData.append('image', productData.image);
+        }
+
+        if (selectedProduct) {
+            console.log('selected product: ', selectedProduct);
+            formData.append('_method', 'put');
+            // Update existing product - use Inertia's put method
+            router.post(
+                route('admin.products.update', selectedProduct.id), formData,
+                {
+                    forceFormData: true,
+                    onSuccess: () => closeModals(),
+                },
+            );
         } else {
             // Create new product
-            router.post(route('admin.products.store'), payload, {
+            router.post(route('admin.products.store'), formData, {
                 onSuccess: () => closeModals(),
             });
         }
@@ -141,7 +163,7 @@ export default function AdminProducts({ products, categories }: AdminProductProp
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead/>
+                                    <TableHead />
                                     <TableHead>Name</TableHead>
                                     <TableHead>SKU ID</TableHead>
                                     <TableHead>Category</TableHead>
@@ -155,13 +177,9 @@ export default function AdminProducts({ products, categories }: AdminProductProp
                                     <TableRow key={product.id}>
                                         <TableCell>
                                             {product.image ? (
-                                                <img
-                                                    src={product.image}
-                                                    alt={product.name}
-                                                    className="w-16 h-16 object-cover rounded-lg"
-                                                />
+                                                <img src={product.image} alt={product.name} className="h-16 w-16 rounded-lg object-cover" />
                                             ) : (
-                                                <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center text-xs text-gray-500">
+                                                <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-200 text-xs text-gray-500">
                                                     No Image
                                                 </div>
                                             )}
@@ -176,12 +194,9 @@ export default function AdminProducts({ products, categories }: AdminProductProp
                                             <span className="text-sm">
                                                 {product.category
                                                     ? `${product.category.main_category}${
-                                                        product.category.subcategory1 ? ` > ${product.category.subcategory1}` : ''
-                                                    }${
-                                                        product.category.subcategory2 ? ` > ${product.category.subcategory2}` : ''
-                                                    }`
-                                                    : 'No Category'
-                                                }
+                                                          product.category.subcategory1 ? ` > ${product.category.subcategory1}` : ''
+                                                      }${product.category.subcategory2 ? ` > ${product.category.subcategory2}` : ''}`
+                                                    : 'No Category'}
                                             </span>
                                         </TableCell>
                                         <TableCell>
@@ -192,20 +207,14 @@ export default function AdminProducts({ products, categories }: AdminProductProp
                                         <TableCell>
                                             <Badge
                                                 variant="secondary"
-                                                className={`text-xs text-white ${
-                                                    product.is_active ? 'bg-emerald-500' : 'bg-rose-500'
-                                                }`}
+                                                className={`text-xs text-white ${product.is_active ? 'bg-emerald-500' : 'bg-rose-500'}`}
                                             >
                                                 {product.is_active ? 'active' : 'inactive'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center space-x-2">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleEditProduct(product)}
-                                                >
+                                                <Button variant="outline" size="sm" onClick={() => handleEditProduct(product)}>
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
                                                 <Button
@@ -229,12 +238,8 @@ export default function AdminProducts({ products, categories }: AdminProductProp
                     {products.links.map((link, idx) => (
                         <Link
                             key={idx}
-                            href={link.url ?? "#"}
-                            className={`px-3 py-1 rounded ${
-                                link.active
-                                    ? "bg-blue-600 text-white"
-                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                            }`}
+                            href={link.url ?? '#'}
+                            className={`rounded px-3 py-1 ${link.active ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                             dangerouslySetInnerHTML={{ __html: link.label }}
                         />
                     ))}
@@ -260,11 +265,7 @@ export default function AdminProducts({ products, categories }: AdminProductProp
             />
 
             {/* Delete Product Modal */}
-            <DeleteProductModal
-                isOpen={isDeleteModalOpen}
-                onClose={closeModals}
-                product={selectedProduct}
-            />
+            <DeleteProductModal isOpen={isDeleteModalOpen} onClose={closeModals} product={selectedProduct} />
         </AppLayout>
     );
 }

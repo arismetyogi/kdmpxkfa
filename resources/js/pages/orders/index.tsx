@@ -2,7 +2,7 @@ import Filters from '@/components/Filters';
 import ProductCard from '@/components/ProductCard';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CartItem, type BreadcrumbItem, OrderProducts } from '@/types';
+import { CartItem, type BreadcrumbItem, Product, Paginated, Category } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ShoppingCart } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -16,112 +16,39 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function OrdersIndexPage() {
-    const products: OrderProducts[] = [
-        {
-            id: 1,
-            name: 'KF FACIAL TISSUE 200S ANIMAL',
-            price: 15000,
-            inventory: 20,
-            category: 'Barang',
-            order_unit: 'PCS',
-            content: 1,
-            base_uom: 'PCS',
-            image: 'https://placehold.co/400',
-            description: 'Tisu wajah isi besar, lembut dan aman untuk kulit wajah sehari-hari..',
-        },
-        {
-            id: 2,
-            name: 'FITUNO TAB SALUT (BLISTER 3X10 TAB)-BJN',
-            price: 10000,
-            inventory: 20,
-            category: 'Obat',
-            order_unit: 'BLT',
-            content: 1,
-            base_uom: 'TAB',
-            image: 'https://placehold.co/400',
-            description: 'Suplemen herbal untuk bantu tingkatkan daya tahan tubuh dan pemulihan stamina.',
-        },
-        {
-            id: 3,
-            name: 'sample syrup',
-            price: 15000,
-            inventory: 0,
-            category: 'Antibiotik',
-            order_unit: 'BTL',
-            content: 1,
-            base_uom: 'BTL',
-            image: 'https://placehold.co/400',
-            description: '',
-        },
-        {
-            id: 4,
-            name: 'ENKASARI HERBAL 120ML',
-            price: 25000,
-            inventory: 20,
-            category: 'Obat',
-            order_unit: 'BTL',
-            content: 1,
-            base_uom: 'BTL',
-            image: 'https://placehold.co/400',
-            description:
-                'Cairan kumur herbal alami untuk menjaga kesehatan mulut dan tenggorokan. Formulanya membantu mengatasi bau mulut, sariawan, dan meredakan radang tenggorokan. Dengan bahan-bahan pilihan, memberikan sensasi segar dan nyaman setelah digunakan. Ideal untuk kebersihan mulut sehari-hari.',
-        },
-        {
-            id: 5,
-            name: 'MAGASIDA TABLET (DUS 10 TAB)-BJN',
-            price: 20000,
-            inventory: 20,
-            category: 'Obat',
-            order_unit: 'STR',
-            content: 10,
-            base_uom: 'TAB',
-            image: 'https://placehold.co/400',
-            description:
-                'Obat yang digunakan untuk mengatasi gangguan pada saluran pencernaan seperti gastritis, perut kembung, maag, dispepsia, hiatus hernia, tukak lambung dan tukak usus duabelas jari',
-        },
-        {
-            id: 6,
-            name: 'BATUGIN ELIXIR BT 120 ML - BJN',
-            price: 65000,
-            inventory: 20,
-            category: 'Obat',
-            order_unit: 'BTL',
-            content: 1,
-            base_uom: 'Syrup',
-            image: 'https://placehold.co/400',
-            description: 'Obat herbal pereda batu ginjal, sirup 120ml dari BJN',
-        },
-    ];
-
-    const [search, setSearch] = useState('');
-    const [sortBy, setSortBy] = useState('name-asc');
-    const [filters, setFilters] = useState({ categories: ['Semua Produk'], packages: ['Semua Package'] });
+interface IndexProps {
+    products: Paginated<Product>;
+    categories: Category[];
+}
+export default function OrdersIndexPage({ products, categories }: IndexProps) {
+    const [search, setSearch] = useState("");
+    const [sortBy, setSortBy] = useState("name-asc");
+    const [filters, setFilters] = useState({ categories: ["Semua Produk"], packages: ["Semua Paket"] });
     const [cart, setCart] = useState<CartItem[]>([]);
-    const [selectedProduct, setSelectedProduct] = useState<OrderProducts | null>(null); // 🔹 modal state
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-    // 🔹 Hitung total unique item dalam cart
+    // 🔹 jumlah jenis produk unik
     const totalItems = cart.length;
 
-    // 🔹 Load cart dari localStorage saat pertama kali render
+    // 🔹 Load cart dari localStorage
     useEffect(() => {
-        const storedCart = localStorage.getItem('cart');
+        const storedCart = localStorage.getItem("cart");
         if (storedCart) {
             setCart(JSON.parse(storedCart));
         }
     }, []);
 
     // 🔹 filter berdasarkan search
-    let filteredProducts = products.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
+    let filteredProducts = products.data.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
 
     // ambil filter aktif (tanpa "Semua")
     const activeCategories = filters.categories.filter((c) => c !== 'Semua Produk');
-    const activePackages = filters.packages.filter((p) => p !== 'Semua Package');
+    const activePackages = filters.packages.filter((p) => p !== 'Semua Paket');
 
     // 🔹 filter kategori & package
     if (!(activeCategories.length === 0 && activePackages.length === 0)) {
         filteredProducts = filteredProducts.filter((p) => {
-            const matchCategory = activeCategories.length === 0 || activeCategories.includes(p.category);
+            const matchCategory = activeCategories.length === 0 || activeCategories.includes(p.category?.main_category as string);
 
             const matchPackage = activePackages.length === 0 || activePackages.includes(p.order_unit);
 
@@ -231,10 +158,7 @@ export default function OrdersIndexPage() {
                                         <strong>Harga:</strong> Rp{selectedProduct.price.toLocaleString()}
                                     </p>
                                     <p>
-                                        <strong>Stok:</strong> {selectedProduct.inventory > 0 ? selectedProduct.inventory : 'Habis'}
-                                    </p>
-                                    <p>
-                                        <strong>Kategori:</strong> {selectedProduct.category}
+                                        <strong>Kategori:</strong> {selectedProduct.category?.subcategory2}
                                     </p>
                                     <p>
                                         <strong>Kemasan:</strong> {selectedProduct.order_unit}

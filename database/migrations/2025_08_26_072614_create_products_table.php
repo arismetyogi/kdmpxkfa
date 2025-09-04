@@ -23,7 +23,6 @@ return new class extends Migration
             $table->integer('width')->nullable();
             $table->integer('height')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->string('image')->nullable();
             $table->boolean('is_featured')->default(false);
             $table->timestamps();
         });

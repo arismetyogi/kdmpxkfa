@@ -16,7 +16,7 @@ interface ProductFormModalProps {
 }
 
 export default function ProductFormModal({ isOpen, onClose, onSubmit, product, categories }: ProductFormModalProps) {
-    const [formData, setFormData] = useState<Partial<Product>>({
+    const [formData, setFormData] = useState<Partial<Product> & { image?: string | File }>({
         name: '',
         sku: '',
         description: '',
@@ -33,13 +33,22 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
         weight: 0,
         price: 0,
         image: '',
-        image_alt: '',
         is_active: true,
     });
 
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+
     useEffect(() => {
         if (product) {
-            setFormData(product);
+            setFormData({
+                ...product,
+                category_id: product.category_id ?? undefined, // ensure numeric or undefined
+                image: product.image ?? '', // keep string (URL) from MediaLibrary);
+            });
+            // Set image preview if product has an image
+            if (typeof product.image === 'string' && product.image !== '') {
+                setImagePreview(product.image);
+            }
         } else {
             setFormData({
                 name: '',
@@ -58,9 +67,9 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                 weight: 0,
                 price: 0,
                 image: '',
-                image_alt: '',
                 is_active: true,
             });
+            setImagePreview(null);
         }
     }, [product]);
 
@@ -89,7 +98,25 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
         }));
     };
 
-    // handle category select (since ShadCN Select doesn’t give a real event)
+    // handle image file input
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setFormData((prev) => ({
+                ...prev,
+                image: file,
+            }));
+
+            // Create preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    // handle category select (since ShadCN Select doesn't give a real event)
     const handleCategoryChange = (value: string) => {
         setFormData((prev) => ({
             ...prev,
@@ -113,8 +140,8 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-            <div className="relative mx-4 max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white shadow-xl">
+            <div className="fixed inset-0 bg-black/50 " onClick={onClose} />
+            <div className="relative mx-4 max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white dark:bg-zinc-700/90 backdrop-blur-lg shadow-xl">
                 <div className="flex items-center justify-between border-b p-6">
                     <h2 className="text-lg font-semibold">{product ? 'Edit Product' : 'Create Product'}</h2>
                     <button onClick={onClose} className="text-gray-400 transition-colors hover:text-gray-600">
@@ -138,11 +165,11 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <Label htmlFor="brand">Brand</Label>
-                            <Input id="brand" name="brand" value={formData.brand} onChange={handleInputChange} />
+                            <Input id="brand" name="brand" value={formData.brand} onChange={handleInputChange} required />
                         </div>
                         <div>
                             <Label htmlFor="category_id">Category</Label>
-                            <Select defaultValue={formData.category_id?.toString() || ''} onValueChange={handleCategoryChange}>
+                            <Select value={formData.category_id?.toString() || ''} onValueChange={handleCategoryChange}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select a category" />
                                 </SelectTrigger>
@@ -163,26 +190,26 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                     <div className="grid grid-cols-3 gap-4">
                         <div>
                             <Label htmlFor="price">Price</Label>
-                            <Input id="price" name="price" type="number" step="0.01" value={formData.price} onChange={handleInputChange} />
+                            <Input id="price" name="price" type="number" step="0.01" value={formData.price} onChange={handleInputChange} required />
                         </div>
                         <div>
                             <Label htmlFor="base_uom">Base UOM</Label>
-                            <Input id="base_uom" name="base_uom" value={formData.base_uom} onChange={handleInputChange} />
+                            <Input id="base_uom" name="base_uom" value={formData.base_uom} onChange={handleInputChange} required />
                         </div>
                         <div>
                             <Label htmlFor="order_unit">Order Unit</Label>
-                            <Input id="order_unit" name="order_unit" value={formData.order_unit} onChange={handleInputChange} />
+                            <Input id="order_unit" name="order_unit" value={formData.order_unit} onChange={handleInputChange} required />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <Label htmlFor="content">Content</Label>
-                            <Input id="content" name="content" type="number" value={formData.content} onChange={handleInputChange} />
+                            <Input id="content" name="content" type="number" value={formData.content} onChange={handleInputChange} required />
                         </div>
                         <div>
                             <Label htmlFor="weight">Weight (g)</Label>
-                            <Input id="weight" name="weight" type="number" value={formData.weight} onChange={handleInputChange} />
+                            <Input id="weight" name="weight" type="number" value={formData.weight} onChange={handleInputChange} required />
                         </div>
                     </div>
 
@@ -190,9 +217,9 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                     <div>
                         <Label>Dimensions (cm)</Label>
                         <div className="grid grid-cols-3 gap-2">
-                            <Input name="length" type="number" placeholder="Length" value={formData.length} onChange={handleInputChange} />
-                            <Input name="width" type="number" placeholder="Width" value={formData.width} onChange={handleInputChange} />
-                            <Input name="height" type="number" placeholder="Height" value={formData.height} onChange={handleInputChange} />
+                            <Input name="length" type="number" placeholder="Length" value={formData.length} onChange={handleInputChange} required />
+                            <Input name="width" type="number" placeholder="Width" value={formData.width} onChange={handleInputChange} required />
+                            <Input name="height" type="number" placeholder="Height" value={formData.height} onChange={handleInputChange} required />
                         </div>
                     </div>
 
@@ -215,14 +242,20 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                     {/* Image */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <Label htmlFor="image">Image URL</Label>
-                            <Input id="image" name="image" value={formData.image} onChange={handleInputChange} />
-                        </div>
-                        <div>
-                            <Label htmlFor="image_alt">Image Alt</Label>
-                            <Input id="image_alt" name="image_alt" value={formData.image_alt} onChange={handleInputChange} />
+                            <Label htmlFor="image">Product Image</Label>
+                            <Input id="image" name="image" type="file" accept="image/*" onChange={handleImageChange} />
                         </div>
                     </div>
+
+                    {/* Image Preview */}
+                    {imagePreview && (
+                        <div>
+                            <Label>Image Preview</Label>
+                            <div className="mt-2">
+                                <img src={imagePreview} alt="Preview" className="h-32 w-32 object-cover rounded-lg" />
+                            </div>
+                        </div>
+                    )}
 
                     {/* Active toggle */}
                     <div className="flex items-center space-x-2">
