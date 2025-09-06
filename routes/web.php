@@ -55,7 +55,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
 
         Route::resource('admins', AdminController::class);
-        Route::resource('users', UserController::class);
+
+        Route::put('users/{user}/map', [UserController::class, 'mapUser'])->name('users.map');
+        Route::resource('users', UserController::class)->except('edit');
 
         // Product management routes with explicit model binding
         Route::resource('products', ProductController::class);
@@ -77,6 +79,11 @@ Route::bind('role', function ($value) {
 // Add explicit route model binding for Permission
 Route::bind('permission', function ($value) {
     return \Spatie\Permission\Models\Permission::findOrFail($value);
+});
+
+// Add explicit route model binding for Permission
+Route::bind('user', function ($value) {
+    return \App\Models\User::findOrFail($value);
 });
 
 require __DIR__.'/settings.php';

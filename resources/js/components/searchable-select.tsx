@@ -19,7 +19,7 @@ interface SelectOption {
 interface SearchableSelectProps {
     options: SelectOption[];
     value: string | number | null;
-    onChange: (value: string | number | null) => void;
+    onChange: (value: any) => void;
     placeholder?: string;
     searchPlaceholder?: string;
     maxResults?: number;
@@ -42,8 +42,7 @@ export default function SearchableSelect({
 
         const results = options.filter(
             (opt) =>
-                opt.label.toLowerCase().includes(nq) ||
-                String(opt.value).toLowerCase().includes(nq)
+                opt.label.toLowerCase().includes(nq)
         );
 
         return results.slice(0, maxResults);

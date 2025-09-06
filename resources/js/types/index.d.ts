@@ -55,6 +55,7 @@ export interface User {
     updated_at: string;
     roles?: Role[];
     permissions?: Permission[];
+    apotek_id?: number;
     apotek?: Apotek
     [key: string]: unknown; // This allows for additional properties...
 }

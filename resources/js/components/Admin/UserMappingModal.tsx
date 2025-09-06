@@ -1,23 +1,19 @@
+import SearchableSelect from '@/components/searchable-select';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Apotek } from '@/types';
+import { Apotek, User } from '@/types';
 import { useForm } from '@inertiajs/react';
-import { Loader2, Save } from 'lucide-react';
+import { Save } from 'lucide-react';
 import React, { useEffect } from 'react';
-import { toast } from 'sonner';
-import SearchableSelect from '@/components/searchable-select';
-
-interface User {
-    id?: number;
-    name?: string;
-    email?: string;
-    apotek_id?: number;
-    apotek?: Apotek;
-    tenantId?: number;
-    tenantName?: string;
-}
 
 interface UserMappingModalProps {
     isOpen: boolean;
@@ -27,37 +23,36 @@ interface UserMappingModalProps {
 }
 
 export default function UserMappingModal({ isOpen, onClose, user, apoteks }: UserMappingModalProps) {
-    const form = useForm({
-        name: user?.name || '',
-        email: user?.email || '',
-        apotek_id: user?.apotek_id || null,
-        tenantId: user?.tenantId || 'default',
-        tenantName: user?.tenantName || '',
+    // ✅ Initialize useForm
+    const { data, setData, put, processing, errors, reset } = useForm({
+        apotek_id: user?.apotek_id ?? '',
     });
 
-    // reset form when modal opens/closes or apotek_id changes
+    // ✅ Reset form when modal opens/closes or user changes
     useEffect(() => {
-        if (isOpen) {
-            form.setData({
-                name: user?.name || '',
-                email: user?.email || '',
-                apotek_id: user?.apotek_id || null,
-                tenantId: user?.tenantId || 'default',
-                tenantName: user?.tenantName || '',
-            });
-            form.clearErrors();
+        if (user) {
+            setData('apotek_id', user.apotek_id?.toString() ?? '');
+        } else {
+            reset();
         }
-    }, [isOpen, user]);
+    }, [user, isOpen]);
+
+    const handleApotekChange = (value: string) => {
+        setData('apotek_id', value);
+    };
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        form.put(route('admin.users.update', user?.id), {
+        if (!user?.id) return;
+
+        put(route('admin.users.map', user.id), {
+            preserveScroll: true,
             onSuccess: () => {
+                reset();
                 onClose();
-                toast.success('User mapped successfully.');
             },
-            onError: (e) => {
-                toast.error('Failed to map user.', e);
+            onError: (err) => {
+                console.error('Form errors:', err);
             },
         });
     };
@@ -67,6 +62,7 @@ export default function UserMappingModal({ isOpen, onClose, user, apoteks }: Use
             open={isOpen}
             onOpenChange={(open) => {
                 if (!open) {
+                    reset();
                     onClose();
                 }
             }}
@@ -85,13 +81,10 @@ export default function UserMappingModal({ isOpen, onClose, user, apoteks }: Use
                             <Input
                                 id="name"
                                 name="name"
-                                value={form.data.name}
-                                onChange={(e) => form.setData('name', e.target.value)}
-                                placeholder="Enter user's full name"
+                                value={user?.name ?? ''}
                                 className="mt-1"
                                 disabled
                             />
-                            {form.errors.name && <p className="mt-1 text-sm text-red-600">{form.errors.name}</p>}
                         </div>
 
                         {/* Email */}
@@ -101,13 +94,10 @@ export default function UserMappingModal({ isOpen, onClose, user, apoteks }: Use
                                 id="email"
                                 name="email"
                                 type="email"
-                                value={form.data.email}
-                                onChange={(e) => form.setData('email', e.target.value)}
-                                placeholder="Enter user's email"
+                                value={user?.email ?? ''}
                                 className="mt-1"
                                 disabled
                             />
-                            {form.errors.email && <p className="mt-1 text-sm text-red-600">{form.errors.email}</p>}
                         </div>
 
                         {/* Apotek */}
@@ -115,39 +105,28 @@ export default function UserMappingModal({ isOpen, onClose, user, apoteks }: Use
                             <Label htmlFor="apotek_id">Apotek</Label>
                             <SearchableSelect
                                 options={apoteks.map((a) => ({
-                                    value: a.id,
+                                    value: a.id.toString(),
                                     label: `${a.sap_id} - ${a.name}`,
                                 }))}
-                                value={form.data.apotek_id}
-                                onChange={(id: any) =>
-                                    form.setData((prev) => ({
-                                        ...prev,
-                                        apotek_id: id ? parseInt(id) : null,
-                                    }))
-                                }
+                                value={data.apotek_id}
+                                onChange={handleApotekChange}
                                 placeholder="Select an apotek..."
                                 searchPlaceholder="Search apoteks..."
                                 maxResults={10}
                             />
+                            {errors.apotek_id && (
+                                <p className="text-sm text-red-600 mt-1">{errors.apotek_id}</p>
+                            )}
                         </div>
                     </div>
 
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={onClose} disabled={form.processing}>
+                        <Button type="button" variant="outline" onClick={onClose}>
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={form.processing || !form.data.name.trim()}>
-                            {form.processing ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Saving...
-                                </>
-                            ) : (
-                                <>
-                                    <Save className="mr-2 h-4 w-4" />
-                                    'Save'
-                                </>
-                            )}
+                        <Button type="submit" disabled={processing}>
+                            <Save className="mr-2 h-4 w-4" />
+                            {processing ? 'Saving...' : 'Save'}
                         </Button>
                     </DialogFooter>
                 </form>

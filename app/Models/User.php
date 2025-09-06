@@ -36,6 +36,7 @@ class User extends Authenticatable implements HasMedia
         'tenant_name',
         'external_id',
         'tenant_id',
+        'apotek_id',
     ];
 
     /**

@@ -118,7 +118,42 @@ class UserController extends Controller
             $user->syncRoles($validated['roles']);
         }
 
-        return redirect()->route('admin.users.index')->with('success', 'User update successfully.');
+        return to_route('admin.users.index')->with('success', 'User update successfully.');
+    }
+
+    public function mapUser(Request $request, User $user)
+    {
+        if (! $user) {
+            Log::error('User not found during mapUser', [
+                'userId' => null,
+                'url' => $request->fullUrl(),
+                'payload' => $request->all(),
+            ]);
+
+            return response()->json([
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        Log::info('mapUser called successfully', [
+            'userId' => $user->id,
+            'url' => $request->fullUrl(),
+        ]);
+
+        if (! $request->user()->can('update users')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'apotek_id' => ['required', 'exists:apoteks,id'],
+        ]);
+
+        $user->update([
+            'apotek_id' => $validated['apotek_id'],
+            'is_active' => true
+        ]);
+
+        return to_route('admin.users.index')->with('success', 'User updated successfully.');
     }
 
     public function destroy(Request $request, User $user)
