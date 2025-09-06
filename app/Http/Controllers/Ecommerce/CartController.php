@@ -71,7 +71,7 @@ class CartController extends Controller
 
         // Determine if shipping is same as billing
         $sameAsBilling = empty($shippingData) ||
-            ($billingData && $shippingData &&
+            ($billingData &&
                 $billingData['first_name'] === $shippingData['first_name'] &&
                 $billingData['last_name'] === $shippingData['last_name'] &&
                 $billingData['email'] === $shippingData['email'] &&
@@ -79,8 +79,7 @@ class CartController extends Controller
                 $billingData['address'] === $shippingData['address'] &&
                 $billingData['city'] === $shippingData['city'] &&
                 $billingData['state'] === $shippingData['state'] &&
-                $billingData['zip'] === $shippingData['zip'] &&
-                $billingData['country'] === $shippingData['country']);
+                $billingData['zip'] === $shippingData['zip']);
 
         return Inertia::render('ecommerce/checkout', [
             'cartItems' => $cartItems,
@@ -107,7 +106,6 @@ class CartController extends Controller
             'city' => 'required|string|max:255',
             'state' => 'required|string|max:255',
             'zip' => 'required|string|max:20',
-            'country' => 'required|string|max:255',
             'notes' => 'nullable|string|max:1000',
             // Shipping fields - make them required since we're copying from billing
             'shipping_first_name' => 'required|string|max:255',
@@ -118,7 +116,6 @@ class CartController extends Controller
             'shipping_city' => 'required|string|max:255',
             'shipping_state' => 'required|string|max:255',
             'shipping_zip' => 'required|string|max:20',
-            'shipping_country' => 'required|string|max:255',
         ]);
 
         // Store billing/shipping info in session for payment page
@@ -132,7 +129,6 @@ class CartController extends Controller
                 'city' => $validated['city'],
                 'state' => $validated['state'],
                 'zip' => $validated['zip'],
-                'country' => $validated['country'],
                 'notes' => $validated['notes'] ?? '',
             ],
             'checkout.shipping' => [
@@ -144,7 +140,6 @@ class CartController extends Controller
                 'city' => $validated['shipping_city'],
                 'state' => $validated['shipping_state'],
                 'zip' => $validated['shipping_zip'],
-                'country' => $validated['shipping_country'],
             ],
         ]);
 
@@ -156,7 +151,7 @@ class CartController extends Controller
     public function paymentForm(CartService $cartService)
     {
         // Check if billing information exists in session
-        if (! session('checkout.billing')) {
+        if (!session('checkout.billing')) {
             return redirect()->route('checkout')->with('error', 'Please complete billing information first.');
         }
 
@@ -180,7 +175,7 @@ class CartController extends Controller
     public function processPayment(Request $request, CartService $cartService, DigikopTransactionService $transactionService)
     {
         // Check if billing information exists in session
-        if (! session('checkout.billing')) {
+        if (!session('checkout.billing')) {
             return redirect()->route('checkout')->with('error', 'Please complete billing information first.');
         }
 
@@ -196,7 +191,7 @@ class CartController extends Controller
             // Validate credit limit using tenant_id
             $creditValidation = $transactionService->validateCreditLimit($user->tenant_id, $totalAmount);
 
-            if (! $creditValidation['valid']) {
+            if (!$creditValidation['valid']) {
                 return back()->with('error', $creditValidation['message']);
             }
 
@@ -227,14 +222,14 @@ class CartController extends Controller
                 'shipping_amount' => 0, // You can calculate shipping based on your business logic
                 'discount_amount' => 0,
                 'total_price' => $cartService->getSubTotal() * 1.11,
-                'billing_name' => $billingData['first_name'].' '.$billingData['last_name'],
+                'billing_name' => $billingData['first_name'] . ' ' . $billingData['last_name'],
                 'billing_email' => $billingData['email'],
                 'billing_phone' => $billingData['phone'],
                 'billing_address' => $billingData['address'],
                 'billing_city' => $billingData['city'],
                 'billing_state' => $billingData['state'],
                 'billing_zip' => $billingData['zip'],
-                'shipping_name' => $shippingData['first_name'].' '.$shippingData['last_name'],
+                'shipping_name' => $shippingData['first_name'] . ' ' . $shippingData['last_name'],
                 'shipping_address' => $shippingData['address'],
                 'shipping_city' => $shippingData['city'],
                 'shipping_state' => $shippingData['state'],
@@ -246,7 +241,7 @@ class CartController extends Controller
             foreach ($cartItems as $cartItem) {
                 $product = Product::find($cartItem['product_id']);
 
-                if (! $product) {
+                if (!$product) {
                     continue;
                 }
 
@@ -276,13 +271,13 @@ class CartController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error('Order creation failed: '.$e->getMessage());
+            Log::error('Order creation failed: ' . $e->getMessage());
 
             return back()->with('error', 'Failed to create order. Please try again.');
         } catch (\Throwable $e) {
             DB::rollBack();
 
-            Log::error('Order creation failed: '.$e->getMessage());
+            Log::error('Order creation failed: ' . $e->getMessage());
 
             return back()->with('error', 'Failed to create order. Please try again.');
         }

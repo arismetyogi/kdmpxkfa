@@ -61,11 +61,6 @@ class User extends Authenticatable implements HasMedia
         ];
     }
 
-    public function profile(): HasOne
-    {
-        return $this->hasOne(UserProfile::class);
-    }
-
     public function apotek(): BelongsTo
     {
         return $this->belongsTo(Apotek::class);
