@@ -55,7 +55,21 @@ export interface User {
     updated_at: string;
     roles?: Role[];
     permissions?: Permission[];
+    apotek?: Apotek
     [key: string]: unknown; // This allows for additional properties...
+}
+
+export interface Apotek {
+    id: number;
+    branch: string;
+    sap_id: string;
+    name: string;
+    address?: string;
+    phone?: string;
+    latitude?: number;
+    longitude?: number;
+    zipcode?: string;
+    is_active?: boolean
 }
 
 export interface Category {

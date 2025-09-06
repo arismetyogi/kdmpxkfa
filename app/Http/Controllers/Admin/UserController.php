@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PaginatedResourceResponse;
 use App\Http\Resources\UserResource;
+use App\Models\Apotek;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -38,7 +39,7 @@ class UserController extends Controller
             'allUsers' => User::all()->count(),
             'adminUsers' => User::admin()->get()->count(),
             'activeUsers' => User::active()->get()->count(),
-            'roles' => Role::all(),
+            'apoteks' => Apotek::active()->get(),
         ]);
     }
 

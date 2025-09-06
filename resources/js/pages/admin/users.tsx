@@ -1,14 +1,13 @@
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, Paginated, Permission, Role, User } from '@/types';
+import { Apotek, BreadcrumbItem, Paginated, User } from '@/types';
 import { Head } from '@inertiajs/react';
-import { Edit, Plus, Shield, Trash2, Users, UserX } from 'lucide-react';
+import { Edit, Shield, Users, UserX } from 'lucide-react';
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import UserFormModal from '@/components/Admin/UserFormModal';
 import { Button } from '@/components/ui/button';
-import DeleteUserModal from '@/components/Admin/DeleteUserModal';
+import UserMappingModal from '@/components/Admin/UserMappingModal';
 
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -24,38 +23,24 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface AdminUserProps {
     users: Paginated<User>;
-    roles: Role[];
-    permissions: Permission[];
+    apoteks: Apotek[];
     allUsers: number;
     adminUsers: number;
     activeUsers: number;
 }
 
-export default function AdminUsers({ users, roles, permissions, allUsers, adminUsers, activeUsers }: AdminUserProps) {
+export default function AdminUsers({ users, apoteks, allUsers, adminUsers, activeUsers }: AdminUserProps) {
     // Modal states
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isMappingModalOpen, setIsMappingModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
-    const handleCreateUser = () => {
-        setSelectedUser(null);
-        setIsCreateModalOpen(true);
-    };
 
-    const handleEditUser = (user: User) => {
+    const handleMapUserApotek = (user: User) => {
         setSelectedUser(user);
-        setIsEditModalOpen(true);
-    };
-
-    const handleDeleteUser = (user: User) => {
-        setSelectedUser(user);
-        setIsDeleteModalOpen(true);
+        setIsMappingModalOpen(true);
     };
 
     const closeModals = () => {
-        setIsCreateModalOpen(false);
-        setIsEditModalOpen(false);
-        setIsDeleteModalOpen(false);
+        setIsMappingModalOpen(false);
         setSelectedUser(null);
     };
 
@@ -91,10 +76,6 @@ export default function AdminUsers({ users, roles, permissions, allUsers, adminU
                         <h1 className="text-2xl font-bold tracking-tight">User Management</h1>
                         <p className="text-muted-foreground">Manage user details, roles and their permissions</p>
                     </div>
-                    <Button onClick={handleCreateUser}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Create User
-                    </Button>
                 </div>
                 <div className="grid gap-4 md:grid-cols-3">
                     <Card>
@@ -141,7 +122,7 @@ export default function AdminUsers({ users, roles, permissions, allUsers, adminU
                                     <TableHead>Role</TableHead>
                                     <TableHead>Permissions</TableHead>
                                     <TableHead>Status</TableHead>
-                                    <TableHead>Actions</TableHead>
+                                    <TableHead>Outlet Mapping</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -187,17 +168,13 @@ export default function AdminUsers({ users, roles, permissions, allUsers, adminU
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center space-x-2">
-                                                <Button variant="outline" size="sm" onClick={() => handleEditUser(user)}>
-                                                    <Edit className="h-4 w-4" />
+                                                {user.apotek ?
+                                                    user.apotek?.name
+                                                    :
+                                                <Button variant="outline" size="sm" onClick={() => handleMapUserApotek(user)}>
+                                                    <Edit className="h-4 w-4" /> Map
                                                 </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="text-red-600 hover:text-red-700"
-                                                    onClick={() => handleDeleteUser(user)}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                                                }
                                             </div>
                                         </TableCell>
                                     </TableRow>
@@ -208,14 +185,8 @@ export default function AdminUsers({ users, roles, permissions, allUsers, adminU
                 </Card>
             </div>
 
-            {/* Create User Modal */}
-            <UserFormModal isOpen={isCreateModalOpen} onClose={closeModals} user={null} roles={roles} />
-
             {/* Edit User Modal */}
-            <UserFormModal isOpen={isEditModalOpen} onClose={closeModals} user={selectedUser} roles={roles} />
-
-            {/* Delete User Modal */}
-            <DeleteUserModal isOpen={isDeleteModalOpen} onClose={closeModals} user={selectedUser} />
+            <UserMappingModal isOpen={isMappingModalOpen} onClose={closeModals} user={selectedUser} apoteks={apoteks} />
         </AppLayout>
     );
 }
