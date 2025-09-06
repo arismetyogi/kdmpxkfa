@@ -35,6 +35,7 @@ class AdminController extends Controller
             'roles' => Role::where('name', '!=', 'user')->get(),
         ]);
     }
+
     /**
      * Display the admin dashboard.
      */

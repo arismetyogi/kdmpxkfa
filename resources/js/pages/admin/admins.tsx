@@ -102,7 +102,7 @@ export default function AdminAdmins({ admins, roles, allAdmins, adminAdmins, act
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{allAdmins}</div>
-                            <p className="text-xs text-muted-foreground">Active admins in the system</p>
+                            <p className="text-xs text-muted-foreground">All admins in the system</p>
                         </CardContent>
                     </Card>
                     <Card>
@@ -112,7 +112,7 @@ export default function AdminAdmins({ admins, roles, allAdmins, adminAdmins, act
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{adminAdmins}</div>
-                            <p className="text-xs text-muted-foreground">Active admin admins in the system</p>
+                            <p className="text-xs text-muted-foreground">Total active admins in the system</p>
                         </CardContent>
                     </Card>
                     <Card>

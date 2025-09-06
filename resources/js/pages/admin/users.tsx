@@ -25,11 +25,10 @@ interface AdminUserProps {
     users: Paginated<User>;
     apoteks: Apotek[];
     allUsers: number;
-    adminUsers: number;
     activeUsers: number;
 }
 
-export default function AdminUsers({ users, apoteks, allUsers, adminUsers, activeUsers }: AdminUserProps) {
+export default function AdminUsers({ users, apoteks, allUsers, activeUsers }: AdminUserProps) {
     // Modal states
     const [isMappingModalOpen, setIsMappingModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -85,17 +84,17 @@ export default function AdminUsers({ users, apoteks, allUsers, adminUsers, activ
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{allUsers}</div>
-                            <p className="text-xs text-muted-foreground">Active users in the system</p>
+                            <p className="text-xs text-muted-foreground">All users in the system</p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Admins</CardTitle>
+                            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
                             <Shield className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{adminUsers}</div>
-                            <p className="text-xs text-muted-foreground">Active admin users in the system</p>
+                            <div className="text-2xl font-bold">{activeUsers}</div>
+                            <p className="text-xs text-muted-foreground">Active users in the system</p>
                         </CardContent>
                     </Card>
                     <Card>

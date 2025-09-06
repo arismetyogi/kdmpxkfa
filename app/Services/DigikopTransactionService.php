@@ -13,16 +13,17 @@ class DigikopTransactionService
     {
         $this->baseUrl = rtrim(config('transaction.digikoperasi.base_url'), '/');
     }
+
     /**
      * Validate user's credit limit against external API
      *
-     * @param string $tenantId User's tenant ID
-     * @param float $orderAmount Total order amount to validate
+     * @param  string  $tenantId  User's tenant ID
+     * @param  float  $orderAmount  Total order amount to validate
      * @return array ['valid' => bool, 'message' => string, 'remaining_credit' => float|null]
      */
     public function validateCreditLimit(string $tenantId, float $orderAmount): array
     {
-        $url = $this->baseUrl . '/remaining-credit/' . $tenantId;
+        $url = $this->baseUrl.'/remaining-credit/'.$tenantId;
         try {
             $token = $this->authService->getAccessToken();
             // Make API call to external service to get credit limit
@@ -52,7 +53,7 @@ class DigikopTransactionService
             Log::debug('Data response: ', $data);
 
             // Check if the response has the expected structure
-            if (!isset($data['data']['remaining_credit'])) {
+            if (! isset($data['data']['remaining_credit'])) {
                 Log::error('Invalid credit limit response structure', ['response' => $data]);
 
                 return [
@@ -74,8 +75,8 @@ class DigikopTransactionService
             } else {
                 return [
                     'valid' => false,
-                    'message' => 'Insufficient credit limit. Available credit: Rp' . number_format($availableCredit, 0, ',', '.') .
-                                ', Order amount: Rp' . number_format($orderAmount, 0, ',', '.'),
+                    'message' => 'Insufficient credit limit. Available credit: Rp'.number_format($availableCredit, 0, ',', '.').
+                                ', Order amount: Rp'.number_format($orderAmount, 0, ',', '.'),
                     'remaining_credit' => $availableCredit,
                 ];
             }

@@ -17,7 +17,7 @@ class OrderController extends Controller
 
         return Inertia::render('orders/index', [
             'products' => PaginatedResourceResponse::make($products, ProductResource::class),
-            'categories' => Category::all()
+            'categories' => Category::all(),
         ]);
     }
 

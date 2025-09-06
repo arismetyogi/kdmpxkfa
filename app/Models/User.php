@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -17,7 +16,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements HasMedia
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, HasRoles, HasUuid, Notifiable, InteractsWithMedia;
+    use HasApiTokens, HasFactory, HasRoles, HasUuid, InteractsWithMedia, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -83,5 +82,4 @@ class User extends Authenticatable implements HasMedia
     {
         return $query->where('is_active', true);
     }
-
 }

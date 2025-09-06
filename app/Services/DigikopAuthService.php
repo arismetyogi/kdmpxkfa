@@ -14,7 +14,7 @@ class DigikopAuthService
     public function __construct()
     {
         $this->baseUrl = rtrim(config('transaction.digikoperasi.base_url'), '/');
-        Log::debug('Base URL loaded: ' . $this->baseUrl);
+        Log::debug('Base URL loaded: '.$this->baseUrl);
     }
 
     /**
@@ -24,7 +24,7 @@ class DigikopAuthService
     {
         $token = Cache::get('digikoperasi_token');
 
-        if (!$token) {
+        if (! $token) {
             $this->login(); // get new token
             $token = Cache::get('digikoperasi_token');
         }
@@ -38,7 +38,7 @@ class DigikopAuthService
      */
     private function login(): void
     {
-        $url = $this->baseUrl . '/koperasi-auth/login';
+        $url = $this->baseUrl.'/koperasi-auth/login';
 
         $payload = [
             'access_key' => config('transaction.digikoperasi.access_key'),
@@ -48,7 +48,7 @@ class DigikopAuthService
         $response = Http::withBody(json_encode($payload))->post($url);
         $data = $response->json()['data']['data'] ?? null;
 
-        if (!$data) {
+        if (! $data) {
             throw new \Exception('Failed to login to Digikoperasi');
         }
 
@@ -61,11 +61,12 @@ class DigikopAuthService
      */
     public function refreshToken(): void
     {
-        $url = $this->baseUrl . '/koperasi-auth/refresh-token';
+        $url = $this->baseUrl.'/koperasi-auth/refresh-token';
         $refreshToken = Cache::get('digikoperasi_refresh');
 
-        if (!$refreshToken) {
+        if (! $refreshToken) {
             $this->login();
+
             return;
         }
 

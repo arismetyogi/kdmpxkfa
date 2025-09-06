@@ -67,7 +67,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Alternative: Use permission-based middleware
-    Route::middleware(['permission:view dashboard'])->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('permission:view dashboard')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard-alt', [AdminController::class, 'dashboard'])->name('dashboard-alt');
     });
 });

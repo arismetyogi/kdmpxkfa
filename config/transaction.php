@@ -13,6 +13,6 @@ return [
     'digikoperasi' => [
         'base_url' => env('DIGIKOPERASI_TRANSACTIONS_BASE_URL', 'https://openapi-stage.berasumkm.id/api/v2/koperasi'),
         'access_key' => env('DIGIKOPERASI_TRANSACTIONS_ACCESS_KEY'),
-        'access_secret' => env('DIGIKOPERASI_TRANSACTIONS_ACCESS_SECRET')
-    ]
+        'access_secret' => env('DIGIKOPERASI_TRANSACTIONS_ACCESS_SECRET'),
+    ],
 ];

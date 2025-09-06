@@ -196,7 +196,7 @@ class CartController extends Controller
             // Validate credit limit using tenant_id
             $creditValidation = $transactionService->validateCreditLimit($user->tenant_id, $totalAmount);
 
-            if (!$creditValidation['valid']) {
+            if (! $creditValidation['valid']) {
                 return back()->with('error', $creditValidation['message']);
             }
 
@@ -227,14 +227,14 @@ class CartController extends Controller
                 'shipping_amount' => 0, // You can calculate shipping based on your business logic
                 'discount_amount' => 0,
                 'total_price' => $cartService->getSubTotal() * 1.11,
-                'billing_name' => $billingData['first_name'] . ' ' . $billingData['last_name'],
+                'billing_name' => $billingData['first_name'].' '.$billingData['last_name'],
                 'billing_email' => $billingData['email'],
                 'billing_phone' => $billingData['phone'],
                 'billing_address' => $billingData['address'],
                 'billing_city' => $billingData['city'],
                 'billing_state' => $billingData['state'],
                 'billing_zip' => $billingData['zip'],
-                'shipping_name' => $shippingData['first_name'] . ' ' . $shippingData['last_name'],
+                'shipping_name' => $shippingData['first_name'].' '.$shippingData['last_name'],
                 'shipping_address' => $shippingData['address'],
                 'shipping_city' => $shippingData['city'],
                 'shipping_state' => $shippingData['state'],

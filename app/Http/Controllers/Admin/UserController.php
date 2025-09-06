@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
-use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -150,7 +149,7 @@ class UserController extends Controller
 
         $user->update([
             'apotek_id' => $validated['apotek_id'],
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         return to_route('admin.users.index')->with('success', 'User updated successfully.');

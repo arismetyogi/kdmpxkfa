@@ -96,7 +96,7 @@ class CartService
                     $cartItems = $this->getCartItemsFromCookies();
                 }
 
-                $productIds = collect($cartItems)->map(fn($item) => $item['product_id']);
+                $productIds = collect($cartItems)->map(fn ($item) => $item['product_id']);
 
                 $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
 
@@ -104,12 +104,12 @@ class CartService
                 foreach ($cartItems as $cartItem) {
                     $product = $products->get($cartItem['product_id']);
 
-                    if (!$product) {
+                    if (! $product) {
                         continue;
                     }
 
                     $imageUrl = null;
-                    if (!$imageUrl) {
+                    if (! $imageUrl) {
                         $imageUrl = $product->getFirstMediaUrl('images');
                     }
 
@@ -129,7 +129,7 @@ class CartService
             return $this->cachedCartItems;
         } catch (\Exception $e) {
             // throw $th;
-            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
 
         return [];
@@ -157,7 +157,7 @@ class CartService
     protected function saveItemToCookies(int $productId, int $quantity, int $price): void
     {
         $cartItems = $this->getCartItemsFromCookies();
-        if (!isset($cartItems[$productId])) {
+        if (! isset($cartItems[$productId])) {
             $cartItems[$productId] = [
                 'id' => uniqid(),
                 'product_id' => $productId,
