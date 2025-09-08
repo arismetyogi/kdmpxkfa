@@ -1,39 +1,7 @@
 import { Head } from '@inertiajs/react';
 import HeaderLayout from '@/layouts/header-layout';
 import { CheckCircle } from 'lucide-react';
-
-interface OrderItem {
-    id: number;
-    product_name: string;
-    product_image: string;
-    quantity: number;
-    unit_price: number;
-    total_price: number;
-    variation_data: any;
-}
-
-interface Order {
-    id: number;
-    order_number: string;
-    status: string;
-    payment_status: string;
-    total_price: number;
-    billing_full_name: string;
-    billing_email: string;
-    billing_address: string;
-    billing_city: string;
-    billing_state: string;
-    billing_zip: string;
-    billing_country: string;
-    shipping_full_name: string;
-    shipping_address: string;
-    shipping_city: string;
-    shipping_state: string;
-    shipping_zip: string;
-    shipping_country: string;
-    created_at: string;
-    order_items: OrderItem[];
-}
+import {Order} from "@/types";
 
 interface OrderCompletedProps {
     order: Order;
@@ -77,7 +45,6 @@ export default function OrderCompletedPage({ order }: OrderCompletedProps) {
                                 <p>{order.billing_email}</p>
                                 <p className="mt-2">{order.billing_address}</p>
                                 <p>{order.billing_city}, {order.billing_state} {order.billing_zip}</p>
-                                <p>{order.billing_country}</p>
                             </div>
                         </div>
 
@@ -87,7 +54,6 @@ export default function OrderCompletedPage({ order }: OrderCompletedProps) {
                                 <p>{order.shipping_full_name}</p>
                                 <p className="mt-2">{order.shipping_address}</p>
                                 <p>{order.shipping_city}, {order.shipping_state} {order.shipping_zip}</p>
-                                <p>{order.shipping_country}</p>
                             </div>
                         </div>
                     </div>
@@ -95,7 +61,7 @@ export default function OrderCompletedPage({ order }: OrderCompletedProps) {
                     <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                         <h3 className="text-md font-semibold text-gray-800 mb-4">Order Items</h3>
                         <div className="space-y-4">
-                            {order.order_items.map((item) => (
+                            {order.order_items?.map((item) => (
                                 <div key={item.id} className="flex items-center">
                                     {item.product_image ? (
                                         <img
@@ -114,10 +80,10 @@ export default function OrderCompletedPage({ order }: OrderCompletedProps) {
                                     </div>
                                     <div className="text-right">
                                         <p className="text-sm font-medium text-gray-800">
-                                            Rp{item.total_price.toLocaleString()}
+                                            Rp{item?.total_price.toLocaleString()}
                                         </p>
                                         <p className="text-sm text-gray-600">
-                                            Rp{item.unit_price.toLocaleString()} each
+                                            Rp{item?.unit_price.toLocaleString()} each
                                         </p>
                                     </div>
                                 </div>
@@ -128,7 +94,7 @@ export default function OrderCompletedPage({ order }: OrderCompletedProps) {
                             <div className="flex justify-between">
                                 <span className="text-lg font-semibold text-gray-800">Total</span>
                                 <span className="text-lg font-semibold text-gray-800">
-                                    Rp{order.total_price.toLocaleString()}
+                                    Rp{order?.total_price.toLocaleString()}
                                 </span>
                             </div>
                         </div>

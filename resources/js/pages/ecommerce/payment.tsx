@@ -46,7 +46,6 @@ interface PaymentProps {
 
 export default function PaymentPage({
     cartItems,
-    totalQuantity,
     totalPrice,
     subtotal,
     shipping_amount,

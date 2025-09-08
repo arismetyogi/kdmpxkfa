@@ -3,10 +3,17 @@
 namespace App\Services;
 
 use App\Models\Cart;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
+use App\Services\DigikopTransactionService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
+use Throwable;
 
 class CartService
 {
@@ -28,6 +35,56 @@ class CartService
             // save to the cookie
             $this->saveItemToCookies($product->id, $quantity, $price);
         }
+    }
+
+    public function processCheckout(Request $request): array
+    {
+        // Validate billing information
+        $validated = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'required|string|max:20',
+            'address' => 'required|string|max:500',
+            'city' => 'required|string|max:255',
+            'state' => 'required|string|max:255',
+            'zip' => 'required|string|max:20',
+            'notes' => 'nullable|string|max:1000',
+            // Shipping fields - make them required since we're copying from billing
+            'shipping_first_name' => 'required|string|max:255',
+            'shipping_last_name' => 'required|string|max:255',
+            'shipping_email' => 'required|email|max:255',
+            'shipping_phone' => 'required|string|max:20',
+            'shipping_address' => 'required|string|max:500',
+            'shipping_city' => 'required|string|max:255',
+            'shipping_state' => 'required|string|max:255',
+            'shipping_zip' => 'required|string|max:20',
+        ]);
+
+        // Store billing/shipping info in session for payment page
+        return [
+            'checkout.billing' => [
+                'first_name' => $validated['first_name'],
+                'last_name' => $validated['last_name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
+                'address' => $validated['address'],
+                'city' => $validated['city'],
+                'state' => $validated['state'],
+                'zip' => $validated['zip'],
+                'notes' => $validated['notes'] ?? '',
+            ],
+            'checkout.shipping' => [
+                'first_name' => $validated['shipping_first_name'],
+                'last_name' => $validated['shipping_last_name'],
+                'email' => $validated['shipping_email'],
+                'phone' => $validated['shipping_phone'],
+                'address' => $validated['shipping_address'],
+                'city' => $validated['shipping_city'],
+                'state' => $validated['shipping_state'],
+                'zip' => $validated['shipping_zip'],
+            ],
+        ];
     }
 
     protected function updateItemQuantityToDatabase(int $productId, int $quantity): void
@@ -266,5 +323,143 @@ class CartService
         }
 
         return $cartCount;
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function processPayment(Request $request, DigikopTransactionService $transactionService): array
+    {
+        // Check if billing information exists in session
+        if (!Session::get('checkout.billing')) {
+            return [
+                'success' => false,
+                'redirect' => 'checkout',
+                'message' => 'Please complete billing information first.'
+            ];
+        }
+
+        $request->validate([
+            'payment_method' => 'required|string|in:va,cad',
+        ]);
+
+        try {
+            // Validate credit limit before processing payment
+            $user = auth()->user();
+            $totalAmount = $this->getTotalPrice();
+
+            // Validate credit limit using tenant_id
+            $creditValidation = $transactionService->validateCreditLimit($user->tenant_id, $totalAmount);
+
+            if (!$creditValidation['valid']) {
+                return [
+                    'success' => false,
+                    'back' => true,
+                    'message' => $creditValidation['message']
+                ];
+            }
+
+            DB::beginTransaction();
+
+            $billingData = Session::get('checkout.billing');
+            $shippingData = Session::get('checkout.shipping');
+            $cartItems = $this->getCartItems();
+
+            if (empty($cartItems)) {
+                return [
+                    'success' => false,
+                    'redirect' => 'carts.index',
+                    'message' => 'Your cart is empty.'
+                ];
+            }
+
+            // Create the order
+            $order = Order::create([
+                'transaction_number' => Order::generateTransactionNumber(),
+                'user_id' => auth()->id(),
+                'tenant_id' => auth()->user()->tenant_id,
+                'source_of_fund' => 'pinjaman',
+                'account_no' => '', // This would need to be set based on your business logic
+                'account_bank' => '', // This would need to be set based on your business logic
+                'payment_type' => 'cad',
+                'payment_method' => $request->payment_method,
+                'va_number' => '', // This would need to be set based on your business logic
+                'status' => 'pending',
+                'subtotal' => $this->getSubTotal(),
+                'tax_amount' => $this->getSubTotal() * 0.11, // You can calculate tax based on your business logic
+                'shipping_amount' => 0, // You can calculate shipping based on your business logic
+                'discount_amount' => 0,
+                'total_price' => $this->getSubTotal() * 1.11,
+                'billing_name' => $billingData['first_name'] . ' ' . $billingData['last_name'],
+                'billing_email' => $billingData['email'],
+                'billing_phone' => $billingData['phone'],
+                'billing_address' => $billingData['address'],
+                'billing_city' => $billingData['city'],
+                'billing_state' => $billingData['state'],
+                'billing_zip' => $billingData['zip'],
+                'shipping_name' => $shippingData['first_name'] . ' ' . $shippingData['last_name'],
+                'shipping_address' => $shippingData['address'],
+                'shipping_city' => $shippingData['city'],
+                'shipping_state' => $shippingData['state'],
+                'shipping_zip' => $shippingData['zip'],
+                'customer_notes' => $billingData['notes'] ?? null,
+            ]);
+
+            // Create order items
+            foreach ($cartItems as $cartItem) {
+                $product = Product::find($cartItem['product_id']);
+
+                if (!$product) {
+                    continue;
+                }
+
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
+                    'product_sku' => $product->sku,
+                    'product_description' => $product->description,
+                    'unit_price' => $cartItem['price'],
+                    'total_price' => $cartItem['price'] * $cartItem['quantity'],
+                    'quantity' => $cartItem['quantity'],
+                ]);
+            }
+
+            // Clear the cart
+            $this->clearCart();
+
+            // Clear session data
+            Session::forget(['checkout.billing', 'checkout.shipping']);
+
+            DB::commit();
+
+            // Return success response with order ID for redirect
+            return [
+                'success' => true,
+                'redirect' => 'order.complete',
+                'order_id' => $order->id,
+                'message' => 'Order placed successfully!'
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Order creation failed with exception: ' . $e->getMessage());
+
+            return [
+                'success' => false,
+                'back' => true,
+                'message' => $e->getMessage()
+            ];
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            Log::error('Order creation failed with throwable: ' . $e->getMessage());
+
+            return [
+                'success' => false,
+                'back' => true,
+                'message' => $e->getMessage()
+            ];
+        }
     }
 }

@@ -40,6 +40,7 @@ export interface SharedData {
     ziggy: Config & { location: string };
     sidebarOpen: boolean;
     ssoBaseUrl: string;
+    digikopUrl: string;
     [key: string]: unknown;
 }
 
@@ -56,7 +57,7 @@ export interface User {
     roles?: Role[];
     permissions?: Permission[];
     apotek_id?: number;
-    apotek?: Apotek
+    apotek?: Apotek;
     [key: string]: unknown; // This allows for additional properties...
 }
 
@@ -70,7 +71,7 @@ export interface Apotek {
     latitude?: number;
     longitude?: number;
     zipcode?: string;
-    is_active?: boolean
+    is_active?: boolean;
 }
 
 export interface Category {
@@ -106,39 +107,34 @@ export interface Product {
     is_featured: boolean;
 }
 
-export interface Order {
-    transaction_number: string;
-    tenant_id: string; // id koperasi
-    status: string;
-    merchant_id: string;
-    merchant_name: string;
-    total_nominal: number;
-    is_for_sale: boolean;
-    account_no: string;
-    account_bank: string;
-    payment_type: string;
-    payment_method: string;
-    va_number: string;
-    timestamp: string;
-    products?: Product[];
-    product_detail: {
-        sku: string;
-        quantity: number;
-    }[]; //Relasi ke Product
+export interface OrderItem {
+    id: number;
+    product_name: string;
+    product_image: string;
+    quantity: number;
+    unit_price: number;
+    total_price: number;
 }
 
-
-export interface OrderProducts {
+export interface Order {
     id: number;
-    name: string;
-    description: string;
-    category: string;
-    price: number;
-    inventory: number;
-    order_unit: string;
-    base_uom: string;
-    content: number;
-    image: string;
+    order_number: string;
+    status: string;
+    payment_status: string;
+    total_price: number;
+    billing_full_name: string;
+    billing_email: string;
+    billing_address: string;
+    billing_city: string;
+    billing_state: string;
+    billing_zip: string;
+    shipping_full_name: string;
+    shipping_address: string;
+    shipping_city: string;
+    shipping_state: string;
+    shipping_zip: string;
+    created_at: string;
+    order_items: OrderItem[];
 }
 
 export interface CartItem {
@@ -164,4 +160,4 @@ export interface Paginated<T> {
         from: number;
         to: number;
     };
-};
+}

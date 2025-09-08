@@ -13,7 +13,6 @@ class OrderItem extends Model
         'product_name',
         'product_sku',
         'product_description',
-        'product_image',
         'unit_price',
         'total_price',
         'quantity',
@@ -22,8 +21,6 @@ class OrderItem extends Model
     protected $casts = [
         'unit_price' => 'decimal:2',
         'total_price' => 'decimal:2',
-        'variation_type_option_ids' => 'array',
-        'variation_data' => 'array',
     ];
 
     public function order(): BelongsTo
