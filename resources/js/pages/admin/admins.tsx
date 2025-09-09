@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, Paginated, Permission, Role, User } from '@/types';
+import { Apotek, BreadcrumbItem, Paginated, Permission, Role, User } from '@/types';
 import { Head } from '@inertiajs/react';
 import { Edit, Plus, Shield, Trash2, UserCog, UserX } from 'lucide-react';
 import React, { useState } from 'react';
@@ -25,13 +25,14 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface AdminUserProps {
     admins: Paginated<User>;
     roles: Role[];
+    apoteks: Apotek[];
     permissions: Permission[];
     allAdmins: number;
     adminAdmins: number;
     activeAdmins: number;
 }
 
-export default function AdminAdmins({ admins, roles, allAdmins, adminAdmins, activeAdmins }: AdminUserProps) {
+export default function AdminAdmins({ admins, roles, apoteks, allAdmins, adminAdmins, activeAdmins }: AdminUserProps) {
     // Modal states
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -207,7 +208,7 @@ export default function AdminAdmins({ admins, roles, allAdmins, adminAdmins, act
             </div>
 
             {/* Create User Modal */}
-            <UserFormModal isOpen={isCreateModalOpen} onClose={closeModals} user={null} roles={roles} />
+            <UserFormModal isOpen={isCreateModalOpen} onClose={closeModals} user={null} roles={roles} apoteks={apoteks} />
 
             {/* Edit User Modal */}
             <UserFormModal isOpen={isEditModalOpen} onClose={closeModals} user={selectedUser} roles={roles} />

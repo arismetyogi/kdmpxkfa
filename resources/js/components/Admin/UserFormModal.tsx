@@ -7,10 +7,18 @@ import { useForm } from '@inertiajs/react';
 import { Loader2, Save } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { toast } from 'sonner';
+import SearchableSelect from '@/components/searchable-select';
 
 interface Role {
     id: number;
     name: string;
+}
+
+interface Apotek {
+    id: number;
+    sap_id: string;
+    name: string;
+    branch: string;
 }
 
 interface User {
@@ -20,6 +28,8 @@ interface User {
     email?: string;
     password?: string;
     password_confirmation?: string;
+    apotek_id?: number;
+    apotek?: Apotek;
     roles?: Role[];
 }
 
@@ -27,38 +37,45 @@ interface UserFormModalProps {
     isOpen: boolean;
     onClose: () => void;
     user?: User | null;
+    apoteks?: Apotek[];
     roles: Role[];
 }
 
-export default function UserFormModal({ isOpen, onClose, user, roles }: UserFormModalProps) {
+export default function UserFormModal({ isOpen, onClose, user, roles, apoteks }: UserFormModalProps) {
     const isEditing = !!user?.id;
 
-    const form = useForm({
+    const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm({
         name: user?.name || '',
         username: user?.username || '',
         email: user?.email || '',
         password: user?.password || '',
         password_confirmation: '',
         roles: user?.roles?.map((p) => p.id) || [],
+        apotek_id: user?.apotek_id || ''
     });
 
     // reset form when modal opens/closes or role changes
     useEffect(() => {
         if (isOpen) {
-            form.setData({
+            setData({
                 name: user?.name || '',
                 username: user?.username || '',
                 email: user?.email || '',
                 password: user?.password || '',
                 password_confirmation: user?.password_confirmation || '',
+                apotek_id: user?.apotek_id || '',
                 roles: user?.roles?.map((p) => p.id) || [],
             });
-            form.clearErrors();
+            clearErrors();
         }
     }, [isOpen, user]);
 
     const handleRoleToggle = (roleId: number) => {
-        form.setData('roles', form.data.roles.includes(roleId) ? form.data.roles.filter((id) => id !== roleId) : [...form.data.roles, roleId]);
+        setData('roles', data.roles.includes(roleId) ? data.roles.filter((id) => id !== roleId) : [...data.roles, roleId]);
+    };
+
+    const handleApotekChange = (value: string) => {
+        setData('apotek_id', value);
     };
 
     const formatRoleName = (role: string) => {
@@ -72,7 +89,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles }: UserForm
         e.preventDefault();
 
         if (isEditing && user?.id) {
-            form.put(route('admin.users.update', user.id), {
+            put(route('admin.users.update', user.id), {
                 onSuccess: () => {
                     onClose();
                     toast.success('User updated successfully.');
@@ -82,7 +99,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles }: UserForm
                 },
             });
         } else {
-            form.post(route('admin.users.store'), {
+            post(route('admin.users.store'), {
                 onSuccess: () => {
                     onClose();
                     toast.success('User created successfully');
@@ -112,13 +129,13 @@ export default function UserFormModal({ isOpen, onClose, user, roles }: UserForm
                             <Input
                                 id="name"
                                 name="name"
-                                value={form.data.name}
-                                onChange={(e) => form.setData('name', e.target.value)}
+                                value={data.name}
+                                onChange={(e) => setData('name', e.target.value)}
                                 placeholder="Enter user's full name"
                                 required
                                 className="mt-1"
                             />
-                            {form.errors.name && <p className="mt-1 text-sm text-red-600">{form.errors.name}</p>}
+                            {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
                         </div>
 
                         {/* Username */}
@@ -127,13 +144,13 @@ export default function UserFormModal({ isOpen, onClose, user, roles }: UserForm
                             <Input
                                 id="username"
                                 name="username"
-                                value={form.data.username}
-                                onChange={(e) => form.setData('username', e.target.value)}
+                                value={data.username}
+                                onChange={(e) => setData('username', e.target.value)}
                                 placeholder="Enter username"
                                 required
                                 className="mt-1"
                             />
-                            {form.errors.username && <p className="mt-1 text-sm text-red-600">{form.errors.username}</p>}
+                            {errors.username && <p className="mt-1 text-sm text-red-600">{errors.username}</p>}
                         </div>
 
                         {/* Email */}
@@ -143,13 +160,13 @@ export default function UserFormModal({ isOpen, onClose, user, roles }: UserForm
                                 id="email"
                                 name="email"
                                 type="email"
-                                value={form.data.email}
-                                onChange={(e) => form.setData('email', e.target.value)}
+                                value={data.email}
+                                onChange={(e) => setData('email', e.target.value)}
                                 placeholder="Enter user's email"
                                 required
                                 className="mt-1"
                             />
-                            {form.errors.email && <p className="mt-1 text-sm text-red-600">{form.errors.email}</p>}
+                            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
                         </div>
 
                         {/* Password */}
@@ -159,13 +176,13 @@ export default function UserFormModal({ isOpen, onClose, user, roles }: UserForm
                                 id="password"
                                 name="password"
                                 type="password"
-                                value={form.data.password}
-                                onChange={(e) => form.setData('password', e.target.value)}
+                                value={data.password}
+                                onChange={(e) => setData('password', e.target.value)}
                                 placeholder="Enter password"
                                 required={!isEditing}
                                 className="mt-1"
                             />
-                            {form.errors.password && <p className="mt-1 text-sm text-red-600">{form.errors.password}</p>}
+                            {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
                         </div>
                         <div>
                             <Label htmlFor="password_confirmation">Password</Label>
@@ -173,12 +190,31 @@ export default function UserFormModal({ isOpen, onClose, user, roles }: UserForm
                                 id="password_confirmation"
                                 name="password_confirmation"
                                 type="password"
-                                value={form.data.password_confirmation}
-                                onChange={(e) => form.setData('password_confirmation', e.target.value)}
+                                value={data.password_confirmation}
+                                onChange={(e) => setData('password_confirmation', e.target.value)}
                                 placeholder="Enter password confirmation"
                                 className="mt-1"
                             />
-                            {form.errors.password_confirmation && <p className="mt-1 text-sm text-red-600">{form.errors.password_confirmation}</p>}
+                            {errors.password_confirmation && <p className="mt-1 text-sm text-red-600">{errors.password_confirmation}</p>}
+                        </div>
+
+                        {/* Apotek */}
+                        <div>
+                            <Label htmlFor="apotek_id">Apotek</Label>
+                            <SearchableSelect
+                                options={apoteks.map((a) => ({
+                                    value: a.id.toString(),
+                                    label: `${a.sap_id} - ${a.name}`,
+                                }))}
+                                value={data.apotek_id}
+                                onChange={handleApotekChange}
+                                placeholder="Select an apotek..."
+                                searchPlaceholder="Search apoteks..."
+                                maxResults={10}
+                            />
+                            {errors.apotek_id && (
+                                <p className="text-sm text-red-600 mt-1">{errors.apotek_id}</p>
+                            )}
                         </div>
 
                         {/* Roles */}
@@ -189,7 +225,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles }: UserForm
                                     <div key={role.id} className="flex items-center space-x-2">
                                         <Checkbox
                                             id={`role-${role.id}`}
-                                            checked={form.data.roles.includes(role.id)}
+                                            checked={data.roles.includes(role.id)}
                                             onCheckedChange={() => handleRoleToggle(role.id)}
                                         />
                                         <Label htmlFor={`role-${role.id}`} className="cursor-pointer text-sm font-normal">
@@ -202,11 +238,11 @@ export default function UserFormModal({ isOpen, onClose, user, roles }: UserForm
                     </div>
 
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={onClose} disabled={form.processing}>
+                        <Button type="button" variant="outline" onClick={onClose} disabled={processing}>
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={form.processing || !form.data.name.trim()}>
-                            {form.processing ? (
+                        <Button type="submit" disabled={processing || !data.name.trim()}>
+                            {processing ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     Saving...

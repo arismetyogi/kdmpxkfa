@@ -61,6 +61,7 @@ class UserController extends Controller
             'password_confirmation' => ['required_if:password,', 'same:password'],
             'roles' => ['array'],
             'roles.*' => ['exists:roles,id'],
+            'apotek_id' => ['exists:apoteks,id']
         ]);
 
         $user = User::create([
@@ -68,14 +69,15 @@ class UserController extends Controller
             'username' => $validated['username'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'apotek_id' => $validated['apotek_id'],
         ]);
 
-        Log::info($validated);
+        Log::info(json_encode($validated));
         if (! empty($validated['roles'])) {
             $user->syncRoles($validated['roles']);
         }
 
-        return redirect()->route('admin.users.index')->with('success', 'Role created successfully.');
+        return back()->with('success', 'User created successfully.');
     }
 
     public function update(Request $request, User $user)
@@ -96,6 +98,7 @@ class UserController extends Controller
             ),
             'roles' => ['array'],
             'roles.*' => ['exists:roles,id'],
+            'apotek_id' => ['exists:apoteks,id']
         ]);
 
         if (! empty($validated['[password]'])) {
@@ -104,12 +107,14 @@ class UserController extends Controller
                 'username' => $validated['username'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
+                'apotek_id' => $validated['apotek_id']
             ]);
         } else {
             $user->update([
                 'name' => $validated['name'],
                 'username' => $validated['username'],
                 'email' => $validated['email'],
+                'apotek_id' => $validated['apotek_id']
             ]);
         }
 
@@ -117,7 +122,7 @@ class UserController extends Controller
             $user->syncRoles($validated['roles']);
         }
 
-        return to_route('admin.users.index')->with('success', 'User update successfully.');
+        return back()->with('success', 'User updated successfully.');
     }
 
     public function mapUser(Request $request, User $user)
