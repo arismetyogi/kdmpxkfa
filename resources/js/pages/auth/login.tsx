@@ -16,7 +16,6 @@ interface LoginProps extends SharedData{
 }
 
 export default function Login({ status, canResetPassword, digikopUrl }: LoginProps) {
-    console.log('digikop url: ', digikopUrl);
     return (
         <AuthLayout title="" description="">
             <Card>

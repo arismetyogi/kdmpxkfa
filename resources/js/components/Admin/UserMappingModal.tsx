@@ -24,7 +24,7 @@ interface UserMappingModalProps {
 
 export default function UserMappingModal({ isOpen, onClose, user, apoteks }: UserMappingModalProps) {
     // ✅ Initialize useForm
-    const { data, setData, put, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         apotek_id: user?.apotek_id ?? '',
     });
 
@@ -45,7 +45,7 @@ export default function UserMappingModal({ isOpen, onClose, user, apoteks }: Use
         e.preventDefault();
         if (!user?.id) return;
 
-        put(route('admin.users.map', user.id), {
+        post(route('admin.users.map', user.id), {
             preserveScroll: true,
             onSuccess: () => {
                 reset();

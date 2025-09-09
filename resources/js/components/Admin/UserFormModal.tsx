@@ -44,7 +44,7 @@ interface UserFormModalProps {
 export default function UserFormModal({ isOpen, onClose, user, roles, apoteks }: UserFormModalProps) {
     const isEditing = !!user?.id;
 
-    const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm({
+    const { data, setData, put, post, processing, errors, reset, clearErrors } = useForm({
         name: user?.name || '',
         username: user?.username || '',
         email: user?.email || '',

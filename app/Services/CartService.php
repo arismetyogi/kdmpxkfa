@@ -386,10 +386,9 @@ class CartService
                 'source_of_fund' => 'pinjaman',
                 'account_no' => '', // This would need to be set based on your business logic
                 'account_bank' => '', // This would need to be set based on your business logic
-                'payment_type' => 'cad',
+                'payment_type' => 'cad', // todo! no other payment available currently, subjects to change
                 'payment_method' => $request->payment_method,
                 'va_number' => '', // This would need to be set based on your business logic
-                'status' => 'pending',
                 'subtotal' => $this->getSubTotal(),
                 'tax_amount' => $this->getSubTotal() * 0.11, // You can calculate tax based on your business logic
                 'shipping_amount' => 0, // You can calculate shipping based on your business logic

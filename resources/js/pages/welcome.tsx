@@ -1,6 +1,6 @@
+import AppLogoIcon from '@/components/app-logo-icon';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import AppLogoIcon from '@/components/app-logo-icon';
 
 export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
@@ -8,9 +8,7 @@ export default function Welcome() {
 
     console.log(user);
     // Check if user has admin or manager role
-    const isUser = user?.roles?.some((role) =>
-        ['user'].includes(role.name.toLowerCase())
-    );
+    const isUser = user?.roles?.some((role) => ['user'].includes(role.name.toLowerCase()));
 
     const dashRoute = isUser ? 'dashboard' : 'admin.dashboard';
 
@@ -24,12 +22,15 @@ export default function Welcome() {
                 <header className="mb-6 w-full max-w-[335px] text-sm not-has-[nav]:hidden lg:max-w-4xl">
                     <nav className="flex items-center justify-end gap-4">
                         {auth.user ? (
-                            <Link
-                                href={route(dashRoute)}
-                                className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
-                            >
-                                {isUser ? 'Dashboard' : 'Admin Dashboard'}
-                            </Link>
+                            <>
+                                <Link
+                                    href={route(dashRoute)}
+                                    className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
+                                >
+                                    {isUser ? 'Dashboard' : 'Admin Dashboard'}
+                                </Link>
+                                <Link className="inline-block rounded-sm border px-4 py-1.5" method="post" href={route('logout')}>Logout</Link>
+                            </>
                         ) : (
                             <>
                                 <Link
@@ -37,12 +38,6 @@ export default function Welcome() {
                                     className="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
                                 >
                                     Log in
-                                </Link>
-                                <Link
-                                    href={route('register')}
-                                    className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
-                                >
-                                    Register
                                 </Link>
                             </>
                         )}

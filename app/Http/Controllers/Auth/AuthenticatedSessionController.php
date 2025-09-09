@@ -33,7 +33,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        $dashRoute = auth()->user()->hasAnyRole(['super-admin', 'admin']) ? 'admin.dashboard' : 'dashboard';
+        $dashRoute = auth()->user()->hasPermissionTo('view admin dashboard') ? 'admin.dashboard' : 'dashboard';
 
         return redirect()->intended(route($dashRoute, absolute: false));
     }

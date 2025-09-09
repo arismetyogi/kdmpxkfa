@@ -38,7 +38,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/order-complete/{order}', [CartController::class, 'orderComplete'])->name('order.complete');
 
     // Admin routes with role-based access
-    Route::middleware(['role:admins|super-admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('permission:view admin dashboard')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
 
         // Role management routes with explicit model binding
@@ -56,7 +56,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::resource('admins', AdminController::class);
 
-        Route::put('users/{user}/map', [UserController::class, 'mapUser'])->name('users.map');
+        Route::post('users/{user}/map', [UserController::class, 'mapUser'])->name('users.map');
         Route::resource('users', UserController::class)->except('edit');
 
         // Product management routes with explicit model binding

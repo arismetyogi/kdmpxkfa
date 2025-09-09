@@ -88,7 +88,6 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'max:255', Rule::unique('users', 'username')->ignore($user)],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user)],
             'password' => array_merge(
                 ['nullable', 'string', 'max:255', 'confirmed'],
@@ -104,7 +103,6 @@ class UserController extends Controller
         if (! empty($validated['[password]'])) {
             $user->update([
                 'name' => $validated['name'],
-                'username' => $validated['username'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'apotek_id' => $validated['apotek_id']
@@ -112,7 +110,6 @@ class UserController extends Controller
         } else {
             $user->update([
                 'name' => $validated['name'],
-                'username' => $validated['username'],
                 'email' => $validated['email'],
                 'apotek_id' => $validated['apotek_id']
             ]);
