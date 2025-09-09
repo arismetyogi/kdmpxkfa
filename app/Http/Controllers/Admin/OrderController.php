@@ -46,22 +46,6 @@ class OrderController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
      * Display the specified resource.
      */
     public function show(string $id)
@@ -95,7 +79,48 @@ class OrderController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $order = Order::findOrFail($id);
+
+        // Validate the request
+        $request->validate([
+            'order_items' => 'array',
+            'order_items.*.id' => 'required|exists:order_items,id',
+            'order_items.*.qty_delivered' => 'required|integer|min:0',
+        ]);
+
+        // Update order items with delivered quantities
+        $allItemsDelivered = true;
+        if ($request->has('order_items')) {
+            foreach ($request->order_items as $itemData) {
+                $orderItem = $order->orderItems()->find($itemData['id']);
+                if ($orderItem) {
+                    $orderItem->update([
+                        'qty_delivered' => $itemData['qty_delivered']
+                    ]);
+
+                    // Check if all items are fully delivered
+                    if ($orderItem->qty_delivered < $orderItem->quantity) {
+                        $allItemsDelivered = false;
+                    }
+                }
+            }
+        }
+
+        // Update order status to received if all items are delivered
+        if ($allItemsDelivered) {
+            $order->update([
+                'status' => 'received',
+                'delivered_at' => now()
+            ]);
+        } else if ($order->status !== 'delivering') {
+            // If not all items are delivered but order was not in delivering status, set it to delivering
+            $order->update([
+                'status' => 'delivering',
+                'shipped_at' => $order->shipped_at ?? now()
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Order updated successfully.');
     }
 
     /**

@@ -1,10 +1,11 @@
 import AppLayout from "@/layouts/app-layout";
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { format } from "date-fns";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Package, Truck, CheckCircle, XCircle, Clock, User, MapPin } from "lucide-react";
 import { Order, OrderItem } from '@/types';
 
@@ -46,6 +47,37 @@ interface OrderShowProps {
 
 export default function OrderShow({ order }: OrderShowProps) {
     const breadcrumbsArray = breadcrumbs(order.id.toString());
+
+    // Initialize form with order items
+    const { data, setData, patch, processing } = useForm({
+        order_items: order.order_items?.map((item: OrderItem) => ({
+            id: item.id,
+            qty_delivered: item.qty_delivered || 0
+        })) || [],
+        status: order.status,
+        shipped_at: order.shipped_at || null
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        patch(route('admin.orders.update', order.id), {
+            onSuccess: () => {
+                // Reload the page to show updated data
+                window.location.reload();
+            }
+        });
+    };
+
+    const updateQtyDelivered = (index: number, value: string) => {
+        const updatedItems = [...data.order_items];
+        updatedItems[index] = {
+            ...updatedItems[index],
+            qty_delivered: parseInt(value) || 0
+        };
+        setData('order_items', updatedItems);
+    };
+
+    const isDeliverable = order.status === 'new';
 
     return (
         <AppLayout breadcrumbs={breadcrumbsArray}>
@@ -155,89 +187,115 @@ export default function OrderShow({ order }: OrderShowProps) {
                 </Card>
 
                 {/* Order Items */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Package className="h-5 w-5" />
-                            Order Items
-                        </CardTitle>
-                        <CardDescription>Products included in this order</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead/>
-                                    <TableHead>Product</TableHead>
-                                    <TableHead className="text-right">Unit Price</TableHead>
-                                    <TableHead className="text-center">Quantity</TableHead>
-                                    <TableHead className="text-center">Satuan</TableHead>
-                                    <TableHead className="text-right">Total</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {order.order_items?.map((item: OrderItem) => (
-                                    <TableRow key={item.id}>
-                                        <TableCell>
-                                            {item.product.image ? (
-                                                <img src={item.product.image} alt={item.product.name} className="h-16 w-16 rounded-lg object-cover" />
-                                            ) : (
-                                                <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-200 text-xs text-gray-500">
-                                                    No Image
-                                                </div>
+                <form onSubmit={handleSubmit}>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Package className="h-5 w-5" />
+                                Order Items
+                            </CardTitle>
+                            <CardDescription>Products included in this order</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead/>
+                                        <TableHead>Product</TableHead>
+                                        <TableHead className="text-right">Unit Price</TableHead>
+                                        <TableHead className="text-center">Quantity</TableHead>
+                                        <TableHead className="text-center">Satuan</TableHead>
+                                        {isDeliverable && (
+                                            <TableHead className="text-center">Qty Delivered</TableHead>
+                                        )}
+                                        <TableHead className="text-right">Total</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {order.order_items?.map((item: OrderItem, index: number) => (
+                                        <TableRow key={item.id}>
+                                            <TableCell>
+                                                {item.product.image ? (
+                                                    <img src={item.product.image} alt={item.product.name} className="h-16 w-16 rounded-lg object-cover" />
+                                                ) : (
+                                                    <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-200 text-xs text-gray-500">
+                                                        No Image
+                                                    </div>
+                                                )}
+                                            </TableCell>
+                                            <TableCell className="text-sm font-medium">
+                                                {item.product_name || 'N/A'}
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                Rp{Number(item.unit_price).toLocaleString()}
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {item.quantity} {item.product.order_unit}
+                                                <br />
+                                                <span className="text-xs text-muted-foreground">
+                                                    ({item.quantity * item.product.content} {item.product.base_uom})
+                                                </span>
+                                            </TableCell>
+                                            <TableCell>
+                                                {item.product.order_unit}
+                                            </TableCell>
+                                            {isDeliverable && (
+                                                <TableCell className="text-center">
+                                                    <Input
+                                                        type="number"
+                                                        min="0"
+                                                        max={item.quantity}
+                                                        value={data.order_items[index]?.qty_delivered || 0}
+                                                        onChange={(e) => updateQtyDelivered(index, e.target.value)}
+                                                        className="w-20 text-center"
+                                                    />
+                                                </TableCell>
                                             )}
-                                        </TableCell>
-                                        <TableCell className="text-sm font-medium">
-                                            {item.product_name || 'N/A'}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            Rp{Number(item.unit_price).toLocaleString()}
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            {item.quantity} {item.product.order_unit}
-                                            <br />
-                                            <span className="text-xs text-muted-foreground">
-                                                ({item.quantity * item.product.content} {item.product.base_uom})
-                                            </span>
-                                        </TableCell>
-                                        <TableCell>
-                                            {item.product.order_unit}
+                                            <TableCell className="text-right">
+                                                Rp{Number(item.unit_price * item.quantity).toLocaleString()}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                                <TableFooter>
+                                    <TableRow>
+                                        <TableCell colSpan={isDeliverable ? 6 : 5} className="text-right font-medium">
+                                            Subtotal
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            Rp{Number(item.unit_price * item.quantity).toLocaleString()}
+                                            Rp{Number(order.total_price).toLocaleString()}
                                         </TableCell>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                            <TableFooter>
-                                <TableRow>
-                                    <TableCell colSpan={5} className="text-right font-medium">
-                                        Subtotal
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        Rp{Number(order.total_price).toLocaleString()}
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell colSpan={5} className="text-right font-medium">
-                                        Tax (11%)
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        Rp{Number(order.total_price * 0.11).toLocaleString()}
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell colSpan={5} className="text-right font-bold">
-                                        Total
-                                    </TableCell>
-                                    <TableCell className="text-right font-bold">
-                                        Rp{Number(order.total_price * 1.11).toLocaleString()}
-                                    </TableCell>
-                                </TableRow>
-                            </TableFooter>
-                        </Table>
-                    </CardContent>
-                </Card>
+                                    <TableRow>
+                                        <TableCell colSpan={isDeliverable ? 6 : 5} className="text-right font-medium">
+                                            Tax (11%)
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            Rp{Number(order.total_price * 0.11).toLocaleString()}
+                                        </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell colSpan={isDeliverable ? 6 : 5} className="text-right font-bold">
+                                            Total
+                                        </TableCell>
+                                        <TableCell className="text-right font-bold">
+                                            Rp{Number(order.total_price * 1.11).toLocaleString()}
+                                        </TableCell>
+                                    </TableRow>
+                                </TableFooter>
+                            </Table>
+                        </CardContent>
+                    </Card>
+
+                    {/* Delivery Button */}
+                    {isDeliverable && (
+                        <div className="mt-4 flex justify-end">
+                            <Button type="submit" disabled={processing}>
+                                {processing ? 'Updating...' : 'Mark as Delivered'}
+                            </Button>
+                        </div>
+                    )}
+                </form>
 
                 {/* Back Button */}
                 <div className="flex justify-end">

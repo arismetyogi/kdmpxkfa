@@ -113,6 +113,7 @@ export interface OrderItem {
     product_name: string;
     product_image: string;
     quantity: number;
+    qty_delivered?: number;
     unit_price: number;
     total_price: number;
     product: Product;
@@ -138,6 +139,8 @@ export interface Order {
     shipping_state: string;
     shipping_zip: string;
     created_at: string;
+    shipped_at: string;
+    delivered_at: string;
     order_items: OrderItem[];
 }
 

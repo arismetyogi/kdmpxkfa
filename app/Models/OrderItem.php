@@ -16,6 +16,7 @@ class OrderItem extends Model
         'unit_price',
         'total_price',
         'quantity',
+        'qty_delivered',
         'base_quantity', // Quantity in base units (quantity * content)
         'order_unit',
         'base_uom',
