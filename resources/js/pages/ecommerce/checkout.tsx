@@ -11,7 +11,11 @@ interface CartItem {
     slug: string;
     quantity: number;
     price: number;
+    base_price: number;
     image: string;
+    order_unit: string;
+    base_uom: string;
+    content: number;
 }
 
 interface CheckoutProps {
@@ -411,7 +415,10 @@ export default function CheckoutPage({
                                         <div key={item.id} className="flex items-center justify-between py-1">
                                             <div>
                                                 <p className="text-xs font-medium text-gray-800">{item.name}</p>
-                                                <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                                                <p className="text-xs text-gray-500">
+                                                    Qty: {item.quantity} {item.order_unit}
+                                                    <span className="block">({item.quantity * item.content} {item.base_uom})</span>
+                                                </p>
                                             </div>
                                             <p className="text-xs font-medium text-gray-800">
                                                 Rp{(item.price * item.quantity).toLocaleString()}

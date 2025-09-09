@@ -26,7 +26,8 @@ class CartService
     public function addItemToCart(Product $product, int $quantity = 1): void
     {
 
-        $price = $product->price;
+        // Price per order unit = base price * content
+        $price = $product->price * $product->content;
 
         if (Auth::check()) {
             // save to the database
@@ -171,14 +172,18 @@ class CartService
                     }
 
                     $cartItemData[] = [
-                        'id' => $cartItem['id'] ?? null,
-                        'product_id' => $product->id,
-                        'name' => $product->name,
-                        'slug' => $product->slug,
-                        'quantity' => $cartItem['quantity'],
-                        'price' => $product->price,
-                        'image' => $imageUrl,
-                    ];
+                    'id' => $cartItem['id'] ?? null,
+                    'product_id' => $product->id,
+                    'name' => $product->name,
+                    'slug' => $product->slug,
+                    'quantity' => $cartItem['quantity'],
+                    'price' => $product->price * $product->content, // Price per order unit
+                    'base_price' => $product->price, // Price per base unit
+                    'image' => $imageUrl,
+                    'order_unit' => $product->order_unit,
+                    'base_uom' => $product->base_uom,
+                    'content' => $product->content,
+                ];
                 }
                 $this->cachedCartItems = $cartItemData;
             }
@@ -419,9 +424,13 @@ class CartService
                     'product_name' => $product->name,
                     'product_sku' => $product->sku,
                     'product_description' => $product->description,
-                    'unit_price' => $cartItem['price'],
+                    'unit_price' => $cartItem['price'], // This is now the price per order unit
                     'total_price' => $cartItem['price'] * $cartItem['quantity'],
                     'quantity' => $cartItem['quantity'],
+                    'base_quantity' => $cartItem['quantity'] * $product->content,
+                    'order_unit' => $product->order_unit,
+                    'base_uom' => $product->base_uom,
+                    'content' => $product->content,
                 ]);
             }
 
@@ -448,7 +457,7 @@ class CartService
             return [
                 'success' => false,
                 'back' => true,
-                'message' => $e->getMessage()
+                'message' => 'Koperasi belum dimapping dengan Apotek KF, Silakan hubungi administrator.'
             ];
         } catch (Throwable $e) {
             DB::rollBack();

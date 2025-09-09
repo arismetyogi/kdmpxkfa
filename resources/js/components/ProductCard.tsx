@@ -15,6 +15,9 @@ export default function ProductCard({product}: { product: Product }) {
         category,
     } = product;
 
+    // Calculate price per order unit
+    const pricePerOrderUnit = price * content;
+
     const form = useForm<{productId: number, quantity: number}>({
         productId: product.id,
         quantity: 1
@@ -71,7 +74,10 @@ export default function ProductCard({product}: { product: Product }) {
             {/* Bagian Bawah */}
             <div className="mt-3">
                 <p className="text-lg md:text-xl font-bold text-blue-600">
-                    Rp {price?.toLocaleString() ?? "0"}
+                    Rp {pricePerOrderUnit?.toLocaleString() ?? "0"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                    Rp {price?.toLocaleString() ?? "0"} per {base_uom}
                 </p>
 
                 <button

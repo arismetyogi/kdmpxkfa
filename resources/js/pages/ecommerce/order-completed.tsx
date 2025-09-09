@@ -76,7 +76,10 @@ export default function OrderCompletedPage({ order }: OrderCompletedProps) {
                                     )}
                                     <div className="ml-4 flex-1">
                                         <h4 className="text-sm font-medium text-gray-800">{item.product_name}</h4>
-                                        <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                                        <p className="text-sm text-gray-600">
+                                            {item.quantity} {item.product.order_unit}
+                                            <span className="block">({item.quantity * item.product.content} {item.product.base_uom})</span>
+                                        </p>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-sm font-medium text-gray-800">

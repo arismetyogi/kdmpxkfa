@@ -90,20 +90,20 @@ export interface Product {
     name: string;
     slug: string;
     description: string;
-    dosage: Array<string>;
-    pharmacology: string;
-    category_id?: number;
-    category?: Category;
+    dosage: any;
+    pharmacology: any;
+    category_id: number;
+    category: any;
     base_uom: string;
     order_unit: string;
     content: number;
     price: number;
     weight: number;
-    length?: number;
-    width?: number;
-    height?: number;
-    brand?: string;
-    image?: any;
+    length: number;
+    width: number;
+    height: number;
+    brand: string;
+    image: string;
     is_active: boolean;
     is_featured: boolean;
 }
@@ -115,7 +115,6 @@ export interface OrderItem {
     quantity: number;
     unit_price: number;
     total_price: number;
-    qty_delivered: number;
     product: Product;
 }
 
@@ -143,12 +142,17 @@ export interface Order {
 }
 
 export interface CartItem {
+    id: number | string;
+    product_id: number;
     name: string;
-    image: string;
-    qty: string;
-    packaging: string;
-    price: number;
+    slug: string;
     quantity: number;
+    price: number;
+    base_price: number;
+    image: string;
+    order_unit: string;
+    base_uom: string;
+    content: number;
 }
 
 export interface Paginated<T> {

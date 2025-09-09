@@ -194,10 +194,14 @@ export default function OrderShow({ order }: OrderShowProps) {
                                             Rp{Number(item.unit_price).toLocaleString()}
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            {item.quantity}
+                                            {item.quantity} {item.product.order_unit}
+                                            <br />
+                                            <span className="text-xs text-muted-foreground">
+                                                ({item.quantity * item.product.content} {item.product.base_uom})
+                                            </span>
                                         </TableCell>
                                         <TableCell>
-                                            {item.product.base_uom}
+                                            {item.product.order_unit}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             Rp{Number(item.unit_price * item.quantity).toLocaleString()}

@@ -44,6 +44,11 @@ class OrderResource extends JsonResource
                         'quantity' => $item->quantity,
                         'unit_price' => $item->unit_price,
                         'total_price' => $item->total_price,
+                        'product' => $product ? [
+                            'order_unit' => $product->order_unit,
+                            'base_uom' => $product->base_uom,
+                            'content' => $product->content,
+                        ] : null,
                     ];
                 });
             }, []),

@@ -10,7 +10,11 @@ interface CartItem {
     slug: string
     quantity: number
     price: number
+    base_price: number
     image: string
+    order_unit: string
+    base_uom: string
+    content: number
 }
 
 interface CartProps {
@@ -128,8 +132,19 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
                                                             {item.name}
                                                         </Link>
                                                     </h3>
+                                                    <div className="mt-1 text-sm text-gray-600">
+                                                        {item.content} {item.base_uom} per {item.order_unit}
+                                                    </div>
+                                                    <div className="mt-1 text-sm font-medium text-gray-600">
+                                                        {item.quantity} {item.order_unit}
+                                                        <span className="text-gray-500"> ({item.quantity * item.content} {item.base_uom})</span>
+                                                    </div>
                                                     <div className="mt-2 text-lg font-semibold text-indigo-600">
-                                                        ${item.price}
+                                                        Rp{(item.price).toLocaleString()}
+                                                        <span className="text-sm font-normal text-gray-500"> per {item.order_unit}</span>
+                                                    </div>
+                                                    <div className="text-sm text-gray-500">
+                                                        Rp{(item.base_price).toLocaleString()} per {item.base_uom}
                                                     </div>
                                                 </div>
                                                 <div className="ml-4 flex items-center space-x-2">
@@ -151,7 +166,10 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
                                                 </div>
                                                 <div className="ml-4 text-right">
                                                     <div className="text-lg font-semibold text-gray-800">
-                                                        ${(item.price * item.quantity).toFixed(2)}
+                                                        Rp{(item.price * item.quantity).toLocaleString()}
+                                                    </div>
+                                                    <div className="text-sm text-gray-500">
+                                                        ({item.base_price * item.quantity * item.content} {item.base_uom})
                                                     </div>
                                                     <button
                                                         onClick={() => removeItem(item)}
@@ -175,7 +193,7 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
                             <div className="space-y-3">
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">Subtotal</span>
-                                    <span className="font-medium">${subtotal.toFixed(2)}</span>
+                                    <span className="font-medium">Rp{subtotal.toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">Shipping</span>
@@ -184,7 +202,7 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
                                 <div className="border-t pt-3">
                                     <div className="flex justify-between">
                                         <span className="text-lg font-semibold text-gray-800">Total</span>
-                                        <span className="text-lg font-semibold text-gray-800">${total.toFixed(2)}</span>
+                                        <span className="text-lg font-semibold text-gray-800">Rp{total.toLocaleString()}</span>
                                     </div>
                                 </div>
                             </div>

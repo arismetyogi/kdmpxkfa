@@ -16,11 +16,16 @@ class OrderItem extends Model
         'unit_price',
         'total_price',
         'quantity',
+        'base_quantity', // Quantity in base units (quantity * content)
+        'order_unit',
+        'base_uom',
+        'content',
     ];
 
     protected $casts = [
         'unit_price' => 'decimal:2',
         'total_price' => 'decimal:2',
+        'base_quantity' => 'integer',
     ];
 
     public function order(): BelongsTo
