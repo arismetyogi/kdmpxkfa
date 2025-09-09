@@ -211,7 +211,7 @@ export default function AdminAdmins({ admins, roles, apoteks, allAdmins, adminAd
             <UserFormModal isOpen={isCreateModalOpen} onClose={closeModals} user={null} roles={roles} apoteks={apoteks} />
 
             {/* Edit User Modal */}
-            <UserFormModal isOpen={isEditModalOpen} onClose={closeModals} user={selectedUser} roles={roles} />
+            <UserFormModal isOpen={isEditModalOpen} onClose={closeModals} user={selectedUser} roles={roles} apoteks={apoteks}/>
 
             {/* Delete User Modal */}
             <DeleteUserModal isOpen={isDeleteModalOpen} onClose={closeModals} user={selectedUser} />

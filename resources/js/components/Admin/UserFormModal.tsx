@@ -139,19 +139,21 @@ export default function UserFormModal({ isOpen, onClose, user, roles, apoteks }:
                         </div>
 
                         {/* Username */}
-                        <div>
-                            <Label htmlFor="username">Username</Label>
-                            <Input
-                                id="username"
-                                name="username"
-                                value={data.username}
-                                onChange={(e) => setData('username', e.target.value)}
-                                placeholder="Enter username"
-                                required
-                                className="mt-1"
-                            />
-                            {errors.username && <p className="mt-1 text-sm text-red-600">{errors.username}</p>}
-                        </div>
+                        {!isEditing && (
+                            <div>
+                                <Label htmlFor="username">Username</Label>
+                                <Input
+                                    id="username"
+                                    name="username"
+                                    value={data.username}
+                                    onChange={(e) => setData('username', e.target.value)}
+                                    placeholder="Enter username"
+                                    required
+                                    className="mt-1"
+                                />
+                                {errors.username && <p className="mt-1 text-sm text-red-600">{errors.username}</p>}
+                            </div>
+                        )}
 
                         {/* Email */}
                         <div>
@@ -202,7 +204,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles, apoteks }:
                         <div>
                             <Label htmlFor="apotek_id">Apotek</Label>
                             <SearchableSelect
-                                options={apoteks.map((a) => ({
+                                options={(apoteks ?? []).map((a) => ({
                                     value: a.id.toString(),
                                     label: `${a.sap_id} - ${a.name}`,
                                 }))}
@@ -212,9 +214,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles, apoteks }:
                                 searchPlaceholder="Search apoteks..."
                                 maxResults={10}
                             />
-                            {errors.apotek_id && (
-                                <p className="text-sm text-red-600 mt-1">{errors.apotek_id}</p>
-                            )}
+                            {errors.apotek_id && <p className="mt-1 text-sm text-red-600">{errors.apotek_id}</p>}
                         </div>
 
                         {/* Roles */}

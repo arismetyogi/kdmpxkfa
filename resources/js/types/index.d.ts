@@ -58,6 +58,7 @@ export interface User {
     permissions?: Permission[];
     apotek_id?: number;
     apotek?: Apotek;
+    phone?: string;
     [key: string]: unknown; // This allows for additional properties...
 }
 
@@ -114,21 +115,25 @@ export interface OrderItem {
     quantity: number;
     unit_price: number;
     total_price: number;
+    qty_delivered: number;
+    product: Product;
 }
 
 export interface Order {
     id: number;
-    order_number: string;
+    transaction_number: string;
+    user: User;
+    apotek: Apotek;
     status: string;
     payment_status: string;
     total_price: number;
-    billing_full_name: string;
+    billing_name: string;
     billing_email: string;
     billing_address: string;
     billing_city: string;
     billing_state: string;
     billing_zip: string;
-    shipping_full_name: string;
+    shipping_name: string;
     shipping_address: string;
     shipping_city: string;
     shipping_state: string;

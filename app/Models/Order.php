@@ -61,6 +61,11 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function apotek()
+    {
+        return $this->user->apotek();
+    }
+
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);

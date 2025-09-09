@@ -64,6 +64,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Category management routes
         Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
+
+        Route::middleware('permission:view orders')->group(function () {
+            Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
+        });
     });
 
     // Alternative: Use permission-based middleware
