@@ -291,7 +291,7 @@ export default function OrderShow({ order }: OrderShowProps) {
                     {isDeliverable && (
                         <div className="mt-4 flex justify-end">
                             <Button type="submit" disabled={processing}>
-                                {processing ? 'Updating...' : 'Mark as Delivered'}
+                                {processing ? 'Updating...' : 'Mark as Shipped'}
                             </Button>
                         </div>
                     )}

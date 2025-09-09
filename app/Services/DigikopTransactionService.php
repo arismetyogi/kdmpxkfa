@@ -94,4 +94,83 @@ class DigikopTransactionService
             ];
         }
     }
+
+    /**
+     * Send transaction data to Digikoperasi
+     *
+     * @param array $transactionData
+     * @return array ['success' => bool, 'message' => string, 'data' => array|null]
+     */
+    public function sendTransaction(array $transactionData): array
+    {
+        $url = $this->baseUrl.'/api/v2/koperasi/transactions';
+        
+        try {
+            $token = $this->authService->getAccessToken();
+            
+            // Make API call to send transaction data
+            $response = Http::withToken($token)
+                ->timeout(30)
+                ->post($url, $transactionData);
+
+            if ($response->unauthorized()) {
+                // Token expired, refresh and retry once
+                $this->authService->refreshToken();
+                $token = $this->authService->getAccessToken();
+                $response = Http::withToken($token)
+                    ->timeout(30)
+                    ->post($url, $transactionData);
+            }
+
+            if ($response->failed()) {
+                Log::error('Transaction API call failed', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+
+                return [
+                    'success' => false,
+                    'message' => 'Failed to send transaction data. Please try again later.',
+                    'data' => null,
+                ];
+            }
+
+            $data = $response->json();
+            
+            // Check if the response indicates success
+            if (isset($data['success']) && $data['success'] === true) {
+                return [
+                    'success' => true,
+                    'message' => 'Transaction sent successfully.',
+                    'data' => $data,
+                ];
+            } else {
+                Log::error('Transaction API returned error', ['response' => $data]);
+                
+                $message = 'Failed to send transaction data.';
+                if (isset($data['message'])) {
+                    $message = $data['message'];
+                } elseif (isset($data['error'])) {
+                    $message = $data['error'];
+                }
+
+                return [
+                    'success' => false,
+                    'message' => $message,
+                    'data' => $data,
+                ];
+            }
+        } catch (\Exception $e) {
+            Log::error('Transaction sending error', [
+                'exception' => $e->getMessage(),
+                'transaction_data' => $transactionData,
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'An error occurred while sending transaction data. Please try again later.',
+                'data' => null,
+            ];
+        }
+    }
 }

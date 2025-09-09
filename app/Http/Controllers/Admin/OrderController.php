@@ -4,12 +4,23 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\Admin\OrderService;
+use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
+    protected $orderService;
+    protected $digikopTransactionService;
+
+    public function __construct(OrderService $orderService, DigikopTransactionService $digikopTransactionService)
+    {
+        $this->orderService = $orderService;
+        $this->digikopTransactionService = $digikopTransactionService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -46,11 +57,27 @@ class OrderController extends Controller
     }
 
     /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        $order = Order::with(['user', 'user.apotek', 'orderItems.product'])->findOrFail($id);
+        $order = Order::with(['user', 'user.apotek', 'orderItems.product.category'])->findOrFail($id);
 
         $user = Auth::user();
 
@@ -88,37 +115,27 @@ class OrderController extends Controller
             'order_items.*.qty_delivered' => 'required|integer|min:0',
         ]);
 
-        // Update order items with delivered quantities
-        $allItemsDelivered = true;
-        if ($request->has('order_items')) {
-            foreach ($request->order_items as $itemData) {
-                $orderItem = $order->orderItems()->find($itemData['id']);
-                if ($orderItem) {
-                    $orderItem->update([
-                        'qty_delivered' => $itemData['qty_delivered']
-                    ]);
+        // Store the original status
+        $originalStatus = $order->status;
 
-                    // Check if all items are fully delivered
-                    if ($orderItem->qty_delivered < $orderItem->quantity) {
-                        $allItemsDelivered = false;
-                    }
-                }
-            }
-        }
+        // Use the service to update order delivery
+        $this->orderService->updateOrderDelivery($order, $request->order_items);
 
-        // Update order status to received if all items are delivered
-        if ($allItemsDelivered) {
-            $order->update([
-                'status' => 'received',
-                'delivered_at' => now()
-            ]);
-        } else if ($order->status !== 'delivering') {
-            // If not all items are delivered but order was not in delivering status, set it to delivering
-            $order->update([
-                'status' => 'delivering',
-                'shipped_at' => $order->shipped_at ?? now()
+        // Prepare transaction data according to documentation
+        $transactionData = $this->prepareTransactionData($order);
+
+        // Send transaction data to Digikoperasi
+        $response = $this->digikopTransactionService->sendTransaction($transactionData);
+
+        // Handle response
+        if (!$response['success']) {
+            // Log the error but don't fail the order update
+            \Log::error('Failed to send transaction to Digikoperasi', [
+                'order_id' => $order->id,
+                'error' => $response['message']
             ]);
         }
+
 
         return redirect()->back()->with('success', 'Order updated successfully.');
     }
@@ -129,5 +146,64 @@ class OrderController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    /**
+     * Prepare transaction data according to Digikoperasi API documentation
+     *
+     * @param Order $order
+     * @return array
+     */
+    private function prepareTransactionData(Order $order): array
+    {
+        // Format product details
+        $productDetails = [];
+        foreach ($order->orderItems as $item) {
+            // Get category name
+            $categoryName = 'Obat';
+            if ($item->product && $item->product->category) {
+                $categoryName = $item->product->category->main_category ?? 'Obat';
+            }
+
+            $hargaSatuan = (int)$item->unit_price ?? $item->product->price;
+            $gargaSatuanPpn = (int)$hargaSatuan * 1.11;
+
+            $productDetails[] = [
+                'nama_product' => $item->product_name,
+                'sku' => $item->product_sku ?? ($item->product ? $item->product->sku : ''),
+                'kategori' => $categoryName,
+                'quantity' => ($item->qty_delivered * $item->content) ?? $item->base_quantity,
+                'harga_per_unit' => $gargaSatuanPpn,
+                'satuan' => $item->product->base_uom ?? 'PCS',
+                'berat' => $item->product->weight ?? 0,
+                'dimensi' => [
+                    'panjang' => $item->product->length ?? 0,
+                    'lebar' => $item->product->width ?? 0,
+                    'tinggi' => $item->product->height ?? 0,
+                ],
+                'total' => (int)($gargaSatuanPpn * ($item->qty_delivered * $item->content) ?? $item->base_quantity),
+            ];
+        }
+
+        // Calculate total nominal
+        $totalNominal = array_sum(array_column($productDetails, 'total'));
+
+        return [
+            'id_transaksi' => $order->transaction_number,
+            'id_koperasi' => $order->user->tenant_id ?? '', // Assuming tenant_id exists on User model
+            'status' => 'diproses',
+            'merchant_id' => 'MCH-KF-007', // From documentation
+            'merchant_name' => 'Kimia Farma', // From documentation
+            'total_nominal' => $totalNominal,
+            'is_for_sale' => true, // Optional field
+            'source_of_fund' => $order->source_of_fund ?? 'pinjaman',
+            'account_no' => $order->account_no ?? '', // Optional field
+            'account_bank' => $order->account_bank ?? '', // Optional field
+            'payment_type' => $order->payment_type ?? 'cad',
+            'payment_method' => 'Mandiri', // Default to Mandiri
+            'va_number' => $order->va_number ?? '00112233445566', // No Rek KFA
+            'product_detail' => $productDetails,
+            'timestamp' => $order->shipped_at ? $order->shipped_at->toIso8601String() : now()->toIso8601String(), // Use delivered_at timestamp or current time
+        ];
     }
 }
