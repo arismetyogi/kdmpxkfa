@@ -103,17 +103,19 @@ class DigikopTransactionService
      */
     public function sendTransaction(array $transactionData): array
     {
-        $url = $this->baseUrl.'/api/v2/koperasi/transactions';
-        
+        $url = $this->baseUrl.'/transactions';
+
+        Log::info('Transaction data received: ', $transactionData);
         try {
             $token = $this->authService->getAccessToken();
-            
+
             // Make API call to send transaction data
             $response = Http::withToken($token)
                 ->timeout(30)
                 ->post($url, $transactionData);
 
             if ($response->unauthorized()) {
+                Log::info('Transaction data send failed', [$response->json()]);
                 // Token expired, refresh and retry once
                 $this->authService->refreshToken();
                 $token = $this->authService->getAccessToken();
@@ -136,9 +138,23 @@ class DigikopTransactionService
             }
 
             $data = $response->json();
-            
+
+            Log::info("Response Data: ", $data);
+
             // Check if the response indicates success
-            if (isset($data['success']) && $data['success'] === true) {
+            if (isset($data['status']) && $data['status'] === 'success') {
+                // update status to dalam-pengiriman karena data dikirim ke digikop setelah diproses oleh apotek, bukan saat order dibuat
+                $payload = [
+                    "id_transaksi" => $transactionData['id_transaksi'],
+                    "status" => 'dalam-pengiriman'
+                ];
+                Log::info("Update Data: ", $payload);
+                $response = Http::withToken($token)
+                    ->timeout(30)
+                    ->put($url, $payload);
+
+                Log::info("Response for Update Data: ", $response->json());
+
                 return [
                     'success' => true,
                     'message' => 'Transaction sent successfully.',
@@ -146,7 +162,7 @@ class DigikopTransactionService
                 ];
             } else {
                 Log::error('Transaction API returned error', ['response' => $data]);
-                
+
                 $message = 'Failed to send transaction data.';
                 if (isset($data['message'])) {
                     $message = $data['message'];

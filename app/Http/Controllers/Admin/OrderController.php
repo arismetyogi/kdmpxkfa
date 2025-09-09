@@ -115,9 +115,6 @@ class OrderController extends Controller
             'order_items.*.qty_delivered' => 'required|integer|min:0',
         ]);
 
-        // Store the original status
-        $originalStatus = $order->status;
-
         // Use the service to update order delivery
         $this->orderService->updateOrderDelivery($order, $request->order_items);
 
@@ -135,7 +132,6 @@ class OrderController extends Controller
                 'error' => $response['message']
             ]);
         }
-
 
         return redirect()->back()->with('success', 'Order updated successfully.');
     }
@@ -156,24 +152,31 @@ class OrderController extends Controller
      */
     private function prepareTransactionData(Order $order): array
     {
-        // Format product details
+        // Format product details - only include items with qty_delivered > 0
         $productDetails = [];
         foreach ($order->orderItems as $item) {
+            // Only include items with qty_delivered > 0
+            if (!isset($item->qty_delivered) || $item->qty_delivered <= 0) {
+                continue;
+            }
+
             // Get category name
             $categoryName = 'Obat';
             if ($item->product && $item->product->category) {
-                $categoryName = $item->product->category->main_category ?? 'Obat';
+                $categoryName = $item->product->category->subcategory2 ? $item->product->category->subcategory1 : 'Obat';
             }
 
-            $hargaSatuan = (int)$item->unit_price ?? $item->product->price;
-            $gargaSatuanPpn = (int)$hargaSatuan * 1.11;
+            $hargaSatuan = (int)$item->unit_price;
+            $hargaSatuanPpn = (int)($hargaSatuan * 1.11);
+            $baseQtyDelivered = $item->qty_delivered * $item->content;
 
             $productDetails[] = [
-                'nama_product' => $item->product_name,
+                'nama_produk' => $item->product_name,
                 'sku' => $item->product_sku ?? ($item->product ? $item->product->sku : ''),
                 'kategori' => $categoryName,
-                'quantity' => ($item->qty_delivered * $item->content) ?? $item->base_quantity,
-                'harga_per_unit' => $gargaSatuanPpn,
+                'quantity' => $baseQtyDelivered,
+                'harga_per_unit' => $hargaSatuanPpn,
+                'total' => (int)($hargaSatuanPpn * $baseQtyDelivered),
                 'satuan' => $item->product->base_uom ?? 'PCS',
                 'berat' => $item->product->weight ?? 0,
                 'dimensi' => [
@@ -181,7 +184,6 @@ class OrderController extends Controller
                     'lebar' => $item->product->width ?? 0,
                     'tinggi' => $item->product->height ?? 0,
                 ],
-                'total' => (int)($gargaSatuanPpn * ($item->qty_delivered * $item->content) ?? $item->base_quantity),
             ];
         }
 
@@ -191,7 +193,7 @@ class OrderController extends Controller
         return [
             'id_transaksi' => $order->transaction_number,
             'id_koperasi' => $order->user->tenant_id ?? '', // Assuming tenant_id exists on User model
-            'status' => 'diproses',
+            'status' => 'diproses', // diproses untuk create transaksi, update status: dalam-pengiriman, diterima, dibatalkan, selesai
             'merchant_id' => 'MCH-KF-007', // From documentation
             'merchant_name' => 'Kimia Farma', // From documentation
             'total_nominal' => $totalNominal,
@@ -201,9 +203,9 @@ class OrderController extends Controller
             'account_bank' => $order->account_bank ?? '', // Optional field
             'payment_type' => $order->payment_type ?? 'cad',
             'payment_method' => 'Mandiri', // Default to Mandiri
-            'va_number' => $order->va_number ?? '00112233445566', // No Rek KFA
+            'va_number' => '00112233445566', // No Rek KFA
+            'timestamp' => $order->shipped_at ? $order->shipped_at->toIso8601String() : now()->toIso8601String(), // Use shipped_at timestamp or current time
             'product_detail' => $productDetails,
-            'timestamp' => $order->shipped_at ? $order->shipped_at->toIso8601String() : now()->toIso8601String(), // Use delivered_at timestamp or current time
         ];
     }
 }

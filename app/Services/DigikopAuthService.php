@@ -14,7 +14,6 @@ class DigikopAuthService
     public function __construct()
     {
         $this->baseUrl = rtrim(config('transaction.digikoperasi.base_url'), '/');
-        Log::debug('Base URL loaded: '.$this->baseUrl);
     }
 
     /**
@@ -28,6 +27,7 @@ class DigikopAuthService
             $this->login(); // get new token
             $token = Cache::get('digikoperasi_token');
         }
+        Log::info('Token data received: ', [$token]);
 
         return $token;
     }
