@@ -14,6 +14,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { Bell, History, LayoutGrid, Menu, Search, ShoppingCart } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
+import DarkModeToggle from '@/components/toggle-dark-mode';
 
 const mainNavItems: NavItem[] = [
     {
@@ -161,6 +162,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 ))}
                             </div>
                         </div>
+                        <DarkModeToggle/>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="size-10 rounded-full p-1">

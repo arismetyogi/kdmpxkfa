@@ -37,6 +37,8 @@ class OnboardingController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'tenant_id' => ['required', 'string', 'max:255'],
             'tenant_name' => ['nullable', 'string', 'max:255'],
+            'sia_number' => ['nullable', 'string', 'max:255'],
+            'sia_document' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'], // 2MB max
         ]);
 
         $user = $request->user();
@@ -47,9 +49,16 @@ class OnboardingController extends Controller
             'name' => $validated['name'],
             'onboarding_completed' => true,
             'phone' => $validated['phone'],
+            'sia_number' => $validated['sia_number'],
             'tenant_id' => $validated['tenant_id'],
             'tenant_name' => $validated['tenant_name'],
         ]);
+
+        // Handle SIA document upload
+        if ($request->hasFile('sia_document')) {
+            $user->addMediaFromRequest('sia_document')
+                ->toMediaCollection('sia_documents');
+        }
 
         return redirect()->intended(route('orders.products'))->with('success', 'Onboarding completed successfully!');
     }

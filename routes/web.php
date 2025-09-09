@@ -69,11 +69,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
         });
     });
-
-    // Alternative: Use permission-based middleware
-    Route::middleware('permission:view dashboard')->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard-alt', [AdminController::class, 'dashboard'])->name('dashboard-alt');
-    });
 });
 
 // Add explicit route model binding for Role

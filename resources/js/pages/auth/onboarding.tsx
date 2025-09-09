@@ -1,5 +1,11 @@
 import { Head, useForm } from "@inertiajs/react";
 import { FormEventHandler } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 type PrefilledData = {
     email: string | null;
@@ -20,100 +26,162 @@ export default function OnboardingPage({ prefilled_data }: OnboardingPageProps) 
         phone: prefilled_data.phone || "",
         tenant_id: prefilled_data.tenant_id || "",
         tenant_name: prefilled_data.tenant_name || "",
+        sia_number: "",
+        sia_document: null as File | null,
     });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route("onboarding.store")); // ⬅️ adjust backend route
+        post(route("onboarding.store"));
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            setData("sia_document", e.target.files[0]);
+        }
     };
 
     return (
         <>
             <Head title="Complete Onboarding" />
 
-            <div className="max-w-lg mx-auto mt-12 p-6 bg-white shadow-lg rounded-2xl">
-                <h1 className="text-2xl font-semibold mb-4">Welcome! 🎉</h1>
-                <p className="text-gray-600 mb-6">
-                    Please complete your onboarding details below:
-                </p>
+            <div className="flex min-h-screen items-center justify-center p-4">
+                <Card className="w-full max-w-lg">
+                    <CardHeader>
+                        <CardTitle>Welcome! 🎉</CardTitle>
+                        <CardDescription>
+                            Please complete your onboarding details below:
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={submit} className="space-y-4">
+                            {/* Name */}
+                            <div className="space-y-2">
+                                <Label htmlFor="name">Full Name</Label>
+                                <Input
+                                    id="name"
+                                    type="text"
+                                    value={data.name}
+                                    onChange={(e) => setData("name", e.target.value)}
+                                />
+                                {errors.name && (
+                                    <Alert variant="destructive">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertTitle>Error</AlertTitle>
+                                        <AlertDescription>{errors.name}</AlertDescription>
+                                    </Alert>
+                                )}
+                            </div>
 
-                <form onSubmit={submit} className="space-y-4">
-                    {/* Name */}
-                    <div>
-                        <label className="block text-sm font-medium">Full Name</label>
-                        <input
-                            type="text"
-                            value={data.name}
-                            onChange={(e) => setData("name", e.target.value)}
-                            className="w-full mt-1 p-2 border rounded-lg"
-                        />
-                        {errors.name && (
-                            <p className="text-red-500 text-sm">{errors.name}</p>
-                        )}
-                    </div>
+                            {/* Email */}
+                            <div className="space-y-2">
+                                <Label htmlFor="email">Email</Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    value={data.email}
+                                    onChange={(e) => setData("email", e.target.value)}
+                                    disabled
+                                />
+                                {errors.email && (
+                                    <Alert variant="destructive">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertTitle>Error</AlertTitle>
+                                        <AlertDescription>{errors.email}</AlertDescription>
+                                    </Alert>
+                                )}
+                            </div>
 
-                    {/* Email */}
-                    <div>
-                        <label className="block text-sm font-medium">Email</label>
-                        <input
-                            type="email"
-                            value={data.email}
-                            onChange={(e) => setData("email", e.target.value)}
-                            className="w-full mt-1 p-2 border rounded-lg"
-                            disabled
-                        />
-                        {errors.email && (
-                            <p className="text-red-500 text-sm">{errors.email}</p>
-                        )}
-                    </div>
+                            {/* Phone */}
+                            <div className="space-y-2">
+                                <Label htmlFor="phone">Phone Number</Label>
+                                <Input
+                                    id="phone"
+                                    type="text"
+                                    value={data.phone}
+                                    onChange={(e) => setData("phone", e.target.value)}
+                                />
+                                {errors.phone && (
+                                    <Alert variant="destructive">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertTitle>Error</AlertTitle>
+                                        <AlertDescription>{errors.phone}</AlertDescription>
+                                    </Alert>
+                                )}
+                            </div>
 
-                    {/* Phone */}
-                    <div>
-                        <label className="block text-sm font-medium">Phone Number</label>
-                        <input
-                            type="text"
-                            value={data.phone}
-                            onChange={(e) => setData("phone", e.target.value)}
-                            className="w-full mt-1 p-2 border rounded-lg"
-                        />
-                        {errors.phone && (
-                            <p className="text-red-500 text-sm">{errors.phone}</p>
-                        )}
-                    </div>
+                            {/* Tenant ID */}
+                            <div className="space-y-2">
+                                <Label htmlFor="tenant_id">Tenant ID</Label>
+                                <Input
+                                    id="tenant_id"
+                                    type="text"
+                                    value={data.tenant_id}
+                                    onChange={(e) => setData("tenant_id", e.target.value)}
+                                    disabled
+                                />
+                            </div>
 
-                    {/* Tenant ID */}
-                    <div>
-                        <label className="block text-sm font-medium">Tenant ID</label>
-                        <input
-                            type="text"
-                            value={data.tenant_id}
-                            onChange={(e) => setData("tenant_id", e.target.value)}
-                            className="w-full mt-1 p-2 border rounded-lg"
-                            disabled
-                        />
-                    </div>
+                            {/* Tenant Name */}
+                            <div className="space-y-2">
+                                <Label htmlFor="tenant_name">Tenant Name</Label>
+                                <Input
+                                    id="tenant_name"
+                                    type="text"
+                                    value={data.tenant_name}
+                                    onChange={(e) => setData("tenant_name", e.target.value)}
+                                    disabled
+                                />
+                            </div>
 
-                    {/* Tenant Name */}
-                    <div>
-                        <label className="block text-sm font-medium">Tenant Name</label>
-                        <input
-                            type="text"
-                            value={data.tenant_name}
-                            onChange={(e) => setData("tenant_name", e.target.value)}
-                            className="w-full mt-1 p-2 border rounded-lg"
-                            disabled
-                        />
-                    </div>
+                            {/* SIA Number */}
+                            <div className="space-y-2">
+                                <Label htmlFor="sia_number">SIA Number</Label>
+                                <Input
+                                    id="sia_number"
+                                    type="text"
+                                    value={data.sia_number}
+                                    onChange={(e) => setData("sia_number", e.target.value)}
+                                    placeholder="Enter your SIA number"
+                                />
+                                {errors.sia_number && (
+                                    <Alert variant="destructive">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertTitle>Error</AlertTitle>
+                                        <AlertDescription>{errors.sia_number}</AlertDescription>
+                                    </Alert>
+                                )}
+                            </div>
 
-                    {/* Submit */}
-                    <button
-                        type="submit"
-                        disabled={processing}
-                        className="w-full py-2 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                    >
-                        {processing ? "Saving..." : "Complete Onboarding"}
-                    </button>
-                </form>
+                            {/* SIA Document */}
+                            <div className="space-y-2">
+                                <Label htmlFor="sia_document">SIA Document</Label>
+                                <Input
+                                    id="sia_document"
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    accept=".pdf,.jpg,.jpeg,.png"
+                                />
+                                {errors.sia_document && (
+                                    <Alert variant="destructive">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertTitle>Error</AlertTitle>
+                                        <AlertDescription>{errors.sia_document}</AlertDescription>
+                                    </Alert>
+                                )}
+                            </div>
+
+                            {/* Submit */}
+                            <Button 
+                                type="submit" 
+                                disabled={processing}
+                                className="w-full"
+                            >
+                                {processing ? "Saving..." : "Complete Onboarding"}
+                            </Button>
+                        </form>
+                    </CardContent>
+                </Card>
             </div>
         </>
     );

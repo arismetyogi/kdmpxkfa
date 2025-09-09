@@ -32,6 +32,7 @@ class User extends Authenticatable implements HasMedia
         'avatar',
         'onboarding_completed',
         'phone',
+        'sia_number',
         'tenant_name',
         'external_id',
         'tenant_id',

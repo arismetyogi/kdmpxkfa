@@ -5,6 +5,7 @@ import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { History, Key, LayoutGrid, Package, Settings, Shield, ShoppingCart, Tag, UserCog, Users } from 'lucide-react';
 import AppLogo from './app-logo';
+import DarkModeToggle from '@/components/toggle-dark-mode';
 
 export function AppSidebar() {
     const page = usePage();
@@ -109,6 +110,7 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
+                <DarkModeToggle/>
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
