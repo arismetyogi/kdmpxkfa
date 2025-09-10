@@ -49,163 +49,136 @@ export default function OrdersIndex({ orders, totalOrders = 0, newOrders = 0, de
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("ALL");
 
-    const filteredOrders = orders.filter((order: Order) => {
-        const matchesSearch = order.id.toString().includes(search) ||
-                             (order.user?.name && order.user.name.toLowerCase().includes(search.toLowerCase()));
-        const matchesStatus = statusFilter === "ALL" || order.status === statusFilter;
+    // Filter orders based on search and status
+    const filteredOrders = orders.filter(order => {
+        const matchesSearch = order.transaction_number.toLowerCase().includes(search.toLowerCase()) ||
+            order.user?.name?.toLowerCase().includes(search.toLowerCase());
+        const matchesStatus = statusFilter === "ALL" || order.status === statusFilter.toLowerCase();
         return matchesSearch && matchesStatus;
     });
-
-    const formatStatus = (status: string) => {
-        return status.charAt(0).toUpperCase() + status.slice(1);
-    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Orders" />
-
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Order Management</h1>
-                        <p className="text-muted-foreground">Manage and track all customer orders</p>
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
+                <div className="space-y-6">
+                    <div className="mb-8 space-y-0.5">
+                        <h2 className="text-xl font-semibold tracking-tight text-foreground">Orders Management</h2>
+                        <p className="text-sm text-muted-foreground">Manage and track customer orders</p>
                     </div>
-                </div>
 
-                {/* Stats Cards */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-                            <Package className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{totalOrders}</div>
-                            <p className="text-xs text-muted-foreground">All orders in the system</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">New Orders</CardTitle>
-                            <Clock className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{newOrders}</div>
-                            <p className="text-xs text-muted-foreground">Orders awaiting processing</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">In Transit</CardTitle>
-                            <Truck className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{deliveringOrders}</div>
-                            <p className="text-xs text-muted-foreground">Orders being delivered</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Completed</CardTitle>
-                            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{completedOrders}</div>
-                            <p className="text-xs text-muted-foreground">Successfully delivered orders</p>
-                        </CardContent>
-                    </Card>
-                </div>
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <Card className="p-4 border border-border bg-card">
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-primary">{totalOrders}</div>
+                                <div className="text-xs text-muted-foreground">Total Orders</div>
+                            </div>
+                        </Card>
+                        <Card className="p-4 border border-border bg-card">
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{newOrders}</div>
+                                <div className="text-xs text-muted-foreground">New Orders</div>
+                            </div>
+                        </Card>
+                        <Card className="p-4 border border-border bg-card">
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{deliveringOrders}</div>
+                                <div className="text-xs text-muted-foreground">Delivering</div>
+                            </div>
+                        </Card>
+                        <Card className="p-4 border border-border bg-card">
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-green-600 dark:text-green-400">{completedOrders}</div>
+                                <div className="text-xs text-muted-foreground">Completed</div>
+                            </div>
+                        </Card>
+                    </div>
 
-                {/* Filters Card */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Orders</CardTitle>
-                        <CardDescription>View and manage all customer orders</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {/* Filters */}
-                        <div className="mb-6 flex flex-col gap-4 md:flex-row">
+                    {/* Filters */}
+                    <Card className="p-4 border border-border bg-card">
+                        <div className="flex flex-col md:flex-row gap-4">
                             <div className="flex-1">
                                 <Input
-                                    type="text"
-                                    placeholder="Search by order ID or customer name..."
+                                    placeholder="Search by transaction number or customer name..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
+                                    className="w-full border-border bg-background text-foreground placeholder:text-muted-foreground"
                                 />
                             </div>
                             <div className="w-full md:w-48">
                                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                    <SelectTrigger>
+                                    <SelectTrigger className="w-full border-border bg-background text-foreground">
                                         <SelectValue placeholder="Filter by status" />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent className="border-border bg-background text-foreground">
                                         <SelectItem value="ALL">All Statuses</SelectItem>
-                                        <SelectItem value="new">New</SelectItem>
-                                        <SelectItem value="delivering">Delivering</SelectItem>
-                                        <SelectItem value="received">Received</SelectItem>
-                                        <SelectItem value="canceled">Canceled</SelectItem>
+                                        <SelectItem value="NEW">New</SelectItem>
+                                        <SelectItem value="DELIVERING">Delivering</SelectItem>
+                                        <SelectItem value="RECEIVED">Received</SelectItem>
+                                        <SelectItem value="CANCELED">Canceled</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                         </div>
+                    </Card>
 
-                        {/* Orders Table */}
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Order ID</TableHead>
-                                    <TableHead>Customer</TableHead>
-                                    <TableHead>Apotek</TableHead>
-                                    <TableHead>Date</TableHead>
-                                    <TableHead>Total</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredOrders.length > 0 ? (
-                                    filteredOrders.map((order: Order) => (
-                                        <TableRow key={order.id}>
-                                            <TableCell className="font-medium">#{order.id}</TableCell>
-                                            <TableCell>
-                                                {order.user?.name || 'N/A'}
-                                            </TableCell>
-                                            <TableCell>
-                                                {order.apotek?.name || 'N/A'}
-                                            </TableCell>
-                                            <TableCell>
-                                                {format(new Date(order.created_at), 'MMM dd, yyyy')}
-                                            </TableCell>
-                                            <TableCell>
-                                                Rp{Number(order.total_price).toLocaleString()}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Badge className={`flex w-fit items-center gap-1 ${statusStyle[order.status] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'}`}>
-                                                    {getStatusIcon(order.status)}
-                                                    {formatStatus(order.status)}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Link
-                                                    href={route('admin.orders.show', order.id)}
-                                                    className="text-primary hover:underline"
-                                                >
-                                                    View
-                                                </Link>
-                                            </TableCell>
+                    {/* Orders Table */}
+                    <Card className="border border-border bg-card">
+                        <CardHeader>
+                            <CardTitle className="text-lg font-semibold text-foreground">Orders List</CardTitle>
+                            <CardDescription className="text-muted-foreground">View and manage customer orders</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="hover:bg-muted/50">
+                                            <TableHead className="text-muted-foreground">Order ID</TableHead>
+                                            <TableHead className="text-muted-foreground">Customer</TableHead>
+                                            <TableHead className="text-muted-foreground">Date</TableHead>
+                                            <TableHead className="text-muted-foreground">Amount</TableHead>
+                                            <TableHead className="text-muted-foreground">Status</TableHead>
+                                            <TableHead className="text-right text-muted-foreground">Actions</TableHead>
                                         </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={7} className="text-center">
-                                            No orders found
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredOrders.map((order) => (
+                                            <TableRow key={order.id} className="border-b border-border hover:bg-muted/50">
+                                                <TableCell className="font-medium text-foreground">
+                                                    #{order.transaction_number}
+                                                </TableCell>
+                                                <TableCell className="text-foreground">
+                                                    {order.user?.name || 'N/A'}
+                                                </TableCell>
+                                                <TableCell className="text-foreground">
+                                                    {format(new Date(order.created_at), 'MMM dd, yyyy')}
+                                                </TableCell>
+                                                <TableCell className="text-foreground">
+                                                    Rp{Number(order.total_price).toLocaleString()}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Badge className={`${statusStyle[order.status] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'} flex items-center gap-1`}>
+                                                        {getStatusIcon(order.status)}
+                                                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <Link
+                                                        href={route('admin.orders.show', order.id)}
+                                                        className="text-primary hover:text-primary/80"
+                                                    >
+                                                        View Details
+                                                    </Link>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </AppLayout>
     );

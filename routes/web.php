@@ -39,7 +39,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Admin routes with role-based access
     Route::middleware('permission:view admin dashboard')->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
         // Role management routes with explicit model binding
         Route::prefix('roles')->name('roles.')->group(function () {

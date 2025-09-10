@@ -30,11 +30,11 @@ interface AdminPermissionProps {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Admin',
-        href: '/admin',
+        href: route('admin.dashboard'),
     },
     {
         title: 'Permission',
-        href: '/admin/permissions',
+        href: route('admin.permissions.index'),
     },
 ];
 
@@ -146,7 +146,6 @@ export default function AdminPermission({ permissions }: AdminPermissionProps) {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Permission Name</TableHead>
-                                    <TableHead>Permissions</TableHead>
                                     <TableHead>Users</TableHead>
                                     <TableHead>Actions</TableHead>
                                 </TableRow>
@@ -160,8 +159,6 @@ export default function AdminPermission({ permissions }: AdminPermissionProps) {
                                                     {formatPermissionName(permission.name)}
                                                 </Badge>
                                             </div>
-                                        </TableCell>
-                                        <TableCell>
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center space-x-2">
@@ -200,7 +197,6 @@ export default function AdminPermission({ permissions }: AdminPermissionProps) {
                 isOpen={isCreateModalOpen}
                 onClose={closeModals}
                 permission={null}
-                permissions={permissions}
             />
 
             {/* Edit Permission Modal */}
@@ -208,7 +204,6 @@ export default function AdminPermission({ permissions }: AdminPermissionProps) {
                 isOpen={isEditModalOpen}
                 onClose={closeModals}
                 permission={selectedPermission}
-                permissions={permissions}
             />
 
             {/* Delete Permission Modal */}

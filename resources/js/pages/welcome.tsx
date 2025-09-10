@@ -18,24 +18,24 @@ export default function Welcome() {
                 <link rel="preconnect" href="https://fonts.bunny.net" />
                 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
             </Head>
-            <div className="flex min-h-screen flex-col items-center bg-[#FDFDFC] p-6 text-[#1b1b18] lg:justify-center lg:p-8 dark:bg-[#0a0a0a]">
+            <div className="flex min-h-screen flex-col items-center bg-background p-6 text-foreground lg:justify-center lg:p-8">
                 <header className="mb-6 w-full max-w-[335px] text-sm not-has-[nav]:hidden lg:max-w-4xl">
                     <nav className="flex items-center justify-end gap-4">
                         {auth.user ? (
                             <>
                                 <Link
                                     href={route(dashRoute)}
-                                    className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
+                                    className="inline-block rounded-sm border border-border px-5 py-1.5 text-sm leading-normal text-foreground hover:border-accent-foreground"
                                 >
                                     {isUser ? 'Dashboard' : 'Admin Dashboard'}
                                 </Link>
-                                <Link className="inline-block rounded-sm border px-4 py-1.5" method="post" href={route('logout')}>Logout</Link>
+                                <Link className="inline-block rounded-sm border px-4 py-1.5 border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground" method="post" href={route('logout')}>Logout</Link>
                             </>
                         ) : (
                             <>
                                 <Link
                                     href={route('login')}
-                                    className="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
+                                    className="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-foreground hover:border-border"
                                 >
                                     Log in
                                 </Link>
@@ -45,9 +45,9 @@ export default function Welcome() {
                 </header>
                 {/* Logo dan Teks Selamat Datang */}
                 <div className="mb-10 text-center">
-                    <AppLogoIcon className="mx-auto size-60 text-white dark:text-black" />
-                    <h1 className="text-2xl font-semibold dark:text-white">Selamat Datang, {auth.user?.name || 'Pengguna'} 👋</h1>
-                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Silakan pilih modul yang ingin Anda akses di bawah ini</p>
+                    <AppLogoIcon className="mx-auto size-60 text-sidebar-primary dark:text-sidebar-primary" />
+                    <h1 className="text-2xl font-semibold text-foreground dark:text-foreground">Selamat Datang, {auth.user?.name || 'Pengguna'} 👋</h1>
+                    <p className="mt-2 text-sm text-muted-foreground">Silakan pilih modul yang ingin Anda akses di bawah ini</p>
                 </div>
 
                 {/* Card Menu */}
@@ -56,14 +56,14 @@ export default function Welcome() {
                         {/* Pemesanan Barang Card */}
                         <Link
                             href={route('orders.products')}
-                            className="group rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:border-gray-700 dark:bg-[#1a1a1a]"
+                            className="group rounded-xl border border-border bg-card p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
                         >
                             <div className="flex flex-col items-start gap-3">
-                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600 transition-colors group-hover:bg-green-600 group-hover:text-white">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600 transition-colors group-hover:bg-green-600 group-hover:text-white dark:bg-green-900/30 dark:text-green-300 dark:group-hover:bg-green-600 dark:group-hover:text-white">
                                     📝
                                 </div>
-                                <h2 className="text-lg font-semibold text-gray-900 group-hover:text-green-600 dark:text-white">Pemesanan Barang</h2>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                <h2 className="text-lg font-semibold text-foreground group-hover:text-green-600 dark:group-hover:text-green-400">Pemesanan Barang</h2>
+                                <p className="text-sm text-muted-foreground">
                                     Buat dan kelola pesanan barang sesuai kebutuhan operasional.
                                 </p>
                             </div>
@@ -71,14 +71,14 @@ export default function Welcome() {
                         {/* Penerimaan Barang Card */}
                         <Link
                             href={route('orders.products')}
-                            className="group rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg dark:border-gray-700 dark:bg-[#1a1a1a]"
+                            className="group rounded-xl border border-border bg-card p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
                         >
                             <div className="flex flex-col items-start gap-3">
-                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white dark:bg-blue-900/30 dark:text-blue-300 dark:group-hover:bg-blue-600 dark:group-hover:text-white">
                                     📦
                                 </div>
-                                <h2 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 dark:text-white">Penerimaan Barang</h2>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                <h2 className="text-lg font-semibold text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400">Penerimaan Barang</h2>
+                                <p className="text-sm text-muted-foreground">
                                     Kelola dan catat proses penerimaan barang dengan mudah dan cepat.
                                 </p>
                             </div>

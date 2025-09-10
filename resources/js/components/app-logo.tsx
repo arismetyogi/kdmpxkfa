@@ -5,11 +5,11 @@ export default function AppLogo() {
     const { name } = usePage().props;
     return (
         <>
-            <div className="flex aspect-square size-8 items-center justify-center rounded-md text-sidebar-primary-foreground">
-                <AppLogoIcon className="size-8 text-white dark:text-black" />
+            <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-white text-sidebar-primary-foreground">
+                <AppLogoIcon className="size-8 text-white dark:text-white" />
             </div>
             <div className="ml-1 grid flex-1 text-left text-sm">
-                <span className="mb-0.5 truncate leading-tight font-semibold">
+                <span className="mb-0.5 truncate leading-tight font-semibold text-foreground dark:text-white">
                     {typeof name === 'string' || typeof name === 'number' ? name : ''}
                 </span>
             </div>

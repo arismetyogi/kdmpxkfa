@@ -20,7 +20,7 @@ export function AppSidebar() {
         ? [
               {
                   title: 'Admin Dashboard',
-                  href: '/admin',
+                  href: '/admin/dashboard',
                   icon: Shield,
               },
               {
