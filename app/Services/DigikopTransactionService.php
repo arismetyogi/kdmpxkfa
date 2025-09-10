@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Order;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -17,13 +19,13 @@ class DigikopTransactionService
     /**
      * Validate user's credit limit against external API
      *
-     * @param  string  $tenantId  User's tenant ID
-     * @param  float  $orderAmount  Total order amount to validate
+     * @param string $tenantId User's tenant ID
+     * @param float $orderAmount Total order amount to validate
      * @return array ['valid' => bool, 'message' => string, 'remaining_credit' => float|null]
      */
     public function validateCreditLimit(string $tenantId, float $orderAmount): array
     {
-        $url = $this->baseUrl.'/remaining-credit/'.$tenantId;
+        $url = $this->baseUrl . '/remaining-credit/' . $tenantId;
         try {
             $token = $this->authService->getAccessToken();
             // Make API call to external service to get credit limit
@@ -53,7 +55,7 @@ class DigikopTransactionService
             Log::debug('Data response: ', $data);
 
             // Check if the response has the expected structure
-            if (! isset($data['data']['remaining_credit'])) {
+            if (!isset($data['data']['remaining_credit'])) {
                 Log::error('Invalid credit limit response structure', ['response' => $data]);
 
                 return [
@@ -63,7 +65,7 @@ class DigikopTransactionService
                 ];
             }
 
-            $availableCredit = (float) $data['data']['remaining_credit'];
+            $availableCredit = (float)$data['data']['remaining_credit'];
 
             // Check if available credit is sufficient
             if ($availableCredit >= $orderAmount) {
@@ -75,8 +77,8 @@ class DigikopTransactionService
             } else {
                 return [
                     'valid' => false,
-                    'message' => 'Insufficient credit limit. Available credit: Rp'.number_format($availableCredit, 0, ',', '.').
-                                ', Order amount: Rp'.number_format($orderAmount, 0, ',', '.'),
+                    'message' => 'Insufficient credit limit. Available credit: Rp' . number_format($availableCredit, 0, ',', '.') .
+                        ', Order amount: Rp' . number_format($orderAmount, 0, ',', '.'),
                     'remaining_credit' => $availableCredit,
                 ];
             }
@@ -103,7 +105,7 @@ class DigikopTransactionService
      */
     public function sendTransaction(array $transactionData): array
     {
-        $url = $this->baseUrl.'/transactions';
+        $url = $this->baseUrl . '/transactions';
 
         Log::info('Transaction data received: ', $transactionData);
         try {
@@ -185,6 +187,74 @@ class DigikopTransactionService
             return [
                 'success' => false,
                 'message' => 'An error occurred while sending transaction data. Please try again later.',
+                'data' => null,
+            ];
+        }
+    }
+
+    public function updateTransactionStatus(Order $order, string $status): array
+    {
+        $url = $this->baseUrl . '/transactions';
+        $payload = [
+            "id_transaksi" => $order['id_transaksi'],
+            "status" => $status
+        ];
+
+        try {
+            $token = $this->authService->getAccessToken();
+
+            // Make API call to send transaction data
+            $response = Http::withToken($token)
+                ->timeout(30)
+                ->put($url, $payload);
+
+            if ($response->unauthorized()) {
+                Log::info('Transaction status update failed', [$response->json()]);
+                // Token expired, refresh and retry once
+                $this->authService->refreshToken();
+                $token = $this->authService->getAccessToken();
+                $response = Http::withToken($token)
+                    ->timeout(30)
+                    ->put($url, $payload);
+            }
+
+            if ($response->failed()) {
+                Log::error('Transaction update API call failed', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+
+                return [
+                    'success' => false,
+                    'message' => 'Failed to update transaction status. Please try again later.',
+                    'data' => null,
+                ];
+            }
+
+            $data = $response->json();
+
+            if (isset($data['status']) && $data['status'] === 'success') {
+                return [
+                    'success' => true,
+                    'message' => 'Transaction status updated successfully.',
+                    'data' => $data,
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Failed to update transaction status. Please try again later.',
+                    'data' => null,
+                ];
+            };
+        } catch (ConnectionException $e) {
+            Log::error('Transaction status update error', [
+                'exception' => $e->getMessage(),
+                'payload' => $payload,
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'An error occurred while updating transaction status. Please try again later.',
                 'data' => null,
             ];
         }
