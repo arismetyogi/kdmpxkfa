@@ -14,11 +14,11 @@ import ProductShowModal from "@/components/Admin/ProductShowModal";
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Admin',
-        href: '/admin',
+        href: route('admin.dashboard'),
     },
     {
         title: 'Products',
-        href: '/admin/products',
+        href: route('admin.products.index'),
     },
 ];
 
