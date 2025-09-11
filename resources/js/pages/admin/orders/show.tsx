@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Package, Truck, CheckCircle, XCircle, Clock, User, MapPin } from "lucide-react";
 import { Order, OrderItem } from '@/types';
+import { route } from 'ziggy-js';
 
 const breadcrumbs = (orderId: string) => [
-    { title: "Dashboard", href: "/dashboard" },
-    { title: "Orders", href: "/admin/orders" },
-    { title: `Order #${orderId}`, href: `/admin/orders/${orderId}` },
+    { title: "Dashboard", href: route('admin.dashboard') },
+    { title: "Orders", href: route('admin.orders.index') },
+    { title: `Order #${orderId}`, href: route('admin.orders.show', { order: orderId }) },
 ];
 
 const statusStyle: Record<string, string> = {

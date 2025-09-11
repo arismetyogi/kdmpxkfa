@@ -37,11 +37,11 @@ interface AdminRolesProps {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Admin',
-        href: '/admin',
+        href: route('admin.dashboard'),
     },
     {
         title: 'Roles',
-        href: '/admin/roles',
+        href: route('admin.roles.index'),
     },
 ];
 

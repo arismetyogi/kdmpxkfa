@@ -104,7 +104,7 @@ export default function OrdersIndexPage({ products, categories }: IndexProps) {
     }
 
     return (
-        <AppHeaderLayout breadcrumbs={breadcrumbs}>
+        <HeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Products" />
             <h1 className="text-2xl font-bold pt-6 ml-6 lg:ml-9  text-blue-800">Medicine Catalog</h1>
             <div className="flex flex-col gap-6 p-6 lg:flex-row">
@@ -239,6 +239,6 @@ export default function OrdersIndexPage({ products, categories }: IndexProps) {
                     )}
                 </DialogContent>
             </Dialog>
-        </AppHeaderLayout>
+        </HeaderLayout>
     );
 }
