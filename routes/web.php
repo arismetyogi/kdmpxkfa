@@ -44,7 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/credit-limit', [TransactionController::class, 'creditLimit'])->name('credit.limit');
 
     // Admin routes with role-based access
-    Route::middleware('permission:view admin dashboard')->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('permission:'. \App\Enums\PermissionEnum::VIEW_ADMIN_DASHBOARD->value)->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
         // Role management routes with explicit model binding
@@ -71,7 +71,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Category management routes
         Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
 
-        Route::middleware('permission:view orders')->group(function () {
+        Route::middleware('permission:'.\App\Enums\PermissionEnum::VIEW_ORDERS->value)->group(function () {
             Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
         });
     });
