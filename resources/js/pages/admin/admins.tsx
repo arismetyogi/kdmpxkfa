@@ -18,7 +18,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
     {
         title: 'Admins',
-        href: route('admin.admins'),
+        href: route('admin.admins.index'),
     },
 ];
 

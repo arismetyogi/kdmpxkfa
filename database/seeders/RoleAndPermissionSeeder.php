@@ -69,13 +69,14 @@ class RoleAndPermissionSeeder extends Seeder
             'view orders',
         ]);
 
-        $managerRole = Role::create(['name' => 'manager']);
+        $managerRole = Role::create(['name' => 'admin-apotek']);
         $managerRole->givePermissionTo([
-            'view users',
-            'view roles',
-            'view permissions',
-            'view dashboard',
             'view admin dashboard',
+            'view orders',
+            'update orders',
+            'view products',
+            'view reports',
+            'create reports',
         ]);
 
         $userRole = Role::create(['name' => 'user']);

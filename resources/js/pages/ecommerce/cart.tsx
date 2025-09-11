@@ -1,7 +1,8 @@
 import HeaderLayout from '@/layouts/header-layout'
-import { Link, router } from '@inertiajs/react'
+import { Head, Link, router } from '@inertiajs/react'
 import { ArrowLeft, Minus, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { BreadcrumbItem } from '@/types';
 
 interface CartItem {
     id: string | number
@@ -60,9 +61,17 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
         router.get(route('checkout'))
     }
 
+    const breadcrumbs: BreadcrumbItem = [
+        {
+            title: 'Dashboard',
+            href: route('dashboard')
+        }
+    ]
+
     if (cartItems.length === 0) {
         return (
             <HeaderLayout>
+                <Head title="Carts"/>
                 <div className="container mx-auto px-4 py-8">
                     <div className="text-center">
                         <div className="mb-6">
@@ -98,9 +107,9 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
     }
 
     return (
-        <HeaderLayout>
+        <HeaderLayout breadcrumbs={breadcrumbs}>
+            <Head title="Carts"/>
             <div className="container mx-auto px-4 py-8">
-                {/* Breadcrumb */}
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                     {/* Cart Items */}
                     <div className="lg:col-span-2">

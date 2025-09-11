@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\Ecommerce\CartController;
 use App\Http\Controllers\Ecommerce\OrderController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -38,6 +39,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/checkout/process', [CartController::class, 'processCheckout'])->name('checkout.process');
     Route::post('/payment/process', [CartController::class, 'processPayment'])->name('payment.process');
     Route::get('/order-complete/{order}', [CartController::class, 'orderComplete'])->name('order.complete');
+
+    // Credit limit route
+    Route::get('/credit-limit', [TransactionController::class, 'creditLimit'])->name('credit.limit');
 
     // Admin routes with role-based access
     Route::middleware('permission:view admin dashboard')->prefix('admin')->name('admin.')->group(function () {
