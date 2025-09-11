@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\PermissionEnum;
+use App\Enums\RoleEnum;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
@@ -24,14 +25,14 @@ class RoleAndPermissionSeeder extends Seeder
         }
 
         // Create roles and assign permissions
-        $superAdminRole = Role::firstOrCreate(['name' => 'super-admin']);
+        $superAdminRole = Role::firstOrCreate(['name' => RoleEnum::SUPER_ADMIN->value]);
         // Clear existing permissions for this role
         DB::table('role_has_permissions')
             ->where('role_id', $superAdminRole->id)
             ->delete();
         $superAdminRole->givePermissionTo(Permission::all());
 
-        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $adminRole = Role::firstOrCreate(['name' => RoleEnum::ADMIN_BUSDEV->value]);
         // Clear existing permissions for this role
         DB::table('role_has_permissions')
             ->where('role_id', $adminRole->id)
@@ -52,7 +53,7 @@ class RoleAndPermissionSeeder extends Seeder
             PermissionEnum::VIEW_ORDERS->value,
         ]);
 
-        $managerRole = Role::firstOrCreate(['name' => 'admin-apotek']);
+        $managerRole = Role::firstOrCreate(['name' => RoleEnum::ADMIN_APOTEK->value]);
         // Clear existing permissions for this role
         DB::table('role_has_permissions')
             ->where('role_id', $managerRole->id)
@@ -66,7 +67,7 @@ class RoleAndPermissionSeeder extends Seeder
             PermissionEnum::CREATE_REPORTS->value,
         ]);
 
-        $userRole = Role::firstOrCreate(['name' => 'user']);
+        $userRole = Role::firstOrCreate(['name' => RoleEnum::USER->value]);
         // Clear existing permissions for this role
         DB::table('role_has_permissions')
             ->where('role_id', $userRole->id)

@@ -5,6 +5,7 @@ namespace App\Enums;
 enum RoleEnum: string
 {
     case SUPER_ADMIN = 'super-admin';
+    case ADMIN_BUSDEV = 'admin-busdev';
     case ADMIN_APOTEK = 'admin-apotek';
     case USER = 'user';
 
@@ -12,6 +13,7 @@ enum RoleEnum: string
     {
         return match ($this) {
             self::SUPER_ADMIN => 'Super Admin',
+            self::ADMIN_BUSDEV => 'Admin Busdev',
             self::ADMIN_APOTEK => 'Admin Apotek',
             self::USER => 'User',
         };

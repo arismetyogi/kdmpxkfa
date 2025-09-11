@@ -10,7 +10,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, Category, Paginated, Product } from '@/types';
 import { Link, router } from '@inertiajs/react';
 import { Edit, PackageX, Plus, Search, Trash2, X } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import ProductShowModal from "@/components/Admin/ProductShowModal";
 
 const breadcrumbs: BreadcrumbItem[] = [
