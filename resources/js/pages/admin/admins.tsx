@@ -14,11 +14,11 @@ import DeleteUserModal from '@/components/Admin/DeleteUserModal';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Admin',
-        href: '/admin',
+        href: route('admin.dashboard'),
     },
     {
         title: 'Admins',
-        href: '/admin/admins',
+        href: route('admin.admins'),
     },
 ];
 

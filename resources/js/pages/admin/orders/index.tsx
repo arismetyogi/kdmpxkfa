@@ -11,8 +11,8 @@ import { Package, Truck, CheckCircle, XCircle, Clock } from "lucide-react";
 import {Order} from "@/types";
 
 const breadcrumbs = [
-    { title: "Dashboard", href: "/dashboard" },
-    { title: "Orders", href: "/admin/orders" },
+    { title: "Dashboard", href: route('admin.dashboard') },
+    { title: "Orders", href: route('admin.orders.index') },
 ];
 
 const statusStyle: Record<string, string> = {

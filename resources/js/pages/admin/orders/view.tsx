@@ -71,9 +71,9 @@ export default function ViewOrder() {
     return (
         <AppLayout
             breadcrumbs={[
-                { title: "Dashboard", href: "/dashboard" },
-                { title: "Process Orders", href: "/process" },
-                { title: "Delivery Orders", href: "/process/delivery" },
+                { title: "admin", href: route('admin.dashboard') },
+                { title: "Orders", href: route('admin.orders.index') },
+                { title: "Delivery Orders", href: route('admin.orders.show') },
             ]}
         >
             <Head title={`Delivery Order ${id}`} />

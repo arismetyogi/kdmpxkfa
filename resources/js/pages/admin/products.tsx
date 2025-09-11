@@ -16,11 +16,11 @@ import ProductShowModal from "@/components/Admin/ProductShowModal";
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Admin',
-        href: '/admin',
+        href: route('admin.dashboard'),
     },
     {
         title: 'Products',
-        href: '/admin/products',
+        href: route('admin.products.index'),
     },
 ];
 
@@ -134,6 +134,8 @@ export default function AdminProducts({ products, categories, allProducts, activ
         }
 
         // Append image if File
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         if (productData.image instanceof File) {
             formData.append('image', productData.image);
         }
