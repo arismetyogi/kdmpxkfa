@@ -29,6 +29,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     Route::get('/orders/products', [OrderController::class, 'index'])->name('orders.products');
+    Route::get('/orders/history', [OrderController::class, 'history'])->name('orders.history');
+    Route::post('/orders/{order}/accept', [OrderController::class, 'acceptOrder'])->name('orders.accept');
 
     Route::resource('carts', CartController::class);
     Route::get('/checkout', [CartController::class, 'checkoutForm'])->name('checkout');

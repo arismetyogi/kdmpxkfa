@@ -12,11 +12,11 @@ import { useState } from 'react';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Admin',
-        href: '/admin',
+        href: route('admin.dashboard'),
     },
     {
         title: 'Categories',
-        href: '/admin/categories',
+        href: route('admin.categories.index'),
     },
 ];
 

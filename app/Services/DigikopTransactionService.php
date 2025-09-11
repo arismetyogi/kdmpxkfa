@@ -225,7 +225,7 @@ class DigikopTransactionService
     {
         $url = $this->baseUrl . '/transactions';
         $payload = [
-            "id_transaksi" => $order['id_transaksi'],
+            "id_transaksi" => $order->transaction_number,
             "status" => $status
         ];
 

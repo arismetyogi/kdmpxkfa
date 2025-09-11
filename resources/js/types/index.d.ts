@@ -129,6 +129,7 @@ export interface Order {
     total_price: number;
     billing_name: string;
     billing_email: string;
+    billing_phone: string;
     billing_address: string;
     billing_city: string;
     billing_state: string;
@@ -142,6 +143,10 @@ export interface Order {
     shipped_at: string;
     delivered_at: string;
     order_items: OrderItem[];
+    subtotal: number;
+    tax_amount: number;
+    shipping_amount: number;
+    discount_amount: number;
 }
 
 export interface CartItem {

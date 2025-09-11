@@ -13,11 +13,11 @@ import UserMappingModal from '@/components/Admin/UserMappingModal';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Admin',
-        href: '/admin',
+        href: route('admin.dashboard'),
     },
     {
         title: 'Users',
-        href: '/admin/users',
+        href: route('admin.users.index'),
     },
 ];
 
