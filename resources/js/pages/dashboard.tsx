@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import AppLayout from "@/layouts/header-layout";
 import { type BreadcrumbItem } from "@/types";
 import { Head } from "@inertiajs/react";
-import { ShoppingCart, Package, Wallet } from "lucide-react";
+import { Package, Wallet } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -43,7 +43,7 @@ export default function Dashboard() {
                     <Card className="rounded-xl shadow-sm border border-border bg-card">
                         <CardContent className="p-6 flex items-center gap-4">
                             <div className="p-3 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300">
-                                <ShoppingCart size={24} />
+                                <Package size={24} />
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground">Total Transaksi</p>

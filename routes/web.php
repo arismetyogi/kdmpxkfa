@@ -29,13 +29,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     Route::get('/orders/products', [OrderController::class, 'index'])->name('orders.products');
-
-    Route::resource('carts', CartController::class);
-    Route::get('/checkout', [CartController::class, 'checkoutForm'])->name('checkout');
-    Route::get('/payment', [CartController::class, 'paymentForm'])->name('payment');
-    Route::post('/checkout/process', [CartController::class, 'processCheckout'])->name('checkout.process');
-    Route::post('/payment/process', [CartController::class, 'processPayment'])->name('payment.process');
-    Route::get('/order-complete/{order}', [CartController::class, 'orderComplete'])->name('order.complete');
+    Route::get('/orders/cart', function () {
+        return Inertia::render('orders/Cart');
+    })->name('cart');
+    Route::get('/orders/po', function () {
+        return Inertia::render('orders/po');
+    })->name('po');
 
     // Admin routes with role-based access
     Route::middleware('permission:view admin dashboard')->prefix('admin')->name('admin.')->group(function () {

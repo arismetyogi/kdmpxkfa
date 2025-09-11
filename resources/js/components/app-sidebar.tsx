@@ -3,7 +3,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { History, Key, LayoutGrid, Package, Settings, Shield, ShoppingCart, Tag, UserCog, Users } from 'lucide-react';
+import { History, Key, LayoutGrid, Package, Settings, Shield, Tag, UserCog, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 import DarkModeToggle from '@/components/toggle-dark-mode';
 
@@ -43,7 +43,7 @@ export function AppSidebar() {
               {
                   title: 'Products',
                   href: '/orders/products',
-                  icon: ShoppingCart,
+                  icon: Package,
               },
               {
                   title: 'Orders History',
@@ -57,7 +57,7 @@ export function AppSidebar() {
             {
                 title: 'Orders',
                 href: '/admin/orders',
-                icon: ShoppingCart,
+                icon: Package,
             },
         ] : [];
 

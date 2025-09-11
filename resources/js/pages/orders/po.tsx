@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AppLayout from "@/layouts/app-layout";
 import { Head, Link } from "@inertiajs/react";
-import { type BreadcrumbItem } from "@/types";
+import { type BreadcrumbItem, CartItem } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -24,14 +24,8 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: "Purchase Order", href: "/orders/po" },
 ];
 
-// 🔹 Dummy data cart
-const dummyCart = [
-    { id: 1, name: "Paracetamol", qty: 10, price: 5000 },
-    { id: 2, name: "Vitamin C", qty: 5, price: 7000 },
-    { id: 3, name: "Aspirin", qty: 3, price: 7000 },
-];
-
 export default function PurchaseOrderPage() {
+    const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [ppnType] = useState("Include");
     const [paymentMethod, setPaymentMethod] = useState("Kredit");
     const [top, setTop] = useState("30");
@@ -39,13 +33,21 @@ export default function PurchaseOrderPage() {
     const [showCancelDialog, setShowCancelDialog] = useState(false);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
 
+    // Load cart items from localStorage
+    useEffect(() => {
+        const storedCart = localStorage.getItem("cart");
+        if (storedCart) {
+            setCartItems(JSON.parse(storedCart));
+        }
+    }, []);
+
     // 🔹 Dummy values
     const nomorSurat = "PO-2025-0001";
     const namaPengentri = "User";
     const namaKreditur = "Apotek Kimia Farma 123";
 
     // 🔹 Hitung subtotal, ppn, total
-    const subtotal = dummyCart.reduce((sum, item) => sum + item.qty * item.price, 0);
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const ppn = ppnType === "Tanpa" ? 0 : subtotal * 0.11;
     const total = subtotal + ppn;
 
@@ -126,13 +128,13 @@ export default function PurchaseOrderPage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {dummyCart.map((item) => (
-                                        <TableRow key={item.id}>
+                                    {cartItems.map((item) => (
+                                        <TableRow key={item.sku}>
                                             <TableCell>{item.name}</TableCell>
-                                            <TableCell>{item.qty}</TableCell>
+                                            <TableCell>{item.quantity}</TableCell>
                                             <TableCell>Rp {item.price.toLocaleString()}</TableCell>
                                             <TableCell>
-                                                Rp {(item.qty * item.price).toLocaleString()}
+                                                Rp {(item.price * item.quantity).toLocaleString()}
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -184,7 +186,7 @@ export default function PurchaseOrderPage() {
                         <Button variant="outline" onClick={() => setShowCancelDialog(false)}>
                             Tidak
                         </Button>
-                        <Link href={route('carts.index')}>
+                        <Link href="/orders/products">
                             <Button variant="destructive">Ya, Batalkan</Button>
                         </Link>
                     </DialogFooter>

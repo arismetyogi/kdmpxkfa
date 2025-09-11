@@ -2,12 +2,14 @@ import Filters from '@/components/Filters';
 import ProductCard from '@/components/ProductCard';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CartItem, type BreadcrumbItem, Product, Paginated, Category } from '@/types';
-import { Head, Link } from '@inertiajs/react';
-import { ShoppingCart } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { type BreadcrumbItem, Product, Paginated, Category } from '@/types';
+import { Head } from '@inertiajs/react';
+import { Package } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppHeaderLayout from '@/layouts/app/app-header-layout';
+import FloatingCart from '@/components/FloatingCart';
+import { CartItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -24,19 +26,53 @@ export default function OrdersIndexPage({ products, categories }: IndexProps) {
     const [search, setSearch] = useState("");
     const [sortBy, setSortBy] = useState("name-asc");
     const [filters, setFilters] = useState({ categories: ["Semua Produk"], packages: ["Semua Paket"] });
-    const [cart, setCart] = useState<CartItem[]>([]);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const [animationTrigger, setAnimationTrigger] = useState(0);
 
-    // 🔹 jumlah jenis produk unik
-    const totalItems = cart.length;
+    // Extract unique categories and packages from products
+    const uniqueCategories = ["Semua Produk", ...new Set(products.data.map(p => p.category?.main_category).filter(Boolean))] as string[];
+    const uniquePackages = ["Semua Paket", ...new Set(products.data.map(p => p.order_unit).filter(Boolean))] as string[];
 
-    // 🔹 Load cart dari localStorage
+    // Load cart items from localStorage
     useEffect(() => {
         const storedCart = localStorage.getItem("cart");
         if (storedCart) {
-            setCart(JSON.parse(storedCart));
+            setCartItems(JSON.parse(storedCart));
         }
+
+        // Listen for storage changes from other tabs/components
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === "cart") {
+                if (e.newValue) {
+                    setCartItems(JSON.parse(e.newValue));
+                } else {
+                    setCartItems([]);
+                }
+            }
+        };
+
+        window.addEventListener("storage", handleStorageChange);
+        return () => window.removeEventListener("storage", handleStorageChange);
     }, []);
+
+    // Update cart items when localStorage changes
+    const updateCartItems = () => {
+        const storedCart = localStorage.getItem("cart");
+        if (storedCart) {
+            setCartItems(JSON.parse(storedCart));
+        } else {
+            setCartItems([]);
+        }
+    };
+
+    // Calculate total items in cart
+    const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+
+    // Handle animation when cart is updated
+    useEffect(() => {
+        setAnimationTrigger(prev => prev + 1);
+    }, [cartItems]);
 
     // 🔹 filter berdasarkan search
     let filteredProducts = products.data.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
@@ -70,15 +106,20 @@ export default function OrdersIndexPage({ products, categories }: IndexProps) {
     return (
         <AppHeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Products" />
+            <h1 className="text-2xl font-bold pt-6 ml-6 lg:ml-9  text-blue-800">Medicine Catalog</h1>
             <div className="flex flex-col gap-6 p-6 lg:flex-row">
                 {/* Sidebar Filters */}
                 <div className="w-full lg:w-1/4">
-                    <Filters onFilterChange={setFilters} />
+                    <Filters 
+                        onFilterChange={setFilters} 
+                        categories={uniqueCategories}
+                        packages={uniquePackages}
+                    />
                 </div>
 
                 {/* Product Section */}
                 <div className="flex-1">
-                    <h1 className="mb-4 text-2xl font-bold text-blue-800">Medicine Catalog</h1>
+                    
 
                     <div className="mb-4 flex flex-col justify-between gap-2 sm:flex-row">
                         <input
@@ -105,7 +146,7 @@ export default function OrdersIndexPage({ products, categories }: IndexProps) {
                     {/* Produk */}
                     {filteredProducts.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 text-gray-500">
-                            <ShoppingCart size={64} className="mb-4 text-gray-400" />
+                            <Package size={64} className="mb-4 text-gray-400" />
                             <p className="text-lg font-medium">Produk yang anda cari tidak ditemukan</p>
                         </div>
                     ) : (
@@ -114,7 +155,7 @@ export default function OrdersIndexPage({ products, categories }: IndexProps) {
                                 <div key={i}
                                      // onClick={() => setSelectedProduct(p)}
                                      className="cursor-pointer">
-                                    <ProductCard product={p}/>
+                                    <ProductCard product={p} updateCartItems={updateCartItems} />
                                 </div>
                             ))}
                         </div>
@@ -122,20 +163,8 @@ export default function OrdersIndexPage({ products, categories }: IndexProps) {
                 </div>
             </div>
 
-            {/* 🔹 Floating Cart Button */}
-            <div className="fixed right-4 bottom-4 sm:right-6 sm:bottom-6">
-                <Link href={route('carts.index')} className="relative">
-                    <button className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg sm:h-14 sm:w-14">
-                        <ShoppingCart size={24} className="sm:size-8" />
-                    </button>
-
-                    {totalItems > 0 && (
-                        <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white sm:h-6 sm:w-6">
-                            {totalItems}
-                        </span>
-                    )}
-                </Link>
-            </div>
+            {/* Floating Cart */}
+            <FloatingCart totalItems={totalItems} animationTrigger={animationTrigger} />
 
             {/* 🔹 Modal Detail Produk */}
             <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>

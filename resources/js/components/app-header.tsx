@@ -11,10 +11,12 @@ import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Bell, History, LayoutGrid, Menu, Search, ShoppingCart } from 'lucide-react';
+import { Bell, History, LayoutGrid, Menu, Search, ShoppingCart, Package } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 import DarkModeToggle from '@/components/toggle-dark-mode';
+import { useState, useEffect } from 'react';
+import { CartItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
     {
@@ -25,7 +27,7 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Products',
         href: '/orders/products',
-        icon: ShoppingCart,
+        icon: Package,
     },
     {
         title: 'Orders History',
@@ -37,7 +39,7 @@ const mainNavItems: NavItem[] = [
 const rightNavItems: NavItem[] = [
     {
         title: 'Cart',
-        href: '/carts',
+        href: '/orders/cart',
         icon: ShoppingCart,
     },
     {
@@ -57,6 +59,42 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const page = usePage<SharedData>();
     const { auth } = page.props;
     const getInitials = useInitials();
+    
+    const [cartCount, setCartCount] = useState(0);
+
+    // Load cart count from localStorage
+    useEffect(() => {
+        const updateCartCount = () => {
+            const storedCart = localStorage.getItem("cart");
+            if (storedCart) {
+                const cartItems: CartItem[] = JSON.parse(storedCart);
+                const count = cartItems.reduce((total, item) => total + item.quantity, 0);
+                setCartCount(count);
+            } else {
+                setCartCount(0);
+            }
+        };
+
+        // Initial load
+        updateCartCount();
+
+        // Listen for storage changes
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === "cart") {
+                updateCartCount();
+            }
+        };
+
+        window.addEventListener("storage", handleStorageChange);
+        
+        // Also check for changes in the same tab
+        const interval = setInterval(updateCartCount, 1000);
+
+        return () => {
+            window.removeEventListener("storage", handleStorageChange);
+            clearInterval(interval);
+        };
+    }, []);
     
     return (
         <>
@@ -102,6 +140,11 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                 >
                                                     {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
                                                     <span>{item.title}</span>
+                                                    {item.title === 'Cart' && cartCount > 0 && (
+                                                        <span className="ml-2 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                                                            {cartCount}
+                                                        </span>
+                                                    )}
                                                 </a>
                                             ))}
                                         </div>
@@ -160,6 +203,11 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                 >
                                                     <span className="sr-only">{item.title}</span>
                                                     {item.icon && <Icon iconNode={item.icon} className="size-5 text-foreground opacity-80 group-hover:opacity-100" />}
+                                                    {item.title === 'Cart' && cartCount > 0 && (
+                                                        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                                                            {cartCount}
+                                                        </span>
+                                                    )}
                                                 </Link>
                                             </TooltipTrigger>
                                             <TooltipContent>
