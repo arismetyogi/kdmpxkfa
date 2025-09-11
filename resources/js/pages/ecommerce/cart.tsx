@@ -61,7 +61,7 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
         router.get(route('checkout'))
     }
 
-    const breadcrumbs: BreadcrumbItem = [
+    const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Dashboard',
             href: route('dashboard')
