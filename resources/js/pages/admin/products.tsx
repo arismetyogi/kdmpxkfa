@@ -218,9 +218,9 @@ export default function AdminProducts({ products, categories, allProducts, activ
                             </Select>
 
                             {/* Action Buttons */}
-                            <div className="flex space-x-2">
+                            <div className="flex space-x-2 max-w-fit ms-auto">
                                 <Button onClick={applyFilters} className="w-full">
-                                    Apply Filters
+                                    Apply
                                 </Button>
                                 <Button variant="outline" onClick={clearFilters}>
                                     <X className="h-4 w-4" />
