@@ -6,22 +6,21 @@ import { Category, Product } from '@/types';
 import { X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import SearchableSelect from '@/components/searchable-select';
-import { useForm } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 
 interface ProductFormModalProps {
     isOpen: boolean;
     onClose: () => void;
     product: Product | null;
-    onSubmit?: (product: Partial<Product>) => void;
     categories: Category[];
 }
 
-export default function ProductFormModal({ isOpen, onClose, onSubmit, product, categories }: ProductFormModalProps) {
-    const { data, setData, post, processing, errors, reset } = useForm({
+export default function ProductFormModal({ isOpen, onClose, product, categories }: ProductFormModalProps) {
+    const [data, setData] = useState({
         name: '',
         sku: '',
         description: '',
-        dosage: [],
+        dosage: [] as string[],
         pharmacology: '',
         category_id: '',
         base_uom: '',
@@ -38,13 +37,15 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
     });
 
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
         if (product) {
             setData({
                 ...product,
-                category_id: product.category_id?.toString() ?? undefined, // ensure string or undefined
-                image: product.image ?? '', // keep string (URL) from MediaLibrary);
+                category_id: product.category_id?.toString() ?? '',
+                image: product.image ?? '',
+                dosage: Array.isArray(product.dosage) ? product.dosage : [],
             });
             // Set image preview if product has an image
             if (typeof product.image === 'string' && product.image !== '') {
@@ -76,28 +77,100 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (onSubmit) {
-            onSubmit({
-                ...data,
-                category_id: data.category_id ? parseInt(data.category_id) : undefined,
-            });
+        setProcessing(true);
+        
+        // Create FormData for proper file upload handling
+        const formData = new FormData();
+
+        // Add all product data to form
+        formData.append('sku', data.sku || '');
+        formData.append('name', data.name || '');
+        formData.append('description', data.description || '');
+        formData.append('pharmacology', data.pharmacology || '');
+        formData.append('category_id', data.category_id || '');
+        formData.append('base_uom', data.base_uom || '');
+        formData.append('order_unit', data.order_unit || '');
+        formData.append('content', data.content?.toString() || '1');
+        formData.append('brand', data.brand || '');
+        formData.append('price', data.price?.toString() || '0');
+        formData.append('weight', data.weight?.toString() || '0');
+        formData.append('length', data.length?.toString() || '0');
+        formData.append('width', data.width?.toString() || '0');
+        formData.append('height', data.height?.toString() || '0');
+        formData.append('is_active', data.is_active ? '1' : '0');
+
+        // Handle dosage array
+        data.dosage.forEach((dose, index) => {
+            formData.append(`dosage[${index}]`, dose);
+        });
+
+        // Append image if File
+        if (data.image instanceof File) {
+            formData.append('image', data.image);
         }
-        onClose();
+
+        if (product) {
+            // Update existing product
+            formData.append('_method', 'put');
+            router.post(
+                route('admin.products.update', product.id),
+                formData,
+                {
+                    forceFormData: true,
+                    onSuccess: () => {
+                        setProcessing(false);
+                        onClose();
+                    },
+                    onError: () => {
+                        setProcessing(false);
+                    }
+                },
+            );
+        } else {
+            // Create new product
+            router.post(
+                route('admin.products.store'),
+                formData,
+                {
+                    onSuccess: () => {
+                        setProcessing(false);
+                        onClose();
+                    },
+                    onError: () => {
+                        setProcessing(false);
+                    }
+                }
+            );
+        }
     };
 
     type FormKeys = keyof typeof data;
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
     ) => {
-        const { name, value } = e.target;
-        setData(name as FormKeys, value);
+        const { name, value, type } = e.target;
+        
+        // Handle checkbox separately
+        if (type === 'checkbox') {
+            const checked = (e.target as HTMLInputElement).checked;
+            setData(prev => ({
+                ...prev,
+                [name]: checked,
+            }));
+            return;
+        }
+        
+        setData(prev => ({
+            ...prev,
+            [name]: value,
+        }));
     };
 
     // handle image file input
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setData((prev) => ({
+            setData(prev => ({
                 ...prev,
                 image: file,
             }));
@@ -113,7 +186,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
 
     // handle category select (since ShadCN Select doesn't give a real event)
     const handleCategoryChange = (value: string) => {
-        setData((prev) => ({
+        setData(prev => ({
             ...prev,
             category_id: value,
         }));
@@ -122,7 +195,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
     // handle dosage (array of strings) → store as comma-separated input
     const handleDosageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = e.target;
-        setData((prev) => ({
+        setData(prev => ({
             ...prev,
             dosage: value
                 .split(',')
@@ -264,10 +337,12 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
 
                     {/* Actions */}
                     <div className="flex justify-end space-x-3 pt-4">
-                        <Button type="button" variant="outline" onClick={onClose}>
+                        <Button type="button" variant="outline" onClick={onClose} disabled={processing}>
                             Cancel
                         </Button>
-                        <Button type="submit">{product ? 'Update Product' : 'Create Product'}</Button>
+                        <Button type="submit" disabled={processing}>
+                            {processing ? 'Saving...' : (product ? 'Update Product' : 'Create Product')}
+                        </Button>
                     </div>
                 </form>
             </div>
