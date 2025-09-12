@@ -52,16 +52,19 @@ describe('AdminProducts', () => {
         { url: null, label: '&laquo; Previous', active: false },
         { url: '/?page=1', label: '1', active: true },
         { url: '/?page=2', label: '2', active: false },
+        { url: '/?page=3', label: '3', active: false },
+        { url: '/?page=4', label: '4', active: false },
+        { url: '/?page=5', label: '5', active: false },
         { url: '/?page=2', label: 'Next &raquo;', active: false },
       ],
       meta: {
         current_page: 1,
         from: 1,
-        last_page: 2,
+        last_page: 5,
         path: '/admin/products',
         per_page: 15,
         to: 15,
-        total: 20,
+        total: 75,
       },
     },
     categories: [
@@ -72,8 +75,8 @@ describe('AdminProducts', () => {
         subcategory2: null,
       },
     ],
-    allProducts: 20,
-    activeProducts: 18,
+    allProducts: 75,
+    activeProducts: 68,
   };
 
   it('renders the products page correctly', () => {
@@ -86,12 +89,18 @@ describe('AdminProducts', () => {
     expect(screen.getByText('Product 1')).toBeInTheDocument();
 
     // Check that statistics cards are rendered
-    expect(screen.getByText('20')).toBeInTheDocument(); // Total products
-    expect(screen.getByText('18')).toBeInTheDocument(); // Active products
-    expect(screen.getByText('2')).toBeInTheDocument(); // Inactive products
+    expect(screen.getByText('75')).toBeInTheDocument(); // Total products
+    expect(screen.getByText('68')).toBeInTheDocument(); // Active products
+    expect(screen.getByText('7')).toBeInTheDocument(); // Inactive products
 
     // Check that the pagination component is rendered
     expect(screen.getByRole('navigation', { name: 'pagination' })).toBeInTheDocument();
+    
+    // Check that we show 3 page links (1, 2, 3) and ellipsis
+    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(screen.getByText('3')).toBeInTheDocument();
+    expect(screen.getByText('More pages')).toBeInTheDocument();
   });
 
   it('renders correctly with no products', () => {
@@ -121,5 +130,8 @@ describe('AdminProducts', () => {
     expect(screen.getByText('0')).toBeInTheDocument(); // Total products
     expect(screen.getByText('0')).toBeInTheDocument(); // Active products
     expect(screen.getByText('0')).toBeInTheDocument(); // Inactive products
+    
+    // Check that pagination is not rendered
+    expect(screen.queryByRole('navigation', { name: 'pagination' })).not.toBeInTheDocument();
   });
 });

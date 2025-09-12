@@ -43,7 +43,7 @@ class ProductController extends Controller
             }
         }
 
-        $paginatedProducts = $products->latest()->paginate(15)->withQueryString();
+        $paginatedProducts = $products->latest()->paginate(10)->withQueryString();
 
         // Count products for statistics
         $allProductsQuery = Product::query();
