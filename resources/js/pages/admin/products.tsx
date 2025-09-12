@@ -1,5 +1,5 @@
-import DeleteProductModal from '@/components/Admin/DeleteProductModal';
-import ProductFormModal from '@/components/Admin/ProductFormModal';
+import DeleteProductModal from '@/components/admin/DeleteProductModal';
+import ProductFormModal from '@/components/admin/ProductFormModal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,14 +8,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, Category, Paginated, Product } from '@/types';
-import { Link, router } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { Edit, PackageX, Plus, Search, Trash2, X } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
-import ProductShowModal from "@/components/Admin/ProductShowModal";
+import ProductShowModal from "@/components/admin/ProductShowModal";
+import { CustomPagination } from '@/components/custom-pagination';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Admin',
+        title: 'Dashboard',
         href: route('admin.dashboard'),
     },
     {
@@ -299,16 +300,7 @@ export default function AdminProducts({ products, categories, allProducts, activ
                     </CardContent>
                 </Card>
                 {/* Pagination */}
-                <div className="flex gap-2">
-                    {products.links.map((link, idx) => (
-                        <Link
-                            key={idx}
-                            href={link.url ?? '#'}
-                            className={`rounded px-3 py-1 ${link.active ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
-                </div>
+                <CustomPagination pagination={products} />
             </div>
 
             {/* Show Product Modal */}

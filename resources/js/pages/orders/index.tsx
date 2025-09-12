@@ -1,5 +1,5 @@
 import Filters from '@/components/Filters';
-import ProductCard from '@/components/ProductCard';
+import ProductCard from '@/components/product-card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CartItem, type BreadcrumbItem, Product, Paginated, Category } from '@/types';

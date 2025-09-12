@@ -78,7 +78,7 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setProcessing(true);
-        
+
         // Create FormData for proper file upload handling
         const formData = new FormData();
 
@@ -143,13 +143,11 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
             );
         }
     };
-
-    type FormKeys = keyof typeof data;
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
     ) => {
         const { name, value, type } = e.target;
-        
+
         // Handle checkbox separately
         if (type === 'checkbox') {
             const checked = (e.target as HTMLInputElement).checked;
@@ -159,7 +157,7 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
             }));
             return;
         }
-        
+
         setData(prev => ({
             ...prev,
             [name]: value,

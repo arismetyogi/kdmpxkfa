@@ -104,7 +104,7 @@ export default function CreditLimitAlert({ tenantId }: CreditLimitAlertProps) {
     const formattedLastUpdated = lastUpdated ? `${lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Just now';
 
     return (
-        <Alert variant="default" className="bg-primary drop-shadow-2xl backdrop-blur">
+        <Alert variant="default" className="bg-card-foreground drop-shadow-2xl backdrop-blur">
             <AlertDescription>
                 <div className="flex gap-4">
                     <div className="flex-1">
@@ -116,7 +116,7 @@ export default function CreditLimitAlert({ tenantId }: CreditLimitAlertProps) {
                                 <span className="text-red-500">{error}</span>
                             ) : creditLimit !== null ? (
                                 <div>
-                                    <span className="text-white text-sm">{formatCurrency(creditLimit)}</span>
+                                    <span className="text-white dark:text-zinc-700 text-sm">{formatCurrency(creditLimit)}</span>
                                 </div>
                             ) : (
                                 <span>Unable to load credit limit</span>

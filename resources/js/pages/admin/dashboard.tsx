@@ -27,10 +27,6 @@ interface AdminDashboardProps {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Admin',
-        href: route('admin.dashboard'),
-    },
-    {
         title: 'Dashboard',
         href: route('admin.dashboard'),
     },

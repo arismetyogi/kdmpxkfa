@@ -9,6 +9,7 @@ import AuthLayout from '@/layouts/auth-layout';
 import { Form } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { SharedData } from '@/types';
+import { Separator } from '@/components/ui/separator';
 
 interface LoginProps extends SharedData{
     status?: string;
@@ -25,7 +26,11 @@ export default function Login({ status, canResetPassword, digikopUrl }: LoginPro
                 </CardHeader>
                 <CardContent>
                     <div className="grid gap-6">
-                        <Button variant="outline" asChild className="w-full border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground">
+                        <Button
+                            variant="outline"
+                            asChild
+                            className="w-full border-border bg-accent text-foreground hover:bg-accent hover:text-accent-foreground"
+                        >
                             <a href={digikopUrl} target="_blank" className="cursor-pointer">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="778" height="778" viewBox="0 0 778 778" version="1.1">
                                     <path
@@ -41,15 +46,21 @@ export default function Login({ status, canResetPassword, digikopUrl }: LoginPro
                                         fillRule="evenodd"
                                     />
                                 </svg>
-                                Login with Digi Koperasi
+                                Login via Digi Koperasi
                             </a>
                         </Button>
+                        <div className="relative flex items-center py-1">
+                            <Separator />
+                            <div className="absolute left-1/2 -translate-x-1/2 bg-card px-4 text-sm text-muted-foreground">or</div>
+                        </div>
                         <Form method="post" action={route('login')} resetOnSuccess={['password']} className="flex flex-col gap-6">
                             {({ processing, errors }) => (
                                 <>
                                     <div className="grid gap-6">
                                         <div className="grid gap-2">
-                                            <Label htmlFor="email" className="text-foreground">Email address</Label>
+                                            <Label htmlFor="email" className="text-foreground">
+                                                Email address
+                                            </Label>
                                             <Input
                                                 id="email"
                                                 type="email"
@@ -66,9 +77,15 @@ export default function Login({ status, canResetPassword, digikopUrl }: LoginPro
 
                                         <div className="grid gap-2">
                                             <div className="flex items-center">
-                                                <Label htmlFor="password" className="text-foreground">Password</Label>
+                                                <Label htmlFor="password" className="text-foreground">
+                                                    Password
+                                                </Label>
                                                 {canResetPassword && (
-                                                    <TextLink href={route('password.request')} className="ml-auto text-sm text-foreground" tabIndex={5}>
+                                                    <TextLink
+                                                        href={route('password.request')}
+                                                        className="ml-auto text-sm text-foreground"
+                                                        tabIndex={5}
+                                                    >
                                                         Forgot password?
                                                     </TextLink>
                                                 )}
@@ -88,10 +105,17 @@ export default function Login({ status, canResetPassword, digikopUrl }: LoginPro
 
                                         <div className="flex items-center space-x-3">
                                             <Checkbox id="remember" name="remember" tabIndex={3} />
-                                            <Label htmlFor="remember" className="text-foreground">Remember me</Label>
+                                            <Label htmlFor="remember" className="text-foreground">
+                                                Remember me
+                                            </Label>
                                         </div>
 
-                                        <Button type="submit" className="mt-4 w-full bg-primary text-primary-foreground hover:bg-primary/90" tabIndex={4} disabled={processing}>
+                                        <Button
+                                            type="submit"
+                                            className="mt-4 w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                                            tabIndex={4}
+                                            disabled={processing}
+                                        >
                                             {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                                             Log in
                                         </Button>
