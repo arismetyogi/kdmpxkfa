@@ -105,14 +105,11 @@ const dummyProducts: Product[] = [
   },
 ];
 
-export default function Dashboard() {
+export default function Dashboard({ products }: { products?: Product[] }) {
   const [activeCategory, setActiveCategory] = useState("Semua");
-  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-   
-    setProducts(dummyProducts);
     setLoading(false);
   }, []);
 
@@ -293,62 +290,84 @@ export default function Dashboard() {
             </motion.div>
 
             {/* Grid Produk */}
-            <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.5 }}>
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">Katalog Premium</h2>
-              <p className="text-slate-600 dark:text-slate-400">Jelajahi koleksi lengkap produk berkualitas tinggi</p>
+          <motion.div
+  initial={{ opacity: 0, y: 40 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.8, delay: 0.5 }}
+>
+  <div className="text-center mb-8">
+    <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+      Katalog Premium
+    </h2>
+    <p className="text-slate-600 dark:text-slate-400">
+      Jelajahi koleksi lengkap produk berkualitas tinggi
+    </p>
+  </div>
+
+  {/* Category buttons */}
+  <div className="flex gap-3 mb-8 justify-center flex-wrap">
+    {(categories ?? []).map((cat) => (
+      <Button
+        key={cat}
+        variant={activeCategory === cat ? "default" : "outline"}
+        className={`rounded-full px-6 py-3 font-semibold transition-all duration-300 ${
+          activeCategory === cat
+            ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg scale-105"
+            : "border-2 border-blue-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800"
+        }`}
+        onClick={() => setActiveCategory(cat)}
+      >
+        {cat}
+      </Button>
+    ))}
+  </div>
+
+  {/* Product grid */}
+  <div className="grid gap-8 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+    {(filteredProducts ?? []).map((p, idx) => (
+      <motion.div
+        key={p.id}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 * idx }}
+        whileHover={{ y: -8, scale: 1.02 }}
+        className="group"
+      >
+        <Card className="rounded-3xl border-0 shadow-xl hover:shadow-2xl flex flex-col h-full bg-white dark:bg-slate-800 backdrop-blur-sm overflow-hidden relative">
+          <div className="relative overflow-hidden">
+            <img
+              src={p.image ? `/storage/${p.image}` : "/placeholder.jpg"}
+              alt={p.name}
+              className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-700"
+            />
+          </div>
+          <CardContent className="p-6 flex-1 flex flex-col">
+            <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-2 line-clamp-1">
+              {p.name}
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-3 line-clamp-2 flex-1">
+              {p.description}
+            </p>
+            <div className="flex items-baseline gap-2 mb-3">
+              <span className="text-lg font-bold text-blue-600">
+                Rp {p.price.toLocaleString("id-ID")}
+              </span>
             </div>
-            <div className="flex gap-3 mb-8 justify-center flex-wrap">
-              {categories.map((cat) => (
-                <Button
-                  key={cat}
-                  variant={activeCategory === cat ? "default" : "outline"}
-                  className={`rounded-full px-6 py-3 font-semibold transition-all duration-300 ${
-                    activeCategory === cat
-                      ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg scale-105"
-                      : "border-2 border-blue-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800"
-                  }`}
-                  onClick={() => setActiveCategory(cat)}
-                >
-                  {cat}
-                </Button>
-              ))}
-            </div>
-            <div className="grid gap-8 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {filteredProducts.map((p, idx) => (
-                <motion.div
-                  key={p.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.1 * idx }}
-                  whileHover={{ y: -8, scale: 1.02 }}
-                  className="group"
-                >
-                  <Card className="rounded-3xl border-0 shadow-xl hover:shadow-2xl flex flex-col h-full bg-white dark:bg-slate-800 backdrop-blur-sm overflow-hidden relative">
-                    <div className="relative overflow-hidden">
-                      <img
-                        src={p.image || "/placeholder.jpg"}
-                        alt={p.image_alt || p.name}
-                        className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
-                    </div>
-                    <CardContent className="p-6 flex-1 flex flex-col">
-                      <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-2 line-clamp-1">{p.name}</h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mb-3 line-clamp-2 flex-1">{p.description}</p>
-                      <div className="flex items-baseline gap-2 mb-3">
-                        <span className="text-lg font-bold text-blue-600">Rp {p.price.toLocaleString("id-ID")}</span>
-                      </div>
-                      <Button asChild className="w-full mt-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-2xl shadow-md">
-                        <Link href={"#"}>
-                          <ShoppingBag className="w-4 h-4 mr-2" /> Lihat Detail
-                        </Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
+            <Button
+              asChild
+              className="w-full mt-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-2xl shadow-md"
+            >
+              <Link href="#">
+                <ShoppingBag className="w-4 h-4 mr-2" /> Lihat Detail
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </motion.div>
+    ))}
+  </div>
+</motion.div>
+
         </div>
       </div>
 
