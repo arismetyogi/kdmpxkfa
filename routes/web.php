@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\Ecommerce\CartController;
 use App\Http\Controllers\Ecommerce\OrderController;
+use App\Http\Controllers\Ecommerce\HistoryController;
 use App\Http\Controllers\ProductController as ControllersProductController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
@@ -39,6 +40,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/checkout/process', [CartController::class, 'processCheckout'])->name('checkout.process');
     Route::post('/payment/process', [CartController::class, 'processPayment'])->name('payment.process');
     Route::get('/order-complete/{order}', [CartController::class, 'orderComplete'])->name('order.complete');
+
+     // History
+// History
+Route::prefix('orders/history')->name('history.')->group(function () {
+    Route::get('/', [HistoryController::class , 'history'])->name('index');
+    Route::get('{transaction_number}', [HistoryController::class, 'show'])->name('show');
+    Route::get('{transaction_number}/details', [HistoryController::class, 'show'])->name('details');
+    Route::post('{transaction_number}/updateStatus', [HistoryController::class, 'updateStatus'])->name('updateStatus');
+});
 
     // Credit limit route
     Route::get('/credit-limit', [TransactionController::class, 'creditLimit'])->name('credit.limit');
