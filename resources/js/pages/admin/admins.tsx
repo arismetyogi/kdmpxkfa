@@ -6,14 +6,14 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import UserFormModal from '@/components/Admin/UserFormModal';
+import UserFormModal from '@/components/admin/UserFormModal';
 import { Button } from '@/components/ui/button';
-import DeleteUserModal from '@/components/Admin/DeleteUserModal';
+import DeleteUserModal from '@/components/admin/DeleteUserModal';
 
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Admin',
+        title: 'Dashboard',
         href: route('admin.dashboard'),
     },
     {

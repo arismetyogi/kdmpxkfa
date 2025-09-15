@@ -4,7 +4,7 @@ import { useDebounce } from 'use-debounce'; // A great library for debouncing in
 import pickBy from 'lodash/pickBy'; // Helper to remove empty values from an object
 
 import Filters from '@/components/Filters';
-import ProductCard from '@/components/ProductCard';
+import ProductCard from '@/components/product-card';
 import { Pagination } from '@/components/ui/pagination'; // You'll need a Pagination component
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

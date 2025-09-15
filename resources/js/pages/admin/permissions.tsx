@@ -14,8 +14,8 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { useState } from 'react';
-import PermissionFormModal from '@/components/Admin/PermissionFormModal';
-import DeletePermissionModal from '@/components/Admin/DeletePermissionModal';
+import PermissionFormModal from '@/components/admin/PermissionFormModal';
+import DeletePermissionModal from '@/components/admin/DeletePermissionModal';
 
 interface Permission {
     id: number;
@@ -29,7 +29,7 @@ interface AdminPermissionProps {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Admin',
+        title: 'Dashboard',
         href: route('admin.dashboard'),
     },
     {

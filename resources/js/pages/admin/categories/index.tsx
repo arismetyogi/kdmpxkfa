@@ -1,5 +1,5 @@
-import DeleteCategoryModal from '@/components/Admin/DeleteCategoryModal';
-import CategoryFormModal from '@/components/Admin/CategoryFormModal';
+import DeleteCategoryModal from '@/components/admin/DeleteCategoryModal';
+import CategoryFormModal from '@/components/admin/CategoryFormModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -11,7 +11,7 @@ import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Admin',
+        title: 'Dashboard',
         href: route('admin.dashboard'),
     },
     {

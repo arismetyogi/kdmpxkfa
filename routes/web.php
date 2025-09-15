@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SsoController;
 use App\Http\Controllers\Admin\UserController;
@@ -43,7 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/credit-limit', [TransactionController::class, 'creditLimit'])->name('credit.limit');
 
     // Admin routes with role-based access
-    Route::middleware('permission:view admin dashboard')->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('permission:' . \App\Enums\PermissionEnum::VIEW_ADMIN_DASHBOARD->value)->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
         // Role management routes with explicit model binding
@@ -54,10 +55,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/{role}', [AdminController::class, 'destroyRole'])->name('destroy');
         });
 
-        Route::prefix('permissions')->name('permissions.')->group(function () {
-            Route::get('/', [AdminController::class, 'permissions'])->name('index');
-            Route::post('/', [AdminController::class, 'storePermission'])->name('store');
-        });
+        Route::resource('permissions', PermissionController::class)->except('show, edit');
 
         Route::resource('admins', AdminController::class);
 
@@ -70,7 +68,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Category management routes
         Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
 
-        Route::middleware('permission:view orders')->group(function () {
+        Route::middleware('permission:' . \App\Enums\PermissionEnum::VIEW_ORDERS->value)->group(function () {
             Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
         });
     });
@@ -90,5 +88,5 @@ Route::bind('user', function ($value) {
     return \App\Models\User::findOrFail($value);
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

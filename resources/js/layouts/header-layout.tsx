@@ -1,4 +1,4 @@
-import CreditLimitAlert from '@/components/CreditLimitAlert';
+import CreditLimitAlert from '@/components/credit-limit-alert';
 import { Toaster } from '@/components/ui/sonner';
 import AppLayoutTemplate from '@/layouts/app/app-header-layout';
 import { type BreadcrumbItem } from '@/types';

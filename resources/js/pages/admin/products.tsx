@@ -1,5 +1,5 @@
-import DeleteProductModal from '@/components/Admin/DeleteProductModal';
-import ProductFormModal from '@/components/Admin/ProductFormModal';
+import DeleteProductModal from '@/components/admin/DeleteProductModal';
+import ProductFormModal from '@/components/admin/ProductFormModal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,14 +8,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, Category, Paginated, Product } from '@/types';
-import { Link, router } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { Edit, PackageX, Plus, Search, Trash2, X } from 'lucide-react';
-import { useState } from 'react';
-import ProductShowModal from "@/components/Admin/ProductShowModal";
+import React, { useState, useCallback } from 'react';
+import ProductShowModal from "@/components/admin/ProductShowModal";
+import { CustomPagination } from '@/components/custom-pagination';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Admin',
+        title: 'Dashboard',
         href: route('admin.dashboard'),
     },
     {
@@ -73,7 +74,7 @@ export default function AdminProducts({ products, categories, allProducts, activ
     };
 
     // Apply filters
-    const applyFilters = () => {
+    const applyFilters = useCallback(() => {
         const filters: Record<string, string> = {};
 
         if (searchTerm) filters.search = searchTerm;
@@ -84,7 +85,7 @@ export default function AdminProducts({ products, categories, allProducts, activ
             preserveState: true,
             preserveScroll: true,
         });
-    };
+    }, [searchTerm, selectedCategory, statusFilter]);
 
     // Clear filters
     const clearFilters = () => {
@@ -102,60 +103,6 @@ export default function AdminProducts({ products, categories, allProducts, activ
     const handleSearchKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
             applyFilters();
-        }
-    };
-
-    const handleSubmitProduct = (productData: Partial<Product>) => {
-        // Create FormData for proper file upload handling
-        const formData = new FormData();
-
-        // Add all product data to form
-        formData.append('sku', productData.sku || '');
-        formData.append('name', productData.name || '');
-        formData.append('description', productData.description || '');
-        formData.append('pharmacology', productData.pharmacology || '');
-        formData.append('category_id', productData.category_id?.toString() || '');
-        formData.append('base_uom', productData.base_uom || '');
-        formData.append('order_unit', productData.order_unit || '');
-        formData.append('content', productData.content?.toString() || '1');
-        formData.append('brand', productData.brand || '');
-        formData.append('price', productData.price?.toString() || '0');
-        formData.append('weight', productData.weight?.toString() || '0');
-        formData.append('length', productData.length?.toString() || '0');
-        formData.append('width', productData.width?.toString() || '0');
-        formData.append('height', productData.height?.toString() || '0');
-        formData.append('is_active', productData.is_active ? '1' : '0');
-
-        // Handle dosage array
-        if (productData.dosage && Array.isArray(productData.dosage)) {
-            productData.dosage.forEach((dose, index) => {
-                formData.append(`dosage[${index}]`, dose);
-            });
-        }
-
-        // Append image if File
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        if (productData.image instanceof File) {
-            formData.append('image', productData.image);
-        }
-
-        if (selectedProduct) {
-            console.log('selected product: ', selectedProduct);
-            formData.append('_method', 'put');
-            // Update existing product - use Inertia's put method
-            router.post(
-                route('admin.products.update', selectedProduct.id), formData,
-                {
-                    forceFormData: true,
-                    onSuccess: () => closeModals(),
-                },
-            );
-        } else {
-            // Create new product
-            router.post(route('admin.products.store'), formData, {
-                onSuccess: () => closeModals(),
-            });
         }
     };
 
@@ -353,16 +300,7 @@ export default function AdminProducts({ products, categories, allProducts, activ
                     </CardContent>
                 </Card>
                 {/* Pagination */}
-                <div className="flex gap-2">
-                    {products.links.map((link, idx) => (
-                        <Link
-                            key={idx}
-                            href={link.url ?? '#'}
-                            className={`rounded px-3 py-1 ${link.active ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
-                </div>
+                <CustomPagination pagination={products} />
             </div>
 
             {/* Show Product Modal */}
@@ -377,7 +315,6 @@ export default function AdminProducts({ products, categories, allProducts, activ
                 isOpen={isCreateModalOpen}
                 onClose={closeModals}
                 product={null}
-                onSubmit={handleSubmitProduct}
                 categories={categories}
             />
 
@@ -386,7 +323,6 @@ export default function AdminProducts({ products, categories, allProducts, activ
                 isOpen={isEditModalOpen}
                 onClose={closeModals}
                 product={selectedProduct}
-                onSubmit={handleSubmitProduct}
                 categories={categories}
             />
 
