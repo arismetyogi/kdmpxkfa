@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\Ecommerce\CartController;
 use App\Http\Controllers\Ecommerce\OrderController;
+use App\Http\Controllers\ProductController as ControllersProductController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -26,10 +27,8 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Regular user dashboard
-    Route::get('/dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
-
+    Route::get('/dashboard', [ControllersProductController::class, 'index'])->name('dashboard');
+    
     Route::get('/orders/products', [OrderController::class, 'index'])->name('orders.products');
     Route::get('/orders/history', [OrderController::class, 'history'])->name('orders.history');
     Route::post('/orders/{order}/accept', [OrderController::class, 'acceptOrder'])->name('orders.accept');
