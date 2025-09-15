@@ -31,7 +31,7 @@ class ApotekSeeder extends Seeder
                     $header = array_map(function ($h) {
                         return trim(preg_replace('/^\xEF\xBB\xBF/', '', $h)); // hapus BOM kalau ada
                     }, $row);
-                    $this->command->info('CSV Header: '.json_encode($header));
+//                    $this->command->info('CSV Header: '.json_encode($header));
                 } else {
                     if (count($row) === count($header)) {
                         $data[] = array_combine($header, array_map('trim', $row));

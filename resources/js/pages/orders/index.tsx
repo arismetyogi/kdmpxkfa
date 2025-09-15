@@ -1,5 +1,5 @@
 import Filters from '@/components/Filters';
-import ProductCard from '@/components/ProductCard';
+import ProductCard from '@/components/product-card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CartItem, type BreadcrumbItem, Product, Paginated, Category } from '@/types';
@@ -7,7 +7,7 @@ import { Head, Link } from '@inertiajs/react';
 import { ShoppingCart } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import AppHeaderLayout from '@/layouts/app/app-header-layout';
+import HeaderLayout from '@/layouts/header-layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -68,7 +68,7 @@ export default function OrdersIndexPage({ products, categories }: IndexProps) {
     }
 
     return (
-        <AppHeaderLayout breadcrumbs={breadcrumbs}>
+        <HeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Products" />
             <div className="flex flex-col gap-6 p-6 lg:flex-row">
                 {/* Sidebar Filters */}
@@ -210,6 +210,6 @@ export default function OrdersIndexPage({ products, categories }: IndexProps) {
                     )}
                 </DialogContent>
             </Dialog>
-        </AppHeaderLayout>
+        </HeaderLayout>
     );
 }

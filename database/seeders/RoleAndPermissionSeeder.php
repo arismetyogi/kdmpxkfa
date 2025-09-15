@@ -2,7 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Enums\PermissionEnum;
+use App\Enums\RoleEnum;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -16,71 +19,61 @@ class RoleAndPermissionSeeder extends Seeder
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Create permissions
-        $permissions = [
-            'view users',
-            'create users',
-            'update users',
-            'delete users',
-            'view roles',
-            'create roles',
-            'update roles',
-            'delete roles',
-            'view permissions',
-            'create permissions',
-            'update permissions',
-            'delete permissions',
-            'view dashboard',
-            'view admin dashboard',
-            'view products',
-            'create products',
-            'update products',
-            'delete products',
-            'view orders',
-            'create orders',
-            'update orders',
-            'delete orders',
-            'view reports',
-            'create reports',
-        ];
-
-        foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+        // Create permissions using PermissionEnum, handling existing permissions
+        foreach (PermissionEnum::cases() as $permission) {
+            Permission::firstOrCreate(['name' => $permission->value]);
         }
 
         // Create roles and assign permissions
-        $superAdminRole = Role::create(['name' => 'super-admin']);
+        $superAdminRole = Role::firstOrCreate(['name' => RoleEnum::SUPER_ADMIN->value]);
+        // Clear existing permissions for this role
+        DB::table('role_has_permissions')
+            ->where('role_id', $superAdminRole->id)
+            ->delete();
         $superAdminRole->givePermissionTo(Permission::all());
 
-        $adminRole = Role::create(['name' => 'admin']);
+        $adminRole = Role::firstOrCreate(['name' => RoleEnum::ADMIN_BUSDEV->value]);
+        // Clear existing permissions for this role
+        DB::table('role_has_permissions')
+            ->where('role_id', $adminRole->id)
+            ->delete();
         $adminRole->givePermissionTo([
-            'view users',
-            'create users',
-            'update users',
-            'view roles',
-            'create roles',
-            'update roles',
-            'view permissions',
-            'create permissions',
-            'update permissions',
-            'view admin dashboard',
-            'view dashboard',
-            'view products',
-            'view orders',
+            PermissionEnum::VIEW_USERS->value,
+            PermissionEnum::CREATE_USERS->value,
+            PermissionEnum::UPDATE_USERS->value,
+            PermissionEnum::VIEW_ROLES->value,
+            PermissionEnum::CREATE_ROLES->value,
+            PermissionEnum::UPDATE_ROLES->value,
+            PermissionEnum::VIEW_PERMISSIONS->value,
+            PermissionEnum::CREATE_PERMISSIONS->value,
+            PermissionEnum::UPDATE_PERMISSIONS->value,
+            PermissionEnum::VIEW_ADMIN_DASHBOARD->value,
+            PermissionEnum::VIEW_DASHBOARD->value,
+            PermissionEnum::VIEW_PRODUCTS->value,
+            PermissionEnum::VIEW_ORDERS->value,
         ]);
 
-        $managerRole = Role::create(['name' => 'manager']);
+        $managerRole = Role::firstOrCreate(['name' => RoleEnum::ADMIN_APOTEK->value]);
+        // Clear existing permissions for this role
+        DB::table('role_has_permissions')
+            ->where('role_id', $managerRole->id)
+            ->delete();
         $managerRole->givePermissionTo([
-            'view users',
-            'view roles',
-            'view permissions',
-            'view dashboard',
-            'view admin dashboard',
+            PermissionEnum::VIEW_ADMIN_DASHBOARD->value,
+            PermissionEnum::VIEW_ORDERS->value,
+            PermissionEnum::UPDATE_ORDERS->value,
+            PermissionEnum::VIEW_PRODUCTS->value,
+            PermissionEnum::VIEW_REPORTS->value,
+            PermissionEnum::CREATE_REPORTS->value,
         ]);
 
-        $userRole = Role::create(['name' => 'user']);
+        $userRole = Role::firstOrCreate(['name' => RoleEnum::USER->value]);
+        // Clear existing permissions for this role
+        DB::table('role_has_permissions')
+            ->where('role_id', $userRole->id)
+            ->delete();
         $userRole->givePermissionTo([
-            'view dashboard',
+            PermissionEnum::VIEW_DASHBOARD->value,
         ]);
     }
 }

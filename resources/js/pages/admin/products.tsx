@@ -1,19 +1,22 @@
-import DeleteProductModal from '@/components/Admin/DeleteProductModal';
-import ProductFormModal from '@/components/Admin/ProductFormModal';
+import DeleteProductModal from '@/components/admin/DeleteProductModal';
+import ProductFormModal from '@/components/admin/ProductFormModal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, Category, Paginated, Product } from '@/types';
-import { Link, router } from '@inertiajs/react';
-import { Edit, PackageX, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
-import ProductShowModal from "@/components/Admin/ProductShowModal";
+import { router } from '@inertiajs/react';
+import { Edit, PackageX, Plus, Search, Trash2, X } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import ProductShowModal from "@/components/admin/ProductShowModal";
+import { CustomPagination } from '@/components/custom-pagination';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Admin',
+        title: 'Dashboard',
         href: route('admin.dashboard'),
     },
     {
@@ -36,6 +39,11 @@ export default function AdminProducts({ products, categories, allProducts, activ
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isShowModalOpen, setIsShowModalOpen] = useState(false);
+
+    // Filter states
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
 
     const handleShowProduct = (product: Product) => {
         setSelectedProduct(product);
@@ -65,55 +73,36 @@ export default function AdminProducts({ products, categories, allProducts, activ
         setSelectedProduct(null);
     };
 
-    const handleSubmitProduct = (productData: Partial<Product>) => {
-        // Create FormData for proper file upload handling
-        const formData = new FormData();
+    // Apply filters
+    const applyFilters = useCallback(() => {
+        const filters: Record<string, string> = {};
 
-        // Add all product data to form
-        formData.append('sku', productData.sku || '');
-        formData.append('name', productData.name || '');
-        formData.append('description', productData.description || '');
-        formData.append('pharmacology', productData.pharmacology || '');
-        formData.append('category_id', productData.category_id?.toString() || '');
-        formData.append('base_uom', productData.base_uom || '');
-        formData.append('order_unit', productData.order_unit || '');
-        formData.append('content', productData.content?.toString() || '1');
-        formData.append('brand', productData.brand || '');
-        formData.append('price', productData.price?.toString() || '0');
-        formData.append('weight', productData.weight?.toString() || '0');
-        formData.append('length', productData.length?.toString() || '0');
-        formData.append('width', productData.width?.toString() || '0');
-        formData.append('height', productData.height?.toString() || '0');
-        formData.append('is_active', productData.is_active ? '1' : '0');
+        if (searchTerm) filters.search = searchTerm;
+        if (selectedCategory) filters.category_id = selectedCategory;
+        if (statusFilter) filters.status = statusFilter;
 
-        // Handle dosage array
-        if (productData.dosage && Array.isArray(productData.dosage)) {
-            productData.dosage.forEach((dose, index) => {
-                formData.append(`dosage[${index}]`, dose);
-            });
-        }
+        router.get(route('admin.products.index'), filters, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    }, [searchTerm, selectedCategory, statusFilter]);
 
-        // Append image if File
-        if (productData.image instanceof File) {
-            formData.append('image', productData.image);
-        }
+    // Clear filters
+    const clearFilters = () => {
+        setSearchTerm('');
+        setSelectedCategory('');
+        setStatusFilter('');
 
-        if (selectedProduct) {
-            console.log('selected product: ', selectedProduct);
-            formData.append('_method', 'put');
-            // Update existing product - use Inertia's put method
-            router.post(
-                route('admin.products.update', selectedProduct.id), formData,
-                {
-                    forceFormData: true,
-                    onSuccess: () => closeModals(),
-                },
-            );
-        } else {
-            // Create new product
-            router.post(route('admin.products.store'), formData, {
-                onSuccess: () => closeModals(),
-            });
+        router.get(route('admin.products.index'), {}, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    // Handle Enter key in search input
+    const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            applyFilters();
         }
     };
 
@@ -131,6 +120,63 @@ export default function AdminProducts({ products, categories, allProducts, activ
                     </Button>
                 </div>
 
+                {/* Search and Filter Section */}
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+                            {/* Search Input */}
+                            <div className="relative">
+                                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Search products..."
+                                    className="pl-8"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onKeyDown={handleSearchKeyDown}
+                                />
+                            </div>
+
+                            {/* Category Filter */}
+                            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Filter by category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {categories.map((category) => (
+                                        <SelectItem key={category.id} value={category.id.toString()}>
+                                            {category.main_category}
+                                            {category.subcategory1 ? ` > ${category.subcategory1}` : ''}
+                                            {category.subcategory2 ? ` > ${category.subcategory2}` : ''}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            {/* Status Filter */}
+                            <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Filter by status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {/*<SelectItem value="">All Statuses</SelectItem>*/}
+                                    <SelectItem value="active">Active</SelectItem>
+                                    <SelectItem value="inactive">Inactive</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            {/* Action Buttons */}
+                            <div className="flex space-x-2 max-w-fit ms-auto">
+                                <Button onClick={applyFilters} className="w-full">
+                                    Apply
+                                </Button>
+                                <Button variant="outline" onClick={clearFilters}>
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
                 <div className="grid gap-4 md:grid-cols-3">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -138,7 +184,11 @@ export default function AdminProducts({ products, categories, allProducts, activ
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{allProducts}</div>
-                            <p className="text-xs text-gray-600">Total products in the system</p>
+                            <p className="text-xs text-gray-600">
+                                {searchTerm || selectedCategory || statusFilter
+                                    ? "Filtered products"
+                                    : "Total products in the system"}
+                            </p>
                         </CardContent>
                     </Card>
                     <Card>
@@ -147,7 +197,11 @@ export default function AdminProducts({ products, categories, allProducts, activ
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{activeProducts}</div>
-                            <p className="text-xs text-gray-600">Total active products</p>
+                            <p className="text-xs text-gray-600">
+                                {searchTerm || selectedCategory || statusFilter
+                                    ? "Filtered active products"
+                                    : "Total active products"}
+                            </p>
                         </CardContent>
                     </Card>
                     <Card>
@@ -157,7 +211,11 @@ export default function AdminProducts({ products, categories, allProducts, activ
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{allProducts - activeProducts}</div>
-                            <p className="text-xs text-gray-600">Total inactive products</p>
+                            <p className="text-xs text-gray-600">
+                                {searchTerm || selectedCategory || statusFilter
+                                    ? "Filtered inactive products"
+                                    : "Total inactive products"}
+                            </p>
                         </CardContent>
                     </Card>
                 </div>
@@ -242,16 +300,7 @@ export default function AdminProducts({ products, categories, allProducts, activ
                     </CardContent>
                 </Card>
                 {/* Pagination */}
-                <div className="flex gap-2">
-                    {products.links.map((link, idx) => (
-                        <Link
-                            key={idx}
-                            href={link.url ?? '#'}
-                            className={`rounded px-3 py-1 ${link.active ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
-                </div>
+                <CustomPagination pagination={products} />
             </div>
 
             {/* Show Product Modal */}
@@ -266,7 +315,6 @@ export default function AdminProducts({ products, categories, allProducts, activ
                 isOpen={isCreateModalOpen}
                 onClose={closeModals}
                 product={null}
-                onSubmit={handleSubmitProduct}
                 categories={categories}
             />
 
@@ -275,7 +323,6 @@ export default function AdminProducts({ products, categories, allProducts, activ
                 isOpen={isEditModalOpen}
                 onClose={closeModals}
                 product={selectedProduct}
-                onSubmit={handleSubmitProduct}
                 categories={categories}
             />
 

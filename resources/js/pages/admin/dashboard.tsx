@@ -27,10 +27,6 @@ interface AdminDashboardProps {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Admin',
-        href: '#',
-    },
-    {
         title: 'Dashboard',
         href: route('admin.dashboard'),
     },
@@ -113,21 +109,21 @@ export default function AdminDashboard({ user, stats }: AdminDashboardProps) {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <a
-                                href="/admin/users"
+                                href={route('admin.users.index')}
                                 className="block p-4 border border-border rounded-lg hover:bg-accent transition-colors"
                             >
                                 <div className="font-semibold text-foreground">Manage Users</div>
                                 <div className="text-sm text-muted-foreground">View and manage user accounts</div>
                             </a>
                             <a
-                                href="/admin/roles"
+                                href={route('admin.roles.index')}
                                 className="block p-4 border border-border rounded-lg hover:bg-accent transition-colors"
                             >
                                 <div className="font-semibold text-foreground">Manage Roles</div>
                                 <div className="text-sm text-muted-foreground">Create and assign user roles</div>
                             </a>
                             <a
-                                href="/admin/permissions"
+                                href={route('admin.permissions.index')}
                                 className="block p-4 border border-border rounded-lg hover:bg-accent transition-colors"
                             >
                                 <div className="font-semibold text-foreground">Manage Permissions</div>

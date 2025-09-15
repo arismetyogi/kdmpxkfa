@@ -65,7 +65,7 @@ it('shows user roles and permissions in admin dashboard', function () {
     $response = $this->actingAs($adminUser)->get('/admin');
 
     $response->assertSuccessful();
-    $response->assertInertia(fn ($page) => $page->component('Admin/Dashboard')
+    $response->assertInertia(fn ($page) => $page->component('admin/Dashboard')
         ->has('user')
         ->has('stats')
     );

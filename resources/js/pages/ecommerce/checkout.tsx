@@ -1,8 +1,8 @@
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import HeaderLayout from '@/layouts/header-layout';
 import { router } from '@inertiajs/react';
 import React, { useState } from 'react';
-import HeaderLayout from '@/layouts/header-layout';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 
 interface CartItem {
     id: string | number;
@@ -48,19 +48,9 @@ interface CheckoutProps {
         zip: string;
         country: string;
     };
-    sameAsBilling: boolean;
 }
 
-export default function CheckoutPage({
-    cartItems,
-                                         totalPrice,
-    subtotal,
-    shipping,
-    tax,
-    billingData,
-    shippingData,
-    sameAsBilling,
-}: CheckoutProps) {
+export default function CheckoutPage({ cartItems, totalPrice, subtotal, shipping, tax, billingData, shippingData,  }: CheckoutProps) {
     const [formData, setFormData] = useState({
         first_name: billingData?.first_name || '',
         last_name: billingData?.last_name || '',
@@ -72,7 +62,7 @@ export default function CheckoutPage({
         zip: billingData?.zip || '',
         country: billingData?.country || 'Indonesia',
         notes: billingData?.notes || '',
-        same_as_billing: sameAsBilling,
+        same_as_billing: false,
         shipping_first_name: shippingData?.first_name || billingData?.first_name || '',
         shipping_last_name: shippingData?.last_name || billingData?.last_name || '',
         shipping_email: shippingData?.email || billingData?.email || '',
@@ -86,23 +76,23 @@ export default function CheckoutPage({
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
-            [name]: value
+            [name]: value,
         }));
     };
 
     const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, checked } = e.target;
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
-            [name]: checked
+            [name]: checked,
         }));
         console.log(formData);
 
         // If same_as_billing is checked, copy billing data to shipping data
         if (name === 'same_as_billing' && checked) {
-            setFormData(prev => ({
+            setFormData((prev) => ({
                 ...prev,
                 shipping_first_name: prev.first_name,
                 shipping_last_name: prev.last_name,
@@ -123,12 +113,12 @@ export default function CheckoutPage({
 
     return (
         <HeaderLayout>
-            <div className="container mx-auto p-2 max-w-6xl">
+            <div className="container mx-auto max-w-6xl p-2">
                 <h1 className="mb-4 text-xl font-bold text-gray-800">Checkout</h1>
 
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 md:grid-cols-4">
                     {/* Billing & Shipping Information */}
-                    <div className="md:col-span-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-4 md:col-span-3 md:grid-cols-2">
                         {/* Billing Information */}
                         <div className="rounded-lg bg-white p-3 shadow-sm">
                             <h2 className="mb-3 text-sm font-semibold text-gray-800">Billing Information</h2>
@@ -272,7 +262,7 @@ export default function CheckoutPage({
 
                         {/* Shipping Information */}
                         <div className="rounded-lg bg-white p-3 shadow-sm">
-                            <div className="flex items-center justify-between mb-3">
+                            <div className="mb-3 flex items-center justify-between">
                                 <h2 className="text-sm font-semibold text-gray-800">Shipping Information</h2>
                                 <div className="flex items-center">
                                     <Input
@@ -417,17 +407,17 @@ export default function CheckoutPage({
                                                 <p className="text-xs font-medium text-gray-800">{item.name}</p>
                                                 <p className="text-xs text-gray-500">
                                                     Qty: {item.quantity} {item.order_unit}
-                                                    <span className="block">({item.quantity * item.content} {item.base_uom})</span>
+                                                    <span className="block">
+                                                        ({item.quantity * item.content} {item.base_uom})
+                                                    </span>
                                                 </p>
                                             </div>
-                                            <p className="text-xs font-medium text-gray-800">
-                                                Rp{(item.price * item.quantity).toLocaleString()}
-                                            </p>
+                                            <p className="text-xs font-medium text-gray-800">Rp{(item.price * item.quantity).toLocaleString()}</p>
                                         </div>
                                     ))}
                                 </div>
 
-                                <div className="border-t pt-3 space-y-1">
+                                <div className="space-y-1 border-t pt-3">
                                     <div className="flex justify-between">
                                         <span className="text-xs text-gray-600">Subtotal</span>
                                         <span className="text-xs font-medium">Rp{subtotal.toLocaleString()}</span>
@@ -435,8 +425,8 @@ export default function CheckoutPage({
                                     <div className="flex justify-between">
                                         <span className="text-xs text-gray-600">Shipping</span>
                                         <span className="text-xs font-medium text-green-600">
-                      {shipping === 0 ? "Free" : `Rp${shipping.toLocaleString()}`}
-                    </span>
+                                            {shipping === 0 ? 'Free' : `Rp${shipping.toLocaleString()}`}
+                                        </span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-xs text-gray-600">Tax</span>

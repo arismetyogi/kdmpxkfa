@@ -20,34 +20,34 @@ export function AppSidebar() {
         ? [
               {
                   title: 'Admin Dashboard',
-                  href: '/admin/dashboard',
+                  href: route('admin.dashboard', [], false),
                   icon: Shield,
               },
               {
                   title: 'Category Management',
-                  href: '/admin/categories',
+                  href: route('admin.categories.index', [], false),
                   icon: Tag,
               },
               {
                   title: 'Product Management',
-                  href: '/admin/products',
+                  href: route('admin.products.index', [], false),
                   icon: Package,
               },
           ]
         : [
               {
                   title: 'Dashboard',
-                  href: '/dashboard',
+                  href: route('dashboard', [], false),
                   icon: LayoutGrid,
               },
               {
                   title: 'Products',
-                  href: '/orders/products',
+                  href: route('orders.products', [], false),
                   icon: ShoppingCart,
               },
               {
                   title: 'Orders History',
-                  href: '/orders/history',
+                  href: route('orders.history', [], false),
                   icon: History,
               },
           ];
@@ -56,7 +56,7 @@ export function AppSidebar() {
         [
             {
                 title: 'Orders',
-                href: '/admin/orders',
+                href: route('admin.orders.index', [], false),
                 icon: ShoppingCart,
             },
         ] : [];
@@ -65,29 +65,29 @@ export function AppSidebar() {
         ? [
               {
                   title: 'Admin Management',
-                  href: '/admin/admins',
+                  href: route('admin.admins.index', [], false),
                   icon: UserCog,
               },
             {
                   title: 'User Management',
-                  href: '/admin/users',
+                  href: route('admin.users.index', [], false),
                   icon: Users,
               },
               {
                   title: 'Role Management',
-                  href: '/admin/roles',
+                  href: route('admin.roles.index', [], false),
                   icon: Settings,
               },
               {
                   title: 'Permission Management',
-                  href: '/admin/permissions',
+                  href: route('admin.permissions.index', [], false),
                   icon: Key,
               },
           ]
         : [];
 
     // Determine the logo link based on user role
-    const logoHref = isAdminOrManager ? '/admin' : '/dashboard';
+    const logoHref = isAdminOrManager ? route('admin.dashboard') : route('home');
 
     return (
         <Sidebar collapsible="icon" variant="inset">
