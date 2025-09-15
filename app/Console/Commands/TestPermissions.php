@@ -73,7 +73,7 @@ class TestPermissions extends Command
             // Assign admin role if not already assigned
             if (! $user->hasRole('admin')) {
                 $user->assignRole('admin');
-                $this->info('Admin role assigned to user');
+                $this->info('admin role assigned to user');
             } else {
                 $this->info('User already has admin role');
             }

@@ -1,26 +1,26 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Category, Product } from '@/types';
 import { X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import SearchableSelect from '@/components/searchable-select';
+import { router } from '@inertiajs/react';
 
 interface ProductFormModalProps {
     isOpen: boolean;
     onClose: () => void;
     product: Product | null;
-    onSubmit?: (product: Partial<Product>) => void;
     categories: Category[];
 }
 
-export default function ProductFormModal({ isOpen, onClose, onSubmit, product, categories }: ProductFormModalProps) {
-    const [formData, setFormData] = useState<Omit<Partial<Product>, 'category_id'> & {category_id?: string; image?: string | File }>({
+export default function ProductFormModal({ isOpen, onClose, product, categories }: ProductFormModalProps) {
+    const [data, setData] = useState({
         name: '',
         sku: '',
         description: '',
-        dosage: [],
+        dosage: [] as string[],
         pharmacology: '',
         category_id: '',
         base_uom: '',
@@ -37,20 +37,22 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
     });
 
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
         if (product) {
-            setFormData({
+            setData({
                 ...product,
-                category_id: product.category_id?.toString() ?? undefined, // ensure string or undefined
-                image: product.image ?? '', // keep string (URL) from MediaLibrary);
+                category_id: product.category_id?.toString() ?? '',
+                image: product.image ?? '',
+                dosage: Array.isArray(product.dosage) ? product.dosage : [],
             });
             // Set image preview if product has an image
             if (typeof product.image === 'string' && product.image !== '') {
                 setImagePreview(product.image);
             }
         } else {
-            setFormData({
+            setData({
                 name: '',
                 sku: '',
                 description: '',
@@ -75,29 +77,90 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (onSubmit) {
-            onSubmit({
-                ...formData,
-                category_id: formData.category_id ? parseInt(formData.category_id) : undefined,
-            });
-        }
-        onClose();
-    };
+        setProcessing(true);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        // Create FormData for proper file upload handling
+        const formData = new FormData();
+
+        // Add all product data to form
+        formData.append('sku', data.sku || '');
+        formData.append('name', data.name || '');
+        formData.append('description', data.description || '');
+        formData.append('pharmacology', data.pharmacology || '');
+        formData.append('category_id', data.category_id || '');
+        formData.append('base_uom', data.base_uom || '');
+        formData.append('order_unit', data.order_unit || '');
+        formData.append('content', data.content?.toString() || '1');
+        formData.append('brand', data.brand || '');
+        formData.append('price', data.price?.toString() || '0');
+        formData.append('weight', data.weight?.toString() || '0');
+        formData.append('length', data.length?.toString() || '0');
+        formData.append('width', data.width?.toString() || '0');
+        formData.append('height', data.height?.toString() || '0');
+        formData.append('is_active', data.is_active ? '1' : '0');
+
+        // Handle dosage array
+        data.dosage.forEach((dose, index) => {
+            formData.append(`dosage[${index}]`, dose);
+        });
+
+        // Append image if File
+        if (data.image instanceof File) {
+            formData.append('image', data.image);
+        }
+
+        if (product) {
+            // Update existing product
+            formData.append('_method', 'put');
+            router.post(
+                route('admin.products.update', product.id),
+                formData,
+                {
+                    forceFormData: true,
+                    onSuccess: () => {
+                        setProcessing(false);
+                        onClose();
+                    },
+                    onError: () => {
+                        setProcessing(false);
+                    }
+                },
+            );
+        } else {
+            // Create new product
+            router.post(
+                route('admin.products.store'),
+                formData,
+                {
+                    onSuccess: () => {
+                        setProcessing(false);
+                        onClose();
+                    },
+                    onError: () => {
+                        setProcessing(false);
+                    }
+                }
+            );
+        }
+    };
+    const handleInputChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    ) => {
         const { name, value, type } = e.target;
-        setFormData((prev) => ({
+
+        // Handle checkbox separately
+        if (type === 'checkbox') {
+            const checked = (e.target as HTMLInputElement).checked;
+            setData(prev => ({
+                ...prev,
+                [name]: checked,
+            }));
+            return;
+        }
+
+        setData(prev => ({
             ...prev,
-            [name]:
-                name === 'category_id'
-                    ? value
-                        ? parseInt(value)
-                        : undefined
-                    : type === 'number'
-                      ? parseFloat(value) || 0
-                      : type === 'checkbox'
-                        ? (e.target as HTMLInputElement).checked
-                        : value,
+            [name]: value,
         }));
     };
 
@@ -105,7 +168,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setFormData((prev) => ({
+            setData(prev => ({
                 ...prev,
                 image: file,
             }));
@@ -121,7 +184,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
 
     // handle category select (since ShadCN Select doesn't give a real event)
     const handleCategoryChange = (value: string) => {
-        setFormData((prev) => ({
+        setData(prev => ({
             ...prev,
             category_id: value,
         }));
@@ -130,7 +193,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
     // handle dosage (array of strings) → store as comma-separated input
     const handleDosageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = e.target;
-        setFormData((prev) => ({
+        setData(prev => ({
             ...prev,
             dosage: value
                 .split(',')
@@ -157,35 +220,32 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <Label htmlFor="name">Product Name</Label>
-                            <Input id="name" name="name" value={formData.name} onChange={handleInputChange} required />
+                            <Input id="name" name="name" value={data.name} onChange={handleInputChange} required />
                         </div>
                         <div>
                             <Label htmlFor="sku">SKU</Label>
-                            <Input id="sku" name="sku" value={formData.sku} onChange={handleInputChange} required />
+                            <Input id="sku" name="sku" value={data.sku} onChange={handleInputChange} required />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <Label htmlFor="brand">Brand</Label>
-                            <Input id="brand" name="brand" value={formData.brand} onChange={handleInputChange} required />
+                            <Input id="brand" name="brand" value={data.brand} onChange={handleInputChange} required />
                         </div>
                         <div>
                             <Label htmlFor="category_id">Category</Label>
-                            <Select value={formData.category_id} onValueChange={handleCategoryChange}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select a category" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {categories.map((cat) => (
-                                        <SelectItem key={cat.id} value={cat.id.toString()}>
-                                            {cat.main_category}
-                                            {cat.subcategory1 && ` > ${cat.subcategory1}`}
-                                            {cat.subcategory2 && ` > ${cat.subcategory2}`}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <SearchableSelect
+                                options={categories.map((c) => ({
+                                    value: c.id.toString(),
+                                    label: `${c.main_category} > ${c.subcategory1} > ${c.subcategory2}`,
+                                }))}
+                                value={data.category_id?.toString()}
+                                onChange={handleCategoryChange}
+                                placeholder="Select category..."
+                                searchPlaceholder="Search for category..."
+                                maxResults={10}
+                            />
                         </div>
                     </div>
 
@@ -193,26 +253,26 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                     <div className="grid grid-cols-3 gap-4">
                         <div>
                             <Label htmlFor="price">Price</Label>
-                            <Input id="price" name="price" type="number" step="0.01" value={formData.price} onChange={handleInputChange} required />
+                            <Input id="price" name="price" type="number" step="0.01" value={data.price} onChange={handleInputChange} required />
                         </div>
                         <div>
                             <Label htmlFor="base_uom">Base UOM</Label>
-                            <Input id="base_uom" name="base_uom" value={formData.base_uom} onChange={handleInputChange} required />
+                            <Input id="base_uom" name="base_uom" value={data.base_uom} onChange={handleInputChange} required />
                         </div>
                         <div>
                             <Label htmlFor="order_unit">Order Unit</Label>
-                            <Input id="order_unit" name="order_unit" value={formData.order_unit} onChange={handleInputChange} required />
+                            <Input id="order_unit" name="order_unit" value={data.order_unit} onChange={handleInputChange} required />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <Label htmlFor="content">Content</Label>
-                            <Input id="content" name="content" type="number" value={formData.content} onChange={handleInputChange} required />
+                            <Input id="content" name="content" type="number" value={data.content} onChange={handleInputChange} required />
                         </div>
                         <div>
                             <Label htmlFor="weight">Weight (g)</Label>
-                            <Input id="weight" name="weight" type="number" value={formData.weight} onChange={handleInputChange} required />
+                            <Input id="weight" name="weight" type="number" value={data.weight} onChange={handleInputChange} required />
                         </div>
                     </div>
 
@@ -220,26 +280,26 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                     <div>
                         <Label>Dimensions (cm)</Label>
                         <div className="grid grid-cols-3 gap-2">
-                            <Input name="length" type="number" placeholder="Length" value={formData.length} onChange={handleInputChange} required />
-                            <Input name="width" type="number" placeholder="Width" value={formData.width} onChange={handleInputChange} required />
-                            <Input name="height" type="number" placeholder="Height" value={formData.height} onChange={handleInputChange} required />
+                            <Input name="length" type="number" placeholder="Length" value={data.length} onChange={handleInputChange} required />
+                            <Input name="width" type="number" placeholder="Width" value={data.width} onChange={handleInputChange} required />
+                            <Input name="height" type="number" placeholder="Height" value={data.height} onChange={handleInputChange} required />
                         </div>
                     </div>
 
                     {/* Pharmacology & Dosage */}
                     <div>
                         <Label htmlFor="pharmacology">Pharmacology</Label>
-                        <Textarea id="pharmacology" name="pharmacology" value={formData.pharmacology} onChange={handleInputChange} rows={2} />
+                        <Textarea id="pharmacology" name="pharmacology" value={data.pharmacology} onChange={handleInputChange} rows={2} />
                     </div>
                     <div>
                         <Label htmlFor="dosage">Dosage (comma-separated)</Label>
-                        <Input id="dosage" name="dosage" value={formData.dosage?.join(', ') || ''} onChange={handleDosageChange} />
+                        <Input id="dosage" name="dosage" value={data.dosage?.join(', ') || ''} onChange={handleDosageChange} />
                     </div>
 
                     {/* Description */}
                     <div>
                         <Label htmlFor="description">Description</Label>
-                        <Textarea id="description" name="description" value={formData.description} onChange={handleInputChange} rows={3} />
+                        <Textarea id="description" name="description" value={data.description} onChange={handleInputChange} rows={3} />
                     </div>
 
                     {/* Image */}
@@ -266,7 +326,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
                             type="checkbox"
                             id="is_active"
                             name="is_active"
-                            checked={formData.is_active}
+                            checked={data.is_active}
                             onChange={handleInputChange}
                             className="rounded border-gray-300"
                         />
@@ -275,10 +335,12 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, product, c
 
                     {/* Actions */}
                     <div className="flex justify-end space-x-3 pt-4">
-                        <Button type="button" variant="outline" onClick={onClose}>
+                        <Button type="button" variant="outline" onClick={onClose} disabled={processing}>
                             Cancel
                         </Button>
-                        <Button type="submit">{product ? 'Update Product' : 'Create Product'}</Button>
+                        <Button type="submit" disabled={processing}>
+                            {processing ? 'Saving...' : (product ? 'Update Product' : 'Create Product')}
+                        </Button>
                     </div>
                 </form>
             </div>

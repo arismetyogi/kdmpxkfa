@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import AppLayout from "@/layouts/app-layout";
 import { Head, Link } from "@inertiajs/react";
 import { type BreadcrumbItem } from "@/types";
 import { Input } from "@/components/ui/input";
@@ -16,7 +15,7 @@ import {
     DialogDescription,
     DialogFooter,
 } from "@/components/ui/dialog";
-import AppHeaderLayout from '@/layouts/app/app-header-layout';
+import HeaderLayout from '@/layouts/header-layout';
 
 // 🔹 Breadcrumbs
 const breadcrumbs: BreadcrumbItem[] = [
@@ -50,7 +49,7 @@ export default function PurchaseOrderPage() {
     const total = subtotal + ppn;
 
     return (
-        <AppHeaderLayout breadcrumbs={breadcrumbs}>
+        <HeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Purchase Order" />
 
             <div className="p-4 md:p-6 space-y-6">
@@ -210,6 +209,6 @@ export default function PurchaseOrderPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </AppHeaderLayout>
+        </HeaderLayout>
     );
 }

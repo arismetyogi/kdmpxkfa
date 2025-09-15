@@ -108,6 +108,35 @@ class DigikopTransactionService
         $url = $this->baseUrl . '/transactions';
 
         Log::info('Transaction data received: ', $transactionData);
+
+        // Validate credit limit before sending transaction
+        if (!isset($transactionData['tenant_id']) || !isset($transactionData['total_amount'])) {
+            Log::error('Missing required data for credit limit validation', [
+                'transaction_data' => $transactionData
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Missing required data for transaction processing.',
+                'data' => null,
+            ];
+        }
+
+        $creditValidation = $this->validateCreditLimit(
+            $transactionData['tenant_id'],
+            $transactionData['total_amount']
+        );
+
+        // If credit validation fails, return the error
+        if (!$creditValidation['valid']) {
+            Log::warning('Credit limit validation failed', $creditValidation);
+            return [
+                'success' => false,
+                'message' => $creditValidation['message'],
+                'data' => null,
+            ];
+        }
+
         try {
             $token = $this->authService->getAccessToken();
 
@@ -245,7 +274,7 @@ class DigikopTransactionService
                     'message' => 'Failed to update transaction status. Please try again later.',
                     'data' => null,
                 ];
-            };
+            }
         } catch (ConnectionException $e) {
             Log::error('Transaction status update error', [
                 'exception' => $e->getMessage(),

@@ -2,9 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Enums\RoleEnum;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,13 +22,17 @@ class DatabaseSeeder extends Seeder
             ApotekSeeder::class,
         ]);
 
-        $superAdmin = User::factory()->create([
+        $superAdmin = User::create([
+            'uuid' => Str::uuid()->toString(),
             'name' => 'Super Admin',
             'username' => 'super',
             'email' => 'super@admin.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('password'),
+            'remember_token' => Str::random(10),
         ]);
 
         // Assign admin role
-        $superAdmin->assignRole('super-admin');
+        $superAdmin->assignRole(RoleEnum::SUPER_ADMIN->value);
     }
 }

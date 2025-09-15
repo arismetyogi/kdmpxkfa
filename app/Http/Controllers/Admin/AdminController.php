@@ -18,7 +18,7 @@ class AdminController extends Controller
     public function index(Request $request)
     {
         // Check if user has permission to view users
-        if (! $request->user()->can('view users')) {
+        if (!$request->user()->can('view users')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -44,7 +44,7 @@ class AdminController extends Controller
     public function dashboard(Request $request)
     {
         // Check if user has permission to view dashboard
-        if (! $request->user()->can('view dashboard')) {
+        if (!$request->user()->can('view dashboard')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -64,7 +64,7 @@ class AdminController extends Controller
     public function roles(Request $request)
     {
         // Check if user has permission to view roles
-        if (! $request->user()->can('view roles')) {
+        if (!$request->user()->can('view roles')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -86,7 +86,7 @@ class AdminController extends Controller
     public function storeRole(Request $request)
     {
         // Check if user has permission to create roles
-        if (! $request->user()->can('create roles')) {
+        if (!$request->user()->can('create roles')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -98,7 +98,7 @@ class AdminController extends Controller
 
         $role = Role::create(['name' => $validated['name']]);
 
-        if (! empty($validated['permissions'])) {
+        if (!empty($validated['permissions'])) {
             $permissions = Permission::whereIn('id', $validated['permissions'])->get();
             $role->syncPermissions($permissions);
         }
@@ -112,7 +112,7 @@ class AdminController extends Controller
     public function updateRole(Request $request, Role $role)
     {
         // Check if user has permission to update roles
-        if (! $request->user()->can('update roles')) {
+        if (!$request->user()->can('update roles')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -138,7 +138,7 @@ class AdminController extends Controller
     public function destroyRole(Request $request, Role $role)
     {
         // Check if user has permission to delete roles
-        if (! $request->user()->can('delete roles')) {
+        if (!$request->user()->can('delete roles')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -150,36 +150,5 @@ class AdminController extends Controller
         $role->delete();
 
         return redirect()->route('admin.roles.index')->with('success', 'Role deleted successfully.');
-    }
-
-    /**
-     * Display the permissions management page.
-     */
-    public function permissions(Request $request)
-    {
-        // Check if user has permission to view permissions
-        if (! $request->user()->can('view permissions')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        return Inertia::render('admin/permissions', [
-            'permissions' => Permission::all(),
-        ]);
-    }
-
-    public function storePermission(Request $request)
-    {
-        // Check if user has permission to create roles
-        if (! $request->user()->can('create permissions')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:permissions,name'],
-        ]);
-
-        $permission = Permission::create(['name' => $validated['name']]);
-
-        return redirect()->route('admin.permissions.index')->with('success', 'Permission created successfully.');
     }
 }

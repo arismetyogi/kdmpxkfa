@@ -14,8 +14,8 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { useState } from 'react';
-import RoleFormModal from '@/components/Admin/RoleFormModal';
-import DeleteRoleModal from '@/components/Admin/DeleteRoleModal';
+import RoleFormModal from '@/components/admin/RoleFormModal';
+import DeleteRoleModal from '@/components/admin/DeleteRoleModal';
 
 interface Role {
     id: number;
@@ -36,7 +36,7 @@ interface AdminRolesProps {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Admin',
+        title: 'Dashboard',
         href: route('admin.dashboard'),
     },
     {

@@ -143,6 +143,7 @@ export default function OnboardingPage({ prefilled_data }: OnboardingPageProps) 
                                     value={data.sia_number}
                                     onChange={(e) => setData("sia_number", e.target.value)}
                                     placeholder="Enter your SIA number"
+                                    required
                                 />
                                 {errors.sia_number && (
                                     <Alert variant="destructive">
@@ -161,6 +162,7 @@ export default function OnboardingPage({ prefilled_data }: OnboardingPageProps) 
                                     type="file"
                                     onChange={handleFileChange}
                                     accept=".pdf,.jpg,.jpeg,.png"
+                                    required
                                 />
                                 {errors.sia_document && (
                                     <Alert variant="destructive">
@@ -172,8 +174,8 @@ export default function OnboardingPage({ prefilled_data }: OnboardingPageProps) 
                             </div>
 
                             {/* Submit */}
-                            <Button 
-                                type="submit" 
+                            <Button
+                                type="submit"
                                 disabled={processing}
                                 className="w-full"
                             >

@@ -30,13 +30,65 @@ class ProductController extends Controller
         $products = Product::query()
             ->with('category');
 
-        $paginatedProducts = $products->latest()->paginate(15);
+        // Apply search filter
+        $this->applySearch($request, $products);
 
-        //        dd($paginatedProducts);
+        // Apply status filter
+        if ($request->filled('status')) {
+            $status = $request->get('status');
+            if ($status === 'active') {
+                $products->where('is_active', true);
+            } elseif ($status === 'inactive') {
+                $products->where('is_active', false);
+            }
+        }
+
+        $paginatedProducts = $products->latest()->paginate(10)->withQueryString();
+
+        // Count products for statistics
+        $allProductsQuery = Product::query();
+        $activeProductsQuery = Product::active();
+
+        // Apply the same filters to count queries
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $allProductsQuery->where(function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('brand', 'like', "%{$search}%");
+            });
+            $activeProductsQuery->where(function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('brand', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('category_id')) {
+            $categoryId = $request->get('category_id');
+            $allProductsQuery->where('category_id', $categoryId);
+            $activeProductsQuery->where('category_id', $categoryId);
+        }
+
+        if ($request->filled('status')) {
+            $status = $request->get('status');
+            if ($status === 'active') {
+                $allProductsQuery->where('is_active', true);
+            } elseif ($status === 'inactive') {
+                $allProductsQuery->where('is_active', false);
+                $activeProductsQuery = Product::query()->where('is_active', false); // Reset active query
+
+                // Apply search to inactive query if needed
+                $this->applySearch($request, $activeProductsQuery);
+            }
+        }
+
         return Inertia::render('admin/products', [
             'products' => PaginatedResourceResponse::make($paginatedProducts, ProductResource::class),
-            'allProducts' => Product::all()->count(),
-            'activeProducts' => Product::active()->get()->count(),
+            'allProducts' => $allProductsQuery->count(),
+            'activeProducts' => $activeProductsQuery->count(),
             'categories' => Category::all(),
         ]);
     }
@@ -187,5 +239,28 @@ class ProductController extends Controller
         $product->delete();
 
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
+    }
+
+    /**
+     * @param Request $request
+     * @param \Illuminate\Database\Eloquent\Builder $activeProductsQuery
+     * @return void
+     */
+    public function applySearch(Request $request, \Illuminate\Database\Eloquent\Builder $activeProductsQuery): void
+    {
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $activeProductsQuery->where(function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('brand', 'like', "%{$search}%");
+            });
+        }
+
+        // Apply category to inactive query if needed
+        if ($request->filled('category_id')) {
+            $activeProductsQuery->where('category_id', $request->get('category_id'));
+        }
     }
 }
