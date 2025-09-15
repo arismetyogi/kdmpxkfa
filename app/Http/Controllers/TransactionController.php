@@ -9,20 +9,17 @@ use Illuminate\Support\Facades\Log;
 
 class TransactionController extends Controller
 {
-    public function __construct(private readonly DigikopTransactionService $transactionService)
-    {
-    }
+    public function __construct(private readonly DigikopTransactionService $transactionService) {}
 
     /**
      * Fetch user's credit limit
      *
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function creditLimit(Request $request)
     {
         // Check if user is authenticated
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return response()->json([
                 'success' => false,
                 'message' => 'User not authenticated',
@@ -32,7 +29,7 @@ class TransactionController extends Controller
         $user = Auth::user();
 
         // Check if user has tenant_id (SSO users)
-        if (!$user->tenant_id) {
+        if (! $user->tenant_id) {
             return response()->json([
                 'success' => false,
                 'message' => 'User is not an SSO user',
@@ -46,7 +43,7 @@ class TransactionController extends Controller
                 return response()->json([
                     'success' => true,
                     'remaining_credit' => $result['remaining_credit'],
-                    'formatted_credit' => 'Rp' . number_format($result['remaining_credit'], 0, ',', '.'),
+                    'formatted_credit' => 'Rp'.number_format($result['remaining_credit'], 0, ',', '.'),
                 ]);
             } else {
                 return response()->json([

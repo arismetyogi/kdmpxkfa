@@ -69,13 +69,12 @@ export default function ProductCard({ product, updateCartItems }: ProductCardPro
     };
 
     return (
-        <div className="border rounded-lg p-3 shadow-sm transition-colors flex flex-col justify-between h-full relative">
-
+        <div className="relative flex h-full flex-col justify-between rounded-lg border p-3 shadow-sm transition-colors">
             {/* Floating Category Badge */}
             {category?.main_category && (
-                <span className="absolute top-2 right-2 text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800 whitespace-nowrap shadow">
-          {category.main_category}
-        </span>
+                <span className="absolute top-2 right-2 rounded-full bg-blue-100 px-2 py-1 text-xs whitespace-nowrap text-blue-800 shadow">
+                    {category.main_category}
+                </span>
             )}
 
             {/* Bagian Atas */}
@@ -89,16 +88,14 @@ export default function ProductCard({ product, updateCartItems }: ProductCardPro
                     }}
                 />
 
-                <h3 className="font-semibold leading-tight text-sm md:text-base mb-1">
-                    {name.length > 16 ? name.slice(0, 16) + "..." : name}
-                </h3>
+                <h3 className="mb-1 text-sm leading-tight font-semibold md:text-base">{name.length > 16 ? name.slice(0, 16) + '...' : name}</h3>
 
-                <span className="text-xs text-muted-foreground block">
-          {content} {base_uom} per {order_unit}
-        </span>
+                <span className="block text-xs text-muted-foreground">
+                    {content} {base_uom} per {order_unit}
+                </span>
 
-                <p className="text-sm text-gray-500 mt-1">
-                    Status:{" "}
+                <p className="mt-1 text-sm text-gray-500">
+                    Status:{' '}
                     {is_active ? (
                         <span className="font-semibold text-blue-600">Tersedia</span>
                     ) : (
@@ -109,11 +106,9 @@ export default function ProductCard({ product, updateCartItems }: ProductCardPro
 
             {/* Bagian Bawah */}
             <div className="mt-3">
-                <p className="text-lg md:text-xl font-bold text-blue-600">
-                    Rp {pricePerOrderUnit?.toLocaleString() ?? "0"}
-                </p>
+                <p className="text-lg font-bold text-blue-600 md:text-xl">Rp {pricePerOrderUnit?.toLocaleString() ?? '0'}</p>
                 <p className="text-xs text-muted-foreground">
-                    Rp {price?.toLocaleString() ?? "0"} per {base_uom}
+                    Rp {price?.toLocaleString() ?? '0'} per {base_uom}
                 </p>
 
                 {/* Full width Add to Cart button */}

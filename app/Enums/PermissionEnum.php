@@ -91,6 +91,7 @@ enum PermissionEnum: string
         foreach (self::cases() as $case) {
             $labels[$case->value] = $case->label();
         }
+
         return $labels;
     }
 

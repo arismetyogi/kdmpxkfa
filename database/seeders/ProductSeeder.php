@@ -9,16 +9,13 @@ use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $this->seedCategories();
         $this->seedProducts();
     }
 
-    public function seedCategories(): void
+    private function seedCategories(): void
     {
         $filePath = database_path('seeders/data/categories.csv');
 
@@ -43,12 +40,14 @@ class ProductSeeder extends Seeder
         }
 
         foreach ($data as $item) {
-            Category::forceCreate([
-                'id' => $item['id'],
-                'main_category' => $item['main_category'] ?? null,
-                'subcategory1' => $item['subcategory1'] ?? null,
-                'subcategory2' => $item['subcategory2'] ?? null,
-            ]);
+            Category::updateOrCreate(
+                ['id' => $item['id']],
+                [
+                    'main_category' => $item['main_category'] ?? null,
+                    'subcategory1' => $item['subcategory1'] ?? null,
+                    'subcategory2' => $item['subcategory2'] ?? null,
+                ]
+            );
         }
 
         $this->command->info('Categories seeded successfully!');
@@ -98,23 +97,27 @@ class ProductSeeder extends Seeder
                 $counter++;
             }
 
-            Product::create([
-                'sku' => $item['sku'],
-                'name' => $name,
-                'slug' => $slug,
-                'description' => $item['description'] ?? '',
-                'dosage' => $item['dosage'] ? json_decode($item['dosage'], true) : null,
-                'pharmacology' => $item['pharmacology'] ?? '',
-                'price' => $item['price'] ?? 1.00,
-                'base_uom' => $item['base_uom'] ?? '',
-                'order_unit' => $item['order_unit'] ?? '',
-                'content' => $item['content'] ?? 1,
-                'weight' => $item['weight'] ?? 100,
-                'length' => $item['length'] ?? null,
-                'width' => $item['width'] ?? null,
-                'height' => $item['height'] ?? null,
-                'brand' => $item['brand'] ?? null,
-            ]);
+            Product::updateOrCreate(
+                ['sku' => $item['sku']],
+                [
+                    'name' => $name,
+                    'slug' => $slug,
+                    'description' => $item['description'] ?? '',
+                    'dosage' => $item['dosage'] ? json_decode($item['dosage'], true) : null,
+                    'pharmacology' => $item['pharmacology'] ?? '',
+                    'price' => (float) ($item['price'] ?? 1.00),
+                    'base_uom' => $item['base_uom'] ?? '',
+                    'order_unit' => $item['order_unit'] ?? '',
+                    'content' => (int) ($item['content'] ?? 1),
+                    'weight' => (int) ($item['weight'] ?? 100),
+                    'length' => $item['length'] ?? null,
+                    'width' => $item['width'] ?? null,
+                    'height' => $item['height'] ?? null,
+                    'brand' => $item['brand'] ?? null,
+                    'category_id' => $item['category_id'] ?? null,
+                    'is_active' => true,
+                ]
+            );
         }
 
         $this->command->info('Products seeded successfully!');

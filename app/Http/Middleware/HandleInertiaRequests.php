@@ -54,11 +54,11 @@ class HandleInertiaRequests extends Middleware
             'ssoBaseUrl' => config('sso.allowed_origins.digikoperasi.url'),
             'digikopUrl' => config('sso.allowed_origins.digikop_web'),
             'flash' => [
-                'message' => fn() => $request->session()->get('message'),
-                'error' => fn() => $request->session()->get('error'),
-                'success' => fn() => $request->session()->get('success'),
-                'warning' => fn() => $request->session()->get('warning'),
-            ]
+                'message' => fn () => $request->session()->get('message'),
+                'error' => fn () => $request->session()->get('error'),
+                'success' => fn () => $request->session()->get('success'),
+                'warning' => fn () => $request->session()->get('warning'),
+            ],
         ];
     }
 }
