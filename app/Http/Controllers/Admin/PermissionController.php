@@ -75,10 +75,10 @@ class PermissionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request,Permission $permission)
+    public function destroy(Request $request, Permission $permission)
     {
         // Check if user has permission to delete roles
-        if (!$request->user()->can(PermissionEnum::DELETE_PERMISSIONS->value)) {
+        if (! $request->user()->can(PermissionEnum::DELETE_PERMISSIONS->value)) {
             abort(403, 'Unauthorized action.');
         }
 

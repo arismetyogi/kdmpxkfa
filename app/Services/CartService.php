@@ -6,7 +6,6 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
-use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
@@ -172,18 +171,18 @@ class CartService
                     }
 
                     $cartItemData[] = [
-                    'id' => $cartItem['id'] ?? null,
-                    'product_id' => $product->id,
-                    'name' => $product->name,
-                    'slug' => $product->slug,
-                    'quantity' => $cartItem['quantity'],
-                    'price' => $product->price * $product->content, // Price per order unit
-                    'base_price' => $product->price, // Price per base unit
-                    'image' => $imageUrl,
-                    'order_unit' => $product->order_unit,
-                    'base_uom' => $product->base_uom,
-                    'content' => $product->content,
-                ];
+                        'id' => $cartItem['id'] ?? null,
+                        'product_id' => $product->id,
+                        'name' => $product->name,
+                        'slug' => $product->slug,
+                        'quantity' => $cartItem['quantity'],
+                        'price' => $product->price * $product->content, // Price per order unit
+                        'base_price' => $product->price, // Price per base unit
+                        'image' => $imageUrl,
+                        'order_unit' => $product->order_unit,
+                        'base_uom' => $product->base_uom,
+                        'content' => $product->content,
+                    ];
                 }
                 $this->cachedCartItems = $cartItemData;
             }
@@ -336,11 +335,11 @@ class CartService
     public function processPayment(Request $request, DigikopTransactionService $transactionService): array
     {
         // Check if billing information exists in session
-        if (!Session::get('checkout.billing')) {
+        if (! Session::get('checkout.billing')) {
             return [
                 'success' => false,
                 'redirect' => 'checkout',
-                'message' => 'Please complete billing information first.'
+                'message' => 'Please complete billing information first.',
             ];
         }
 
@@ -356,11 +355,11 @@ class CartService
             // Validate credit limit using tenant_id
             $creditValidation = $transactionService->validateCreditLimit($user->tenant_id, $totalAmount);
 
-            if (!$creditValidation['valid']) {
+            if (! $creditValidation['valid']) {
                 return [
                     'success' => false,
                     'back' => true,
-                    'message' => $creditValidation['message']
+                    'message' => $creditValidation['message'],
                 ];
             }
 
@@ -374,7 +373,7 @@ class CartService
                 return [
                     'success' => false,
                     'redirect' => 'carts.index',
-                    'message' => 'Your cart is empty.'
+                    'message' => 'Your cart is empty.',
                 ];
             }
 
@@ -394,14 +393,14 @@ class CartService
                 'shipping_amount' => 0, // You can calculate shipping based on your business logic
                 'discount_amount' => 0,
                 'total_price' => $this->getSubTotal() * 1.11,
-                'billing_name' => $billingData['first_name'] . ' ' . $billingData['last_name'],
+                'billing_name' => $billingData['first_name'].' '.$billingData['last_name'],
                 'billing_email' => $billingData['email'],
                 'billing_phone' => $billingData['phone'],
                 'billing_address' => $billingData['address'],
                 'billing_city' => $billingData['city'],
                 'billing_state' => $billingData['state'],
                 'billing_zip' => $billingData['zip'],
-                'shipping_name' => $shippingData['first_name'] . ' ' . $shippingData['last_name'],
+                'shipping_name' => $shippingData['first_name'].' '.$shippingData['last_name'],
                 'shipping_address' => $shippingData['address'],
                 'shipping_city' => $shippingData['city'],
                 'shipping_state' => $shippingData['state'],
@@ -413,7 +412,7 @@ class CartService
             foreach ($cartItems as $cartItem) {
                 $product = Product::find($cartItem['product_id']);
 
-                if (!$product) {
+                if (! $product) {
                     continue;
                 }
 
@@ -446,27 +445,27 @@ class CartService
                 'success' => true,
                 'redirect' => 'order.complete',
                 'order_id' => $order->id,
-                'message' => 'Order placed successfully!'
+                'message' => 'Order placed successfully!',
             ];
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error('Order creation failed with exception: ' . $e->getMessage());
+            Log::error('Order creation failed with exception: '.$e->getMessage());
 
             return [
                 'success' => false,
                 'back' => true,
-                'message' => 'Koperasi belum dimapping dengan Apotek KF, Silakan hubungi administrator.'
+                'message' => 'Koperasi belum dimapping dengan Apotek KF, Silakan hubungi administrator.',
             ];
         } catch (Throwable $e) {
             DB::rollBack();
 
-            Log::error('Order creation failed with throwable: ' . $e->getMessage());
+            Log::error('Order creation failed with throwable: '.$e->getMessage());
 
             return [
                 'success' => false,
                 'back' => true,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ];
         }
     }

@@ -20,8 +20,8 @@ Route::prefix('v1')->group(function () {
     Route::get('/products', [\App\Http\Controllers\Api\ProductController::class, 'index']);
 
     // Public product routes
-    //    Route::get('products', [ProductController::class, 'index']);
-    //    Route::get('products/{product}', [ProductController::class, 'show']);
+    //    Route::get('products', [DashboardController::class, 'index']);
+    //    Route::get('products/{product}', [DashboardController::class, 'show']);
 });
 
 // Protected routes

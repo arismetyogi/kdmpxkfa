@@ -12,14 +12,15 @@ use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-
 class OrderController extends Controller
 {
     protected $digikopTransactionService;
+
     public function __construct(DigikopTransactionService $digikopTransactionService)
     {
         $this->digikopTransactionService = $digikopTransactionService;
     }
+
     public function index()
     {
         $products = Product::with('category')->latest()->paginate(15);
