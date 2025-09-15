@@ -110,7 +110,7 @@ class DigikopTransactionService
         Log::info('Transaction data received: ', $transactionData);
 
         // Validate credit limit before sending transaction
-        if (!isset($transactionData['tenant_id']) || !isset($transactionData['total_amount'])) {
+        if (!isset($transactionData['id_koperasi']) || !isset($transactionData['total_nominal'])) {
             Log::error('Missing required data for credit limit validation', [
                 'transaction_data' => $transactionData
             ]);
@@ -123,8 +123,8 @@ class DigikopTransactionService
         }
 
         $creditValidation = $this->validateCreditLimit(
-            $transactionData['tenant_id'],
-            $transactionData['total_amount']
+            $transactionData['id_koperasi'],
+            $transactionData['total_nominal']
         );
 
         // If credit validation fails, return the error
