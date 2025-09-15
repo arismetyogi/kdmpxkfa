@@ -151,14 +151,16 @@ export interface Order {
 
 export interface CartItem {
     id: number | string;
-    sku: string;
+    product_id: number;
     name: string;
+    slug: string;
+    quantity: number;
     price: number;
+    base_price: number;
     image: string;
     order_unit: string;
-    weight: number;
-    quantity: number;
-    total?: number;
+    base_uom: string;
+    content: number;
 }
 
 export interface Paginated<T> {

@@ -1,18 +1,13 @@
-import { useEffect, useState, useCallback } from 'react';
-import { Head, router, usePage } from '@inertiajs/react';
-import { useDebounce } from 'use-debounce'; // A great library for debouncing input
-import pickBy from 'lodash/pickBy'; // Helper to remove empty values from an object
-
 import Filters from '@/components/Filters';
 import ProductCard from '@/components/product-card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CartItem, type BreadcrumbItem, Product, Paginated, Category } from '@/types';
+import { Head, Link } from '@inertiajs/react';
+import { ShoppingCart } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package } from 'lucide-react';
 import HeaderLayout from '@/layouts/header-layout';
-import FloatingCart from '@/components/FloatingCart';
-import { CustomPagination } from '@/components/custom-pagination';
-import { type BreadcrumbItem, Product, Paginated, Category, CartItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -23,124 +18,73 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface IndexProps {
     products: Paginated<Product>;
-    allCategories: string[]; // From controller
-    allPackages: string[];   // From controller
-    filters: { // Current filters from controller
-        search?: string;
-        categories?: string[];
-        packages?: string[];
-        sort_by?: string;
-    };
+    categories: Category[];
 }
-
-export default function OrdersIndexPage({ products, allCategories, allPackages, filters: initialFilters }: IndexProps) {
-    console.log("Props received from server:", { allCategories, allPackages });
-    const [search, setSearch] = useState(initialFilters.search || "");
-    const [sortBy, setSortBy] = useState(initialFilters.sort_by || "name-asc");
-    const [filters, setFilters] = useState({ 
-        categories: initialFilters.categories || ["Semua Produk"], 
-        packages: initialFilters.packages || ["Semua Paket"] 
-    });
-    
+export default function OrdersIndexPage({ products, categories }: IndexProps) {
+    const [search, setSearch] = useState("");
+    const [sortBy, setSortBy] = useState("name-asc");
+    const [filters, setFilters] = useState({ categories: ["Semua Produk"], packages: ["Semua Paket"] });
+    const [cart, setCart] = useState<CartItem[]>([]);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-    const [cartItems, setCartItems] = useState<CartItem[]>([]);
-    const [animationTrigger, setAnimationTrigger] = useState(0);
 
-    const [debouncedSearch] = useDebounce(search, 300); // Debounce search input
+    // 🔹 jumlah jenis produk unik
+    const totalItems = cart.length;
 
-    // This effect listens for changes in filters and triggers a new Inertia request
-    useEffect(() => {
-        // Start with the base parameters that are always present (even if empty)
-        const baseParams = { 
-            search: debouncedSearch, 
-            sort_by: sortBy,
-
-        };
-
-                // ====================== THE FIX IS HERE ======================
-        // Create a copy of the filters to potentially add to the parameters
-        const activeFilters = {};
-
-        // Conditionally add categories to the request
-        // Only include it if the array is not the default ["Semua Produk"]
-        if (filters.categories && (filters.categories.length > 1 || (filters.categories.length === 1 && filters.categories[0] !== 'Semua Produk'))) {
-            activeFilters.categories = filters.categories.filter(cat => cat !== 'Semua Produk');
-        }
-
-        // Conditionally add packages to the request
-        // Only include it if the array is not the default ["Semua Paket"]
-        if (filters.packages && (filters.packages.length > 1 || (filters.packages.length === 1 && filters.packages[0] !== 'Semua Paket'))) {
-            activeFilters.packages = filters.packages.filter(pack => pack !== 'Semua Paket');
-        }
-
-        // Combine the base params with the active filters, then clean with pickBy
-        // pickBy will remove keys with empty/null/undefined values (like an empty search string)
-        const queryParams = pickBy({
-            ...baseParams,
-            ...activeFilters
-        });
-
-        router.get(
-            route('orders.products'), // Make sure you have a named route for this
-            queryParams,
-            {
-                preserveState: true, // Prevents scroll position reset on filter change
-                replace: true,       // Avoids polluting browser history
-                preserveScroll: true, // Keeps the scroll position
-            }
-        );
-    }, [debouncedSearch, sortBy, filters]);
-
-
-    // Cart logic remains the same...
+    // 🔹 Load cart dari localStorage
     useEffect(() => {
         const storedCart = localStorage.getItem("cart");
-        if (storedCart) setCartItems(JSON.parse(storedCart));
-
-        const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === "cart" && e.newValue) setCartItems(JSON.parse(e.newValue));
-        };
-
-        window.addEventListener("storage", handleStorageChange);
-        return () => window.removeEventListener("storage", handleStorageChange);
+        if (storedCart) {
+            setCart(JSON.parse(storedCart));
+        }
     }, []);
 
-    const updateCartItems = () => {
-        const storedCart = localStorage.getItem("cart");
-        setCartItems(storedCart ? JSON.parse(storedCart) : []);
-    };
-    
-    useEffect(() => {
-        setAnimationTrigger(prev => prev + 1);
-    }, [cartItems]);
+    // 🔹 filter berdasarkan search
+    let filteredProducts = products.data.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
 
-    const totalItems = cartItems.length;
+    // ambil filter aktif (tanpa "Semua")
+    const activeCategories = filters.categories.filter((c) => c !== 'Semua Produk');
+    const activePackages = filters.packages.filter((p) => p !== 'Semua Paket');
 
+    // 🔹 filter kategori & package
+    if (!(activeCategories.length === 0 && activePackages.length === 0)) {
+        filteredProducts = filteredProducts.filter((p) => {
+            const matchCategory = activeCategories.length === 0 || activeCategories.includes(p.category?.main_category as string);
+
+            const matchPackage = activePackages.length === 0 || activePackages.includes(p.order_unit);
+
+            return matchCategory && matchPackage;
+        });
+    }
+
+    // 🔹 sorting
+    if (sortBy === 'lowest') {
+        filteredProducts = [...filteredProducts].sort((a, b) => a.price - b.price);
+    } else if (sortBy === 'highest') {
+        filteredProducts = [...filteredProducts].sort((a, b) => b.price - a.price);
+    } else if (sortBy === 'name-asc') {
+        filteredProducts = [...filteredProducts].sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === 'name-desc') {
+        filteredProducts = [...filteredProducts].sort((a, b) => b.name.localeCompare(a.name));
+    }
 
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Products" />
-            <h1 className="text-2xl font-bold pt-4 px-4 lg:pt-6 lg:ml-9 text-blue-800">Medicine Catalog</h1>
-            <div className="flex flex-col gap-4 p-4 lg:gap-6 lg:p-6 lg:flex-row">
+            <div className="flex flex-col gap-6 p-6 lg:flex-row">
                 {/* Sidebar Filters */}
-                <div className="w-full lg:block lg:w-1/4">
-                    <Filters 
-                        onFilterChange={setFilters} 
-                        // Pass the full list of categories/packages from the controller
-                        categories={["Semua Produk", ...allCategories]}
-                        packages={["Semua Paket", ...allPackages]}
-                        // Pass the currently active filters to the component
-                        activeFilters={filters}
-                    />
+                <div className="w-full lg:w-1/4">
+                    <Filters onFilterChange={setFilters} />
                 </div>
 
                 {/* Product Section */}
                 <div className="flex-1">
+                    <h1 className="mb-4 text-2xl font-bold text-blue-800">Medicine Catalog</h1>
+
                     <div className="mb-4 flex flex-col justify-between gap-2 sm:flex-row">
                         <input
                             type="text"
                             placeholder="Search Products..."
-                            className="w-full rounded-md border px-3 py-2"
+                            className="w-full rounded-md border px-3 py-2 sm:w-1/2"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -159,29 +103,39 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
                     </div>
 
                     {/* Produk */}
-                    {products.data.length === 0 ? (
+                    {filteredProducts.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 text-gray-500">
-                            <Package size={64} className="mb-4 text-gray-400" />
+                            <ShoppingCart size={64} className="mb-4 text-gray-400" />
                             <p className="text-lg font-medium">Produk yang anda cari tidak ditemukan</p>
                         </div>
                     ) : (
-                        <>
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                                {products.data.map((p) => (
-                                    <div key={p.id} className="cursor-pointer">
-                                        <ProductCard product={p} updateCartItems={updateCartItems} />
-                                    </div>
-                                ))}
-                            </div>
-                            {/* Add Custom Pagination */}
-                            <CustomPagination pagination={products} className="mt-6" />
-                        </>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                            {filteredProducts.map((p, i) => (
+                                <div key={i}
+                                     // onClick={() => setSelectedProduct(p)}
+                                     className="cursor-pointer">
+                                    <ProductCard product={p}/>
+                                </div>
+                            ))}
+                        </div>
                     )}
                 </div>
             </div>
 
-            {/* Floating Cart */}
-            <FloatingCart totalItems={totalItems} animationTrigger={animationTrigger} />
+            {/* 🔹 Floating Cart Button */}
+            <div className="fixed right-4 bottom-4 sm:right-6 sm:bottom-6">
+                <Link href={route('carts.index')} className="relative">
+                    <button className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg sm:h-14 sm:w-14">
+                        <ShoppingCart size={24} className="sm:size-8" />
+                    </button>
+
+                    {totalItems > 0 && (
+                        <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white sm:h-6 sm:w-6">
+                            {totalItems}
+                        </span>
+                    )}
+                </Link>
+            </div>
 
             {/* 🔹 Modal Detail Produk */}
             <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>

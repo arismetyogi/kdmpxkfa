@@ -50,6 +50,11 @@ class Product extends Model implements HasMedia
         return $this->hasMany(OrderItem::class);
     }
 
+    public function carts(): HasMany
+    {
+        return $this->hasMany(Cart::class);
+    }
+
     public function registerMediaConversions(?Media $media = null): void
     {
         $this->addMediaConversion('thumb')->width(100);

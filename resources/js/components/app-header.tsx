@@ -11,12 +11,10 @@ import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { History, LayoutGrid, Menu, Search, ShoppingCart, Package } from 'lucide-react';
+import { Bell, History, LayoutGrid, Menu, Search, ShoppingCart } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 import DarkModeToggle from '@/components/toggle-dark-mode';
-import { useState, useEffect } from 'react';
-import { CartItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
     {
@@ -27,7 +25,7 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Products',
         href: '/orders/products',
-        icon: Package,
+        icon: ShoppingCart,
     },
     {
         title: 'Orders History',
@@ -39,8 +37,13 @@ const mainNavItems: NavItem[] = [
 const rightNavItems: NavItem[] = [
     {
         title: 'Cart',
-        href: '/orders/cart',
+        href: '/carts',
         icon: ShoppingCart,
+    },
+    {
+        title: 'Notification',
+        href: '#',
+        icon: Bell,
     },
 ];
 
@@ -55,47 +58,10 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const { auth } = page.props;
     const getInitials = useInitials();
     
-    const [cartCount, setCartCount] = useState(0);
-
-    // Load cart count from localStorage
-    useEffect(() => {
-        const updateCartCount = () => {
-            const storedCart = localStorage.getItem("cart");
-            if (storedCart) {
-                const cartItems: CartItem[] = JSON.parse(storedCart);
-                const count = cartItems.reduce((total, item) => total + item.quantity, 0);
-                setCartCount(count);
-            } else {
-                setCartCount(0);
-            }
-        };
-
-        // Initial load
-        updateCartCount();
-
-        // Listen for storage changes
-        const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === "cart") {
-                updateCartCount();
-            }
-        };
-
-        window.addEventListener("storage", handleStorageChange);
-        
-        // Also check for changes in the same tab
-        const interval = setInterval(updateCartCount, 1000);
-
-        return () => {
-            window.removeEventListener("storage", handleStorageChange);
-            clearInterval(interval);
-        };
-    }, []);
-    
     return (
         <>
             <header className="sticky top-0 z-50 w-full border-b border-sidebar-border/80 bg-background/95 backdrop-blur-sm">
                 <div className="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
-        
                     {/* Mobile Menu */}
                     <div className="lg:hidden">
                         <Sheet>
@@ -125,7 +91,20 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             ))}
                                         </div>
 
-
+                                        <div className="flex flex-col space-y-4">
+                                            {rightNavItems.map((item) => (
+                                                <a
+                                                    key={item.title}
+                                                    href={item.href}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center space-x-2 rounded-md px-3 py-2 font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                                                >
+                                                    {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
+                                                    <span>{item.title}</span>
+                                                </a>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             </SheetContent>
@@ -135,7 +114,6 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     <Link href="/dashboard" prefetch className="flex items-center space-x-2">
                         <AppLogo />
                     </Link>
-
 
                     {/* Desktop Navigation */}
                     <div className="ml-6 hidden h-full items-center space-x-6 lg:flex">
@@ -161,9 +139,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                         )}
                                     </NavigationMenuItem>
                                 ))}
-                                
                             </NavigationMenuList>
-            
                         </NavigationMenu>
                     </div>
 
@@ -173,23 +149,6 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 <Search className="!size-5 text-foreground opacity-80 group-hover:opacity-100" />
                                 <span className="sr-only">Search</span>
                             </Button>
-                                        <div className="flex flex-col space-y-4 lg:hidden">
-                                            {rightNavItems.map((item) => (
-                                                <a
-                                                    key={item.title}
-                                                    href={item.href}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center rounded-md py-2 font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                                                >
-                                                    {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
-                                                    {item.title === 'Cart' && cartCount > 0 && (
-                                                        <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-                                                        </span>
-                                                    )}
-                                                </a>
-                                            ))}
-                                        </div>
                             <div className="hidden lg:flex">
                                 {rightNavItems.map((item) => (
                                     <TooltipProvider key={item.title} delayDuration={0}>
@@ -201,11 +160,6 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                 >
                                                     <span className="sr-only">{item.title}</span>
                                                     {item.icon && <Icon iconNode={item.icon} className="size-5 text-foreground opacity-80 group-hover:opacity-100" />}
-                                                    {item.title === 'Cart' && cartCount > 0 && (
-                                                        <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-
-                                                        </span>
-                                                    )}
                                                 </Link>
                                             </TooltipTrigger>
                                             <TooltipContent>
