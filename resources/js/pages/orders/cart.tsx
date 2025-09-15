@@ -1,4 +1,4 @@
-import AppLayout from "@/layouts/app-layout";
+import HeaderLayout from "@/layouts/header-layout";
 import { Head, Link } from "@inertiajs/react";
 import { useState, useEffect } from "react";
 import { type BreadcrumbItem, type CartItem } from "@/types";
@@ -50,7 +50,7 @@ export default function Cart() {
   const grandTotal = subtotal + ppn;
 
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
+    <HeaderLayout breadcrumbs={breadcrumbs}>
       <Head title="Cart" />
       <div className="p-4 sm:p-6">
         {/* Header */}
@@ -174,6 +174,6 @@ export default function Cart() {
 )}
 
       </div>
-    </AppLayout>
+    </HeaderLayout>
   );
 }

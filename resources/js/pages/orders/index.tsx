@@ -1,15 +1,18 @@
+import { useEffect, useState, useCallback } from 'react';
+import { Head, router, usePage } from '@inertiajs/react';
+import { useDebounce } from 'use-debounce'; // A great library for debouncing input
+import pickBy from 'lodash/pickBy'; // Helper to remove empty values from an object
+
 import Filters from '@/components/Filters';
 import ProductCard from '@/components/ProductCard';
+import { Pagination } from '@/components/ui/pagination'; // You'll need a Pagination component
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { type BreadcrumbItem, Product, Paginated, Category } from '@/types';
-import { Head } from '@inertiajs/react';
-import { Package } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import AppHeaderLayout from '@/layouts/app/app-header-layout';
+import { Package } from 'lucide-react';
+import HeaderLayout from '@/layouts/header-layout';
 import FloatingCart from '@/components/FloatingCart';
-import { CartItem } from '@/types';
+import { type BreadcrumbItem, Product, Paginated, Category, CartItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -20,107 +23,119 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface IndexProps {
     products: Paginated<Product>;
-    categories: Category[];
+    allCategories: string[]; // From controller
+    allPackages: string[];   // From controller
+    filters: { // Current filters from controller
+        search?: string;
+        categories?: string[];
+        packages?: string[];
+        sort_by?: string;
+    };
 }
-export default function OrdersIndexPage({ products, categories }: IndexProps) {
-    const [search, setSearch] = useState("");
-    const [sortBy, setSortBy] = useState("name-asc");
-    const [filters, setFilters] = useState({ categories: ["Semua Produk"], packages: ["Semua Paket"] });
+
+export default function OrdersIndexPage({ products, allCategories, allPackages, filters: initialFilters }: IndexProps) {
+    console.log("Props received from server:", { allCategories, allPackages });
+    const [search, setSearch] = useState(initialFilters.search || "");
+    const [sortBy, setSortBy] = useState(initialFilters.sort_by || "name-asc");
+    const [filters, setFilters] = useState({ 
+        categories: initialFilters.categories || ["Semua Produk"], 
+        packages: initialFilters.packages || ["Semua Paket"] 
+    });
+    
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [animationTrigger, setAnimationTrigger] = useState(0);
 
-    // Extract unique categories and packages from products
-    const uniqueCategories = ["Semua Produk", ...new Set(products.data.map(p => p.category?.main_category).filter(Boolean))] as string[];
-    const uniquePackages = ["Semua Paket", ...new Set(products.data.map(p => p.order_unit).filter(Boolean))] as string[];
+    const [debouncedSearch] = useDebounce(search, 300); // Debounce search input
 
-    // Load cart items from localStorage
+    // This effect listens for changes in filters and triggers a new Inertia request
     useEffect(() => {
-        const storedCart = localStorage.getItem("cart");
-        if (storedCart) {
-            setCartItems(JSON.parse(storedCart));
+        // Start with the base parameters that are always present (even if empty)
+        const baseParams = { 
+            search: debouncedSearch, 
+            sort_by: sortBy,
+
+        };
+
+                // ====================== THE FIX IS HERE ======================
+        // Create a copy of the filters to potentially add to the parameters
+        const activeFilters = {};
+
+        // Conditionally add categories to the request
+        // Only include it if the array is not the default ["Semua Produk"]
+        if (filters.categories && (filters.categories.length > 1 || (filters.categories.length === 1 && filters.categories[0] !== 'Semua Produk'))) {
+            activeFilters.categories = filters.categories;
         }
 
-        // Listen for storage changes from other tabs/components
-        const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === "cart") {
-                if (e.newValue) {
-                    setCartItems(JSON.parse(e.newValue));
-                } else {
-                    setCartItems([]);
-                }
+        // Conditionally add packages to the request
+        // Only include it if the array is not the default ["Semua Paket"]
+        if (filters.packages && (filters.packages.length > 1 || (filters.packages.length === 1 && filters.packages[0] !== 'Semua Paket'))) {
+            activeFilters.packages = filters.packages;
+        }
+
+        // Combine the base params with the active filters, then clean with pickBy
+        // pickBy will remove keys with empty/null/undefined values (like an empty search string)
+        const queryParams = pickBy({
+            ...baseParams,
+            ...activeFilters
+        });
+
+        router.get(
+            route('orders.products'), // Make sure you have a named route for this
+            queryParams,
+            {
+                preserveState: true, // Prevents scroll position reset on filter change
+                replace: true,       // Avoids polluting browser history
+                preserveScroll: true, // Keeps the scroll position
             }
+        );
+    }, [debouncedSearch, sortBy, filters]);
+
+
+    // Cart logic remains the same...
+    useEffect(() => {
+        const storedCart = localStorage.getItem("cart");
+        if (storedCart) setCartItems(JSON.parse(storedCart));
+
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === "cart" && e.newValue) setCartItems(JSON.parse(e.newValue));
         };
 
         window.addEventListener("storage", handleStorageChange);
         return () => window.removeEventListener("storage", handleStorageChange);
     }, []);
 
-    // Update cart items when localStorage changes
     const updateCartItems = () => {
         const storedCart = localStorage.getItem("cart");
-        if (storedCart) {
-            setCartItems(JSON.parse(storedCart));
-        } else {
-            setCartItems([]);
-        }
+        setCartItems(storedCart ? JSON.parse(storedCart) : []);
     };
-
-    // Calculate total items in cart
-    const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
-
-    // Handle animation when cart is updated
+    
     useEffect(() => {
         setAnimationTrigger(prev => prev + 1);
     }, [cartItems]);
 
-    // 🔹 filter berdasarkan search
-    let filteredProducts = products.data.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
+    const totalItems = cartItems.length;
 
-    // ambil filter aktif (tanpa "Semua")
-    const activeCategories = filters.categories.filter((c) => c !== 'Semua Produk');
-    const activePackages = filters.packages.filter((p) => p !== 'Semua Paket');
-
-    // 🔹 filter kategori & package
-    if (!(activeCategories.length === 0 && activePackages.length === 0)) {
-        filteredProducts = filteredProducts.filter((p) => {
-            const matchCategory = activeCategories.length === 0 || activeCategories.includes(p.category?.main_category as string);
-
-            const matchPackage = activePackages.length === 0 || activePackages.includes(p.order_unit);
-
-            return matchCategory && matchPackage;
-        });
-    }
-
-    // 🔹 sorting
-    if (sortBy === 'lowest') {
-        filteredProducts = [...filteredProducts].sort((a, b) => a.price - b.price);
-    } else if (sortBy === 'highest') {
-        filteredProducts = [...filteredProducts].sort((a, b) => b.price - a.price);
-    } else if (sortBy === 'name-asc') {
-        filteredProducts = [...filteredProducts].sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sortBy === 'name-desc') {
-        filteredProducts = [...filteredProducts].sort((a, b) => b.name.localeCompare(a.name));
-    }
 
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Products" />
-            <h1 className="text-2xl font-bold pt-6 ml-6 lg:ml-9  text-blue-800">Medicine Catalog</h1>
+            <h1 className="text-2xl font-bold pt-6 ml-6 lg:ml-9 text-blue-800">Medicine Catalog</h1>
             <div className="flex flex-col gap-6 p-6 lg:flex-row">
                 {/* Sidebar Filters */}
                 <div className="w-full lg:w-1/4">
                     <Filters 
                         onFilterChange={setFilters} 
-                        categories={uniqueCategories}
-                        packages={uniquePackages}
+                        // Pass the full list of categories/packages from the controller
+                        categories={["Semua Produk", ...allCategories]}
+                        packages={["Semua Paket", ...allPackages]}
+                        // Pass the currently active filters to the component
+                        activeFilters={filters}
                     />
                 </div>
 
                 {/* Product Section */}
                 <div className="flex-1">
-                    
-
                     <div className="mb-4 flex flex-col justify-between gap-2 sm:flex-row">
                         <input
                             type="text"
@@ -144,21 +159,23 @@ export default function OrdersIndexPage({ products, categories }: IndexProps) {
                     </div>
 
                     {/* Produk */}
-                    {filteredProducts.length === 0 ? (
+                    {products.data.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 text-gray-500">
                             <Package size={64} className="mb-4 text-gray-400" />
                             <p className="text-lg font-medium">Produk yang anda cari tidak ditemukan</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                            {filteredProducts.map((p, i) => (
-                                <div key={i}
-                                     // onClick={() => setSelectedProduct(p)}
-                                     className="cursor-pointer">
-                                    <ProductCard product={p} updateCartItems={updateCartItems} />
-                                </div>
-                            ))}
-                        </div>
+                        <>
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                                {products.data.map((p) => (
+                                    <div key={p.id} className="cursor-pointer">
+                                        <ProductCard product={p} updateCartItems={updateCartItems} />
+                                    </div>
+                                ))}
+                            </div>
+                            {/* Add Pagination Links */}
+                            <Pagination links={products.links} className="mt-6" />
+                        </>
                     )}
                 </div>
             </div>
