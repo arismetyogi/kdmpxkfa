@@ -5,13 +5,13 @@ import pickBy from 'lodash/pickBy'; // Helper to remove empty values from an obj
 
 import Filters from '@/components/Filters';
 import ProductCard from '@/components/product-card';
-import { Pagination } from '@/components/ui/pagination'; // You'll need a Pagination component
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Package } from 'lucide-react';
 import HeaderLayout from '@/layouts/header-layout';
 import FloatingCart from '@/components/FloatingCart';
+import { CustomPagination } from '@/components/custom-pagination';
 import { type BreadcrumbItem, Product, Paginated, Category, CartItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -64,13 +64,13 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
         // Conditionally add categories to the request
         // Only include it if the array is not the default ["Semua Produk"]
         if (filters.categories && (filters.categories.length > 1 || (filters.categories.length === 1 && filters.categories[0] !== 'Semua Produk'))) {
-            activeFilters.categories = filters.categories;
+            activeFilters.categories = filters.categories.filter(cat => cat !== 'Semua Produk');
         }
 
         // Conditionally add packages to the request
         // Only include it if the array is not the default ["Semua Paket"]
         if (filters.packages && (filters.packages.length > 1 || (filters.packages.length === 1 && filters.packages[0] !== 'Semua Paket'))) {
-            activeFilters.packages = filters.packages;
+            activeFilters.packages = filters.packages.filter(pack => pack !== 'Semua Paket');
         }
 
         // Combine the base params with the active filters, then clean with pickBy
@@ -120,10 +120,10 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Products" />
-            <h1 className="text-2xl font-bold pt-6 ml-6 lg:ml-9 text-blue-800">Medicine Catalog</h1>
-            <div className="flex flex-col gap-6 p-6 lg:flex-row">
+            <h1 className="text-2xl font-bold pt-4 px-4 lg:pt-6 lg:ml-9 text-blue-800">Medicine Catalog</h1>
+            <div className="flex flex-col gap-4 p-4 lg:gap-6 lg:p-6 lg:flex-row">
                 {/* Sidebar Filters */}
-                <div className="w-full lg:w-1/4">
+                <div className="w-full lg:block lg:w-1/4">
                     <Filters 
                         onFilterChange={setFilters} 
                         // Pass the full list of categories/packages from the controller
@@ -140,7 +140,7 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
                         <input
                             type="text"
                             placeholder="Search Products..."
-                            className="w-full rounded-md border px-3 py-2 sm:w-1/2"
+                            className="w-full rounded-md border px-3 py-2"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -173,8 +173,8 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
                                     </div>
                                 ))}
                             </div>
-                            {/* Add Pagination Links */}
-                            <Pagination links={products.links} className="mt-6" />
+                            {/* Add Custom Pagination */}
+                            <CustomPagination pagination={products} className="mt-6" />
                         </>
                     )}
                 </div>

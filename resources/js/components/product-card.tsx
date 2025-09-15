@@ -81,9 +81,12 @@ export default function ProductCard({ product, updateCartItems }: ProductCardPro
             {/* Bagian Atas */}
             <div>
                 <img
-                    src={image}
+                    src={image && image !== "" ? image : "/products/Placeholder_Medicine.png"}
                     alt={name}
                     className="w-full h-36 object-cover rounded-md mb-4"
+                    onError={({ currentTarget }) => {
+                        currentTarget.src = "/products/Placeholder_Medicine.png";
+                    }}
                 />
 
                 <h3 className="font-semibold leading-tight text-sm md:text-base mb-1">

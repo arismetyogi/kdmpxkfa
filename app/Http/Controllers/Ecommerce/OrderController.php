@@ -39,17 +39,31 @@ class OrderController extends Controller
         }
 
         // 🔎 Filter kategori
-        if ($request->filled('categories') && !in_array("Semua Produk", (array)$request->categories)) {
+        if ($request->filled('categories')) {
             $categories = (array) $request->categories;
-            $query->whereHas('category', function ($q) use ($categories) {
-                $q->whereIn('main_category', $categories);
+            // Remove "Semua Produk" if it exists
+            $categories = array_filter($categories, function($cat) {
+                return $cat !== "Semua Produk";
             });
+            
+            if (!empty($categories)) {
+                $query->whereHas('category', function ($q) use ($categories) {
+                    $q->whereIn('subcategory1', $categories);
+                });
+            }
         }
 
         // 🔹 Filter Package (base_uom)
-        if ($request->filled('packages') && !in_array("Semua Paket", (array)$request->packages)) {
+        if ($request->filled('packages')) {
             $packages = (array) $request->packages;
-            $query->whereIn('base_uom', $packages);
+            // Remove "Semua Paket" if it exists
+            $packages = array_filter($packages, function($pack) {
+                return $pack !== "Semua Paket";
+            });
+            
+            if (!empty($packages)) {
+                $query->whereIn('base_uom', $packages);
+            }
         }
 
         //  Sorting
@@ -69,13 +83,13 @@ class OrderController extends Controller
             $query->orderBy('name', 'asc'); // Default sort
         }
         
-        $products = $query->paginate(15)->withQueryString();
+        $products = $query->paginate(12)->withQueryString();
 
         // Get all unique categories and packages for the filter dropdowns
     $allCategories = Category::query()
-        ->whereNotNull('main_category')
+        ->whereNotNull('subcategory1')
         ->distinct()
-        ->pluck('main_category');
+        ->pluck('subcategory1');
 
     $allPackages = Product::query()
         ->whereNotNull('base_uom')
