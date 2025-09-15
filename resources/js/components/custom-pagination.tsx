@@ -10,12 +10,14 @@ import {
 import { Paginated } from '@/types';
 import { router } from '@inertiajs/react';
 import { ChevronFirst, ChevronLast } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface CustomPaginationProps {
     pagination: Paginated<any>;
+    className?: string;
 }
 
-export function CustomPagination({ pagination }: CustomPaginationProps) {
+export function CustomPagination({ pagination, className }: CustomPaginationProps) {
     // Don't render if there's only one page
     if (pagination.links.length <= 3) {
         return null;
@@ -64,7 +66,7 @@ export function CustomPagination({ pagination }: CustomPaginationProps) {
     const lastPageLink = pageLinks[pageLinks.length - 1];
 
     return (
-        <Pagination>
+        <Pagination className={cn("mt-6", className)}>
             <PaginationContent>
                 {/* First page button */}
                 {pageLinks.length > 5 && firstPageLink && (
