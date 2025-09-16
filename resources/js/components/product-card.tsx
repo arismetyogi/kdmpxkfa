@@ -37,6 +37,8 @@ export default function ProductCard({ product, updateCartItems }: ProductCardPro
             order_unit: order_unit,
             weight: weight,
             quantity: 1,
+            content: content,
+            base_uom: base_uom
         };
 
         // Get current cart from localStorage

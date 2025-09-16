@@ -118,6 +118,10 @@ class OrderController extends Controller
         ]);
     }
 
+    public function cart(){
+        return Inertia::render('orders/cart');
+    }
+
     public function acceptOrder(Request $request, Order $order)
     {
         // Ensure the order belongs to the authenticated user

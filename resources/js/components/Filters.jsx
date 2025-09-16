@@ -141,13 +141,13 @@ export default function Filters({
   };
 
   return (
-    <div className="lg:w-64 w-full p-4 border rounded-lg shadow-sm bg-card text-card-foreground">
+    <div className="lg:w-64 w-full pt-3 pl-4 pr-2 border rounded-lg bg-card text-card-foreground">
       
       <button 
         className="flex items-center justify-between w-full mb-4 lg:hidden"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <h2 className="text-xl font-bold">Filters</h2>
+        <h2 className="lg:text-xl font-bold text-lg ">Filters</h2>
         <div className="flex items-center gap-4">
             <span
               onClick={clearAllFilters} // Pass the event automatically

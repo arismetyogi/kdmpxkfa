@@ -1,23 +1,25 @@
-import { useEffect, useState, useCallback } from 'react';
-import { Head, router, usePage } from '@inertiajs/react';
+import { useEffect, useState} from 'react';
+import { Head, router } from '@inertiajs/react';
 import { useDebounce } from 'use-debounce'; // A great library for debouncing input
 import pickBy from 'lodash/pickBy'; // Helper to remove empty values from an object
 
 import Filters from '@/components/Filters';
 import ProductCard from '@/components/product-card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Package } from 'lucide-react';
 import HeaderLayout from '@/layouts/header-layout';
 import FloatingCart from '@/components/FloatingCart';
 import { CustomPagination } from '@/components/custom-pagination';
-import { type BreadcrumbItem, Product, Paginated, Category, CartItem } from '@/types';
+import { type BreadcrumbItem, Product, Paginated, CartItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
+        title: 'Dashboard',
+        href: route('dashboard'),
+    },
+        {
         title: 'Products',
-        href: '/orders/products',
+        href: '#',
     },
 ];
 
@@ -42,7 +44,6 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
         packages: initialFilters.packages || ["Semua Paket"] 
     });
     
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [animationTrigger, setAnimationTrigger] = useState(0);
 
@@ -120,10 +121,10 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Products" />
-            <h1 className="text-2xl font-bold pt-4 px-4 lg:pt-6 lg:ml-9 text-blue-800">Medicine Catalog</h1>
+            <h1 className="text-2xl font-bold ml-6 lg:ml-9 text-blue-800">Medicine Catalog</h1>
             <div className="flex flex-col gap-4 p-4 lg:gap-6 lg:p-6 lg:flex-row">
                 {/* Sidebar Filters */}
-                <div className="w-full lg:block lg:w-1/4">
+                <div className="lg:w-1/5 w-full lg:mr-4">
                     <Filters 
                         onFilterChange={setFilters} 
                         // Pass the full list of categories/packages from the controller
@@ -179,83 +180,8 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
                     )}
                 </div>
             </div>
-
             {/* Floating Cart */}
             <FloatingCart totalItems={totalItems} animationTrigger={animationTrigger} />
-
-            {/* 🔹 Modal Detail Produk */}
-            <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
-                <DialogContent className="max-h-[90vh] w-[95%] overflow-y-auto sm:max-w-lg md:max-w-2xl">
-                    {selectedProduct && (
-                        <>
-                            <DialogHeader>
-                                <DialogTitle>{selectedProduct.name}</DialogTitle>
-                                <DialogDescription>{selectedProduct.description || 'Tidak ada deskripsi tersedia.'}</DialogDescription>
-                            </DialogHeader>
-
-                            <div className="flex flex-col gap-4 sm:flex-row">
-                                <img
-                                    src={selectedProduct.image}
-                                    alt={selectedProduct.name}
-                                    className="w-full rounded-lg border object-cover sm:w-1/3"
-                                />
-                                <div className="flex-1 space-y-2">
-                                    <p>
-                                        <strong>Harga:</strong> Rp{selectedProduct.price.toLocaleString()}
-                                    </p>
-                                    <p>
-                                        <strong>Kategori:</strong> {selectedProduct.category?.subcategory2}
-                                    </p>
-                                    <p>
-                                        <strong>Kemasan:</strong> {selectedProduct.order_unit}
-                                    </p>
-                                    <p>
-                                        <strong>Kuantitas:</strong> {selectedProduct.content}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* 🔹 Tabs untuk Benefit & Dosage */}
-                            <Tabs defaultValue="benefit" className="mt-4">
-                                <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="benefit">Benefit</TabsTrigger>
-                                    <TabsTrigger value="dosage">Dosage</TabsTrigger>
-                                </TabsList>
-
-                                <TabsContent value="benefit" className="mt-2 text-sm text-gray-700">
-                                    {/*{selectedProduct.benefit && selectedProduct.benefit.length > 0 ? (*/}
-                                    {/*    <ul className="list-disc space-y-1 pl-5">*/}
-                                    {/*        {selectedProduct.benefit.map((item: string, idx: number) => (*/}
-                                    {/*            <li key={idx}>{item}</li>*/}
-                                    {/*        ))}*/}
-                                    {/*    </ul>*/}
-                                    {/*) : (*/}
-                                        'Belum ada informasi benefit.'
-                                    {/*)}*/}
-                                </TabsContent>
-
-                                <TabsContent value="dosage" className="mt-2 text-sm text-gray-700">
-                                    <div className="space-y-1">
-                                        {/*{selectedProduct.dosage.split('. ').map((line: string, idx: number) => {*/}
-                                        {/*    const formatted = line*/}
-                                        {/*        .replace(/Dewasa:/g, '<strong>Dewasa:</strong>')*/}
-                                        {/*        .replace(/Anak-anak:/g, '<strong>Anak-anak:</strong>');*/}
-                                        {/*    return (*/}
-                                        {/*        <p*/}
-                                        {/*            key={idx}*/}
-                                        {/*            dangerouslySetInnerHTML={{*/}
-                                        {/*                __html: formatted + (line.endsWith('.') ? '' : '.'),*/}
-                                        {/*            }}*/}
-                                        {/*        />*/}
-                                        {/*    );*/}
-                                        {/*})}*/}
-                                    </div>
-                                </TabsContent>
-                            </Tabs>
-                        </>
-                    )}
-                </DialogContent>
-            </Dialog>
         </HeaderLayout>
     );
 }

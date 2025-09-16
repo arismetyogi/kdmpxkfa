@@ -39,7 +39,7 @@ const mainNavItems: NavItem[] = [
 const rightNavItems: NavItem[] = [
     {
         title: 'Cart',
-        href: route('checkout'),
+        href: route('cart'),
         icon: ShoppingCart,
     },
 ];

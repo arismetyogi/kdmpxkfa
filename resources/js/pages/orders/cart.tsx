@@ -75,7 +75,7 @@ export default function Cart() {
             <p className="text-lg sm:text-xl font-semibold mb-4">
               Keranjang masih kosong
             </p>
-            <Link href="/pemesanan/medicines" className="w-full max-w-xs">
+            <Link href={route("orders.products")} className="w-full max-w-xs">
               <button className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition w-full font-medium shadow-md">
                 Mulai Belanja
               </button>
@@ -137,7 +137,7 @@ export default function Cart() {
             </div>
 
             {/* Ringkasan Belanja */}
-            <div className="border border-gray-200 rounded-2xl p-6 shadow-lg bg-white">
+            <div className="border border-gray-200 rounded-2xl p-6 shadow-lg bg-white lg:sticky lg:top-20 self-start">
               <h2 className="font-bold text-xl mb-5 text-gray-800">
                 Ringkasan Belanja
               </h2>
@@ -157,11 +157,15 @@ export default function Cart() {
               </div>
 
               <div className="mt-8">
-                <Link href={route("po")} className="block">
-                  <button className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition w-full font-semibold shadow-md">
-                    Cetak Purchase Order
-                  </button>
-                </Link>
+                <button 
+                  onClick={() => {
+                    const cartData = localStorage.getItem("cart") || "[]";
+                    window.location.href = `${route("checkout")}?cart=${encodeURIComponent(cartData)}`;
+                  }}
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition w-full font-semibold shadow-md"
+                >
+                  Cetak Purchase Order
+                </button>
               </div>
             </div>
           </div>
