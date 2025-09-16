@@ -92,7 +92,7 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
     }, [debouncedSearch, sortBy, filters]);
 
 
-    // Cart logic remains the same...
+    // Cart logic
     useEffect(() => {
         const storedCart = localStorage.getItem("cart");
         if (storedCart) setCartItems(JSON.parse(storedCart));

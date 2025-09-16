@@ -32,7 +32,7 @@ export default function FloatingCart({ totalItems, animationTrigger }: FloatingC
 
   return (
     <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6">
-      <Link href={route('orders.cart')} className="relative">
+      <Link href={route('checkout')} className="relative">
         <motion.div
           animate={controls}
           whileHover={{ scale: 1.1 }}
