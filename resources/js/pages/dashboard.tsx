@@ -34,14 +34,14 @@ const categoryMap: Record<number, string> = {
 const categoryCards = [
     {
         id: 1,
-        name: 'Obat',
+        name: 'Obat - Obatan',
         desc: 'Resep & Bebas Terlengkap',
         icon: Pill,
         color: 'text-blue-600 bg-blue-100 dark:text-blue-200 dark:bg-blue-900/40',
     },
     {
         id: 2,
-        name: 'Vitamin & Suplemen',
+        name: 'Vitamin & Multivitamin',
         desc: 'Suplemen Premium Import',
         icon: HeartPulse,
         color: 'text-emerald-600 bg-emerald-100 dark:text-emerald-200 dark:bg-emerald-900/40',

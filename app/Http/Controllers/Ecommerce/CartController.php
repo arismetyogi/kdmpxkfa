@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Ecommerce;
 
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
@@ -10,6 +11,7 @@ use App\Services\CartService;
 use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use function Pest\Laravel\json;
 
 class CartController extends Controller
 {
@@ -56,74 +58,171 @@ class CartController extends Controller
         return back()->with('success', 'Item removed from cart successfully.');
     }
 
-    public function checkoutForm(CartService $cartService)
+    public function checkoutForm(Request $request)
     {
-        $cartItems = $cartService->getCartItems();
+        // Get cart items from localStorage (passed via request)
+        $cartData = $request->input('cart', '[]');
+        $cartItems = json_decode($cartData, true);
+
+        // If no cart items from localStorage, try to get from session as fallback
         if (empty($cartItems)) {
-            return redirect()->route('carts.index')->with('error', 'Your cart is empty.');
+            $cartItems = session('cart', []);
         }
+
+        if (empty($cartItems)) {
+            return redirect()->route('cart')->with('error', 'Your cart is empty.');
+        }
+
+        Log::info('Cart items for checkout:', $cartItems);
+
+        // Calculate cart totals
+        $totalQuantity = array_sum(array_column($cartItems, 'quantity'));
+        $subtotal = array_sum(array_map(function($item) {
+            return $item['price'] * $item['quantity'];
+        }, $cartItems));
+
+        $tax = $subtotal*0.11;
+        $shipping_amount = 0;
+        $grandTotal = $tax + $subtotal + $shipping_amount;
 
         // Get existing checkout data from session if available
         $billingData = session('checkout.billing', []);
         $shippingData = session('checkout.shipping', []);
 
+
         // Determine if shipping is same as billing
         $sameAsBilling = empty($shippingData) ||
             ($billingData &&
+                isset($billingData['first_name']) && isset($shippingData['first_name']) &&
                 $billingData['first_name'] === $shippingData['first_name'] &&
+                isset($billingData['last_name']) && isset($shippingData['last_name']) &&
                 $billingData['last_name'] === $shippingData['last_name'] &&
+                isset($billingData['email']) && isset($shippingData['email']) &&
                 $billingData['email'] === $shippingData['email'] &&
+                isset($billingData['phone']) && isset($shippingData['phone']) &&
                 $billingData['phone'] === $shippingData['phone'] &&
+                isset($billingData['address']) && isset($shippingData['address']) &&
                 $billingData['address'] === $shippingData['address'] &&
+                isset($billingData['city']) && isset($shippingData['city']) &&
                 $billingData['city'] === $shippingData['city'] &&
+                isset($billingData['state']) && isset($shippingData['state']) &&
                 $billingData['state'] === $shippingData['state'] &&
+                isset($billingData['zip']) && isset($shippingData['zip']) &&
                 $billingData['zip'] === $shippingData['zip']);
+
+        session([
+            // 'checkout.billing' => $billingData,
+            // 'checkout.shipping' => $shippingData,
+            'cart' => $cartItems // Store cart items in session for payment page
+        ]);
 
         return Inertia::render('ecommerce/checkout', [
             'cartItems' => $cartItems,
-            'totalQuantity' => $cartService->getTotalQuantity(),
-            'totalPrice' => $cartService->getTotalPrice(),
-            'subtotal' => $cartService->getSubTotal(),
-            'shipping' => 0,
-            'tax' => 0,
+            'totalQuantity' => $totalQuantity,
+            'totalPrice' => $grandTotal,
+            'subtotal' => $subtotal,
+            'shipping' => $shipping_amount,
+            'tax' => $tax,
             'billingData' => $billingData,
             'shippingData' => $shippingData,
             'sameAsBilling' => $sameAsBilling,
         ]);
     }
 
-    public function processCheckout(Request $request, CartService $cartService)
+    public function processCheckout(Request $request)
     {
-        // Process checkout through service
-        $sessionData = $cartService->processCheckout($request);
+        // Get cart items from localStorage (passed via request)
+        $cartData = session('cart', '[]');
+        // dd('Cart items for process checkout all:', $request->all());
+        $cartItems = $cartData;
+
+        Log::info('Cart items for payment pre:', $cartItems);
+
+        // If no cart items from localStorage, try to get from session as fallback
+//        if (empty($cartItems)) {
+//            $cartItems = session('cart', []);
+//        }
+
+        if (empty($cartItems)) {
+            return redirect()->route('cart')->with('error', 'Your cart is empty.');
+        }
+
+        // Validate and process billing/shipping data
+        $billingData = $request->validate([
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'address' => ['required', 'string', 'max:255'],
+            'city' => ['required', 'string', 'max:100'],
+            'state' => ['required', 'string', 'max:100'],
+            'zip' => ['required', 'string', 'max:20'],
+        ]);
+
+        $shippingData = $request->input('same_as_billing') ? $billingData : $request->validate([
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'address' => ['required', 'string', 'max:255'],
+            'city' => ['required', 'string', 'max:100'],
+            'state' => ['required', 'string', 'max:100'],
+            'zip' => ['required', 'string', 'max:20'],
+        ]);
+
+        Log::info('Billing Data:', $billingData);
+        Log::info('Shipping Data:', $shippingData);
 
         // Store billing/shipping info in session for payment page
-        session($sessionData);
+        session([
+            'checkout.billing' => $billingData,
+            'checkout.shipping' => $shippingData,
+            // 'cart' => $cartItems // Store cart items in session for payment page
+        ]);
+
+        Log::info('Cart saved in session:', session('cart'));
+        // dd(session('cart'));
 
         // Redirect to payment page
         return redirect()->route('payment');
     }
 
     // Show payment form
-    public function paymentForm(CartService $cartService)
+    public function paymentForm(Request $request)
     {
+        // Get cart items from session
+        $cartItems = session('cart', []);
+        Log::info('Cart items for payment post:', session()->all());
+
         // Check if billing information exists in session
         if (! session('checkout.billing')) {
             return redirect()->route('checkout')->with('error', 'Please complete billing information first.');
         }
 
+
+
         // check cart empty
-        if ($cartService->getTotalQuantity() == 0) {
-            return redirect()->route('carts.index')->with('error', 'Your cart is empty.');
-        }
+        // if (count($cartItems) == 0) {
+        //     return redirect()->route('carts.index')->with('error', 'Your cart is empty.');
+        // }
+
+        // Calculate cart totals
+        $totalQuantity = array_sum(array_column($cartItems, 'quantity'));
+        $subtotal = array_sum(array_map(function($item) {
+            return $item['price'] * $item['quantity'];
+        }, $cartItems));
+
+        $tax = $subtotal*0.11;
+        $shipping_amount = 0;
+        $grandTotal = $tax + $subtotal + $shipping_amount;
 
         return Inertia::render('ecommerce/payment', [
-            'cartItems' => $cartService->getCartItems(),
-            'totalPrice' => $cartService->getTotalPrice(),
-            'totalQuantity' => $cartService->getTotalQuantity(),
-            'subtotal' => $cartService->getSubTotal(),
-            'shipping_amount' => 0,
-            'tax' => 0,
+            'cartItems' => $cartItems,
+            'totalPrice' => $grandTotal,
+            'totalQuantity' => $totalQuantity,
+            'subtotal' => $subtotal,
+            'shipping_amount' => $shipping_amount,
+            'tax' => $tax,
             'billing' => session('checkout.billing'),
             'shipping' => session('checkout.shipping'),
         ]);
@@ -134,18 +233,138 @@ class CartController extends Controller
      */
     public function processPayment(Request $request, CartService $cartService, DigikopTransactionService $transactionService)
     {
-        $result = $cartService->processPayment($request, $transactionService);
-
-        if (! $result['success']) {
-            if (isset($result['back']) && $result['back']) {
-                return back()->with('error', $result['message']);
-            } elseif (isset($result['redirect'])) {
-                return redirect()->route($result['redirect'])->with('error', $result['message']);
-            }
+        // Check if billing information exists in session
+        if (! session('checkout.billing')) {
+            return redirect()->route('checkout')->with('error', 'Please complete billing information first.');
         }
 
-        // Redirect to order confirmation page
-        return redirect()->route($result['redirect'], $result['order_id'])->with('success', $result['message']);
+        // Get cart items from session (set during checkout process)
+        $cartItems = session('cart', []);
+
+        Log::debug('Cart items for payment process:', $cartItems);
+
+        if (empty($cartItems)) {
+            return redirect()->route('cart')->with('error', 'Your cart is empty.');
+        }
+
+        // Add cart items to request so CartService can process them
+        $request->merge(['cart_items' => $cartItems]);
+
+        Log::info('Cart items for order placement:', $cartItems);
+
+        // Temporarily override CartService's getCartItems method
+//        $originalGetCartItems = function() use ($cartItems) {
+//            return $cartItems;
+//        };
+
+        // Use reflection to temporarily override the method
+//        $cartServiceReflection = new \ReflectionClass($cartService);
+//        $getCartItemsMethod = $cartServiceReflection->getMethod('getCartItems');
+
+        // Since we can't directly override the method, we'll pass the cart items differently
+        // Let's create a temporary solution by modifying how we call the service
+
+        $request->validate([
+            'payment_method' => 'required|string|in:va,cad',
+        ]);
+
+        try {
+            // Validate credit limit before processing payment
+            $user = auth()->user();
+
+            // Calculate total amount from localStorage cart items
+            $totalAmount = array_sum(array_map(function($item) {
+                return $item['price'] * $item['quantity'];
+            }, $cartItems));
+
+            // Validate credit limit using tenant_id
+            $creditValidation = $transactionService->validateCreditLimit($user->tenant_id, $totalAmount);
+
+            if (! $creditValidation['valid']) {
+                return back()->with('error', $creditValidation['message']);
+            }
+
+            \DB::beginTransaction();
+
+            $billingData = session('checkout.billing');
+            $shippingData = session('checkout.shipping');
+
+            // Create the order
+            $order = \App\Models\Order::create([
+                'transaction_number' => \App\Models\Order::generateTransactionNumber(),
+                'user_id' => auth()->id(),
+                'tenant_id' => auth()->user()->tenant_id,
+                'source_of_fund' => 'pinjaman',
+                'account_no' => '', // This would need to be set based on your business logic
+                'account_bank' => '', // This would need to be set based on your business logic
+                'payment_type' => 'cad', // todo! no other payment available currently, subjects to change
+                'payment_method' => $request->payment_method,
+                'va_number' => '', // This would need to be set based on your business logic
+                'subtotal' => $totalAmount,
+                'tax_amount' => $totalAmount * 0.11, // You can calculate tax based on your business logic
+                'shipping_amount' => 0, // You can calculate shipping based on your business logic
+                'discount_amount' => 0,
+                'total_price' => $totalAmount * 1.11,
+                'billing_name' => $billingData['first_name'].' '.$billingData['last_name'],
+                'billing_email' => $billingData['email'],
+                'billing_phone' => $billingData['phone'],
+                'billing_address' => $billingData['address'],
+                'billing_city' => $billingData['city'],
+                'billing_state' => $billingData['state'],
+                'billing_zip' => $billingData['zip'],
+                'shipping_name' => $shippingData['first_name'].' '.$shippingData['last_name'],
+                'shipping_address' => $shippingData['address'],
+                'shipping_city' => $shippingData['city'],
+                'shipping_state' => $shippingData['state'],
+                'shipping_zip' => $shippingData['zip'],
+                'customer_notes' => $billingData['notes'] ?? null,
+            ]);
+
+            // Create order items
+            foreach ($cartItems as $cartItem) {
+                $product = \App\Models\Product::find($cartItem['id']);
+
+                if (! $product) {
+                    continue;
+                }
+
+                \App\Models\OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
+                    'product_sku' => $product->sku,
+                    'product_description' => $product->description,
+                    'unit_price' => $cartItem['price'], // This is now the price per order unit
+                    'total_price' => $cartItem['price'] * $cartItem['quantity'],
+                    'quantity' => $cartItem['quantity'],
+                    'base_quantity' => $cartItem['quantity'] * $product->content,
+                    'order_unit' => $product->order_unit,
+                    'base_uom' => $product->base_uom,
+                    'content' => $product->content,
+                ]);
+            }
+
+            // Clear cart and checkout data from session after successful payment
+            Log::debug("message", session('cart'));
+            session()->forget(['cart', 'checkout.billing', 'checkout.shipping']);
+
+            \DB::commit();
+
+            // Redirect to order confirmation page
+            return redirect()->route('order.complete', $order->id)->with('success', 'Order placed successfully!');
+        } catch (\Exception $e) {
+            \DB::rollBack();
+
+            \Log::error('Order creation failed with exception: '.$e->getMessage());
+
+            return back()->with('error', 'Koperasi belum dimapping dengan Apotek KF, Silakan hubungi administrator.');
+        } catch (\Throwable $e) {
+            \DB::rollBack();
+
+            \Log::error('Order creation failed with throwable: '.$e->getMessage());
+
+            return back()->with('error', $e->getMessage());
+        }
     }
 
     public function orderComplete(Order $order)
@@ -154,6 +373,8 @@ class CartController extends Controller
         if ($order->user_id !== auth()->id()) {
             abort(403);
         }
+
+        
 
         // Load order items with product relationship
         $order->load('orderItems.product');

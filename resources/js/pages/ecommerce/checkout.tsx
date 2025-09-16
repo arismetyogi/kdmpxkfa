@@ -3,6 +3,10 @@ import { Label } from '@/components/ui/label';
 import HeaderLayout from '@/layouts/header-layout';
 import { router } from '@inertiajs/react';
 import React, { useState } from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { type BreadcrumbItem } from '@/types';
+
 
 interface CartItem {
     id: string | number;
@@ -49,6 +53,13 @@ interface CheckoutProps {
         country: string;
     };
 }
+
+const breadcrumbs: BreadcrumbItem[] = [
+  { title: "Medicines", href: route("orders.products") },
+  { title: "Cart", href: route("cart") },
+  { title: "Checkout", href: "#" },
+];
+
 
 export default function CheckoutPage({ cartItems, totalPrice, subtotal, shipping, tax, billingData, shippingData,  }: CheckoutProps) {
     const [formData, setFormData] = useState({
@@ -112,7 +123,7 @@ export default function CheckoutPage({ cartItems, totalPrice, subtotal, shipping
     };
 
     return (
-        <HeaderLayout>
+        <HeaderLayout breadcrumbs={breadcrumbs}>
             <div className="container mx-auto max-w-6xl p-2">
                 <h1 className="mb-4 text-xl font-bold text-gray-800">Checkout</h1>
 
@@ -393,54 +404,71 @@ export default function CheckoutPage({ cartItems, totalPrice, subtotal, shipping
                                 <div className="text-xs text-gray-500 italic">Shipping address will be the same as billing address</div>
                             )}
                         </div>
+
+                        {/* Order Items Table */}
+                        <div className="md:col-span-2 rounded-lg bg-white p-3 shadow-sm">
+                            <h2 className="mb-3 text-sm font-semibold text-gray-800">Your Order Items</h2>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="w-[80px] text-xs">Image</TableHead>
+                                        <TableHead className="text-xs">Item</TableHead>
+                                        <TableHead className="text-xs">Quantity</TableHead>
+                                        <TableHead className="text-xs">Price</TableHead>
+                                        <TableHead className="text-right text-xs">Subtotal</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {cartItems.map((item) => (
+                                        <TableRow key={item.id}>
+                                            <TableCell>
+                                                <img src={item.image} alt={item.name} className="h-12 w-12 object-cover rounded" />
+                                            </TableCell>
+                                            <TableCell className="text-xs font-medium">{item.name}</TableCell>
+                                            <TableCell className="text-xs">
+                                                {item.quantity} {item.order_unit}
+                                                <span className="block text-gray-500">
+                                                    ({item.quantity * item.content} {item.base_uom})
+                                                </span>
+                                            </TableCell>
+                                            <TableCell className="text-xs">Rp{item.price.toLocaleString()}</TableCell>
+                                            <TableCell className="text-right text-xs">Rp{(item.price * item.quantity).toLocaleString()}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
                     </div>
 
                     {/* Order Summary */}
                     <div className="md:col-span-1">
-                        <div className="rounded-lg bg-white p-3 shadow-sm">
+                        <div className="border border-gray-200 rounded-2xl p-5 shadow-lg bg-white lg:sticky lg:top-55 self-start ">
                             <h2 className="mb-2 text-sm font-semibold text-gray-800">Order Summary</h2>
                             <div className="space-y-3">
-                                <div className="max-h-40 overflow-y-auto">
-                                    {cartItems.map((item) => (
-                                        <div key={item.id} className="flex items-center justify-between py-1">
-                                            <div>
-                                                <p className="text-xs font-medium text-gray-800">{item.name}</p>
-                                                <p className="text-xs text-gray-500">
-                                                    Qty: {item.quantity} {item.order_unit}
-                                                    <span className="block">
-                                                        ({item.quantity * item.content} {item.base_uom})
-                                                    </span>
-                                                </p>
-                                            </div>
-                                            <p className="text-xs font-medium text-gray-800">Rp{(item.price * item.quantity).toLocaleString()}</p>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="space-y-1 border-t pt-3">
+                                <div className="space-y-1">
                                     <div className="flex justify-between">
-                                        <span className="text-xs text-gray-600">Subtotal</span>
-                                        <span className="text-xs font-medium">Rp{subtotal.toLocaleString()}</span>
+                                        <span className="text-sm text-gray-600">Subtotal</span>
+                                        <span className="text-sm font-medium">Rp{subtotal.toLocaleString()}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-xs text-gray-600">Shipping</span>
-                                        <span className="text-xs font-medium text-green-600">
+                                        <span className="text-sm text-gray-600">Shipping</span>
+                                        <span className="text-sm font-medium text-green-600">
                                             {shipping === 0 ? 'Free' : `Rp${shipping.toLocaleString()}`}
                                         </span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-xs text-gray-600">Tax</span>
-                                        <span className="text-xs font-medium">Rp{tax.toLocaleString()}</span>
+                                        <span className="text-sm text-gray-600">Tax</span>
+                                        <span className="text-sm font-medium">Rp{tax.toLocaleString()}</span>
                                     </div>
-                                    <div className="flex justify-between border-t pt-2">
-                                        <span className="text-sm font-semibold text-gray-800">Total</span>
-                                        <span className="text-sm font-semibold text-gray-800">Rp{totalPrice.toLocaleString()}</span>
+                                    <div className="flex justify-between border-t pt-5">
+                                        <span className="text-sm font-semibold text-primary">Total</span>
+                                        <span className="text-sm font-semibold text-primary">Rp{totalPrice.toLocaleString()}</span>
                                     </div>
                                 </div>
 
                                 <button
                                     type="submit"
-                                    className="mt-4 w-full rounded-md bg-indigo-600 px-3 py-2 text-xs text-white hover:bg-indigo-700"
+                                    className="mt-2 w-full rounded-md bg-primary px-3 py-2 text-xs text-white hover:bg-primary/90"
                                 >
                                     Proceed to Payment
                                 </button>
