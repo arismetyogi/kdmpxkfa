@@ -7,12 +7,13 @@ use App\Models\Order;
 use App\Services\Admin\OrderService;
 use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class OrderController extends Controller
 {
     protected $orderService;
+
     protected $digikopTransactionService;
 
     public function __construct(OrderService $orderService, DigikopTransactionService $digikopTransactionService)
@@ -125,11 +126,11 @@ class OrderController extends Controller
         $response = $this->digikopTransactionService->sendTransaction($transactionData);
 
         // Handle response
-        if (!$response['success']) {
+        if (! $response['success']) {
             // Log the error but don't fail the order update
             \Log::error('Failed to send transaction to Digikoperasi', [
                 'order_id' => $order->id,
-                'error' => $response['message']
+                'error' => $response['message'],
             ]);
         }
 
@@ -146,9 +147,6 @@ class OrderController extends Controller
 
     /**
      * Prepare transaction data according to Digikoperasi API documentation
-     *
-     * @param Order $order
-     * @return array
      */
     private function prepareTransactionData(Order $order): array
     {
@@ -156,7 +154,7 @@ class OrderController extends Controller
         $productDetails = [];
         foreach ($order->orderItems as $item) {
             // Only include items with qty_delivered > 0
-            if (!isset($item->qty_delivered) || $item->qty_delivered <= 0) {
+            if (! isset($item->qty_delivered) || $item->qty_delivered <= 0) {
                 continue;
             }
 
@@ -166,8 +164,8 @@ class OrderController extends Controller
                 $categoryName = $item->product->category->subcategory2 ? $item->product->category->subcategory1 : 'Obat';
             }
 
-            $hargaSatuan = (int)$item->unit_price;
-            $hargaSatuanPpn = (int)($hargaSatuan * 1.11);
+            $hargaSatuan = (int) $item->unit_price;
+            $hargaSatuanPpn = (int) ($hargaSatuan * 1.11);
             $baseQtyDelivered = $item->qty_delivered * $item->content;
 
             $productDetails[] = [
@@ -176,7 +174,7 @@ class OrderController extends Controller
                 'kategori' => $categoryName,
                 'quantity' => $baseQtyDelivered,
                 'harga_per_unit' => $hargaSatuanPpn,
-                'total' => (int)($hargaSatuanPpn * $baseQtyDelivered),
+                'total' => (int) ($hargaSatuanPpn * $baseQtyDelivered),
                 'satuan' => $item->product->base_uom ?? 'PCS',
                 'berat' => $item->product->weight ?? 0,
                 'dimensi' => [

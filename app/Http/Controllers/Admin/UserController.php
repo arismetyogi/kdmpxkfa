@@ -61,7 +61,7 @@ class UserController extends Controller
             'password_confirmation' => ['required_if:password,', 'same:password'],
             'roles' => ['array'],
             'roles.*' => ['exists:roles,id'],
-            'apotek_id' => ['exists:apoteks,id']
+            'apotek_id' => ['exists:apoteks,id'],
         ]);
 
         $user = User::create([
@@ -97,7 +97,7 @@ class UserController extends Controller
             ),
             'roles' => ['array'],
             'roles.*' => ['exists:roles,id'],
-            'apotek_id' => ['exists:apoteks,id']
+            'apotek_id' => ['exists:apoteks,id'],
         ]);
 
         if (! empty($validated['[password]'])) {
@@ -105,13 +105,13 @@ class UserController extends Controller
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
-                'apotek_id' => $validated['apotek_id']
+                'apotek_id' => $validated['apotek_id'],
             ]);
         } else {
             $user->update([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'apotek_id' => $validated['apotek_id']
+                'apotek_id' => $validated['apotek_id'],
             ]);
         }
 

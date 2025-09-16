@@ -21,6 +21,7 @@ class ProductSeeder extends Seeder
 
         if (! file_exists($filePath)) {
             $this->command->error("CSV file not found: $filePath");
+
             return;
         }
 
@@ -58,6 +59,7 @@ class ProductSeeder extends Seeder
 
         if (! file_exists($filePath)) {
             $this->command->error("CSV file not found: $filePath");
+
             return;
         }
 
@@ -98,27 +100,26 @@ class ProductSeeder extends Seeder
             Product::updateOrCreate(
                 ['sku' => $item['sku']],
                 [
-                    'name'        => $name,
-                    'slug'        => $slug,
+                    'name' => $name,
+                    'slug' => $slug,
                     'description' => $item['description'] ?? '',
-                    'dosage'      => $item['dosage'] ? json_decode($item['dosage'], true) : null,
-                    'pharmacology'=> $item['pharmacology'] ?? '',
-                    'price'       => (float) ($item['price'] ?? 1.00),
-                    'base_uom'    => $item['base_uom'] ?? '',
-                    'order_unit'  => $item['order_unit'] ?? '',
-                    'content'     => (int) ($item['content'] ?? 1),
-                    'weight'      => (int) ($item['weight'] ?? 100),
-                    'length'      => $item['length'] ?? null,
-                    'width'       => $item['width'] ?? null,
-                    'height'      => $item['height'] ?? null,
-                    'brand'       => $item['brand'] ?? null,
+                    'dosage' => $item['dosage'] ? json_decode($item['dosage'], true) : null,
+                    'pharmacology' => $item['pharmacology'] ?? '',
+                    'price' => (float) ($item['price'] ?? 1.00),
+                    'base_uom' => $item['base_uom'] ?? '',
+                    'order_unit' => $item['order_unit'] ?? '',
+                    'content' => (int) ($item['content'] ?? 1),
+                    'weight' => (int) ($item['weight'] ?? 100),
+                    'length' => $item['length'] ?? null,
+                    'width' => $item['width'] ?? null,
+                    'height' => $item['height'] ?? null,
+                    'brand' => $item['brand'] ?? null,
                     'category_id' => $item['category_id'] ?? null,
-                    'is_active'   => true,
+                    'is_active' => true,
                 ]
             );
         }
 
-        
         $this->command->info('Products seeded successfully!');
     }
 }

@@ -6,10 +6,10 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SsoController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\OnboardingController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Ecommerce\CartController;
 use App\Http\Controllers\Ecommerce\OrderController;
 use App\Http\Controllers\Ecommerce\HistoryController;
-use App\Http\Controllers\ProductController as ControllersProductController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -28,8 +28,8 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Regular user dashboard
-    Route::get('/dashboard', [ControllersProductController::class, 'index'])->name('dashboard');
-    
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
     Route::get('/orders/products', [OrderController::class, 'index'])->name('orders.products');
     Route::get('/orders/history', [OrderController::class, 'history'])->name('orders.history');
     Route::post('/orders/{order}/accept', [OrderController::class, 'acceptOrder'])->name('orders.accept');
@@ -54,7 +54,7 @@ Route::prefix('orders/history')->name('history.')->group(function () {
     Route::get('/credit-limit', [TransactionController::class, 'creditLimit'])->name('credit.limit');
 
     // Admin routes with role-based access
-    Route::middleware('permission:' . \App\Enums\PermissionEnum::VIEW_ADMIN_DASHBOARD->value)->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('permission:'.\App\Enums\PermissionEnum::VIEW_ADMIN_DASHBOARD->value)->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
         // Role management routes with explicit model binding
@@ -78,7 +78,7 @@ Route::prefix('orders/history')->name('history.')->group(function () {
         // Category management routes
         Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
 
-        Route::middleware('permission:' . \App\Enums\PermissionEnum::VIEW_ORDERS->value)->group(function () {
+        Route::middleware('permission:'.\App\Enums\PermissionEnum::VIEW_ORDERS->value)->group(function () {
             Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
         });
     });
@@ -98,5 +98,5 @@ Route::bind('user', function ($value) {
     return \App\Models\User::findOrFail($value);
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\RoleEnum;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
@@ -12,11 +13,11 @@ beforeEach(function () {
     $this->artisan('migrate');
 
     // Create roles and permissions
-    $adminRole = Role::create(['name' => 'admin']);
-    $userRole = Role::create(['name' => 'user']);
+    $adminRole = Role::create(['name' => RoleEnum::SUPER_ADMIN->value]);
+    $userRole = Role::create(['name' => RoleEnum::USER->value]);
 
-    $viewDashboardPermission = Permission::create(['name' => 'view dashboard']);
-    $viewUsersPermission = Permission::create(['name' => 'view users']);
+    $viewDashboardPermission = Permission::create(['name' => \App\Enums\PermissionEnum::VIEW_ADMIN_DASHBOARD->value]);
+    $viewUsersPermission = Permission::create(['name' => \App\Enums\PermissionEnum::VIEW_USERS->value]);
 
     $adminRole->givePermissionTo([$viewDashboardPermission, $viewUsersPermission]);
     $userRole->givePermissionTo([$viewDashboardPermission]);
@@ -24,27 +25,27 @@ beforeEach(function () {
 
 it('allows admin users to access admin routes', function () {
     $adminUser = User::factory()->create();
-    $adminUser->assignRole('admin');
+    $adminUser->assignRole(\App\Enums\RoleEnum::SUPER_ADMIN->value);
 
-    $response = $this->actingAs($adminUser)->get('/admin');
+    $response = $this->actingAs($adminUser)->get(route('admin.dashboard'));
 
     $response->assertSuccessful();
 });
 
 it('denies non-admin users access to admin routes', function () {
     $regularUser = User::factory()->create();
-    $regularUser->assignRole('user');
+    $regularUser->assignRole(RoleEnum::USER->value);
 
-    $response = $this->actingAs($regularUser)->get('/admin');
+    $response = $this->actingAs($regularUser)->get(route('admin.dashboard'));
 
     $response->assertForbidden();
 });
 
 it('allows users with view dashboard permission to access dashboard', function () {
     $user = User::factory()->create();
-    $user->givePermissionTo('view dashboard');
+    $user->givePermissionTo(\App\Enums\PermissionEnum::VIEW_ADMIN_DASHBOARD->value);
 
-    $response = $this->actingAs($user)->get('/admin/dashboard-alt');
+    $response = $this->actingAs($user)->get(route('admin.dashboard'));
 
     $response->assertSuccessful();
 });
@@ -53,19 +54,19 @@ it('denies users without view dashboard permission', function () {
     $user = User::factory()->create();
     // User has no permissions
 
-    $response = $this->actingAs($user)->get('/admin/dashboard-alt');
+    $response = $this->actingAs($user)->get(route('admin.dashboard'));
 
     $response->assertForbidden();
 });
 
 it('shows user roles and permissions in admin dashboard', function () {
     $adminUser = User::factory()->create();
-    $adminUser->assignRole('admin');
+    $adminUser->assignRole(RoleEnum::SUPER_ADMIN->value);
 
-    $response = $this->actingAs($adminUser)->get('/admin');
+    $response = $this->actingAs($adminUser)->get(route('admin.dashboard'));
 
     $response->assertSuccessful();
-    $response->assertInertia(fn ($page) => $page->component('admin/Dashboard')
+    $response->assertInertia(fn ($page) => $page->component(route('admin.dashboard'))
         ->has('user')
         ->has('stats')
     );

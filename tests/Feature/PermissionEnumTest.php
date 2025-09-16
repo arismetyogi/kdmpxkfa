@@ -1,165 +1,149 @@
 <?php
 
-namespace Tests\Feature;
-
 use App\Enums\PermissionEnum;
-use Tests\TestCase;
 
-class PermissionEnumTest extends TestCase
-{
-    /** @test */
-    public function it_has_all_required_permissions()
-    {
-        // Test that all permissions exist
-        $this->assertTrue(defined(PermissionEnum::class . '::VIEW_USERS'));
-        $this->assertTrue(defined(PermissionEnum::class . '::CREATE_USERS'));
-        $this->assertTrue(defined(PermissionEnum::class . '::UPDATE_USERS'));
-        $this->assertTrue(defined(PermissionEnum::class . '::DELETE_USERS'));
+uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-        $this->assertTrue(defined(PermissionEnum::class . '::VIEW_ROLES'));
-        $this->assertTrue(defined(PermissionEnum::class . '::CREATE_ROLES'));
-        $this->assertTrue(defined(PermissionEnum::class . '::UPDATE_ROLES'));
-        $this->assertTrue(defined(PermissionEnum::class . '::DELETE_ROLES'));
+test('it has all required permissions', function () {
+    // Test that all permissions exist
+    expect(defined(PermissionEnum::class.'::VIEW_USERS'))->toBeTrue();
+    expect(defined(PermissionEnum::class.'::CREATE_USERS'))->toBeTrue();
+    expect(defined(PermissionEnum::class.'::UPDATE_USERS'))->toBeTrue();
+    expect(defined(PermissionEnum::class.'::DELETE_USERS'))->toBeTrue();
 
-        $this->assertTrue(defined(PermissionEnum::class . '::VIEW_PERMISSIONS'));
-        $this->assertTrue(defined(PermissionEnum::class . '::CREATE_PERMISSIONS'));
-        $this->assertTrue(defined(PermissionEnum::class . '::UPDATE_PERMISSIONS'));
-        $this->assertTrue(defined(PermissionEnum::class . '::DELETE_PERMISSIONS'));
+    expect(defined(PermissionEnum::class.'::VIEW_ROLES'))->toBeTrue();
+    expect(defined(PermissionEnum::class.'::CREATE_ROLES'))->toBeTrue();
+    expect(defined(PermissionEnum::class.'::UPDATE_ROLES'))->toBeTrue();
+    expect(defined(PermissionEnum::class.'::DELETE_ROLES'))->toBeTrue();
 
-        $this->assertTrue(defined(PermissionEnum::class . '::VIEW_DASHBOARD'));
-        $this->assertTrue(defined(PermissionEnum::class . '::VIEW_ADMIN_DASHBOARD'));
+    expect(defined(PermissionEnum::class.'::VIEW_PERMISSIONS'))->toBeTrue();
+    expect(defined(PermissionEnum::class.'::CREATE_PERMISSIONS'))->toBeTrue();
+    expect(defined(PermissionEnum::class.'::UPDATE_PERMISSIONS'))->toBeTrue();
+    expect(defined(PermissionEnum::class.'::DELETE_PERMISSIONS'))->toBeTrue();
 
-        $this->assertTrue(defined(PermissionEnum::class . '::VIEW_PRODUCTS'));
-        $this->assertTrue(defined(PermissionEnum::class . '::CREATE_PRODUCTS'));
-        $this->assertTrue(defined(PermissionEnum::class . '::UPDATE_PRODUCTS'));
-        $this->assertTrue(defined(PermissionEnum::class . '::DELETE_PRODUCTS'));
+    expect(defined(PermissionEnum::class.'::VIEW_DASHBOARD'))->toBeTrue();
+    expect(defined(PermissionEnum::class.'::VIEW_ADMIN_DASHBOARD'))->toBeTrue();
 
-        $this->assertTrue(defined(PermissionEnum::class . '::VIEW_ORDERS'));
-        $this->assertTrue(defined(PermissionEnum::class . '::CREATE_ORDERS'));
-        $this->assertTrue(defined(PermissionEnum::class . '::UPDATE_ORDERS'));
-        $this->assertTrue(defined(PermissionEnum::class . '::DELETE_ORDERS'));
+    expect(defined(PermissionEnum::class.'::VIEW_PRODUCTS'))->toBeTrue();
+    expect(defined(PermissionEnum::class.'::CREATE_PRODUCTS'))->toBeTrue();
+    expect(defined(PermissionEnum::class.'::UPDATE_PRODUCTS'))->toBeTrue();
+    expect(defined(PermissionEnum::class.'::DELETE_PRODUCTS'))->toBeTrue();
 
-        $this->assertTrue(defined(PermissionEnum::class . '::VIEW_REPORTS'));
-        $this->assertTrue(defined(PermissionEnum::class . '::CREATE_REPORTS'));
-    }
+    expect(defined(PermissionEnum::class.'::VIEW_ORDERS'))->toBeTrue();
+    expect(defined(PermissionEnum::class.'::CREATE_ORDERS'))->toBeTrue();
+    expect(defined(PermissionEnum::class.'::UPDATE_ORDERS'))->toBeTrue();
+    expect(defined(PermissionEnum::class.'::DELETE_ORDERS'))->toBeTrue();
 
-    /** @test */
-    public function it_returns_correct_values()
-    {
-        $this->assertEquals('view users', PermissionEnum::VIEW_USERS->value);
-        $this->assertEquals('create users', PermissionEnum::CREATE_USERS->value);
-        $this->assertEquals('update users', PermissionEnum::UPDATE_USERS->value);
-        $this->assertEquals('delete users', PermissionEnum::DELETE_USERS->value);
+    expect(defined(PermissionEnum::class.'::VIEW_REPORTS'))->toBeTrue();
+    expect(defined(PermissionEnum::class.'::CREATE_REPORTS'))->toBeTrue();
+});
 
-        $this->assertEquals('view roles', PermissionEnum::VIEW_ROLES->value);
-        $this->assertEquals('create roles', PermissionEnum::CREATE_ROLES->value);
-        $this->assertEquals('update roles', PermissionEnum::UPDATE_ROLES->value);
-        $this->assertEquals('delete roles', PermissionEnum::DELETE_ROLES->value);
+test('it returns correct values', function () {
+    expect(PermissionEnum::VIEW_USERS->value)->toBe('view users');
+    expect(PermissionEnum::CREATE_USERS->value)->toBe('create users');
+    expect(PermissionEnum::UPDATE_USERS->value)->toBe('update users');
+    expect(PermissionEnum::DELETE_USERS->value)->toBe('delete users');
 
-        $this->assertEquals('view dashboard', PermissionEnum::VIEW_DASHBOARD->value);
-        $this->assertEquals('view admin dashboard', PermissionEnum::VIEW_ADMIN_DASHBOARD->value);
+    expect(PermissionEnum::VIEW_ROLES->value)->toBe('view roles');
+    expect(PermissionEnum::CREATE_ROLES->value)->toBe('create roles');
+    expect(PermissionEnum::UPDATE_ROLES->value)->toBe('update roles');
+    expect(PermissionEnum::DELETE_ROLES->value)->toBe('delete roles');
 
-        $this->assertEquals('view products', PermissionEnum::VIEW_PRODUCTS->value);
-        $this->assertEquals('create products', PermissionEnum::CREATE_PRODUCTS->value);
-        $this->assertEquals('update products', PermissionEnum::UPDATE_PRODUCTS->value);
-        $this->assertEquals('delete products', PermissionEnum::DELETE_PRODUCTS->value);
-    }
+    expect(PermissionEnum::VIEW_DASHBOARD->value)->toBe('view dashboard');
+    expect(PermissionEnum::VIEW_ADMIN_DASHBOARD->value)->toBe('view admin dashboard');
 
-    /** @test */
-    public function it_returns_correct_labels()
-    {
-        $this->assertEquals('View Users', PermissionEnum::VIEW_USERS->label());
-        $this->assertEquals('Create Users', PermissionEnum::CREATE_USERS->label());
-        $this->assertEquals('Update Users', PermissionEnum::UPDATE_USERS->label());
-        $this->assertEquals('Delete Users', PermissionEnum::DELETE_USERS->label());
+    expect(PermissionEnum::VIEW_PRODUCTS->value)->toBe('view products');
+    expect(PermissionEnum::CREATE_PRODUCTS->value)->toBe('create products');
+    expect(PermissionEnum::UPDATE_PRODUCTS->value)->toBe('update products');
+    expect(PermissionEnum::DELETE_PRODUCTS->value)->toBe('delete products');
+});
 
-        $this->assertEquals('View Roles', PermissionEnum::VIEW_ROLES->label());
-        $this->assertEquals('Create Roles', PermissionEnum::CREATE_ROLES->label());
-        $this->assertEquals('Update Roles', PermissionEnum::UPDATE_ROLES->label());
-        $this->assertEquals('Delete Roles', PermissionEnum::DELETE_ROLES->label());
+test('it returns correct labels', function () {
+    expect(PermissionEnum::VIEW_USERS->label())->toBe('View Users');
+    expect(PermissionEnum::CREATE_USERS->label())->toBe('Create Users');
+    expect(PermissionEnum::UPDATE_USERS->label())->toBe('Update Users');
+    expect(PermissionEnum::DELETE_USERS->label())->toBe('Delete Users');
 
-        $this->assertEquals('View Dashboard', PermissionEnum::VIEW_DASHBOARD->label());
-        $this->assertEquals('View admin Dashboard', PermissionEnum::VIEW_ADMIN_DASHBOARD->label());
+    expect(PermissionEnum::VIEW_ROLES->label())->toBe('View Roles');
+    expect(PermissionEnum::CREATE_ROLES->label())->toBe('Create Roles');
+    expect(PermissionEnum::UPDATE_ROLES->label())->toBe('Update Roles');
+    expect(PermissionEnum::DELETE_ROLES->label())->toBe('Delete Roles');
 
-        $this->assertEquals('View Products', PermissionEnum::VIEW_PRODUCTS->label());
-        $this->assertEquals('Create Products', PermissionEnum::CREATE_PRODUCTS->label());
-        $this->assertEquals('Update Products', PermissionEnum::UPDATE_PRODUCTS->label());
-        $this->assertEquals('Delete Products', PermissionEnum::DELETE_PRODUCTS->label());
-    }
+    expect(PermissionEnum::VIEW_DASHBOARD->label())->toBe('View Dashboard');
+    expect(PermissionEnum::VIEW_ADMIN_DASHBOARD->label())->toBe('View Admin Dashboard');
 
-    /** @test */
-    public function it_returns_all_values()
-    {
-        $values = PermissionEnum::values();
+    expect(PermissionEnum::VIEW_PRODUCTS->label())->toBe('View Products');
+    expect(PermissionEnum::CREATE_PRODUCTS->label())->toBe('Create Products');
+    expect(PermissionEnum::UPDATE_PRODUCTS->label())->toBe('Update Products');
+    expect(PermissionEnum::DELETE_PRODUCTS->label())->toBe('Delete Products');
+});
 
-        $this->assertContains('view users', $values);
-        $this->assertContains('create users', $values);
-        $this->assertContains('update users', $values);
-        $this->assertContains('delete users', $values);
+test('it returns all values', function () {
+    $values = PermissionEnum::values();
 
-        $this->assertContains('view roles', $values);
-        $this->assertContains('create roles', $values);
-        $this->assertContains('update roles', $values);
-        $this->assertContains('delete roles', $values);
+    expect($values)->toContain('view users');
+    expect($values)->toContain('create users');
+    expect($values)->toContain('update users');
+    expect($values)->toContain('delete users');
 
-        $this->assertContains('view dashboard', $values);
-        $this->assertContains('view admin dashboard', $values);
+    expect($values)->toContain('view roles');
+    expect($values)->toContain('create roles');
+    expect($values)->toContain('update roles');
+    expect($values)->toContain('delete roles');
 
-        $this->assertContains('view products', $values);
-        $this->assertContains('create products', $values);
-        $this->assertContains('update products', $values);
-        $this->assertContains('delete products', $values);
+    expect($values)->toContain('view dashboard');
+    expect($values)->toContain('view admin dashboard');
 
-        // Check that we have the expected number of permissions
-        $this->assertCount(24, $values);
-    }
+    expect($values)->toContain('view products');
+    expect($values)->toContain('create products');
+    expect($values)->toContain('update products');
+    expect($values)->toContain('delete products');
 
-    /** @test */
-    public function it_returns_all_labels()
-    {
-        $labels = PermissionEnum::labels();
+    // Check that we have the expected number of permissions
+    expect($values)->toHaveCount(24);
+});
 
-        $this->assertArrayHasKey('view users', $labels);
-        $this->assertArrayHasKey('create users', $labels);
-        $this->assertArrayHasKey('update users', $labels);
-        $this->assertArrayHasKey('delete users', $labels);
+test('it returns all labels', function () {
+    $labels = PermissionEnum::labels();
 
-        $this->assertEquals('View Users', $labels['view users']);
-        $this->assertEquals('Create Users', $labels['create users']);
-        $this->assertEquals('Update Users', $labels['update users']);
-        $this->assertEquals('Delete Users', $labels['delete users']);
+    expect($labels)->toHaveKey('view users');
+    expect($labels)->toHaveKey('create users');
+    expect($labels)->toHaveKey('update users');
+    expect($labels)->toHaveKey('delete users');
 
-        // Check that we have the expected number of labels
-        $this->assertCount(24, $labels);
-    }
+    expect($labels['view users'])->toBe('View Users');
+    expect($labels['create users'])->toBe('Create Users');
+    expect($labels['update users'])->toBe('Update Users');
+    expect($labels['delete users'])->toBe('Delete Users');
 
-    /** @test */
-    public function it_groups_permissions_by_category()
-    {
-        $userPermissions = PermissionEnum::userPermissions();
-        $this->assertCount(4, $userPermissions);
-        $this->assertContains(PermissionEnum::VIEW_USERS, $userPermissions);
-        $this->assertContains(PermissionEnum::CREATE_USERS, $userPermissions);
-        $this->assertContains(PermissionEnum::UPDATE_USERS, $userPermissions);
-        $this->assertContains(PermissionEnum::DELETE_USERS, $userPermissions);
+    // Check that we have the expected number of labels
+    expect($labels)->toHaveCount(24);
+});
 
-        $rolePermissions = PermissionEnum::rolePermissions();
-        $this->assertCount(4, $rolePermissions);
-        $this->assertContains(PermissionEnum::VIEW_ROLES, $rolePermissions);
-        $this->assertContains(PermissionEnum::CREATE_ROLES, $rolePermissions);
-        $this->assertContains(PermissionEnum::UPDATE_ROLES, $rolePermissions);
-        $this->assertContains(PermissionEnum::DELETE_ROLES, $rolePermissions);
+test('it groups permissions by category', function () {
+    $userPermissions = PermissionEnum::userPermissions();
+    expect($userPermissions)->toHaveCount(4);
+    expect($userPermissions)->toContain(PermissionEnum::VIEW_USERS);
+    expect($userPermissions)->toContain(PermissionEnum::CREATE_USERS);
+    expect($userPermissions)->toContain(PermissionEnum::UPDATE_USERS);
+    expect($userPermissions)->toContain(PermissionEnum::DELETE_USERS);
 
-        $dashboardPermissions = PermissionEnum::dashboardPermissions();
-        $this->assertCount(2, $dashboardPermissions);
-        $this->assertContains(PermissionEnum::VIEW_DASHBOARD, $dashboardPermissions);
-        $this->assertContains(PermissionEnum::VIEW_ADMIN_DASHBOARD, $dashboardPermissions);
+    $rolePermissions = PermissionEnum::rolePermissions();
+    expect($rolePermissions)->toHaveCount(4);
+    expect($rolePermissions)->toContain(PermissionEnum::VIEW_ROLES);
+    expect($rolePermissions)->toContain(PermissionEnum::CREATE_ROLES);
+    expect($rolePermissions)->toContain(PermissionEnum::UPDATE_ROLES);
+    expect($rolePermissions)->toContain(PermissionEnum::DELETE_ROLES);
 
-        $productPermissions = PermissionEnum::productPermissions();
-        $this->assertCount(4, $productPermissions);
-        $this->assertContains(PermissionEnum::VIEW_PRODUCTS, $productPermissions);
-        $this->assertContains(PermissionEnum::CREATE_PRODUCTS, $productPermissions);
-        $this->assertContains(PermissionEnum::UPDATE_PRODUCTS, $productPermissions);
-        $this->assertContains(PermissionEnum::DELETE_PRODUCTS, $productPermissions);
-    }
-}
+    $dashboardPermissions = PermissionEnum::dashboardPermissions();
+    expect($dashboardPermissions)->toHaveCount(2);
+    expect($dashboardPermissions)->toContain(PermissionEnum::VIEW_DASHBOARD);
+    expect($dashboardPermissions)->toContain(PermissionEnum::VIEW_ADMIN_DASHBOARD);
+
+    $productPermissions = PermissionEnum::productPermissions();
+    expect($productPermissions)->toHaveCount(4);
+    expect($productPermissions)->toContain(PermissionEnum::VIEW_PRODUCTS);
+    expect($productPermissions)->toContain(PermissionEnum::CREATE_PRODUCTS);
+    expect($productPermissions)->toContain(PermissionEnum::UPDATE_PRODUCTS);
+    expect($productPermissions)->toContain(PermissionEnum::DELETE_PRODUCTS);
+});

@@ -5,13 +5,10 @@ namespace App\Http\Controllers\Ecommerce;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
-use App\Models\OrderItem;
 use App\Models\Product;
 use App\Services\CartService;
 use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class CartController extends Controller
@@ -111,7 +108,7 @@ class CartController extends Controller
     public function paymentForm(CartService $cartService)
     {
         // Check if billing information exists in session
-        if (!session('checkout.billing')) {
+        if (! session('checkout.billing')) {
             return redirect()->route('checkout')->with('error', 'Please complete billing information first.');
         }
 
@@ -139,7 +136,7 @@ class CartController extends Controller
     {
         $result = $cartService->processPayment($request, $transactionService);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             if (isset($result['back']) && $result['back']) {
                 return back()->with('error', $result['message']);
             } elseif (isset($result['redirect'])) {

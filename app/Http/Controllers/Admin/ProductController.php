@@ -241,11 +241,6 @@ class ProductController extends Controller
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
     }
 
-    /**
-     * @param Request $request
-     * @param \Illuminate\Database\Eloquent\Builder $activeProductsQuery
-     * @return void
-     */
     public function applySearch(Request $request, \Illuminate\Database\Eloquent\Builder $activeProductsQuery): void
     {
         if ($request->filled('search')) {
