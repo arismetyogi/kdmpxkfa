@@ -19,14 +19,14 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
 
             // Product Information (snapshot at time of order)
-            $table->string('product_name');
+            $table->string('product_name')->nullable();
             $table->string('product_sku')->nullable();
             $table->text('product_description')->nullable();
 
             // Pricing
             $table->integer('quantity');
-            $table->decimal('unit_price', 20, 2);
-            $table->decimal('total_price', 20, 2);
+            $table->decimal('unit_price', 20, 2)->nullable();
+            $table->decimal('total_price', 20, 2)->nullable();
 
             $table->timestamps();
         });
