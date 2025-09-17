@@ -4,7 +4,7 @@ import HeaderLayout from '@/layouts/header-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { ArrowRight, Package, Truck, CheckCircle, ArrowLeft } from 'lucide-react';
+import { ArrowRight, Package, Truck, CheckCircle, ArrowLeft, ShoppingBag } from 'lucide-react';
 import type { BreadcrumbItem, Order, Apotek } from '@/types';
 
 
@@ -46,13 +46,14 @@ export default function Detail() {
   };
   const activeIndex = stepIndexByStatus[order.status] ?? 0;
 
+  console.log(order);
+
   return (
     <HeaderLayout breadcrumbs={breadcrumbs}>
       <Head title={`Order #${order.transaction_number}`} />
-
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col md:flex-row items-start justify-between gap-6">
-          {/* LEFT SIDE */}
+          {/* LEFT SIDE - Takes full width on mobile, expands on medium screens */}
           <div className="flex-1 space-y-6 w-full md:w-auto">
             {/* Header + Steps */}
             <Card className="p-4">
@@ -65,6 +66,7 @@ export default function Detail() {
                     Placed: {formatTime(order.created_at)}
                   </p>
                 </div>
+                {/* Buttons stack on mobile, go side-by-side on sm screens */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-2 sm:mt-0 w-full sm:w-auto">
                   <Button size="sm" className="w-full sm:w-auto">
                     Send Invoice
@@ -81,7 +83,8 @@ export default function Detail() {
                 </div>
               </div>
 
-              <div className="mt-4 grid grid-cols-2 sm:flex sm:flex-wrap gap-4 items-center justify-between">
+              {/* Order Status Timeline */}
+              <div className="mt-4 flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:gap-4 lg:justify-between lg:pr-3">
                 {[
                   { key: 'made', label: 'Order Made', icon: <Package size={16} /> },
                   { key: 'delivery', label: 'On Delivery', icon: <Truck size={16} /> },
@@ -90,31 +93,37 @@ export default function Detail() {
                   const done = idx <= activeIndex;
                   return (
                     <React.Fragment key={st.key}>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-1 flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3 min-w-0">
                         <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            done
-                              ? 'bg-green-600 text-white'
-                              : 'bg-gray-100 text-gray-600'
-                          }`}
+                          className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0
+                            ${done ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}
+                          `}
                         >
                           {st.icon}
                         </div>
-                        <div className="text-sm">
+                        <div className="text-center sm:text-left text-sm overflow-hidden text-ellipsis">
                           <div
-                            className={`${
-                              done ? 'font-semibold' : 'text-muted-foreground'
-                            }`}
+                            className={`${done ? 'font-semibold' : 'text-muted-foreground'} whitespace-nowrap`}
                           >
                             {st.label}
                           </div>
-                          <div className="text-xs">
+                          <div className="text-xs whitespace-nowrap">
                             {formatTime(timeline[idx]?.time)}
                           </div>
                         </div>
                       </div>
+
+                      {/* Connector → Arrow on desktop, vertical line on mobile */}
                       {idx < 2 && (
-                        <ArrowRight className="hidden sm:block text-gray-300 mx-1" />
+                        <>
+                          {/* Mobile: vertical line/spacer */}
+                          <div className="sm:hidden w-full flex justify-center">
+                            <div className="h-4 border-r border-gray-300"></div>
+                          </div>
+
+                          {/* Desktop: arrow */}
+                          <ArrowRight className="hidden sm:block text-gray-300 mx-1" />
+                        </>
                       )}
                     </React.Fragment>
                   );
@@ -122,7 +131,7 @@ export default function Detail() {
               </div>
             </Card>
 
-            {/* Apotek Information + Payment Info */}
+            {/* Apotek Information + Payment Info - Grid stacks on mobile */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
@@ -154,14 +163,8 @@ export default function Detail() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-1">
-                    <div>
-                      <span className="font-medium">Method:</span>{' '}
-                      {order.payment_status}
-                    </div>
-                    <div>
-                      <span className="font-medium">Total:</span>{' '}
-                      {currency(order.total_price)}
-                    </div>
+                      <div><span className="font-medium">Method:</span> {order.source_of_fund}</div>
+                      <div><span className="font-medium">Payment Type:</span> {order.payment_type || '-'}</div>
                   </div>
                 </CardContent>
               </Card>
@@ -173,27 +176,29 @@ export default function Detail() {
                 <CardTitle>Items</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {order.order_items?.map((item) => (
+                {order.products?.map((item) => (
                   <div key={item.id} className="flex items-center gap-4">
-                    {item.product_image ? (
+                    {item.image ? (
                       <img
-                        src={item.product_image}
-                        alt={item.product_name}
-                        className="w-16 h-16 object-cover rounded"
+                        src={item.image}
+                        alt={item.name}
+                        className="w-14 h-14 object-cover rounded shrink-0"
                       />
                     ) : (
-                      <div className="w-16 h-16 bg-gray-200 rounded" />
-                    )}
-                    <div className="flex-1">
-                      <div className="font-medium">{item.product_name}</div>
-                      <div className="text-sm">Qty: {item.quantity}</div>
+                    <div className="w-14 h-14 rounded-lg bg-gray-200 flex items-center justify-center">
+                      <ShoppingBag className="w-6 h-6 text-gray-400" />
                     </div>
-                    <div className="text-right">
-                      <div className="font-semibold">
-                        {currency(item.unit_price)}
+                    )}
+                    <div className="flex-1 min-w-0"> {/* Added min-w-0 to prevent overflow */}
+                      <div className="font-medium text-base truncate">{item.name}</div> {/* Added truncate */}
+                      <div className="text-sm">Qty: {item.pivot?.quantity}</div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="font-semibold whitespace-nowrap">
+                        {currency(item.price)}
                       </div>
-                      <div className="text-sm text-muted-foreground">
-                        {currency(item.total_price)}
+                      <div className="text-sm text-muted-foreground whitespace-nowrap">
+                        {currency(item.price * (item.pivot?.quantity ?? 1))}
                       </div>
                     </div>
                   </div>
@@ -202,14 +207,14 @@ export default function Detail() {
             </Card>
           </div>
 
-          {/* RIGHT SIDE */}
+          {/* RIGHT SIDE - Order Summary & Confirmation */}
           <aside className="w-full md:w-96 space-y-4 mt-6 md:mt-0">
             <Card>
               <CardHeader>
                 <CardTitle>Order Summary</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 text-sm"> {/* Reduced text size */}
                   <div>Product Price</div>
                   <div className="text-right">{currency(order.subtotal)}</div>
 
@@ -222,8 +227,8 @@ export default function Detail() {
                   <div>Discount</div>
                   <div className="text-right">-{currency(order.discount_amount)}</div>
 
-                  <div className="font-semibold">Total</div>
-                  <div className="text-right font-semibold">
+                  <div className="font-semibold text-base">Total</div> {/* Increased total font size */}
+                  <div className="text-right font-semibold text-base">
                     {currency(order.total_price)}
                   </div>
                 </div>
@@ -234,13 +239,13 @@ export default function Detail() {
             {order.status === 'On Delivery' && (
               <Card>
                 <CardHeader>
-                  <CardTitle>PAKET SUDAH TIBA</CardTitle>
+                  <CardTitle className="text-lg">PAKET SUDAH TIBA</CardTitle> {/* Adjusted title size */}
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground">
                     Harap konfirmasi bahwa paket sudah Anda terima
                   </p>
-                  <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2"> {/* Buttons stack on mobile */}
                   <Button
                     onClick={() => {
                         router.post(
@@ -250,13 +255,13 @@ export default function Detail() {
                         { status: 'Received' }
                         );
                     }}
-                    className="bg-green-600 text-white hover:bg-green-700 w-full sm:w-auto"
+                    className="bg-green-600 text-white hover:bg-green-700 w-full sm:flex-1" // w-full for mobile
                     >
                     Paket Sudah Diterima
                     </Button>
                     <Button
                       variant="destructive"
-                      className="w-full sm:flex-1 text-white"
+                      className="w-full sm:flex-1 text-white" // w-full for mobile
                     >
                       Laporkan
                     </Button>

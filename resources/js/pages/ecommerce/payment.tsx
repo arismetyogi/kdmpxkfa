@@ -1,5 +1,5 @@
 import { Head, router } from '@inertiajs/react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import HeaderLayout from '@/layouts/header-layout';
 
 interface CartItem {
@@ -49,16 +49,21 @@ interface PaymentProps {
 }
 
 export default function PaymentPage({
-    cartItems,
-    totalPrice,
-    subtotal,
-    shipping_amount,
-    tax,
+    // cartItems,
+    // totalPrice,
+    // subtotal,
+    // shipping_amount,
+    // tax,
     billing,
     shipping,
 }: PaymentProps) {
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cad');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  useEffect(() => {
+    const storedCart = localStorage.getItem("cart");
+    if (storedCart) setCartItems(JSON.parse(storedCart));
+  }, [])
 
     const handlePaymentMethodChange = (method: string) => {
         setSelectedPaymentMethod(method);
@@ -73,7 +78,7 @@ export default function PaymentPage({
         
         router.post(route('payment.process'), {
             payment_method: selectedPaymentMethod,
-            cart: cartData
+            cart: JSON.parse(cartData)
         }, {
             onSuccess: () => {
                 localStorage.removeItem("cart");
@@ -83,6 +88,11 @@ export default function PaymentPage({
             }
         });
     };
+
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const ppn = subtotal * 0.11;
+  const grandTotal = subtotal + ppn;
+  const shipping_amount = 0;
 
     return (
         <HeaderLayout>
@@ -203,17 +213,17 @@ export default function PaymentPage({
                                         <div className="flex justify-between">
                                             <span className="text-gray-600">Shipping</span>
                                             <span className="font-medium text-green-600">
-                                                {shipping_amount === 0 ? 'Free' : `Rp${shipping_amount.toLocaleString()}`}
+                                                {shipping_amount === 0 ? 'Free' : `Rp${(shipping_amount as number).toLocaleString()}`}
                                             </span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-gray-600">Tax</span>
-                                            <span className="font-medium">Rp{tax.toLocaleString()}</span>
+                                            <span className="font-medium">Rp{ppn.toLocaleString()}</span>
                                         </div>
                                         <div className="flex justify-between border-t pt-2">
                                             <span className="text-lg font-semibold text-gray-800">Total</span>
                                             <span className="text-lg font-semibold text-gray-800">
-                                                Rp{totalPrice.toLocaleString()}
+                                                Rp{grandTotal.toLocaleString()}
                                             </span>
                                         </div>
                                     </div>

@@ -70,6 +70,20 @@ export default function History() {
     }
   });
 
+    const currency = (v: number) =>
+      new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0,
+      }).format(v ?? 0);
+
+
+    const paymentLabels: Record<string, string> = {
+      cad: 'Cash After Delivery',
+      va: 'Virtual Account',
+    };
+    console.log(selectedOrder);
+
   // --- RENDER ---
   return (
     <HeaderLayout breadcrumbs={breadcrumbs}>
@@ -237,7 +251,7 @@ export default function History() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {(() => {
-                    const items = selectedOrder.order_items ?? [];
+                    const items = selectedOrder.products ?? [];
                     if (items.length === 0) {
                       return (
                         <p className="text-sm text-gray-500">
@@ -252,10 +266,10 @@ export default function History() {
                       <>
                         {showItems.map((item) => (
                           <div key={item.id} className="flex items-center gap-4">
-                            {item.product_image ? (
+                            {item.image ? (
                               <img
-                                src={item.product_image}
-                                alt={item.product_name}
+                                src={item.image}
+                                alt={item.name}
                                 className="w-14 h-14 rounded-lg object-cover"
                               />
                             ) : (
@@ -265,12 +279,12 @@ export default function History() {
                             )}
                             <div>
                               <p className="font-medium text-sm leading-tight">
-                                {item.product_name}
+                                {item.name}
                               </p>
-                              <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                              <p className="text-xs text-gray-500">Qty: {item.pivot?.quantity}</p>
                             </div>
                             <p className="text-sm font-medium text-gray-600 ml-auto whitespace-nowrap">
-                              Rp {item.total_price.toLocaleString()}
+                            {currency(item.price * (item.pivot?.quantity ?? 1))}
                             </p>
                           </div>
                         ))}
@@ -283,9 +297,9 @@ export default function History() {
                 </CardContent>
                 <CardFooter className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-gray-50/75 p-4 rounded-b-lg">
                   <div className="flex items-center justify-between sm:justify-start sm:gap-4 w-full">
-                    <div className="flex items-center gap-1.5 text-sm text-gray-700">
-                      <CreditCard className="w-4 h-4" />
-                      <span>{selectedOrder.payment_method}</span>
+                    <div className="flex items-center gap-2 text-sm text-gray-700 pl-2">
+                      <CreditCard className="w-5 h-5" />
+                      <span>{paymentLabels[selectedOrder.payment_method] ?? selectedOrder.payment_method}</span>
                     </div>
                     <p className="font-semibold text-base">
                       Rp {selectedOrder.total_price.toLocaleString()}

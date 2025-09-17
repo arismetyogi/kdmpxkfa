@@ -157,15 +157,13 @@ export default function Cart() {
               </div>
 
               <div className="mt-8">
+                <Link href={route("checkout")} >
                 <button 
-                  onClick={() => {
-                    const cartData = localStorage.getItem("cart") || "[]";
-                    window.location.href = `${route("checkout")}?cart=${encodeURIComponent(cartData)}`;
-                  }}
                   className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition w-full font-semibold shadow-md"
                 >
                   Cetak Purchase Order
                 </button>
+                </Link>
               </div>
             </div>
           </div>
