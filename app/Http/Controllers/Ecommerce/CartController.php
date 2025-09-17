@@ -160,14 +160,14 @@ class CartController extends Controller
         ]);
 
         $shippingData = $request->input('same_as_billing') ? $billingData : $request->validate([
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'address' => ['required', 'string', 'max:255'],
-            'city' => ['required', 'string', 'max:100'],
-            'state' => ['required', 'string', 'max:100'],
-            'zip' => ['required', 'string', 'max:20'],
+            'shipping_first_name' => ['required', 'string', 'max:255'],
+            'shipping_last_name' => ['required', 'string', 'max:255'],
+            'shipping_email' => ['required', 'email', 'max:255'],
+            'shipping_phone' => ['nullable', 'string', 'max:20'],
+            'shipping_address' => ['required', 'string', 'max:255'],
+            'shipping_city' => ['required', 'string', 'max:100'],
+            'shipping_state' => ['required', 'string', 'max:100'],
+            'shipping_zip' => ['required', 'string', 'max:20'],
         ]);
 
         Log::info('Billing Data:', $billingData);
@@ -180,7 +180,7 @@ class CartController extends Controller
             // 'cart' => $cartItems // Store cart items in session for payment page
         ]);
 
-        Log::info('Cart saved in session:', session('cart'));
+        // Log::info('Shipping Information when Submit:', session('checkout.shipping'));
         // dd(session('cart'));
 
         // Redirect to payment page
@@ -312,11 +312,11 @@ class CartController extends Controller
                 'billing_city' => $billingData['city'],
                 'billing_state' => $billingData['state'],
                 'billing_zip' => $billingData['zip'],
-                'shipping_name' => $shippingData['first_name'].' '.$shippingData['last_name'],
-                'shipping_address' => $shippingData['address'],
-                'shipping_city' => $shippingData['city'],
-                'shipping_state' => $shippingData['state'],
-                'shipping_zip' => $shippingData['zip'],
+                'shipping_name' => ($shippingData['first_name']??$shippingData['shipping_first_name']).' '.($shippingData['last_name']??$shippingData['shipping_last_name']),
+                'shipping_address' => $shippingData['address']??$shippingData['shipping_address'],
+                'shipping_city' => $shippingData['city']??$shippingData['shipping_city'],
+                'shipping_state' => $shippingData['state']??$shippingData['shipping_state'],
+                'shipping_zip' => $shippingData['zip']??$shippingData['shipping_zip'],
                 'customer_notes' => $billingData['notes'] ?? null,
             ]);
 
