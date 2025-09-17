@@ -53,7 +53,7 @@ export default function OrderShow({ order }: OrderShowProps) {
     const { data, setData, patch, processing } = useForm({
         order_items: order.order_items?.map((item: OrderItem) => ({
             id: item.id,
-            qty_delivered: item.qty_delivered || 0
+            qty_delivered: item.qty_delivered || item.quantity
         })) || [],
         status: order.status,
         shipped_at: order.shipped_at || null
@@ -70,10 +70,16 @@ export default function OrderShow({ order }: OrderShowProps) {
     };
 
     const updateQtyDelivered = (index: number, value: string) => {
+        const qtyValue = parseInt(value) || 0;
+        const maxQty = order.order_items?.[index]?.quantity || 0;
+        
+        // Ensure qty_delivered doesn't exceed the ordered quantity
+        const validatedQty = Math.min(qtyValue, maxQty);
+        
         const updatedItems = [...data.order_items];
         updatedItems[index] = {
             ...updatedItems[index],
-            qty_delivered: parseInt(value) || 0
+            qty_delivered: validatedQty
         };
         setData('order_items', updatedItems);
     };
@@ -242,18 +248,19 @@ export default function OrderShow({ order }: OrderShowProps) {
                                             </TableCell>
                                             {isDeliverable && (
                                                 <TableCell className="text-center">
-                                                    <Input
-                                                        type="number"
-                                                        min="0"
-                                                        max={item.quantity}
-                                                        value={data.order_items[index]?.qty_delivered || 0}
-                                                        onChange={(e) => updateQtyDelivered(index, e.target.value)}
-                                                        className="w-20 text-center"
-                                                    />
+                                                                                                    <Input
+                                                    type="number"
+                                                    min="0"
+                                                    max={item.quantity}
+                                                    step="1"
+                                                    value={data.order_items[index]?.qty_delivered || 0}
+                                                    onChange={(e) => updateQtyDelivered(index, e.target.value)}
+                                                    className="w-20 text-center"
+                                                />
                                                 </TableCell>
                                             )}
                                             <TableCell className="text-right">
-                                                Rp{Number(item.unit_price * item.quantity).toLocaleString()}
+                                                Rp{Number(item.unit_price * (data.order_items[index]?.qty_delivered || 0)).toLocaleString()}
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -264,7 +271,10 @@ export default function OrderShow({ order }: OrderShowProps) {
                                             Subtotal
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            Rp{Number(order.total_price).toLocaleString()}
+                                            Rp{data.order_items.reduce((sum, item, index) => {
+                                                const orderItem = order.order_items?.[index];
+                                                return sum + (orderItem ? orderItem.unit_price * (item.qty_delivered || 0) : 0);
+                                            }, 0).toLocaleString()}
                                         </TableCell>
                                     </TableRow>
                                     <TableRow>
@@ -272,7 +282,10 @@ export default function OrderShow({ order }: OrderShowProps) {
                                             Tax (11%)
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            Rp{Number(order.total_price * 0.11).toLocaleString()}
+                                            Rp{Math.round(data.order_items.reduce((sum, item, index) => {
+                                                const orderItem = order.order_items?.[index];
+                                                return sum + (orderItem ? orderItem.unit_price * (item.qty_delivered || 0) : 0);
+                                            }, 0) * 0.11).toLocaleString()}
                                         </TableCell>
                                     </TableRow>
                                     <TableRow>
@@ -280,7 +293,10 @@ export default function OrderShow({ order }: OrderShowProps) {
                                             Total
                                         </TableCell>
                                         <TableCell className="text-right font-bold">
-                                            Rp{Number(order.total_price * 1.11).toLocaleString()}
+                                            Rp{Math.round(data.order_items.reduce((sum, item, index) => {
+                                                const orderItem = order.order_items?.[index];
+                                                return sum + (orderItem ? orderItem.unit_price * (item.qty_delivered || 0) : 0);
+                                            }, 0) * 1.11).toLocaleString()}
                                         </TableCell>
                                     </TableRow>
                                 </TableFooter>
