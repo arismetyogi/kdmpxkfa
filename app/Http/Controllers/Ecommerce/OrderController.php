@@ -23,10 +23,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         // Start building the query
-        $query = Product::with('category')
-            ->select(['id', 'sku', 'slug', 'name', 'price', 'image', 'category_id', 
-                'order_unit', 'is_active', 'content', 'base_uom', 'brand', 'is_featured',
-                'weight', 'pharmacology', 'dosage', 'description', 'length', 'width', 'height']);
+        $query = Product::with('category');
 
         // 🔍 Pencarian
         if ($request->filled('search')) {
@@ -45,7 +42,7 @@ class OrderController extends Controller
             $categories = array_filter($categories, function($cat) {
                 return $cat !== "Semua Produk";
             });
-            
+
             if (!empty($categories)) {
                 $query->whereHas('category', function ($q) use ($categories) {
                     $q->whereIn('subcategory1', $categories);
@@ -60,7 +57,7 @@ class OrderController extends Controller
             $packages = array_filter($packages, function($pack) {
                 return $pack !== "Semua Paket";
             });
-            
+
             if (!empty($packages)) {
                 $query->whereIn('base_uom', $packages);
             }
@@ -82,7 +79,7 @@ class OrderController extends Controller
         } else {
             $query->orderBy('name', 'asc'); // Default sort
         }
-        
+
         $products = $query->paginate(12)->withQueryString();
 
         // Get all unique categories and packages for the filter dropdowns
@@ -98,10 +95,10 @@ class OrderController extends Controller
 
         return Inertia::render('orders/index', [
             'products' => PaginatedResourceResponse::make($products, ProductResource::class),
-            'allCategories' => $allCategories, 
-            'allPackages' => $allPackages,    
+            'allCategories' => $allCategories,
+            'allPackages' => $allPackages,
             'filters' => $request->only(['search', 'categories', 'packages', 'sort_by']),
-        ]); 
+        ]);
     }
 
 
