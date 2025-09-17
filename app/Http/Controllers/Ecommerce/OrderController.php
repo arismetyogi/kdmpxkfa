@@ -23,10 +23,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         // Start building the query
-        $query = Product::with('category')
-            ->select(['id', 'sku', 'slug', 'name', 'price', 'image', 'category_id', 
-                'order_unit', 'is_active', 'content', 'base_uom', 'brand', 'is_featured',
-                'weight', 'pharmacology', 'dosage', 'description', 'length', 'width', 'height']);
+        $query = Product::with('category');
 
         // 🔍 Pencarian
         if ($request->filled('search')) {
