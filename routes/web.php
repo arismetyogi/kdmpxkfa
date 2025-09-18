@@ -7,6 +7,9 @@ use App\Http\Controllers\Admin\SsoController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MappingController;
+use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\AccountManageController;
 use App\Http\Controllers\Ecommerce\CartController;
 use App\Http\Controllers\Ecommerce\OrderController;
 use App\Http\Controllers\Ecommerce\HistoryController;
@@ -42,7 +45,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/payment/process', [CartController::class, 'processPayment'])->name('payment.process');
     Route::get('/order-complete/{order}', [CartController::class, 'orderComplete'])->name('order.complete');
 
-     // History
+// Purchase
+    Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/purchase', [PurchaseController::class, 'index'])->name('purchase.index');
+    Route::get('/purchase/{purchase}', [PurchaseController::class, 'show'])->name('purchase.show');
+    Route::post('/purchase/{purchase}/accept', [PurchaseController::class, 'accept'])->name('purchase.accept');
+    Route::post('/purchase/{purchase}/reject', [PurchaseController::class, 'reject'])->name('purchase.reject');
+});
 // History
 Route::prefix('orders/history')->name('history.')->group(function () {
     Route::get('/', [HistoryController::class , 'history'])->name('index');
@@ -50,6 +59,16 @@ Route::prefix('orders/history')->name('history.')->group(function () {
     Route::get('{transaction_number}/details', [HistoryController::class, 'show'])->name('details');
     Route::post('{transaction_number}/updateStatus', [HistoryController::class, 'updateStatus'])->name('updateStatus');
 });
+
+// Mapping
+
+     Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/mapping', [MappingController::class, 'index'])->name('mapping.index');
+    Route::get('/account', [AccountManageController::class, 'index'])->name('account.index');
+});
+  
+
+    
 
     // Credit limit route
     Route::get('/credit-limit', [TransactionController::class, 'creditLimit'])->name('credit.limit');

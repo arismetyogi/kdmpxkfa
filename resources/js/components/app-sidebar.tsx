@@ -3,7 +3,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { History, Key, LayoutGrid, Package, Settings, Shield, Tag, UserCog, Users, ShoppingCart } from 'lucide-react';
+import { History, Key, LayoutGrid, Package, Settings, Shield, Tag, UserCog, Users, ShoppingCart, Map, UsersIcon } from 'lucide-react';
 import AppLogo from './app-logo';
 import DarkModeToggle from '@/components/toggle-dark-mode';
 
@@ -59,7 +59,28 @@ export function AppSidebar() {
                 href: route('admin.orders.index', [], false),
                 icon: ShoppingCart,
             },
+            {
+                title: 'Purchase',
+                href: route('admin.purchase.index', [], false),
+                icon: ShoppingCart,
+            },
+            
         ] : [];
+
+        const busdevNavItems: NavItem[] = isAdminOrManager
+    ? [
+        {
+            title: "Mapping",
+            href: route("admin.mapping.index", [], false),
+            icon: Map,
+        },
+        {
+            title: "Account Manage",
+            href: route("admin.account.index", [], false),
+            icon: UsersIcon,
+        },
+    ]
+    : [];
 
     const adminNavItems: NavItem[] = isAdminOrManager
         ? [
@@ -103,11 +124,12 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent>
-                <NavMain label="Home" items={mainNavItems} />
-                {isAdminOrManager && <NavMain label="Orders" items={orderManagementNavItems} />}
-                {isAdminOrManager && <NavMain label="System" items={adminNavItems} />}
-            </SidebarContent>
+           <SidebarContent>
+            <NavMain label="Home" items={mainNavItems} />
+            {isAdminOrManager && <NavMain label="Apotek" items={orderManagementNavItems} />}
+            {isAdminOrManager && <NavMain label="BusDev" items={busdevNavItems} />}
+            {isAdminOrManager && <NavMain label="System" items={adminNavItems} />}
+        </SidebarContent>
 
             <SidebarFooter>
                 <DarkModeToggle/>
