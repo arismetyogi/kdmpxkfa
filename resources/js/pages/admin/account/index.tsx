@@ -1,9 +1,9 @@
-import { Head } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, User, X } from "lucide-react";
+import { Calendar, User } from "lucide-react";
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -17,68 +17,12 @@ import { format } from "date-fns";
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: "Dashboard", href: "/dashboard" },
-  { title: "Account Management", href: "/admin/mapping" },
+  { title: "Account Management", href: "/admin/account" },
 ];
 
 export default function MappingUsers() {
-  const accounts = [
-    {
-      id: 1,
-      name: "Koperasi Desa Alun Alun Purwokerto",
-      submitted: new Date("2025-08-21T08:02:01"),
-      contact: "Agus Setyawan",
-      email: "koperasidesapurwokerto@kdmp.com",
-      phone: "+6285664120442",
-      status: "Pending",
-      address: "Jalan Jenderal Sudirman No.23 KAV 4",
-      kelurahan: "Sokanegara",
-      kecamatan: "Purwokerto Timur",
-      kabupaten: "Banyumas",
-      provinsi: "Jawa Tengah",
-    },
-    {
-      id: 2,
-      name: "Koperasi Desa Bangka",
-      submitted: new Date("2025-08-20T09:15:00"),
-      contact: "Budi Santoso",
-      email: "koperasibangka@kdmp.com",
-      phone: "+6281234567890",
-      status: "Approved",
-      address: "Jl. Simpang Payung No.3",
-      kelurahan: "Air Bara",
-      kecamatan: "Air Gegas",
-      kabupaten: "Bangka Selatan",
-      provinsi: "Bangka Belitung",
-    },
-    {
-      id: 3,
-      name: "Koperasi Desa Maju Bersama",
-      submitted: new Date("2025-08-22T10:30:00"),
-      contact: "Siti Aminah",
-      email: "koperasimajubersama@kdmp.com",
-      phone: "+6281122334455",
-      status: "Pending",
-      address: "Jl. Merdeka No.10",
-      kelurahan: "Merdeka",
-      kecamatan: "Bumi Baru",
-      kabupaten: "Bumi Indah",
-      provinsi: "Jawa Barat",
-    },
-    {
-      id: 4,
-      name: "Koperasi Desa Sejahtera",
-      submitted: new Date("2025-08-19T07:45:00"),
-      contact: "Rudi Hartono",
-      email: "koperasisejahtera@kdmp.com",
-      phone: "+6289988776655",
-      status: "Rejected",
-      address: "Jl. Sejahtera No.5",
-      kelurahan: "Sejahtera",
-      kecamatan: "Makmur",
-      kabupaten: "Makmur Jaya",
-      provinsi: "Jawa Timur",
-    },
-  ];
+  const { props }: any = usePage();
+  const users = props.users || [];
 
   const [filter, setFilter] = useState<"Pending" | "Approved" | "Rejected">(
     "Pending"
@@ -90,21 +34,22 @@ export default function MappingUsers() {
     account: any;
   } | null>(null);
   const [dateFilter, setDateFilter] = useState("");
-  const [accountsState, setAccountsState] = useState(accounts);
+  const [accountsState, setAccountsState] = useState(users);
 
-  // Filtering logic
-  const filteredAccounts = accountsState.filter((acc) => {
+  // Filtering
+  const filteredAccounts = accountsState.filter((acc: any) => {
     const matchStatus = acc.status === filter;
     const matchName = acc.name.toLowerCase().includes(search.toLowerCase());
     const matchDate =
       !dateFilter ||
-      format(acc.submitted, "yyyy-MM-dd") === dateFilter;
+      (acc.created_at &&
+        format(new Date(acc.created_at), "yyyy-MM-dd") === dateFilter);
     return matchStatus && matchName && matchDate;
   });
 
-  // Handler untuk approve/reject
+  // Approve / Reject handler
   const handleConfirm = (type: "approve" | "reject", account: any) => {
-    setAccountsState((prev) =>
+    setAccountsState((prev: any[]) =>
       prev.map((acc) =>
         acc.id === account.id
           ? { ...acc, status: type === "approve" ? "Approved" : "Rejected" }
@@ -119,7 +64,6 @@ export default function MappingUsers() {
       <Head title="Mapping Users" />
 
       <div className="flex flex-col gap-10 p-4 md:p-6">
-        {/* ================== HEADER ================== */}
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             Account Management
@@ -129,7 +73,7 @@ export default function MappingUsers() {
           </p>
         </div>
 
-        {/* ================== FILTER TABS ================== */}
+        {/* Filter Tabs */}
         <div className="flex gap-3">
           {["Pending", "Approved", "Rejected"].map((s) => (
             <Button
@@ -137,12 +81,12 @@ export default function MappingUsers() {
               variant={filter === s ? "default" : "outline"}
               onClick={() => setFilter(s as any)}
             >
-              {s} ({accountsState.filter((a) => a.status === s).length})
+              {s} ({accountsState.filter((a: any) => a.status === s).length})
             </Button>
           ))}
         </div>
 
-        {/* ================== SEARCH & DATE FILTER ================== */}
+        {/* Search & Date */}
         <div className="flex gap-3 flex-col sm:flex-row items-center">
           <Input
             placeholder="Search by cooperative name..."
@@ -161,19 +105,18 @@ export default function MappingUsers() {
           </div>
         </div>
 
-        {/* ================== ACCOUNT CARDS ================== */}
+        {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredAccounts.length > 0 ? (
-            filteredAccounts.map((acc) => (
+            filteredAccounts.map((acc: any) => (
               <Card
                 key={acc.id}
                 className="border border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800 hover:shadow-lg hover:scale-[1.01] transition-all duration-300 rounded-2xl"
               >
                 <CardContent className="p-5 flex flex-col gap-4">
-                  {/* Header */}
                   <div className="flex justify-between items-start">
                     <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">
-                      {acc.name}
+                      {acc.tenant_name || acc.name}
                     </h3>
                     <span
                       className={`px-3 py-1 text-xs font-semibold rounded-full shadow-sm ${
@@ -188,25 +131,32 @@ export default function MappingUsers() {
                     </span>
                   </div>
 
-                  {/* Info */}
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    📅 {format(acc.submitted, "yyyy-MM-dd, hh:mm:ss a")}
+                    📅{" "}
+                    {acc.created_at
+                      ? format(new Date(acc.created_at), "yyyy-MM-dd, hh:mm:ss a")
+                      : "-"}
                   </p>
                   <p className="text-sm text-gray-700 dark:text-gray-300">
-                    👤 {acc.contact}
+                    👤 {acc.name}
                   </p>
                   <p className="text-sm text-gray-700 dark:text-gray-300">
                     📧 {acc.email}
                   </p>
                   <p className="text-sm text-gray-700 dark:text-gray-300">
-                    📞 {acc.phone}
+                    📞 {acc.phone ?? "-"}
+                  </p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    🏥 {acc.apotek?.name ?? "-"}
+                  </p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    🔑 {acc.roles?.map((r: any) => r.name).join(", ")}
                   </p>
 
-                  {/* Buttons */}
                   <div className="flex gap-3 mt-3">
                     <Button
                       variant="outline"
-                      className="flex-1 border-gray-300 dark:border-gray-600 hover:bg-blue-50 hover:border-blue-500 hover:text-blue-600 transition-colors"
+                      className="flex-1"
                       onClick={() => setSelectedAccount(acc)}
                     >
                       View Details
@@ -214,7 +164,7 @@ export default function MappingUsers() {
                     {acc.status === "Pending" && (
                       <>
                         <Button
-                          className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md transition-colors"
+                          className="flex-1 bg-green-600 text-white"
                           onClick={() =>
                             setConfirmAction({ type: "approve", account: acc })
                           }
@@ -222,7 +172,7 @@ export default function MappingUsers() {
                           Approve
                         </Button>
                         <Button
-                          className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md transition-colors"
+                          className="flex-1 bg-red-600 text-white"
                           onClick={() =>
                             setConfirmAction({ type: "reject", account: acc })
                           }
@@ -242,80 +192,55 @@ export default function MappingUsers() {
           )}
         </div>
 
-        {/* ================== DETAIL MODAL ================== */}
-        <Dialog open={!!selectedAccount} onOpenChange={() => setSelectedAccount(null)}>
+        {/* Detail Modal */}
+        <Dialog
+          open={!!selectedAccount}
+          onOpenChange={() => setSelectedAccount(null)}
+        >
           <DialogContent className="max-w-2xl rounded-2xl shadow-lg dark:bg-gray-900 dark:border-gray-700 w-full">
             <DialogHeader>
-              <div className="flex items-center gap-2 justify-between">
-                <DialogTitle className="flex items-center gap-2 text-lg font-bold text-blue-600 dark:text-blue-400">
-                  <User className="w-5 h-5" /> Account Details
-                </DialogTitle>
-              </div>
+              <DialogTitle className="flex items-center gap-2 text-lg font-bold text-blue-600 dark:text-blue-400">
+                <User className="w-5 h-5" /> Account Details
+              </DialogTitle>
             </DialogHeader>
 
             {selectedAccount && (
-              <form className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                {/* Left Column */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                 <div className="space-y-4">
-                  {["name", "contact", "email", "phone"].map((field) => (
-                    <div key={field}>
-                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400 capitalize">
-                        {field}
-                      </label>
-                      <input
-                        type="text"
-                        value={selectedAccount[field]}
-                        readOnly
-                        className="w-full rounded-md border bg-gray-50 dark:bg-gray-800 dark:border-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-                      />
-                    </div>
-                  ))}
+                  <p>
+                    <b>Name:</b> {selectedAccount.name}
+                  </p>
+                  <p>
+                    <b>Email:</b> {selectedAccount.email}
+                  </p>
+                  <p>
+                    <b>Phone:</b> {selectedAccount.phone}
+                  </p>
                 </div>
-
-                {/* Right Column */}
                 <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                      Waktu Pendaftaran
-                    </label>
-                    <input
-                      type="text"
-                      value={format(selectedAccount.submitted, "yyyy-MM-dd, hh:mm:ss a")}
-                      readOnly
-                      className="w-full rounded-md border bg-gray-50 dark:bg-gray-800 dark:border-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-                    />
-                  </div>
-                  {["address", "kelurahan", "kecamatan", "kabupaten", "provinsi"].map(
-                    (field) => (
-                      <div key={field}>
-                        <label className="text-sm font-medium text-gray-600 dark:text-gray-400 capitalize">
-                          {field}
-                        </label>
-                        <input
-                          type="text"
-                          value={selectedAccount[field]}
-                          readOnly
-                          className="w-full rounded-md border bg-gray-50 dark:bg-gray-800 dark:border-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
-                        />
-                      </div>
-                    )
-                  )}
+                  <p>
+                    <b>Apotek:</b> {selectedAccount.apotek?.name ?? "-"}
+                  </p>
+                  <p>
+                    <b>Roles:</b>{" "}
+                    {selectedAccount.roles?.map((r: any) => r.name).join(", ")}
+                  </p>
                 </div>
-              </form>
+              </div>
             )}
           </DialogContent>
         </Dialog>
 
-        {/* ================== CONFIRMATION MODAL ================== */}
+        {/* Confirm Modal */}
         <Dialog open={!!confirmAction} onOpenChange={() => setConfirmAction(null)}>
           {confirmAction && (
             <DialogContent className="max-w-md rounded-xl dark:bg-gray-900 dark:border-gray-700">
               <DialogHeader>
-                <DialogTitle className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                <DialogTitle className="text-lg font-bold">
                   Konfirmasi {confirmAction.type === "approve" ? "Approve" : "Reject"}
                 </DialogTitle>
               </DialogHeader>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p>
                 Apakah Anda yakin ingin{" "}
                 <b>
                   {confirmAction.type === "approve" ? "Menyetujui" : "Menolak"}
@@ -327,7 +252,9 @@ export default function MappingUsers() {
                   Batal
                 </Button>
                 <Button
-                  variant={confirmAction.type === "approve" ? "default" : "destructive"}
+                  variant={
+                    confirmAction.type === "approve" ? "default" : "destructive"
+                  }
                   onClick={() =>
                     handleConfirm(confirmAction.type, confirmAction.account)
                   }

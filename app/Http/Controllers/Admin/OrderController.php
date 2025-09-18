@@ -105,37 +105,46 @@ class OrderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        $order = Order::findOrFail($id);
+   public function update(Request $request, string $id)
+{
+    $order = Order::with('orderItems')->findOrFail($id);
 
-        // Validate the request
-        $request->validate([
-            'order_items' => 'array',
-            'order_items.*.id' => 'required|exists:order_items,id',
-            'order_items.*.qty_delivered' => 'required|integer|min:0',
-        ]);
+    // Validasi input
+    $request->validate([
+        'order_items' => 'required|array',
+        'order_items.*.id' => 'required|exists:order_items,id',
+        'order_items.*.qty_delivered' => 'required|integer|min:0',
+    ]);
 
-        // Use the service to update order delivery
-        $this->orderService->updateOrderDelivery($order, $request->order_items);
-
-        // Prepare transaction data according to documentation
-        $transactionData = $this->prepareTransactionData($order);
-
-        // Send transaction data to Digikoperasi
-        $response = $this->digikopTransactionService->sendTransaction($transactionData);
-
-        // Handle response
-        if (! $response['success']) {
-            // Log the error but don't fail the order update
-            \Log::error('Failed to send transaction to Digikoperasi', [
-                'order_id' => $order->id,
-                'error' => $response['message'],
-            ]);
+    // Update qty_delivered di masing-masing order item
+    foreach ($request->order_items as $itemData) {
+        $orderItem = $order->orderItems->where('id', $itemData['id'])->first();
+        if ($orderItem) {
+            $orderItem->qty_delivered = $itemData['qty_delivered'];
+            $orderItem->save();
         }
-
-        return redirect()->back()->with('success', 'Order updated successfully.');
     }
+
+    // Update status pesanan jadi "delivering"
+    $order->status = 'delivering';
+    $order->shipped_at = now();
+    $order->save();
+
+    // Siapkan data transaksi utk Digikoperasi
+    $transactionData = $this->prepareTransactionData($order);
+
+    // Kirim ke Digikoperasi
+    $response = $this->digikopTransactionService->sendTransaction($transactionData);
+
+    if (! $response['success']) {
+        \Log::error('Failed to send transaction to Digikoperasi', [
+            'order_id' => $order->id,
+            'error' => $response['message'],
+        ]);
+    }
+
+    return redirect()->back()->with('success', 'Order updated successfully.');
+}
 
     /**
      * Remove the specified resource from storage.

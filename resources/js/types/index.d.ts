@@ -72,6 +72,18 @@ export interface SharedData {
   [key: string]: unknown;
 }
 
+export interface Role {
+  id: number;
+  name: string;
+  [key: string]: unknown;
+}
+
+export interface Permission {
+  id: number;
+  name: string;
+  [key: string]: unknown;
+}
+
 export interface User {
   id: number;
   name: string;
@@ -80,6 +92,10 @@ export interface User {
   email_verified_at: string | null;
   created_at: string;
   updated_at: string;
+  is_active?: boolean;
+  apotek?: Apotek | null;
+  roles: Role[];
+  permissions: Permission[];
   [key: string]: unknown; // This allows for additional properties...
 }
 
@@ -171,12 +187,14 @@ export interface Order {
 
   // Relasi
   order_items?: OrderItem[];
-
   products?: (Product & { pivot?: { quantity: number } })[];
   product_detail: {
-  sku: string;
-  quantity: number;
-  }[]; //Relasi ke Product
+    sku: string;
+    quantity: number;
+  }[];
+
+  // Relasi ke user
+  user?: User;
 
   created_at: string;
   updated_at: string;
@@ -190,12 +208,13 @@ export interface OrderItem {
   qty_delivered: number;
   unit_price: number;
   total_price: number;
-  product:
-  {
+  product: {
     base_uom: string;
     order_unit: string;
     content: number;
-  }
+    image?: string;
+    name?: string;
+  };
 }
 
 // ✅ OrderPayload untuk request create order
@@ -258,5 +277,18 @@ export interface Penerimaan {
   tglFaktur: string;
   tglTerimaFisik: string;
   top: number;
-  ppnType: "Include" | "Exclude"; // atau tambah jika ada opsi lain
+  ppnType: "Include" | "Exclude";
+}
+
+// ✅ Generic untuk pagination
+export interface Paginated<T> {
+  data: T[];
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+  from?: number;
+  to?: number;
+  next_page_url?: string | null;
+  prev_page_url?: string | null;
 }

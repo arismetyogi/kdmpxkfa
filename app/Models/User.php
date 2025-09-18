@@ -77,4 +77,6 @@ class User extends Authenticatable implements HasMedia
     {
         return $query->where('is_active', true);
     }
+
+    
 }
