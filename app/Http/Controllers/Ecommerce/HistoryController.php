@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Ecommerce;
 
+use App\Enums\OrderStatusEnum;
 use App\Http\Controllers\Controller;
+use App\Models\Order;
+use App\Services\DigikopTransactionService;
+use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
-use App\Models\Order;
-use App\Enums\OrderStatusEnum;
 
 class HistoryController extends Controller
 {
@@ -29,8 +31,8 @@ class HistoryController extends Controller
     public function show($transaction_number)
     {
         $order = Order::with([
-        'products',
-        'user.apotek' // eager load relasi apotek dari user
+            'products',
+            'user.apotek' // eager load relasi apotek dari user
         ])->where('transaction_number', $transaction_number)->firstOrFail();
 
         // Added 'processed' step to the timeline data
@@ -42,46 +44,38 @@ class HistoryController extends Controller
         ];
 
         return Inertia::render('orders/details', [
-            'order'    => $order,
+            'order' => $order,
             'timeline' => $timeline,
-            'buyer'    => [
-                'name'    => $order->billing_name,
-                'email'   => $order->billing_email,
-                'phone'   => $order->billing_phone,
+            'buyer' => [
+                'name' => $order->billing_name,
+                'email' => $order->billing_email,
+                'phone' => $order->billing_phone,
                 'address' => $order->billing_address,
-                'city'    => $order->billing_city,
-                'state'   => $order->billing_state,
-                'zip'     => $order->billing_zip,
+                'city' => $order->billing_city,
+                'state' => $order->billing_state,
+                'zip' => $order->billing_zip,
             ],
-            'apotek'   => $order->user?->apotek,
+            'apotek' => $order->user?->apotek,
         ]);
     }
 
-    public function updateStatus(Request $request, $transaction_number)
-{
-    $request->validate([
-        'status' => 'required|in:dibuat,diproses,dalam pengiriman,diterima',
-    ]);
+    /**
+     * @throws \Throwable
+     */
+    public function updateStatus(Request $request, $transaction_number, OrderService $orderService, DigikopTransactionService $apiService)
+    {
+        $request->validate([
+            'status' => ['required', Rule::enum(OrderStatusEnum::class)],
+        ]);
 
-    
-    $order = Order::where('transaction_number', $transaction_number)->firstOrFail();
 
-    switch ($request->status) {
-        case 'dalam pengiriman':
-            $order->status = 'dalam pengiriman';
-            $order->shipped_at = now();
-            break;
+        $order = Order::where('transaction_number', $transaction_number)->firstOrFail();
 
-        case 'diterima':
-            $order->status = 'diterima';
-            $order->delivered_at = now();
-            break;
+        $apiService->updateTransactionStatus($order, OrderStatusEnum::tryFrom($request->status));
+        $orderService->markAsDelivered($order);
+
+        return redirect()
+            ->route('history.show', ['transaction_number' => $transaction_number])
+            ->with('success', 'Order status updated successfully.');
     }
-
-    $order->save();
-
-    return redirect()
-        ->route('history.show', ['transaction_number' => $transaction_number])
-        ->with('success', 'Order status updated successfully.');
-}
 }

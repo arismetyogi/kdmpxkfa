@@ -8,8 +8,8 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Ecommerce\CartController;
-use App\Http\Controllers\Ecommerce\OrderController;
 use App\Http\Controllers\Ecommerce\HistoryController;
+use App\Http\Controllers\Ecommerce\OrderController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -42,20 +42,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/payment/process', [CartController::class, 'processPayment'])->name('payment.process');
     Route::get('/order-complete/{order}', [CartController::class, 'orderComplete'])->name('order.complete');
 
-     // History
-// History
-Route::prefix('orders/history')->name('history.')->group(function () {
-    Route::get('/', [HistoryController::class , 'history'])->name('index');
-    Route::get('{transaction_number}', [HistoryController::class, 'show'])->name('show');
-    Route::get('{transaction_number}/details', [HistoryController::class, 'show'])->name('details');
-    Route::post('{transaction_number}/updateStatus', [HistoryController::class, 'updateStatus'])->name('updateStatus');
-});
+    // History
+    Route::prefix('orders/history')->name('history.')->group(function () {
+        Route::get('/', [HistoryController::class, 'history'])->name('index');
+        Route::get('{transaction_number}', [HistoryController::class, 'show'])->name('show');
+        Route::get('{transaction_number}/details', [HistoryController::class, 'show'])->name('details');
+        Route::post('{transaction_number}/updateStatus', [HistoryController::class, 'updateStatus'])->name('updateStatus');
+    });
 
     // Credit limit route
     Route::get('/credit-limit', [TransactionController::class, 'creditLimit'])->name('credit.limit');
 
     // Admin routes with role-based access
-    Route::middleware('permission:'.\App\Enums\PermissionEnum::VIEW_ADMIN_DASHBOARD->value)->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('permission:' . \App\Enums\PermissionEnum::VIEW_ADMIN_DASHBOARD->value)->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
         // Role management routes with explicit model binding
@@ -79,7 +78,7 @@ Route::prefix('orders/history')->name('history.')->group(function () {
         // Category management routes
         Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
 
-        Route::middleware('permission:'.\App\Enums\PermissionEnum::VIEW_ORDERS->value)->group(function () {
+        Route::middleware('permission:' . \App\Enums\PermissionEnum::VIEW_ORDERS->value)->group(function () {
             Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
         });
     });
@@ -99,5 +98,5 @@ Route::bind('user', function ($value) {
     return \App\Models\User::findOrFail($value);
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

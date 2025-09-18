@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Package, Truck, CheckCircle, XCircle, Clock, User, MapPin } from "lucide-react";
 import { Order, OrderItem } from '@/types';
 import { route } from 'ziggy-js';
+import { toast } from 'sonner';
 
 const breadcrumbs = (orderId: string) => [
     { title: "Dashboard", href: route('admin.dashboard') },
@@ -63,8 +64,7 @@ export default function OrderShow({ order }: OrderShowProps) {
         e.preventDefault();
         patch(route('admin.orders.update', order.id), {
             onSuccess: () => {
-                // Reload the page to show updated data
-                window.location.reload();
+                toast.success('Order berhasil dikirim.');
             }
         });
     };
@@ -72,10 +72,10 @@ export default function OrderShow({ order }: OrderShowProps) {
     const updateQtyDelivered = (index: number, value: string) => {
         const qtyValue = parseInt(value) || 0;
         const maxQty = order.order_items?.[index]?.quantity || 0;
-        
+
         // Ensure qty_delivered doesn't exceed the ordered quantity
         const validatedQty = Math.min(qtyValue, maxQty);
-        
+
         const updatedItems = [...data.order_items];
         updatedItems[index] = {
             ...updatedItems[index],
