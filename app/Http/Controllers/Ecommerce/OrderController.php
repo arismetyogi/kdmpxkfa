@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Ecommerce;
 
+use App\Enums\OrderStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PaginatedResourceResponse;
 use App\Http\Resources\ProductResource;
@@ -20,6 +21,7 @@ class OrderController extends Controller
     {
         $this->digikopTransactionService = $digikopTransactionService;
     }
+
     public function index(Request $request)
     {
         // Start building the query
@@ -39,11 +41,11 @@ class OrderController extends Controller
         if ($request->filled('categories')) {
             $categories = (array) $request->categories;
             // Remove "Semua Produk" if it exists
-            $categories = array_filter($categories, function($cat) {
-                return $cat !== "Semua Produk";
+            $categories = array_filter($categories, function ($cat) {
+                return $cat !== 'Semua Produk';
             });
 
-            if (!empty($categories)) {
+            if (! empty($categories)) {
                 $query->whereHas('category', function ($q) use ($categories) {
                     $q->whereIn('subcategory1', $categories);
                 });
@@ -54,11 +56,11 @@ class OrderController extends Controller
         if ($request->filled('packages')) {
             $packages = (array) $request->packages;
             // Remove "Semua Paket" if it exists
-            $packages = array_filter($packages, function($pack) {
-                return $pack !== "Semua Paket";
+            $packages = array_filter($packages, function ($pack) {
+                return $pack !== 'Semua Paket';
             });
 
-            if (!empty($packages)) {
+            if (! empty($packages)) {
                 $query->whereIn('base_uom', $packages);
             }
         }
@@ -83,15 +85,15 @@ class OrderController extends Controller
         $products = $query->paginate(12)->withQueryString();
 
         // Get all unique categories and packages for the filter dropdowns
-    $allCategories = Category::query()
-        ->whereNotNull('subcategory1')
-        ->distinct()
-        ->pluck('subcategory1');
+        $allCategories = Category::query()
+            ->whereNotNull('subcategory1')
+            ->distinct()
+            ->pluck('subcategory1');
 
-    $allPackages = Product::query()
-        ->whereNotNull('base_uom')
-        ->distinct()
-        ->pluck('base_uom');
+        $allPackages = Product::query()
+            ->whereNotNull('base_uom')
+            ->distinct()
+            ->pluck('base_uom');
 
         return Inertia::render('orders/index', [
             'products' => PaginatedResourceResponse::make($products, ProductResource::class),
@@ -100,7 +102,6 @@ class OrderController extends Controller
             'filters' => $request->only(['search', 'categories', 'packages', 'sort_by']),
         ]);
     }
-
 
     public function history()
     {
@@ -115,7 +116,8 @@ class OrderController extends Controller
         ]);
     }
 
-    public function cart(){
+    public function cart()
+    {
         return Inertia::render('orders/cart');
     }
 
@@ -127,8 +129,8 @@ class OrderController extends Controller
         }
 
         // Update the order status to accepted
-        $order->update(['status' => 'diterima']);
-        $this->digikopTransactionService->updateTransactionStatus($order, 'diterima');
+        $order->update(['status' => OrderStatusEnum::RECEIVED->value]);
+        $this->digikopTransactionService->updateTransactionStatus($order, OrderStatusEnum::RECEIVED->value);
 
         return response()->json(['message' => 'Order accepted successfully']);
     }

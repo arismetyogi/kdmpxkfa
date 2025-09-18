@@ -1,19 +1,24 @@
 <?php
 
+use App\Enums\PermissionEnum;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SsoController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MappingController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\AccountManageController;
 use App\Http\Controllers\Ecommerce\CartController;
-use App\Http\Controllers\Ecommerce\OrderController;
 use App\Http\Controllers\Ecommerce\HistoryController;
+use App\Http\Controllers\Ecommerce\OrderController;
 use App\Http\Controllers\TransactionController;
+use App\Models\Order;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -122,13 +127,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 |
 */
 Route::bind('role', function ($value) {
-    return \Spatie\Permission\Models\Role::findOrFail($value);
+    return Role::findOrFail($value);
 });
 Route::bind('permission', function ($value) {
-    return \Spatie\Permission\Models\Permission::findOrFail($value);
+    return Permission::findOrFail($value);
 });
 Route::bind('user', function ($value) {
-    return \App\Models\User::findOrFail($value);
+    return User::findOrFail($value);
+});
+
+Route::bind('order', function ($value) {
+    return Order::findOrFail($value);
 });
 
 require __DIR__.'/settings.php';

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\OrderStatusEnum;
 use App\Models\Order;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
@@ -19,13 +20,13 @@ class DigikopTransactionService
     /**
      * Validate user's credit limit against external API
      *
-     * @param  string  $tenantId  User's tenant ID
-     * @param  float  $orderAmount  Total order amount to validate
+     * @param string $tenantId User's tenant ID
+     * @param float $orderAmount Total order amount to validate
      * @return array ['valid' => bool, 'message' => string, 'remaining_credit' => float|null]
      */
     public function validateCreditLimit(string $tenantId, float $orderAmount): array
     {
-        $url = $this->baseUrl.'/remaining-credit/'.$tenantId;
+        $url = $this->baseUrl . '/remaining-credit/' . $tenantId;
         try {
             $token = $this->authService->getAccessToken();
             // Make API call to external service to get credit limit
@@ -55,7 +56,7 @@ class DigikopTransactionService
             Log::debug('Data response: ', $data);
 
             // Check if the response has the expected structure
-            if (! isset($data['data']['remaining_credit'])) {
+            if (!isset($data['data']['remaining_credit'])) {
                 Log::error('Invalid credit limit response structure', ['response' => $data]);
 
                 return [
@@ -65,7 +66,7 @@ class DigikopTransactionService
                 ];
             }
 
-            $availableCredit = (float) $data['data']['remaining_credit'];
+            $availableCredit = (float)$data['data']['remaining_credit'];
 
             // Check if available credit is sufficient
             if ($availableCredit >= $orderAmount) {
@@ -77,8 +78,8 @@ class DigikopTransactionService
             } else {
                 return [
                     'valid' => false,
-                    'message' => 'Insufficient credit limit. Available credit: Rp'.number_format($availableCredit, 0, ',', '.').
-                        ', Order amount: Rp'.number_format($orderAmount, 0, ',', '.'),
+                    'message' => 'Insufficient credit limit. Available credit: Rp' . number_format($availableCredit, 0, ',', '.') .
+                        ', Order amount: Rp' . number_format($orderAmount, 0, ',', '.'),
                     'remaining_credit' => $availableCredit,
                 ];
             }
@@ -104,12 +105,12 @@ class DigikopTransactionService
      */
     public function sendTransaction(array $transactionData): array
     {
-        $url = $this->baseUrl.'/transactions';
+        $url = $this->baseUrl . '/transactions';
 
         Log::info('Transaction data received: ', $transactionData);
 
         // Validate credit limit before sending transaction
-        if (! isset($transactionData['id_koperasi']) || ! isset($transactionData['total_nominal'])) {
+        if (!isset($transactionData['id_koperasi']) || !isset($transactionData['total_nominal'])) {
             Log::error('Missing required data for credit limit validation', [
                 'transaction_data' => $transactionData,
             ]);
@@ -127,7 +128,7 @@ class DigikopTransactionService
         );
 
         // If credit validation fails, return the error
-        if (! $creditValidation['valid']) {
+        if (!$creditValidation['valid']) {
             Log::warning('Credit limit validation failed', $creditValidation);
 
             return [
@@ -177,7 +178,7 @@ class DigikopTransactionService
                 // update status to dalam-pengiriman karena data dikirim ke digikop setelah diproses oleh apotek, bukan saat order dibuat
                 $payload = [
                     'id_transaksi' => $transactionData['id_transaksi'],
-                    'status' => 'dalam-pengiriman',
+                    'status' => OrderStatusEnum::DELIVERY->value,
                 ];
                 Log::info('Update Data: ', $payload);
                 $response = Http::withToken($token)
@@ -221,9 +222,9 @@ class DigikopTransactionService
         }
     }
 
-    public function updateTransactionStatus(Order $order, string $status): array
+    public function updateTransactionStatus(Order $order, OrderStatusEnum $status): array
     {
-        $url = $this->baseUrl.'/transactions';
+        $url = $this->baseUrl . '/transactions';
         $payload = [
             'id_transaksi' => $order->transaction_number,
             'status' => $status,

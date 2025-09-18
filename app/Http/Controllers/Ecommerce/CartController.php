@@ -2,17 +2,19 @@
 
 namespace App\Http\Controllers\Ecommerce;
 
-use Illuminate\Support\Facades\Log;
+use App\Enums\OrderStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Services\CartService;
 use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+
 use function Pest\Laravel\json;
-use App\Enums\OrderStatusEnum;
 
 class CartController extends Controller
 {
@@ -92,7 +94,6 @@ class CartController extends Controller
         $billingData = session('checkout.billing', []);
         $shippingData = session('checkout.shipping', []);
 
-
         // Determine if shipping is same as billing
         $sameAsBilling = empty($shippingData) ||
             ($billingData &&
@@ -142,9 +143,9 @@ class CartController extends Controller
         // Log::info('Cart items for payment pre:', $cartItems);
 
         // If no cart items from localStorage, try to get from session as fallback
-//        if (empty($cartItems)) {
-//            $cartItems = session('cart', []);
-//        }
+        //        if (empty($cartItems)) {
+        //            $cartItems = session('cart', []);
+        //        }
 
         // if (empty($cartItems)) {
         //     return redirect()->route('cart')->with('error', 'Your cart is empty.');
@@ -160,7 +161,7 @@ class CartController extends Controller
             'city' => ['required', 'string', 'max:100'],
             'state' => ['required', 'string', 'max:100'],
             'zip' => ['required', 'string', 'max:20'],
-            'notes' => ['nullable', 'string', 'max:1000']
+            'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $shippingData = $request->input('same_as_billing') ? $billingData : $request->validate([
@@ -204,8 +205,6 @@ class CartController extends Controller
         // if (! session('checkout.billing')) {
         //     return redirect()->route('checkout')->with('error', 'Please complete billing information first.');
         // }
-
-
 
         // check cart empty
         // if (count($cartItems) == 0) {
@@ -259,19 +258,19 @@ class CartController extends Controller
         Log::info('Cart items for order placement:', $cartItems);
 
         // Temporarily override CartService's getCartItems method
-//        $originalGetCartItems = function() use ($cartItems) {
-//            return $cartItems;
-//        };
+        //        $originalGetCartItems = function() use ($cartItems) {
+        //            return $cartItems;
+        //        };
 
         // Use reflection to temporarily override the method
-//        $cartServiceReflection = new \ReflectionClass($cartService);
-//        $getCartItemsMethod = $cartServiceReflection->getMethod('getCartItems');
+        //        $cartServiceReflection = new \ReflectionClass($cartService);
+        //        $getCartItemsMethod = $cartServiceReflection->getMethod('getCartItems');
 
         // Since we can't directly override the method, we'll pass the cart items differently
         // Let's create a temporary solution by modifying how we call the service
 
         $request->validate([
-            'payment_method' => 'required|string|in:va,cad',
+            'payment_type' => 'required|string|in:va,cad',
             'cart' => 'required|array|min:1',
         ]);
 
@@ -279,10 +278,8 @@ class CartController extends Controller
             // Validate credit limit before processing payment
             $user = auth()->user();
 
-            
-
             // Calculate total amount from localStorage cart items
-            $totalAmount = array_sum(array_map(function($item) {
+            $totalAmount = array_sum(array_map(function ($item) {
                 return $item['price'] * $item['quantity'];
             }, $cartItems));
 
@@ -299,17 +296,17 @@ class CartController extends Controller
             $shippingData = session('checkout.shipping');
 
             // Create the order
-            $order = \App\Models\Order::create([
-                'transaction_number' => \App\Models\Order::generateTransactionNumber(),
+            $order = Order::create([
+                'transaction_number' => Order::generateTransactionNumber(),
                 'user_id' => auth()->id(),
                 'tenant_id' => auth()->user()->tenant_id,
                 'source_of_fund' => 'pinjaman',
                 'status' => OrderStatusEnum::CREATED->value,
                 'account_no' => '', // This would need to be set based on your business logic
                 'account_bank' => '', // This would need to be set based on your business logic
-                'payment_type' => 'Cash on Delivery', // todo! no other payment available currently, subjects to change
-                'payment_method' => $request->payment_method,
-                'va_number' => '', // This would need to be set based on your business logic
+                'payment_type' => $request['payment_type'], // todo! no other payment available currently, subjects to change
+                'payment_method' => 'mandiri',
+                'va_number' => '00112233445566', // No Rek KFA -> branch
                 'subtotal' => $totalAmount,
                 'tax_amount' => $totalAmount * 0.11, // You can calculate tax based on your business logic
                 'shipping_amount' => 0, // You can calculate shipping based on your business logic
@@ -332,13 +329,13 @@ class CartController extends Controller
 
             // Create order items
             foreach ($cartItems as $cartItem) {
-                $product = \App\Models\Product::find($cartItem['id']);
+                $product = Product::find($cartItem['id']);
 
                 if (! $product) {
                     continue;
                 }
 
-                \App\Models\OrderItem::create([
+                OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $product->id,
                     'product_name' => $product->name,
@@ -383,8 +380,6 @@ class CartController extends Controller
         if ($order->user_id !== auth()->id()) {
             abort(403);
         }
-
-        
 
         // Load order items with product relationship
         $order->load('orderItems.product');

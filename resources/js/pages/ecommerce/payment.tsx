@@ -1,6 +1,6 @@
-import { Head, router } from '@inertiajs/react';
-import React, { useState, useEffect } from 'react';
 import HeaderLayout from '@/layouts/header-layout';
+import { Head, router } from '@inertiajs/react';
+import React, { useEffect, useState } from 'react';
 
 interface CartItem {
     id: string | number;
@@ -57,16 +57,16 @@ export default function PaymentPage({
     billing,
     shipping,
 }: PaymentProps) {
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cad');
+    const [selectedPaymentType, setSelectedPaymentType] = useState('cad');
     const [isProcessing, setIsProcessing] = useState(false);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  useEffect(() => {
-    const storedCart = localStorage.getItem("cart");
-    if (storedCart) setCartItems(JSON.parse(storedCart));
-  }, [])
+    useEffect(() => {
+        const storedCart = localStorage.getItem('cart');
+        if (storedCart) setCartItems(JSON.parse(storedCart));
+    }, []);
 
-    const handlePaymentMethodChange = (method: string) => {
-        setSelectedPaymentMethod(method);
+    const handlePaymentTypeChange = (method: string) => {
+        setSelectedPaymentType(method);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -74,25 +74,29 @@ export default function PaymentPage({
         setIsProcessing(true);
 
         // Get cart data from localStorage
-        const cartData = localStorage.getItem("cart") || "[]";
-        
-        router.post(route('payment.process'), {
-            payment_method: selectedPaymentMethod,
-            cart: JSON.parse(cartData)
-        }, {
-            onSuccess: () => {
-                localStorage.removeItem("cart");
+        const cartData = localStorage.getItem('cart') || '[]';
+
+        router.post(
+            route('payment.process'),
+            {
+                payment_type: selectedPaymentType,
+                cart: JSON.parse(cartData),
             },
-            onFinish: () => {
-                setIsProcessing(false);
-            }
-        });
+            {
+                onSuccess: () => {
+                    localStorage.removeItem('cart');
+                },
+                onFinish: () => {
+                    setIsProcessing(false);
+                },
+            },
+        );
     };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const ppn = subtotal * 0.11;
-  const grandTotal = subtotal + ppn;
-  const shipping_amount = 0;
+    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const ppn = subtotal * 0.11;
+    const grandTotal = subtotal + ppn;
+    const shipping_amount = 0;
 
     return (
         <HeaderLayout>
@@ -112,10 +116,10 @@ export default function PaymentPage({
                                         <input
                                             type="radio"
                                             id="cad"
-                                            name="payment_method"
+                                            name="payment_type"
                                             value="cad"
-                                            checked={selectedPaymentMethod === 'cad'}
-                                            onChange={() => handlePaymentMethodChange('cad')}
+                                            checked={selectedPaymentType === 'cad'}
+                                            onChange={() => handlePaymentTypeChange('cad')}
                                             className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                         />
                                         <label htmlFor="cod" className="ml-3 block text-sm font-medium text-gray-700">
@@ -124,13 +128,14 @@ export default function PaymentPage({
                                     </div>
 
                                     <div className="flex items-center">
-                                        <input disabled
+                                        <input
+                                            disabled
                                             type="radio"
                                             id="va"
-                                            name="payment_method"
+                                            name="payment_type"
                                             value="va"
-                                            checked={selectedPaymentMethod === 'va'}
-                                            onChange={() => handlePaymentMethodChange('va')}
+                                            checked={selectedPaymentType === 'va'}
+                                            onChange={() => handlePaymentTypeChange('va')}
                                             className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                         />
                                         <label htmlFor="va" className="ml-3 block text-sm font-medium text-gray-700">
@@ -154,28 +159,34 @@ export default function PaymentPage({
                         {/* Billing & Shipping Info */}
                         <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div className="rounded-lg bg-white p-6 shadow-sm">
-                                <h3 className="mb-3 text-md font-semibold text-gray-800">Billing Address</h3>
+                                <h3 className="text-md mb-3 font-semibold text-gray-800">Billing Address</h3>
                                 <div className="text-sm text-gray-600">
-                                    <p>{billing.first_name} {billing.last_name}</p>
+                                    <p>
+                                        {billing.first_name} {billing.last_name}
+                                    </p>
                                     <p>{billing.email}</p>
                                     <p>{billing.phone}</p>
                                     <p className="mt-2">{billing.address}</p>
-                                    <p>{billing.city}, {billing.state} {billing.zip}</p>
+                                    <p>
+                                        {billing.city}, {billing.state} {billing.zip}
+                                    </p>
                                     <p>{billing.country}</p>
-                                    {billing.notes && (
-                                        <p className="mt-2 italic">Notes: {billing.notes}</p>
-                                    )}
+                                    {billing.notes && <p className="mt-2 italic">Notes: {billing.notes}</p>}
                                 </div>
                             </div>
 
                             <div className="rounded-lg bg-white p-6 shadow-sm">
-                                <h3 className="mb-3 text-md font-semibold text-gray-800">Shipping Address</h3>
+                                <h3 className="text-md mb-3 font-semibold text-gray-800">Shipping Address</h3>
                                 <div className="text-sm text-gray-600">
-                                    <p>{shipping.first_name} {shipping.last_name}</p>
+                                    <p>
+                                        {shipping.first_name} {shipping.last_name}
+                                    </p>
                                     <p>{shipping.email}</p>
                                     <p>{shipping.phone}</p>
                                     <p className="mt-2">{shipping.address}</p>
-                                    <p>{shipping.city}, {shipping.state} {shipping.zip}</p>
+                                    <p>
+                                        {shipping.city}, {shipping.state} {shipping.zip}
+                                    </p>
                                     <p>{shipping.country}</p>
                                 </div>
                             </div>
@@ -194,12 +205,12 @@ export default function PaymentPage({
                                                 <p className="text-sm font-medium text-gray-800">{item.name}</p>
                                                 <p className="text-xs text-gray-500">
                                                     Qty: {item.quantity} {item.order_unit}
-                                                    <span className="block">({item.quantity * item.content} {item.base_uom})</span>
+                                                    <span className="block">
+                                                        ({item.quantity * item.content} {item.base_uom})
+                                                    </span>
                                                 </p>
                                             </div>
-                                            <p className="text-sm font-medium text-gray-800">
-                                                Rp{(item.price * item.quantity).toLocaleString()}
-                                            </p>
+                                            <p className="text-sm font-medium text-gray-800">Rp{(item.price * item.quantity).toLocaleString()}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -222,9 +233,7 @@ export default function PaymentPage({
                                         </div>
                                         <div className="flex justify-between border-t pt-2">
                                             <span className="text-lg font-semibold text-gray-800">Total</span>
-                                            <span className="text-lg font-semibold text-gray-800">
-                                                Rp{grandTotal.toLocaleString()}
-                                            </span>
+                                            <span className="text-lg font-semibold text-gray-800">Rp{grandTotal.toLocaleString()}</span>
                                         </div>
                                     </div>
                                 </div>

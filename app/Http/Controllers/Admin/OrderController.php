@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\OrderStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Enums\OrderStatusEnum;
 use App\Services\Admin\OrderService;
 use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
+use function PHPUnit\Framework\isNull;
 
 class OrderController extends Controller
 {
@@ -149,14 +150,6 @@ class OrderController extends Controller
 }
 
     /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-
-    /**
      * Prepare transaction data according to Digikoperasi API documentation
      */
     private function prepareTransactionData(Order $order): array
@@ -202,7 +195,7 @@ class OrderController extends Controller
         return [
             'id_transaksi' => $order->transaction_number,
             'id_koperasi' => $order->user->tenant_id ?? '', // Assuming tenant_id exists on User model
-            'status' => OrderStatusEnum::PROCESS, // diproses untuk create transaksi, update status: dalam-pengiriman, diterima, dibatalkan, selesai
+            'status' => OrderStatusEnum::PROCESS->value, // diproses untuk create transaksi, update status: dalam-pengiriman, diterima, dibatalkan, selesai
             'merchant_id' => 'MCH-KF-007', // From documentation
             'merchant_name' => 'Kimia Farma', // From documentation
             'total_nominal' => $totalNominal,
@@ -211,8 +204,8 @@ class OrderController extends Controller
             'account_no' => $order->account_no ?? '', // Optional field
             'account_bank' => $order->account_bank ?? '', // Optional field
             'payment_type' => $order->payment_type ?? 'cad',
-            'payment_method' => 'Mandiri', // Default to Mandiri
-            'va_number' => '00112233445566', // No Rek KFA
+            'payment_method' => $order->payment_method ?? 'Mandiri', // Default to Mandiri
+            'va_number' => ! isNull($order->va_number) ? $order->va_number : '00112233445566', // No Rek KFA
             'timestamp' => $order->shipped_at ? $order->shipped_at->toIso8601String() : now()->toIso8601String(), // Use shipped_at timestamp or current time
             'product_detail' => $productDetails,
         ];
