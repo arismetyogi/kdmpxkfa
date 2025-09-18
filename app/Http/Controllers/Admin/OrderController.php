@@ -129,7 +129,7 @@ class OrderController extends Controller
     }
 
     // Update status pesanan jadi "delivering"
-    $order->status = 'delivering';
+    $order->status = OrderStatusEnum::DELIVERY->value;
     $order->shipped_at = now();
     $order->save();
 

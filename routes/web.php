@@ -127,10 +127,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 |
 */
 Route::bind('role', function ($value) {
-    return Role::findOrFail($value);
+    return  \Spatie\Permission\Models\Role::findOrFail($value);
 });
 Route::bind('permission', function ($value) {
-    return Permission::findOrFail($value);
+    return \Spatie\Permission\Models\Permission::findOrFail($value);
 });
 Route::bind('user', function ($value) {
     return User::findOrFail($value);
