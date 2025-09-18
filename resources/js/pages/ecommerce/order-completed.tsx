@@ -2,12 +2,15 @@ import { Head } from '@inertiajs/react';
 import HeaderLayout from '@/layouts/header-layout';
 import { CheckCircle } from 'lucide-react';
 import {Order} from "@/types";
+import { Link } from '@inertiajs/react';
+import { Button } from '@/components/ui/button';
 
 interface OrderCompletedProps {
     order: Order;
 }
 
 export default function OrderCompletedPage({ order }: OrderCompletedProps) {
+    console.log('ini isi order', order)
     return (
         <HeaderLayout>
             <Head title="Order Completed" />
@@ -26,7 +29,7 @@ export default function OrderCompletedPage({ order }: OrderCompletedProps) {
                     <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <h2 className="text-lg font-semibold text-gray-800">Order #{order.order_number}</h2>
+                                <h2 className="text-lg font-semibold text-gray-800">Order #{order.transaction_number}</h2>
                                 <p className="text-sm text-gray-600">Placed on {order.created_at}</p>
                             </div>
                             <div className="mt-2 sm:mt-0">
@@ -41,7 +44,7 @@ export default function OrderCompletedPage({ order }: OrderCompletedProps) {
                         <div className="bg-white rounded-lg shadow-sm p-6">
                             <h3 className="text-md font-semibold text-gray-800 mb-3">Billing Address</h3>
                             <div className="text-sm text-gray-600">
-                                <p>{order.billing_full_name}</p>
+                                <p>{order.billing_name}</p>
                                 <p>{order.billing_email}</p>
                                 <p className="mt-2">{order.billing_address}</p>
                                 <p>{order.billing_city}, {order.billing_state} {order.billing_zip}</p>
@@ -51,7 +54,7 @@ export default function OrderCompletedPage({ order }: OrderCompletedProps) {
                         <div className="bg-white rounded-lg shadow-sm p-6">
                             <h3 className="text-md font-semibold text-gray-800 mb-3">Shipping Address</h3>
                             <div className="text-sm text-gray-600">
-                                <p>{order.shipping_full_name}</p>
+                                <p>{order.shipping_name}</p>
                                 <p className="mt-2">{order.shipping_address}</p>
                                 <p>{order.shipping_city}, {order.shipping_state} {order.shipping_zip}</p>
                             </div>
@@ -103,14 +106,19 @@ export default function OrderCompletedPage({ order }: OrderCompletedProps) {
                         </div>
                     </div>
 
-                    <div className="text-center">
-                        <a
-                            href={route('orders.products')}
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                            Continue Shopping
-                        </a>
-                    </div>
+                            {/* Action Buttons */}
+                            <div className="mt-4 flex flex-col sm:flex-row justify-center gap-3">
+                                <Link href="/orders/history" className="w-full sm:w-auto">
+                                    <Button variant="outline" className="w-full">
+                                        Go to Order History
+                                    </Button>
+                                </Link>
+                                <Link href={route('orders.products')} className="w-full sm:w-auto">
+                                    <Button className="w-full">
+                                        Continue Shopping
+                                    </Button>
+                                </Link>
+                            </div>
                 </div>
             </div>
         </HeaderLayout>

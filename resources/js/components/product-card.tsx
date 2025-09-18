@@ -23,7 +23,7 @@ export default function ProductCard({ product, updateCartItems }: ProductCardPro
     } = product;
 
     // Calculate price per order unit
-    const pricePerOrderUnit = price * content;
+    const pricePerOrderUnit = price / content;
 
     const addToCart = () => {
         if (!is_active) return;
@@ -32,7 +32,7 @@ export default function ProductCard({ product, updateCartItems }: ProductCardPro
             id: id,
             sku: sku,
             name: name,
-            price: pricePerOrderUnit,
+            price: price,
             image: image,
             order_unit: order_unit,
             weight: weight,
@@ -73,9 +73,9 @@ export default function ProductCard({ product, updateCartItems }: ProductCardPro
     return (
         <div className="relative flex h-full flex-col justify-between rounded-lg border p-3 shadow-sm transition-colors">
             {/* Floating Category Badge */}
-            {category?.main_category && (
+            {category?.subcategory1 && (
                 <span className="absolute top-2 right-2 rounded-full bg-blue-100 px-2 py-1 text-xs whitespace-nowrap text-blue-800 shadow">
-                    {category.main_category}
+                    {category.subcategory1}
                 </span>
             )}
 
@@ -108,9 +108,9 @@ export default function ProductCard({ product, updateCartItems }: ProductCardPro
 
             {/* Bagian Bawah */}
             <div className="mt-3">
-                <p className="text-lg font-bold text-blue-600 md:text-xl">Rp {pricePerOrderUnit?.toLocaleString() ?? '0'}</p>
+                <p className="text-lg font-bold text-blue-600 md:text-xl">Rp {price?.toLocaleString() ?? '0'}</p>
                 <p className="text-xs text-muted-foreground">
-                    Rp {price?.toLocaleString() ?? '0'} per {base_uom}
+                    Rp {pricePerOrderUnit?.toLocaleString() ?? '0'} per {base_uom}
                 </p>
 
                 {/* Full width Add to Cart button */}

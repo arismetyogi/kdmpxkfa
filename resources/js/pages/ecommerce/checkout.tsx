@@ -2,9 +2,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import HeaderLayout from '@/layouts/header-layout';
 import { router } from '@inertiajs/react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { type BreadcrumbItem } from '@/types';
 
 
@@ -61,7 +60,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 
-export default function CheckoutPage({ cartItems, totalPrice, subtotal, shipping, tax, billingData, shippingData,  }: CheckoutProps) {
+export default function CheckoutPage({ billingData, shippingData,  }: CheckoutProps) {
     const [formData, setFormData] = useState({
         first_name: billingData?.first_name || '',
         last_name: billingData?.last_name || '',
@@ -99,9 +98,7 @@ export default function CheckoutPage({ cartItems, totalPrice, subtotal, shipping
             ...prev,
             [name]: checked,
         }));
-        console.log(formData);
 
-        // If same_as_billing is checked, copy billing data to shipping data
         if (name === 'same_as_billing' && checked) {
             setFormData((prev) => ({
                 ...prev,
@@ -117,10 +114,63 @@ export default function CheckoutPage({ cartItems, totalPrice, subtotal, shipping
         }
     };
 
+    // --- Handlers to clear forms ---
+    const handleClearBilling = () => {
+        setFormData(prev => ({
+            ...prev,
+            first_name: '',
+            last_name: '',
+            email: '',
+            phone: '',
+            address: '',
+            city: '',
+            state: '',
+            zip: '',
+            notes: '',
+        }));
+    };
+
+    const handleClearShipping = () => {
+        setFormData(prev => ({
+            ...prev,
+            shipping_first_name: '',
+            shipping_last_name: '',
+            shipping_email: '',
+            shipping_phone: '',
+            shipping_address: '',
+            shipping_city: '',
+            shipping_state: '',
+            shipping_zip: '',
+        }));
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         router.post(route('checkout.process'), formData);
     };
+
+    const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    useEffect(() => {
+        const storedCart = localStorage.getItem("cart");
+        if (storedCart) setCartItems(JSON.parse(storedCart));
+    }, []);
+
+    useEffect(() => {
+        const handlePageShow = (event: PageTransitionEvent) => {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        };
+        window.addEventListener("pageshow", handlePageShow);
+        return () => {
+            window.removeEventListener("pageshow", handlePageShow);
+        };
+    }, []);
+
+    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const ppn = subtotal * 0.11;
+    const grandTotal = subtotal + ppn;
+    const shipping = 0;
 
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
@@ -132,161 +182,84 @@ export default function CheckoutPage({ cartItems, totalPrice, subtotal, shipping
                     <div className="grid grid-cols-1 gap-4 md:col-span-3 md:grid-cols-2">
                         {/* Billing Information */}
                         <div className="rounded-lg bg-white p-3 shadow-sm">
-                            <h2 className="mb-3 text-sm font-semibold text-gray-800">Billing Information</h2>
+                            {/* --- MODIFIED: Header with Clear button --- */}
+                            <div className="flex items-center justify-between mb-3">
+                                <h2 className="text-sm font-semibold text-gray-800">Billing Information</h2>
+                                <button
+                                    type="button"
+                                    onClick={handleClearBilling}
+                                    className="text-xs font-medium text-destructive hover:underline"
+                                >
+                                    Clear Form
+                                </button>
+                            </div>
                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 {/* First Name */}
                                 <div>
-                                    <Label htmlFor="first_name" className="block text-xs font-medium text-gray-700">
-                                        First Name *
-                                    </Label>
-                                    <Input
-                                        type="text"
-                                        id="first_name"
-                                        name="first_name"
-                                        value={formData.first_name}
-                                        onChange={handleInputChange}
-                                        required
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs"
-                                    />
+                                    <Label htmlFor="first_name" className="block text-xs font-medium text-gray-700">First Name *</Label>
+                                    <Input type="text" id="first_name" name="first_name" value={formData.first_name} onChange={handleInputChange} required className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs" />
                                 </div>
                                 {/* Last Name */}
                                 <div>
-                                    <Label htmlFor="last_name" className="block text-xs font-medium text-gray-700">
-                                        Last Name *
-                                    </Label>
-                                    <Input
-                                        type="text"
-                                        id="last_name"
-                                        name="last_name"
-                                        value={formData.last_name}
-                                        onChange={handleInputChange}
-                                        required
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs"
-                                    />
+                                    <Label htmlFor="last_name" className="block text-xs font-medium text-gray-700">Last Name *</Label>
+                                    <Input type="text" id="last_name" name="last_name" value={formData.last_name} onChange={handleInputChange} required className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs" />
                                 </div>
                                 {/* Email */}
                                 <div className="sm:col-span-2">
-                                    <Label htmlFor="email" className="block text-xs font-medium text-gray-700">
-                                        Email Address *
-                                    </Label>
-                                    <Input
-                                        type="email"
-                                        id="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleInputChange}
-                                        required
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs"
-                                    />
+                                    <Label htmlFor="email" className="block text-xs font-medium text-gray-700">Email Address *</Label>
+                                    <Input type="email" id="email" name="email" value={formData.email} onChange={handleInputChange} required className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs" />
                                 </div>
                                 {/* Phone */}
                                 <div className="sm:col-span-2">
-                                    <Label htmlFor="phone" className="block text-xs font-medium text-gray-700">
-                                        Phone Number *
-                                    </Label>
-                                    <Input
-                                        type="tel"
-                                        id="phone"
-                                        name="phone"
-                                        value={formData.phone}
-                                        onChange={handleInputChange}
-                                        required
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs"
-                                    />
+                                    <Label htmlFor="phone" className="block text-xs font-medium text-gray-700">Phone Number *</Label>
+                                    <Input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleInputChange} required className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs" />
                                 </div>
                                 {/* Address */}
                                 <div className="sm:col-span-2">
-                                    <Label htmlFor="address" className="block text-xs font-medium text-gray-700">
-                                        Address *
-                                    </Label>
-                                    <Input
-                                        type="text"
-                                        id="address"
-                                        name="address"
-                                        value={formData.address}
-                                        onChange={handleInputChange}
-                                        required
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs"
-                                    />
+                                    <Label htmlFor="address" className="block text-xs font-medium text-gray-700">Address *</Label>
+                                    <Input type="text" id="address" name="address" value={formData.address} onChange={handleInputChange} required className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs" />
                                 </div>
                                 {/* City */}
                                 <div>
-                                    <Label htmlFor="city" className="block text-xs font-medium text-gray-700">
-                                        City *
-                                    </Label>
-                                    <Input
-                                        type="text"
-                                        id="city"
-                                        name="city"
-                                        value={formData.city}
-                                        onChange={handleInputChange}
-                                        required
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs"
-                                    />
+                                    <Label htmlFor="city" className="block text-xs font-medium text-gray-700">City *</Label>
+                                    <Input type="text" id="city" name="city" value={formData.city} onChange={handleInputChange} required className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs" />
                                 </div>
                                 {/* State */}
                                 <div>
-                                    <Label htmlFor="state" className="block text-xs font-medium text-gray-700">
-                                        State/Province *
-                                    </Label>
-                                    <Input
-                                        type="text"
-                                        id="state"
-                                        name="state"
-                                        value={formData.state}
-                                        onChange={handleInputChange}
-                                        required
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs"
-                                    />
+                                    <Label htmlFor="state" className="block text-xs font-medium text-gray-700">State/Province *</Label>
+                                    <Input type="text" id="state" name="state" value={formData.state} onChange={handleInputChange} required className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs" />
                                 </div>
                                 {/* ZIP */}
                                 <div>
-                                    <Label htmlFor="zip" className="block text-xs font-medium text-gray-700">
-                                        ZIP/Postal Code *
-                                    </Label>
-                                    <Input
-                                        type="text"
-                                        id="zip"
-                                        name="zip"
-                                        value={formData.zip}
-                                        onChange={handleInputChange}
-                                        required
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs"
-                                    />
+                                    <Label htmlFor="zip" className="block text-xs font-medium text-gray-700">ZIP/Postal Code *</Label>
+                                    <Input type="text" id="zip" name="zip" value={formData.zip} onChange={handleInputChange} required className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs" />
                                 </div>
                                 {/* Notes */}
                                 <div className="sm:col-span-2">
-                                    <Label htmlFor="notes" className="block text-xs font-medium text-gray-700">
-                                        Order Notes (Optional)
-                                    </Label>
-                                    <textarea
-                                        id="notes"
-                                        name="notes"
-                                        value={formData.notes}
-                                        onChange={handleInputChange}
-                                        rows={2}
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs"
-                                    />
+                                    <Label htmlFor="notes" className="block text-xs font-medium text-gray-700">Order Notes (Optional)</Label>
+                                    <textarea id="notes" name="notes" value={formData.notes} onChange={handleInputChange} rows={2} className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs" />
                                 </div>
                             </div>
                         </div>
 
                         {/* Shipping Information */}
                         <div className="rounded-lg bg-white p-3 shadow-sm">
+                            {/* --- MODIFIED: Header with Clear button --- */}
                             <div className="mb-3 flex items-center justify-between">
                                 <h2 className="text-sm font-semibold text-gray-800">Shipping Information</h2>
-                                <div className="flex items-center">
-                                    <Input
-                                        type="checkbox"
-                                        id="same_as_billing"
-                                        name="same_as_billing"
-                                        checked={formData.same_as_billing}
-                                        onChange={handleCheckboxChange}
-                                        className="h-3 w-3 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                    />
-                                    <Label htmlFor="same_as_billing" className="ml-2 block text-xs text-gray-700">
-                                        Same as billing
-                                    </Label>
+                                <div className="flex items-center gap-4">
+                                    <button
+                                        type="button"
+                                        onClick={handleClearShipping}
+                                        className="text-xs font-medium text-destructive hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
+                                        disabled={formData.same_as_billing}
+                                    >
+                                        Clear Form
+                                    </button>
+                                    <div className="flex items-center">
+                                        <Input type="checkbox" id="same_as_billing" name="same_as_billing" checked={formData.same_as_billing} onChange={handleCheckboxChange} className="h-3 w-3 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                                        <Label htmlFor="same_as_billing" className="ml-2 block text-xs text-gray-700">Same as billing</Label>
+                                    </div>
                                 </div>
                             </div>
 
@@ -294,114 +267,44 @@ export default function CheckoutPage({ cartItems, totalPrice, subtotal, shipping
                                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                     {/* Shipping First Name */}
                                     <div>
-                                        <Label htmlFor="shipping_first_name" className="block text-xs font-medium text-gray-700">
-                                            First Name *
-                                        </Label>
-                                        <Input
-                                            type="text"
-                                            id="shipping_first_name"
-                                            name="shipping_first_name"
-                                            value={formData.shipping_first_name}
-                                            onChange={handleInputChange}
-                                            required
-                                            className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs"
-                                        />
+                                        <Label htmlFor="shipping_first_name" className="block text-xs font-medium text-gray-700">First Name *</Label>
+                                        <Input type="text" id="shipping_first_name" name="shipping_first_name" value={formData.shipping_first_name} onChange={handleInputChange} required className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs" />
                                     </div>
                                     {/* Shipping Last Name */}
                                     <div>
-                                        <Label htmlFor="shipping_last_name" className="block text-xs font-medium text-gray-700">
-                                            Last Name *
-                                        </Label>
-                                        <Input
-                                            type="text"
-                                            id="shipping_last_name"
-                                            name="shipping_last_name"
-                                            value={formData.shipping_last_name}
-                                            onChange={handleInputChange}
-                                            required
-                                            className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs"
-                                        />
+                                        <Label htmlFor="shipping_last_name" className="block text-xs font-medium text-gray-700">Last Name *</Label>
+                                        <Input type="text" id="shipping_last_name" name="shipping_last_name" value={formData.shipping_last_name} onChange={handleInputChange} required className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs" />
                                     </div>
                                     {/* Shipping Email */}
                                     <div className="sm:col-span-2">
-                                        <Label htmlFor="shipping_email" className="block text-xs font-medium text-gray-700">
-                                            Email *
-                                        </Label>
-                                        <Input
-                                            type="text"
-                                            id="shipping_email"
-                                            name="shipping_email"
-                                            value={formData.shipping_email}
-                                            onChange={handleInputChange}
-                                            required
-                                            className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs"
-                                        />
+                                        <Label htmlFor="shipping_email" className="block text-xs font-medium text-gray-700">Email *</Label>
+                                        <Input type="email" id="shipping_email" name="shipping_email" value={formData.shipping_email} onChange={handleInputChange} required className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs" />
                                     </div>
                                     {/* Shipping Address */}
                                     <div className="sm:col-span-2">
-                                        <Label htmlFor="shipping_address" className="block text-xs font-medium text-gray-700">
-                                            Address *
-                                        </Label>
-                                        <Input
-                                            type="text"
-                                            id="shipping_address"
-                                            name="shipping_address"
-                                            value={formData.shipping_address}
-                                            onChange={handleInputChange}
-                                            required
-                                            className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs"
-                                        />
+                                        <Label htmlFor="shipping_address" className="block text-xs font-medium text-gray-700">Address *</Label>
+                                        <Input type="text" id="shipping_address" name="shipping_address" value={formData.shipping_address} onChange={handleInputChange} required className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs" />
                                     </div>
                                     {/* Shipping City */}
                                     <div>
-                                        <Label htmlFor="shipping_city" className="block text-xs font-medium text-gray-700">
-                                            City *
-                                        </Label>
-                                        <Input
-                                            type="text"
-                                            id="shipping_city"
-                                            name="shipping_city"
-                                            value={formData.shipping_city}
-                                            onChange={handleInputChange}
-                                            required
-                                            className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs"
-                                        />
+                                        <Label htmlFor="shipping_city" className="block text-xs font-medium text-gray-700">City *</Label>
+                                        <Input type="text" id="shipping_city" name="shipping_city" value={formData.shipping_city} onChange={handleInputChange} required className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs" />
                                     </div>
                                     {/* Shipping State */}
                                     <div>
-                                        <Label htmlFor="shipping_state" className="block text-xs font-medium text-gray-700">
-                                            State/Province *
-                                        </Label>
-                                        <Input
-                                            type="text"
-                                            id="shipping_state"
-                                            name="shipping_state"
-                                            value={formData.shipping_state}
-                                            onChange={handleInputChange}
-                                            required
-                                            className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs"
-                                        />
+                                        <Label htmlFor="shipping_state" className="block text-xs font-medium text-gray-700">State/Province *</Label>
+                                        <Input type="text" id="shipping_state" name="shipping_state" value={formData.shipping_state} onChange={handleInputChange} required className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs" />
                                     </div>
                                     {/* Shipping ZIP */}
                                     <div>
-                                        <Label htmlFor="shipping_zip" className="block text-xs font-medium text-gray-700">
-                                            ZIP/Postal Code *
-                                        </Label>
-                                        <Input
-                                            type="text"
-                                            id="shipping_zip"
-                                            name="shipping_zip"
-                                            value={formData.shipping_zip}
-                                            onChange={handleInputChange}
-                                            required
-                                            className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs"
-                                        />
+                                        <Label htmlFor="shipping_zip" className="block text-xs font-medium text-gray-700">ZIP/Postal Code *</Label>
+                                        <Input type="text" id="shipping_zip" name="shipping_zip" value={formData.shipping_zip} onChange={handleInputChange} required className="mt-1 block w-full rounded-md border border-gray-300 px-2 py-1 text-xs" />
                                     </div>
                                 </div>
                             )}
 
                             {formData.same_as_billing && (
-                                <div className="text-xs text-gray-500 italic">Shipping address will be the same as billing address</div>
+                                <div className="text-xs text-gray-500 italic mt-4">Shipping address will be the same as billing address.</div>
                             )}
                         </div>
 
@@ -442,7 +345,7 @@ export default function CheckoutPage({ cartItems, totalPrice, subtotal, shipping
 
                     {/* Order Summary */}
                     <div className="md:col-span-1">
-                        <div className="border border-gray-200 rounded-2xl p-5 shadow-lg bg-white lg:sticky lg:top-55 self-start ">
+                        <div className="border border-gray-200 rounded-2xl p-5 shadow-lg bg-white lg:sticky lg:top-5 self-start ">
                             <h2 className="mb-2 text-sm font-semibold text-gray-800">Order Summary</h2>
                             <div className="space-y-3">
                                 <div className="space-y-1">
@@ -453,19 +356,18 @@ export default function CheckoutPage({ cartItems, totalPrice, subtotal, shipping
                                     <div className="flex justify-between">
                                         <span className="text-sm text-gray-600">Shipping</span>
                                         <span className="text-sm font-medium text-green-600">
-                                            {shipping === 0 ? 'Free' : `Rp${shipping.toLocaleString()}`}
+                                            {shipping === 0 ? 'Free' : `Rp${(shipping as number).toLocaleString()}`}
                                         </span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-sm text-gray-600">Tax</span>
-                                        <span className="text-sm font-medium">Rp{tax.toLocaleString()}</span>
+                                        <span className="text-sm font-medium">Rp{ppn.toLocaleString()}</span>
                                     </div>
-                                    <div className="flex justify-between border-t pt-5">
+                                    <div className="flex justify-between border-t pt-5 mt-3">
                                         <span className="text-sm font-semibold text-primary">Total</span>
-                                        <span className="text-sm font-semibold text-primary">Rp{totalPrice.toLocaleString()}</span>
+                                        <span className="text-sm font-semibold text-primary">Rp{grandTotal.toLocaleString()}</span>
                                     </div>
                                 </div>
-
                                 <button
                                     type="submit"
                                     className="mt-2 w-full rounded-md bg-primary px-3 py-2 text-xs text-white hover:bg-primary/90"
