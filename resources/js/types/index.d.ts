@@ -112,6 +112,8 @@ export interface Product {
   is_featured?: boolean;
   category?: {
     main_category: string;
+    subcategory1: string;
+    subcategory2: string;
   };
 }
 
@@ -170,6 +172,12 @@ export interface Order {
   // Relasi
   order_items?: OrderItem[];
 
+  products?: (Product & { pivot?: { quantity: number } })[];
+  product_detail: {
+  sku: string;
+  quantity: number;
+  }[]; //Relasi ke Product
+
   created_at: string;
   updated_at: string;
 }
@@ -182,6 +190,12 @@ export interface OrderItem {
   qty_delivered: number;
   unit_price: number;
   total_price: number;
+  product:
+  {
+    base_uom: string;
+    order_unit: string;
+    content: number;
+  }
 }
 
 // ✅ OrderPayload untuk request create order
