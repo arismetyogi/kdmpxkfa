@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Enums\OrderStatusEnum;
 use App\Services\Admin\OrderService;
 use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+
 
 class OrderController extends Controller
 {
@@ -191,7 +193,7 @@ class OrderController extends Controller
         return [
             'id_transaksi' => $order->transaction_number,
             'id_koperasi' => $order->user->tenant_id ?? '', // Assuming tenant_id exists on User model
-            'status' => 'diproses', // diproses untuk create transaksi, update status: dalam-pengiriman, diterima, dibatalkan, selesai
+            'status' => OrderStatusEnum::PROCESS, // diproses untuk create transaksi, update status: dalam-pengiriman, diterima, dibatalkan, selesai
             'merchant_id' => 'MCH-KF-007', // From documentation
             'merchant_name' => 'Kimia Farma', // From documentation
             'total_nominal' => $totalNominal,

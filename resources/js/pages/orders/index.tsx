@@ -18,7 +18,7 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: route('dashboard'),
     },
         {
-        title: 'Products',
+        title: 'Medicines',
         href: '#',
     },
 ];
