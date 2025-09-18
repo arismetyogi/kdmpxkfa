@@ -52,8 +52,8 @@ class Order extends Model
         'discount_amount' => 'decimal:2',
         // 'total_price' => 'decimal:2', //Decimal is not supported with .toLocale() function
         'estimated_delivery' => 'date',
-        'shipped_at' => 'date',
-        'delivered_at' => 'date',
+        'shipped_at' => 'datetime',
+        'delivered_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

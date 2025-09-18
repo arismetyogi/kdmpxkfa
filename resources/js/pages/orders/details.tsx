@@ -39,10 +39,12 @@ export default function Detail() {
     }
   };
 
+  // Updated status mapping to include 'diproses' and a more accurate first step 'dibuat'
   const stepIndexByStatus: Record<string, number> = {
-    Process: 0,
-    'On Delivery': 1,
-    Received: 2,
+    dibuat: 0,
+    diproses: 1,
+    'dalam pengiriman': 2,
+    diterima: 3,
   };
   const activeIndex = stepIndexByStatus[order.status] ?? 0;
 
@@ -52,10 +54,59 @@ export default function Detail() {
     <HeaderLayout breadcrumbs={breadcrumbs}>
       <Head title={`Order #${order.transaction_number}`} />
       <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
+        {/* --- MOVED TIMELINE TO THE TOP --- */}
+            {/* Order Status Timeline - Centered */}
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:gap-8 justify-center pb-10">
+              {[
+                // Added 'Pesanan Diproses' step
+                { key: 'dibuat', label: 'Order Dibuat', icon: <Package size={16} /> },
+                { key: 'diproses', label: 'Pesanan Diproses', icon: <ShoppingBag size={16} /> },
+                { key: 'dalam pengiriman', label: 'Dalam Pengiriman', icon: <Truck size={16} /> },
+                { key: 'diterima', label: 'Diterima', icon: <CheckCircle size={16} /> },
+              ].map((st, idx) => {
+                const done = idx <= activeIndex;
+                return (
+                  <React.Fragment key={st.key}>
+                    <div className="flex flex-1 flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3 min-w-0">
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0
+                          ${done ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}
+                        `}
+                      >
+                        {st.icon}
+                      </div>
+                      <div className="text-center sm:text-left text-sm overflow-hidden text-ellipsis">
+                        <div
+                          className={`${done ? 'font-semibold' : 'text-muted-foreground'} whitespace-nowrap`}
+                        >
+                          {st.label}
+                        </div>
+                        <div className="text-xs whitespace-nowrap">
+                          {formatTime(timeline[idx]?.time)}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Connector → Arrow on desktop, vertical line on mobile */}
+                    {idx < 3 && (
+                      <>
+                        {/* Mobile: vertical line/spacer */}
+                        <div className="sm:hidden w-full flex justify-center">
+                          <div className="h-4 border-r border-gray-300"></div>
+                        </div>
+                        {/* Desktop: arrow */}
+                        <ArrowRight className="hidden sm:block text-gray-300 mx-1 self-center" />
+                      </>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+        
         <div className="flex flex-col md:flex-row items-start justify-between gap-6">
           {/* LEFT SIDE - Takes full width on mobile, expands on medium screens */}
           <div className="flex-1 space-y-6 w-full md:w-auto">
-            {/* Header + Steps */}
+            {/* Header */}
             <Card className="p-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-6">
                 <div>
@@ -81,53 +132,6 @@ export default function Detail() {
                     </Button>
                   </Link>
                 </div>
-              </div>
-
-              {/* Order Status Timeline */}
-              <div className="mt-4 flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:gap-4 lg:justify-between lg:pr-3">
-                {[
-                  { key: 'made', label: 'Order Made', icon: <Package size={16} /> },
-                  { key: 'delivery', label: 'On Delivery', icon: <Truck size={16} /> },
-                  { key: 'received', label: 'Received', icon: <CheckCircle size={16} /> },
-                ].map((st, idx) => {
-                  const done = idx <= activeIndex;
-                  return (
-                    <React.Fragment key={st.key}>
-                      <div className="flex flex-1 flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3 min-w-0">
-                        <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0
-                            ${done ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}
-                          `}
-                        >
-                          {st.icon}
-                        </div>
-                        <div className="text-center sm:text-left text-sm overflow-hidden text-ellipsis">
-                          <div
-                            className={`${done ? 'font-semibold' : 'text-muted-foreground'} whitespace-nowrap`}
-                          >
-                            {st.label}
-                          </div>
-                          <div className="text-xs whitespace-nowrap">
-                            {formatTime(timeline[idx]?.time)}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Connector → Arrow on desktop, vertical line on mobile */}
-                      {idx < 2 && (
-                        <>
-                          {/* Mobile: vertical line/spacer */}
-                          <div className="sm:hidden w-full flex justify-center">
-                            <div className="h-4 border-r border-gray-300"></div>
-                          </div>
-
-                          {/* Desktop: arrow */}
-                          <ArrowRight className="hidden sm:block text-gray-300 mx-1" />
-                        </>
-                      )}
-                    </React.Fragment>
-                  );
-                })}
               </div>
             </Card>
 
@@ -236,7 +240,7 @@ export default function Detail() {
             </Card>
 
             {/* Confirmation */}
-            {order.status === 'On Delivery' && (
+            {order.status === 'dalam pengiriman' && (
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">PAKET SUDAH TIBA</CardTitle> {/* Adjusted title size */}
@@ -252,7 +256,7 @@ export default function Detail() {
                         route('history.updateStatus', {
                             transaction_number: order.transaction_number,
                         }),
-                        { status: 'Received' }
+                        { status: 'diterima' }
                         );
                     }}
                     className="bg-green-600 text-white hover:bg-green-700 w-full sm:flex-1" // w-full for mobile

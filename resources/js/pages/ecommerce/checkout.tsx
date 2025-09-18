@@ -54,6 +54,7 @@ interface CheckoutProps {
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
+  { title: "Dashboard", href: route("dashboard") },
   { title: "Medicines", href: route("orders.products") },
   { title: "Cart", href: route("cart") },
   { title: "Checkout", href: "#" },

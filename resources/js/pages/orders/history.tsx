@@ -25,10 +25,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 // ✅ Samakan dengan seeder
-const statusFilters = ['Semua', 'On Delivery', 'Received'];
+// const statusFilters = ['Semua', 'On Delivery', 'Received'];
 
 export default function History() {
-  const { orders } = usePage<{ orders: Order[] }>().props;
+  const { orders, statusColors, statusFilters } = usePage<{ orders: Order[], statusColors: Record<string, string>, statusFilters: Record<string, string> }>().props;
 
   const [filterStatus, setFilterStatus] = useState('Semua');
   const [sortBy, setSortBy] = useState('newest');
@@ -36,11 +36,12 @@ export default function History() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  const statusColors: Record<string, string> = {
-    'On Delivery': 'bg-blue-100 text-blue-700',
-    Received: 'bg-green-100 text-green-700',
-    Pending: 'bg-yellow-100 text-yellow-700',
-  };
+  // const statusColors: Record<string, string> = {
+  //   'dibuat': 'bg-amber-100 text-amber-700',
+  //   'dalam pengiriman': 'bg-sky-100 text-sky-700',
+  //   'diterima': 'bg-green-100 text-green-700',
+  //   'diproses': 'bg-yellow-100 text-yellow-700',
+  // };
 
   // --- FILTERING & SORTING ---
   const filteredOrders = orders.filter((order) => {
@@ -103,9 +104,10 @@ export default function History() {
                   <SelectValue placeholder="Filter status..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {statusFilters.map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {status === 'Semua' ? 'Semua Status' : status}
+                  <SelectItem value="Semua">Semua</SelectItem>
+                  {Object.entries(statusFilters).map(([key, value]) => (
+                    <SelectItem key={key} value={key}>  
+                      {value}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -114,9 +116,10 @@ export default function History() {
             <div className="hidden lg:block">
               <Tabs value={filterStatus} onValueChange={setFilterStatus}>
                 <TabsList>
-                  {statusFilters.map((status) => (
-                    <TabsTrigger key={status} value={status}>
-                      {status}
+                  <TabsTrigger value="Semua">Semua</TabsTrigger>
+                  {Object.entries(statusFilters).map(([key, value]) => (
+                    <TabsTrigger key={key} value={key}>
+                      {value}
                     </TabsTrigger>
                   ))}
                 </TabsList>
@@ -153,7 +156,7 @@ export default function History() {
                   selected={selectedDate}
                   onSelect={setSelectedDate}
                   initialFocus
-                  className="lg:w-50"
+                  className="w-50"
                 />
               </PopoverContent>
             </Popover>
@@ -206,7 +209,7 @@ export default function History() {
                           statusColors[order.status] ?? 'bg-gray-100 text-gray-700'
                         }`}
                       >
-                        {order.status}
+                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                       </span>
                     </div>
                     <p className="text-xs text-gray-500 mt-3">
@@ -244,7 +247,7 @@ export default function History() {
                           statusColors[selectedOrder.status] ?? 'bg-gray-100 text-gray-700'
                         }`}
                       >
-                        {selectedOrder.status}
+                        {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
                       </span>
                     </div>
                   </div>
