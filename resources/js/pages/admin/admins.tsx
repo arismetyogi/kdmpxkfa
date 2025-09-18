@@ -10,7 +10,6 @@ import UserFormModal from '@/components/admin/UserFormModal';
 import { Button } from '@/components/ui/button';
 import DeleteUserModal from '@/components/admin/DeleteUserModal';
 
-
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
@@ -155,7 +154,7 @@ export default function AdminAdmins({ admins, roles, apoteks, allAdmins, adminAd
                                         <TableCell>
                                             <div className="flex flex-wrap gap-1">
                                                 {admin.roles && admin.roles.length > 0 ? (
-                                                    admin.roles.map((role) => (
+                                                    admin.roles.map((role: Role) => (
                                                         <Badge key={role.id} variant="secondary" className={`text-xs ${getRoleColor(role.name)}`}>
                                                             {formatRoleName(role.name)}
                                                         </Badge>
@@ -211,7 +210,7 @@ export default function AdminAdmins({ admins, roles, apoteks, allAdmins, adminAd
             <UserFormModal isOpen={isCreateModalOpen} onClose={closeModals} user={null} roles={roles} apoteks={apoteks} />
 
             {/* Edit User Modal */}
-            <UserFormModal isOpen={isEditModalOpen} onClose={closeModals} user={selectedUser} roles={roles} apoteks={apoteks}/>
+            <UserFormModal isOpen={isEditModalOpen} onClose={closeModals} user={selectedUser} roles={roles} apoteks={apoteks} />
 
             {/* Delete User Modal */}
             <DeleteUserModal isOpen={isDeleteModalOpen} onClose={closeModals} user={selectedUser} />

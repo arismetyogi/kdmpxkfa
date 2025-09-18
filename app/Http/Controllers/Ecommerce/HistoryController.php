@@ -17,9 +17,8 @@ class HistoryController extends Controller
     {
         $orders = Order::with([
             'products',
-            'user.apotek' // eager load relasi apotek dari user
+            'user.apotek', // eager load relasi apotek dari user
         ])->latest()->get();
-
 
         return Inertia::render('orders/history', [
             'orders' => $orders,
@@ -32,7 +31,7 @@ class HistoryController extends Controller
     {
         $order = Order::with([
             'products',
-            'user.apotek' // eager load relasi apotek dari user
+            'user.apotek', // eager load relasi apotek dari user
         ])->where('transaction_number', $transaction_number)->firstOrFail();
 
         // Added 'processed' step to the timeline data
@@ -67,7 +66,6 @@ class HistoryController extends Controller
         $request->validate([
             'status' => ['required', Rule::enum(OrderStatusEnum::class)],
         ]);
-
 
         $order = Order::where('transaction_number', $transaction_number)->firstOrFail();
 

@@ -39,7 +39,7 @@ enum OrderStatusEnum: string
             self::PROCESS->value => 'text-amber-600 bg-amber-100 dark:text-amber-200 dark:bg-amber-900/40',
             self::DELIVERY->value => 'text-sky-600 bg-sky-100 dark:text-sky-200 dark:bg-sky-900/40',
             self::RECEIVED->value => 'text-emerald-600 bg-emerald-100 dark:text-emerald-200 dark:bg-emerald-900/40',
-            self::CANCELED->value => 'text-rose-600 bg-rose-100 dark:text-rose-200 dark:bg-rose-900/40',];
+            self::CANCELED->value => 'text-rose-600 bg-rose-100 dark:text-rose-200 dark:bg-rose-900/40', ];
     }
 
     public static function toArray(): array
@@ -48,6 +48,7 @@ enum OrderStatusEnum: string
         foreach (self::cases() as $case) {
             $array[$case->value] = $case->label();
         }
+
         return $array;
     }
 }

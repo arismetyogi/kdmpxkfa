@@ -62,10 +62,10 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
-  public function apotek()
-{
-    return $this->user()->first()?->apotek ?? null;
-}
+    public function apotek()
+    {
+        return $this->user()->first()?->apotek ?? null;
+    }
 
     public function orderItems(): HasMany
     {
@@ -75,9 +75,10 @@ class Order extends Model
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'order_items')
-                    ->withPivot('quantity')
-                    ->withTimestamps();
+            ->withPivot('quantity')
+            ->withTimestamps();
     }
+
     public static function generateTransactionNumber(): string
     {
         $prefix = 'TKF';

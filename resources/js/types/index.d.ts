@@ -247,16 +247,3 @@ export interface FiltersProps {
     orderUnits: string[];
   }) => void;
 }
-
-export interface Penerimaan {
-  id: number;
-  nomorSuratPemesanan: string;
-  namaPengentri: string;
-  kreditur: string;
-  nomorFaktur: string;
-  tglPenerimaan: string;
-  tglFaktur: string;
-  tglTerimaFisik: string;
-  top: number;
-  ppnType: "Include" | "Exclude"; // atau tambah jika ada opsi lain
-}

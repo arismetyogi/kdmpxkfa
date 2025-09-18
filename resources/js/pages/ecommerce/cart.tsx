@@ -1,36 +1,36 @@
-import HeaderLayout from '@/layouts/header-layout'
-import { Head, Link, router } from '@inertiajs/react'
-import { ArrowLeft, Minus, Plus, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import HeaderLayout from '@/layouts/header-layout';
+import { Head, Link, router } from '@inertiajs/react';
+import { ArrowLeft, Minus, Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { BreadcrumbItem } from '@/types';
 
 interface CartItem {
-    id: string | number
-    product_id: number
-    name: string
-    slug: string
-    quantity: number
-    price: number
-    base_price: number
-    image: string
-    order_unit: string
-    base_uom: string
-    content: number
+    id: string | number;
+    product_id: number;
+    name: string;
+    slug: string;
+    quantity: number;
+    price: number;
+    base_price: number;
+    image: string;
+    order_unit: string;
+    base_uom: string;
+    content: number;
 }
 
 interface CartProps {
-    cartItems: CartItem[]
-    cartCount: number
+    cartItems: CartItem[];
+    cartCount: number;
 }
 
 export default function CartPage({ cartItems, cartCount }: CartProps) {
-    const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set())
+    const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
 
     const updateQuantity = (item: CartItem, newQuantity: number) => {
-        if (newQuantity < 1) return
+        if (newQuantity < 1) return;
 
-        const itemKey = `${item.product_id}`
-        setUpdatingItems((prev) => new Set(prev).add(itemKey))
+        const itemKey = `${item.product_id}`;
+        setUpdatingItems((prev) => new Set(prev).add(itemKey));
 
         router.put(
             route('carts.update', { product: item.product_id }),
@@ -40,47 +40,42 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
             {
                 onFinish: () => {
                     setUpdatingItems((prev) => {
-                        const newSet = new Set(prev)
-                        newSet.delete(itemKey)
-                        return newSet
-                    })
+                        const newSet = new Set(prev);
+                        newSet.delete(itemKey);
+                        return newSet;
+                    });
                 },
-            }
-        )
-    }
+            },
+        );
+    };
 
     const removeItem = (item: CartItem) => {
-        router.delete(route('carts.delete', { product: item.product_id }))
-    }
+        router.delete(route('carts.delete', { product: item.product_id }));
+    };
 
-    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    const shipping = 0 // Free shipping
-    const total = subtotal + shipping
+    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const shipping = 0; // Free shipping
+    const total = subtotal + shipping;
 
     const handleCheckout = () => {
-        router.get(route('checkout'))
-    }
+        router.get(route('checkout'));
+    };
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Dashboard',
-            href: route('dashboard')
-        }
-    ]
+            href: route('dashboard'),
+        },
+    ];
 
     if (cartItems.length === 0) {
         return (
             <HeaderLayout>
-                <Head title="Carts"/>
+                <Head title="Carts" />
                 <div className="container mx-auto px-4 py-8">
                     <div className="text-center">
                         <div className="mb-6">
-                            <svg
-                                className="mx-auto h-24 w-24 text-gray-300"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
+                            <svg className="mx-auto h-24 w-24 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
@@ -90,48 +85,37 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
                             </svg>
                         </div>
                         <h2 className="mb-4 text-2xl font-bold text-gray-800">Your cart is empty</h2>
-                        <p className="mb-8 text-gray-600">
-                            Looks like you haven't added any items to your cart yet.
-                        </p>
-                        <Link
-                            href="/"
-                            className="inline-flex items-center rounded-md bg-indigo-600 px-6 py-3 text-white hover:bg-indigo-700"
-                        >
+                        <p className="mb-8 text-gray-600">Looks like you haven't added any items to your cart yet.</p>
+                        <Link href="/" className="inline-flex items-center rounded-md bg-indigo-600 px-6 py-3 text-white hover:bg-indigo-700">
                             <ArrowLeft className="mr-2 h-5 w-5" />
                             Continue Shopping
                         </Link>
                     </div>
                 </div>
             </HeaderLayout>
-        )
+        );
     }
 
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
-            <Head title="Carts"/>
+            <Head title="Carts" />
             <div className="container mx-auto px-4 py-8">
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                     {/* Cart Items */}
                     <div className="lg:col-span-2">
                         <div className="rounded-lg bg-white shadow-sm">
                             <div className="border-b px-6 py-4">
-                                <h1 className="text-xl font-semibold text-gray-800">
-                                    Shopping Cart ({cartCount} items)
-                                </h1>
+                                <h1 className="text-xl font-semibold text-gray-800">Shopping Cart ({cartCount} items)</h1>
                             </div>
                             <div className="divide-y">
                                 {cartItems.map((item) => {
-                                    const itemKey = `${item.product_id}`
-                                    const isUpdating = updatingItems.has(itemKey)
+                                    const itemKey = `${item.product_id}`;
+                                    const isUpdating = updatingItems.has(itemKey);
 
                                     return (
                                         <div key={itemKey} className="p-6">
                                             <div className="flex items-center">
-                                                <img
-                                                    src={item.image}
-                                                    alt={item.name}
-                                                    className="h-20 w-20 rounded-md object-cover"
-                                                />
+                                                <img src={item.image} alt={item.name} className="h-20 w-20 rounded-md object-cover" />
                                                 <div className="ml-4 flex-1">
                                                     <h3 className="text-lg font-medium text-gray-800">
                                                         <Link
@@ -146,14 +130,17 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
                                                     </div>
                                                     <div className="mt-1 text-sm font-medium text-gray-600">
                                                         {item.quantity} {item.order_unit}
-                                                        <span className="text-gray-500"> ({item.quantity * item.content} {item.base_uom})</span>
+                                                        <span className="text-gray-500">
+                                                            {' '}
+                                                            ({item.quantity * item.content} {item.base_uom})
+                                                        </span>
                                                     </div>
                                                     <div className="mt-2 text-lg font-semibold text-indigo-600">
-                                                        Rp{(item.price).toLocaleString()}
+                                                        Rp{item.price.toLocaleString()}
                                                         <span className="text-sm font-normal text-gray-500"> per {item.order_unit}</span>
                                                     </div>
                                                     <div className="text-sm text-gray-500">
-                                                        Rp{(item.base_price).toLocaleString()} per {item.base_uom}
+                                                        Rp{item.base_price.toLocaleString()} per {item.base_uom}
                                                     </div>
                                                 </div>
                                                 <div className="ml-4 flex items-center space-x-2">
@@ -180,16 +167,13 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
                                                     <div className="text-sm text-gray-500">
                                                         ({item.base_price * item.quantity * item.content} {item.base_uom})
                                                     </div>
-                                                    <button
-                                                        onClick={() => removeItem(item)}
-                                                        className="mt-2 text-sm text-red-600 hover:text-red-800"
-                                                    >
+                                                    <button onClick={() => removeItem(item)} className="mt-2 text-sm text-red-600 hover:text-red-800">
                                                         <Trash2 className="h-4 w-4" />
                                                     </button>
                                                 </div>
                                             </div>
                                         </div>
-                                    )
+                                    );
                                 })}
                             </div>
                         </div>
@@ -232,5 +216,5 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
                 </div>
             </div>
         </HeaderLayout>
-    )
+    );
 }
