@@ -12,6 +12,7 @@ use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use function Pest\Laravel\json;
+use App\Enums\OrderStatusEnum;
 
 class CartController extends Controller
 {
@@ -159,6 +160,7 @@ class CartController extends Controller
             'city' => ['required', 'string', 'max:100'],
             'state' => ['required', 'string', 'max:100'],
             'zip' => ['required', 'string', 'max:20'],
+            'notes' => ['nullable', 'string', 'max:1000']
         ]);
 
         $shippingData = $request->input('same_as_billing') ? $billingData : $request->validate([
@@ -302,6 +304,7 @@ class CartController extends Controller
                 'user_id' => auth()->id(),
                 'tenant_id' => auth()->user()->tenant_id,
                 'source_of_fund' => 'pinjaman',
+                'status' => OrderStatusEnum::CREATED->value,
                 'account_no' => '', // This would need to be set based on your business logic
                 'account_bank' => '', // This would need to be set based on your business logic
                 'payment_type' => 'Cash on Delivery', // todo! no other payment available currently, subjects to change
@@ -353,7 +356,7 @@ class CartController extends Controller
 
             // Clear cart and checkout data from session after successful payment
             // Log::debug("message", session('cart'));
-            session()->forget(['cart', 'checkout.billing', 'checkout.shipping']);
+            // session()->forget(['cart', 'checkout.billing', 'checkout.shipping']);
 
             \DB::commit();
 

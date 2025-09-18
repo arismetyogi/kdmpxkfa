@@ -5,6 +5,7 @@ import { type BreadcrumbItem, type CartItem } from "@/types";
 import { ShoppingBag } from "lucide-react";
 
 const breadcrumbs: BreadcrumbItem[] = [
+  { title: "Dashboard", href: "/dashboard" },
   { title: "Medicines", href: "/orders/products" },
   { title: "Cart", href: "#" },
 ];
