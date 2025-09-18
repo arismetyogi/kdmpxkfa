@@ -34,7 +34,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders/history', [OrderController::class, 'history'])->name('orders.history');
     Route::post('/orders/{order}/accept', [OrderController::class, 'acceptOrder'])->name('orders.accept');
 
-    Route::resource('carts', CartController::class);
+    Route::get('/cart', [OrderController::class, 'cart'])->name('cart');
+
     Route::get('/checkout', [CartController::class, 'checkoutForm'])->name('checkout');
     Route::get('/payment', [CartController::class, 'paymentForm'])->name('payment');
     Route::post('/checkout/process', [CartController::class, 'processCheckout'])->name('checkout.process');
@@ -65,7 +66,7 @@ Route::prefix('orders/history')->name('history.')->group(function () {
             Route::delete('/{role}', [AdminController::class, 'destroyRole'])->name('destroy');
         });
 
-        Route::resource('permissions', PermissionController::class)->except('show, edit');
+        Route::resource('permissions', PermissionController::class)->except(['show, edit']);
 
         Route::resource('admins', AdminController::class);
 

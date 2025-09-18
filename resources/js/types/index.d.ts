@@ -179,6 +179,7 @@ export interface OrderItem {
   product_name: string;
   product_image: string;
   quantity: number;
+  qty_delivered: number;
   unit_price: number;
   total_price: number;
 }

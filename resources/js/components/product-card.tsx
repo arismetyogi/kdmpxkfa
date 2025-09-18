@@ -1,28 +1,73 @@
-import { Product } from '@/types/index.js';
-import { useForm } from '@inertiajs/react';
-import { ShoppingCart } from 'lucide-react';
+import React from "react";
+import { ShoppingCart } from "lucide-react";
+import { Product, CartItem } from '@/types/index.js';
 
-export default function ProductCard({ product }: { product: Product }) {
-    const { name, price, base_uom, order_unit, image, is_active, content, category } = product;
+interface ProductCardProps {
+    product: Product;
+    updateCartItems?: () => void;
+}
+
+export default function ProductCard({ product, updateCartItems }: ProductCardProps) {
+    const {
+        id,
+        sku,
+        name,
+        price,
+        base_uom,
+        order_unit,
+        image,
+        is_active,
+        content,
+        weight,
+        category,
+    } = product;
 
     // Calculate price per order unit
     const pricePerOrderUnit = price * content;
 
-    const form = useForm<{ productId: number; quantity: number }>({
-        productId: product.id,
-        quantity: 1,
-    });
-
-    // 🔹 Fungsi Add to Cart
     const addToCart = () => {
-        form.post(route('carts.store'), {
-            preserveScroll: true,
-            preserveState: true,
-            onError: (err: any) => {
-                console.log(err);
-            },
-        });
-        console.log('product: ', product);
+        if (!is_active) return;
+        
+        const newItem: CartItem = {
+            id: id,
+            sku: sku,
+            name: name,
+            price: pricePerOrderUnit,
+            image: image,
+            order_unit: order_unit,
+            weight: weight,
+            quantity: 1,
+            content: content,
+            base_uom: base_uom
+        };
+
+        // Get current cart from localStorage
+        const storedCart = localStorage.getItem("cart");
+        const cart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
+        
+        // Check if item already exists in cart
+        const existingItemIndex = cart.findIndex(item => item.sku === sku);
+        
+        let updatedCart;
+        if (existingItemIndex >= 0) {
+            // Update quantity if item exists
+            updatedCart = [...cart];
+            updatedCart[existingItemIndex] = {
+                ...updatedCart[existingItemIndex],
+                quantity: updatedCart[existingItemIndex].quantity + 1
+            };
+        } else {
+            // Add new item to cart
+            updatedCart = [...cart, newItem];
+        }
+
+        // Update localStorage
+        localStorage.setItem("cart", JSON.stringify(updatedCart));
+        
+        // Notify parent component to update cart items
+        if (updateCartItems) {
+            updateCartItems();
+        }
     };
 
     return (
@@ -36,7 +81,14 @@ export default function ProductCard({ product }: { product: Product }) {
 
             {/* Bagian Atas */}
             <div>
-                <img src={image || '/logo.svg' } alt={name} className="mb-4 h-36 w-fit rounded-md object-cover" />
+                <img
+                    src={image && image !== "" ? image : "/products/Placeholder_Medicine.png"}
+                    alt={name}
+                    className="w-full h-36 object-cover rounded-md mb-4"
+                    onError={({ currentTarget }) => {
+                        currentTarget.src = "/products/Placeholder_Medicine.png";
+                    }}
+                />
 
                 <h3 className="mb-1 text-sm leading-tight font-semibold md:text-base">{name.length > 16 ? name.slice(0, 16) + '...' : name}</h3>
 
@@ -61,14 +113,14 @@ export default function ProductCard({ product }: { product: Product }) {
                     Rp {price?.toLocaleString() ?? '0'} per {base_uom}
                 </p>
 
+                {/* Full width Add to Cart button */}
                 <button
                     disabled={!is_active}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        addToCart();
-                    }}
-                    className={`mt-2 flex w-full items-center justify-center gap-2 rounded px-3 py-2 font-semibold text-white transition-colors ${
-                        is_active ? 'bg-blue-600 hover:bg-blue-700' : 'cursor-not-allowed bg-gray-400'
+                    onClick={addToCart}
+                    className={`w-full flex items-center justify-center gap-2 mt-2 px-3 py-2 rounded text-white font-semibold transition-colors ${
+                        is_active
+                            ? "bg-blue-600 hover:bg-blue-700"
+                            : "bg-gray-400 cursor-not-allowed"
                     }`}
                 >
                     <ShoppingCart size={16} /> Add to Cart

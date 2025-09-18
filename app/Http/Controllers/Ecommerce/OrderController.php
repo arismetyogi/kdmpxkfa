@@ -20,16 +20,87 @@ class OrderController extends Controller
     {
         $this->digikopTransactionService = $digikopTransactionService;
     }
-
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with('category')->latest()->paginate(15);
+        // Start building the query
+        $query = Product::with('category');
+
+        // 🔍 Pencarian
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
+        // 🔎 Filter kategori
+        if ($request->filled('categories')) {
+            $categories = (array) $request->categories;
+            // Remove "Semua Produk" if it exists
+            $categories = array_filter($categories, function($cat) {
+                return $cat !== "Semua Produk";
+            });
+
+            if (!empty($categories)) {
+                $query->whereHas('category', function ($q) use ($categories) {
+                    $q->whereIn('subcategory1', $categories);
+                });
+            }
+        }
+
+        // 🔹 Filter Package (base_uom)
+        if ($request->filled('packages')) {
+            $packages = (array) $request->packages;
+            // Remove "Semua Paket" if it exists
+            $packages = array_filter($packages, function($pack) {
+                return $pack !== "Semua Paket";
+            });
+
+            if (!empty($packages)) {
+                $query->whereIn('base_uom', $packages);
+            }
+        }
+
+        //  Sorting
+        if ($request->filled('sort_by')) {
+            $sortBy = $request->sort_by;
+            if ($sortBy === 'lowest') {
+                $query->orderBy('price', 'asc');
+            } elseif ($sortBy === 'highest') {
+                $query->orderBy('price', 'desc');
+            } elseif ($sortBy === 'name-desc') {
+                $query->orderBy('name', 'desc');
+            } else {
+                // Default to 'name-asc'
+                $query->orderBy('name', 'asc');
+            }
+        } else {
+            $query->orderBy('name', 'asc'); // Default sort
+        }
+
+        $products = $query->paginate(12)->withQueryString();
+
+        // Get all unique categories and packages for the filter dropdowns
+    $allCategories = Category::query()
+        ->whereNotNull('subcategory1')
+        ->distinct()
+        ->pluck('subcategory1');
+
+    $allPackages = Product::query()
+        ->whereNotNull('base_uom')
+        ->distinct()
+        ->pluck('base_uom');
 
         return Inertia::render('orders/index', [
             'products' => PaginatedResourceResponse::make($products, ProductResource::class),
-            'categories' => Category::all(),
+            'allCategories' => $allCategories,
+            'allPackages' => $allPackages,
+            'filters' => $request->only(['search', 'categories', 'packages', 'sort_by']),
         ]);
     }
+
 
     public function history()
     {
@@ -42,6 +113,10 @@ class OrderController extends Controller
         return Inertia::render('orders/history', [
             'orders' => $orders,
         ]);
+    }
+
+    public function cart(){
+        return Inertia::render('orders/cart');
     }
 
     public function acceptOrder(Request $request, Order $order)

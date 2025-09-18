@@ -68,10 +68,19 @@ export default function PaymentPage({
         e.preventDefault();
         setIsProcessing(true);
 
+        // Get cart data from localStorage
+        const cartData = localStorage.getItem("cart") || "[]";
+        
         router.post(route('payment.process'), {
-            payment_method: selectedPaymentMethod
+            payment_method: selectedPaymentMethod,
+            cart: cartData
         }, {
-            onFinish: () => setIsProcessing(false)
+            onSuccess: () => {
+                localStorage.removeItem("cart");
+            },
+            onFinish: () => {
+                setIsProcessing(false);
+            }
         });
     };
 
