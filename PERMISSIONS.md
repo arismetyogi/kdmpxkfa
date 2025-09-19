@@ -44,12 +44,12 @@ The system creates the following tables:
 
 ```php
 // Check if user has a specific permission
-if (!$request->user()->can('view users')) {
+if (!$request->user()->can(\App\Enums\PermissionEnum::VIEW_ORDERS->value)) {
     abort(403, 'Unauthorized action.');
 }
 
 // Check if user has a specific role
-if (!$request->user()->hasRole('admin')) {
+if (!$request->user()->hasRole(\App\Enums\RoleEnum::ADMIN_APOTEK->value)) {
     abort(403, 'Unauthorized action.');
 }
 ```
@@ -58,12 +58,12 @@ if (!$request->user()->hasRole('admin')) {
 
 ```php
 // Protect routes with role middleware
-Route::middleware(['role:admin'])->group(function () {
+Route::middleware(['role:'.\App\Enums\RoleEnum::ADMIN_APOTEK->value])->group(function () {
     Route::get('/admin', [AdminController::class, 'dashboard']);
 });
 
 // Protect routes with permission middleware
-Route::middleware(['permission:view dashboard'])->group(function () {
+Route::middleware(['permission:'.\App\Enums\PermissionEnum::VIEW_DASHBOARD->value])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
 });
 ```
@@ -72,10 +72,10 @@ Route::middleware(['permission:view dashboard'])->group(function () {
 
 ```php
 // Assign a role to a user
-$user->assignRole('admin');
+$user->assignRole(\App\Enums\RoleEnum::ADMIN_APOTEK->value);
 
 // Give a permission to a user
-$user->givePermissionTo('view users');
+$user->givePermissionTo(\App\Enums\PermissionEnum::VIEW_USERS->value);
 
 // Give permissions to a role
 $role->givePermissionTo(['view users', 'create users']);

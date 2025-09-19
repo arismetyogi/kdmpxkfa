@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 interface LoginProps extends SharedData{
     status?: string;
     canResetPassword: boolean;
+    digikopUrl: string;
 }
 
 export default function Login({ status, canResetPassword, digikopUrl }: LoginProps) {

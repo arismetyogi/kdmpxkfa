@@ -1,18 +1,25 @@
 <?php
 
+use App\Enums\PermissionEnum;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SsoController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Ecommerce\CartController;
-use App\Http\Controllers\Ecommerce\OrderController;
 use App\Http\Controllers\Ecommerce\HistoryController;
+use App\Http\Controllers\Ecommerce\OrderController;
 use App\Http\Controllers\TransactionController;
+use App\Models\Order;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -43,20 +50,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/payment/process', [CartController::class, 'processPayment'])->name('payment.process');
     Route::get('/order-complete/{order}', [CartController::class, 'orderComplete'])->name('order.complete');
 
-     // History
-// History
-Route::prefix('orders/history')->name('history.')->group(function () {
-    Route::get('/', [HistoryController::class , 'history'])->name('index');
-    Route::get('{transaction_number}', [HistoryController::class, 'show'])->name('show');
-    Route::get('{transaction_number}/details', [HistoryController::class, 'show'])->name('details');
-    Route::post('{transaction_number}/updateStatus', [HistoryController::class, 'updateStatus'])->name('updateStatus');
-});
+    // History
+    Route::prefix('orders/history')->name('history.')->group(function () {
+        Route::get('/', [HistoryController::class, 'history'])->name('index');
+        Route::get('{transaction_number}', [HistoryController::class, 'show'])->name('show');
+        Route::get('{transaction_number}/details', [HistoryController::class, 'show'])->name('details');
+        Route::post('{transaction_number}/updateStatus', [HistoryController::class, 'updateStatus'])->name('updateStatus');
+    });
 
     // Credit limit route
     Route::get('/credit-limit', [TransactionController::class, 'creditLimit'])->name('credit.limit');
 
     // Admin routes with role-based access
-    Route::middleware('permission:'.\App\Enums\PermissionEnum::VIEW_ADMIN_DASHBOARD->value)->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('permission:'.PermissionEnum::VIEW_ADMIN_DASHBOARD->value)->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
         // Role management routes with explicit model binding
@@ -78,26 +84,30 @@ Route::prefix('orders/history')->name('history.')->group(function () {
         Route::resource('products', ProductController::class);
 
         // Category management routes
-        Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
+        Route::resource('categories', CategoryController::class);
 
-        Route::middleware('permission:'.\App\Enums\PermissionEnum::VIEW_ORDERS->value)->group(function () {
-            Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
+        Route::middleware('permission:'.PermissionEnum::VIEW_ORDERS->value)->group(function () {
+            Route::resource('orders', AdminOrderController::class);
         });
     });
 });
 
 // Add explicit route model binding for Role
 Route::bind('role', function ($value) {
-    return \Spatie\Permission\Models\Role::findOrFail($value);
+    return Role::findOrFail($value);
 });
 // Add explicit route model binding for Permission
 Route::bind('permission', function ($value) {
-    return \Spatie\Permission\Models\Permission::findOrFail($value);
+    return Permission::findOrFail($value);
 });
 
 // Add explicit route model binding for Permission
 Route::bind('user', function ($value) {
-    return \App\Models\User::findOrFail($value);
+    return User::findOrFail($value);
+});
+
+Route::bind('order', function ($value) {
+    return Order::findOrFail($value);
 });
 
 require __DIR__.'/settings.php';

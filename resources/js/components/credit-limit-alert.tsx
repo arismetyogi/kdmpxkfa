@@ -32,7 +32,7 @@ export default function CreditLimitAlert({ tenantId }: CreditLimitAlertProps) {
             } else {
                 setError(response.data.message);
             }
-        } catch (err) {
+        } catch (error) {
             setError('Failed to fetch credit limit');
             // Try to get from localStorage as fallback
             const storedData = localStorage.getItem('creditLimitData');

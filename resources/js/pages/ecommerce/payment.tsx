@@ -1,6 +1,6 @@
-import { Head, router } from '@inertiajs/react';
-import React, { useState, useEffect } from 'react';
 import HeaderLayout from '@/layouts/header-layout';
+import React, { useState, useEffect } from 'react';
+import { Head, router } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -183,26 +183,32 @@ export default function PaymentPage({
                              <div className="rounded-lg bg-white p-6 shadow-sm">
                                 <h3 className="mb-3 text-md font-semibold text-gray-800">Billing Address</h3>
                                 <div className="text-sm text-gray-600">
-                                    <p>{billing.first_name} {billing.last_name}</p>
+                                    <p>
+                                        {billing.first_name} {billing.last_name}
+                                    </p>
                                     <p>{billing.email}</p>
                                     <p>{billing.phone}</p>
                                     <p className="mt-2">{billing.address}</p>
-                                    <p>{billing.city}, {billing.state} {billing.zip}</p>
+                                    <p>
+                                        {billing.city}, {billing.state} {billing.zip}
+                                    </p>
                                     <p>{billing.country}</p>
-                                    {billing.notes && (
-                                        <p className="mt-2 italic">Notes: {billing.notes}</p>
-                                    )}
+                                    {billing.notes && <p className="mt-2 italic">Notes: {billing.notes}</p>}
                                 </div>
                             </div>
 
                             <div className="rounded-lg bg-white p-6 shadow-sm">
-                                <h3 className="mb-3 text-md font-semibold text-gray-800">Shipping Address</h3>
+                                <h3 className="text-md mb-3 font-semibold text-gray-800">Shipping Address</h3>
                                 <div className="text-sm text-gray-600">
-                                    <p>{shipping.first_name} {shipping.last_name}</p>
+                                    <p>
+                                        {shipping.first_name} {shipping.last_name}
+                                    </p>
                                     <p>{shipping.email}</p>
                                     <p>{shipping.phone}</p>
                                     <p className="mt-2">{shipping.address}</p>
-                                    <p>{shipping.city}, {shipping.state} {shipping.zip}</p>
+                                    <p>
+                                        {shipping.city}, {shipping.state} {shipping.zip}
+                                    </p>
                                     <p>{shipping.country}</p>
                                 </div>
                             </div>
@@ -248,9 +254,7 @@ export default function PaymentPage({
                                         </div>
                                         <div className="flex justify-between border-t pt-2 mt-2">
                                             <span className="text-lg font-semibold text-gray-800">Total</span>
-                                            <span className="text-lg font-semibold text-gray-800">
-                                                Rp{grandTotal.toLocaleString()}
-                                            </span>
+                                            <span className="text-lg font-semibold text-gray-800">Rp{grandTotal.toLocaleString()}</span>
                                         </div>
                                     </div>
                                 </div>

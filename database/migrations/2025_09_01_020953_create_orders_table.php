@@ -57,8 +57,8 @@ return new class extends Migration
             $table->string('shipping_method')->default('standard');
             $table->string('tracking_number')->nullable();
             $table->date('estimated_delivery')->nullable();
-            $table->date('shipped_at')->nullable();
-            $table->date('delivered_at')->nullable();
+            $table->dateTime('shipped_at')->nullable();
+            $table->dateTime('delivered_at')->nullable();
 
             // Order Notes
             $table->text('customer_notes')->nullable();

@@ -39,7 +39,6 @@ export default function Detail() {
     }
   };
 
-  // Updated status mapping to include 'diproses' and a more accurate first step 'dibuat'
   const stepIndexByStatus: Record<string, number> = {
     dibuat: 0,
     diproses: 1,

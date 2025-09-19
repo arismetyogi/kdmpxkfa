@@ -37,8 +37,8 @@ class OnboardingController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'tenant_id' => ['required', 'string', 'max:255'],
             'tenant_name' => ['nullable', 'string', 'max:255'],
-            'sia_number' => ['nullable', 'string', 'max:255'],
-            'sia_document' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'], // 2MB max
+            'sia_number' => ['required', 'string', 'max:255'],
+            'sia_document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'], // 2MB max
         ]);
 
         $user = $request->user();
