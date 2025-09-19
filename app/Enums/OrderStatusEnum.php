@@ -35,7 +35,7 @@ enum OrderStatusEnum: string
     public static function colors(): array
     {
          return [
-            self::CREATED->value => 'text-blue-600 bg-blue-100 dark:text-blue-200 dark:bg-blue-900/40',
+            self::CREATED->value => 'text-cyan-600 bg-cyan-100 dark:text-cyan-200 dark:bg-cyan-900/40',
             self::PROCESS->value => 'text-amber-600 bg-amber-100 dark:text-amber-200 dark:bg-amber-900/40',
             self::DELIVERY->value => 'text-sky-600 bg-sky-100 dark:text-sky-200 dark:bg-sky-900/40',
             self::RECEIVED->value => 'text-emerald-600 bg-emerald-100 dark:text-emerald-200 dark:bg-emerald-900/40',

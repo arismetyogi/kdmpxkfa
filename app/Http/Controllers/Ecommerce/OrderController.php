@@ -82,16 +82,22 @@ class OrderController extends Controller
 
         $products = $query->paginate(12)->withQueryString();
 
-        // Get all unique categories and packages for the filter dropdowns
-    $allCategories = Category::query()
-        ->whereNotNull('subcategory1')
-        ->distinct()
-        ->pluck('subcategory1');
+        // Get all unique categories that have at least one product associated with them
+        $allCategories = Category::whereHas('products')
+            ->whereNotNull('subcategory1')
+            ->distinct()
+            ->pluck('subcategory1')
+            ->sort()
+            ->values();
 
-    $allPackages = Product::query()
-        ->whereNotNull('base_uom')
-        ->distinct()
-        ->pluck('base_uom');
+        // Get all unique packages from existing products
+        $allPackages = Product::query()
+            ->whereNotNull('base_uom')
+            ->where('base_uom', '!=', '') // Also ensure it's not an empty string
+            ->distinct()
+            ->pluck('base_uom')
+            ->sort()
+            ->values();
 
         return Inertia::render('orders/index', [
             'products' => PaginatedResourceResponse::make($products, ProductResource::class),

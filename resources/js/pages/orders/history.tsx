@@ -204,13 +204,13 @@ export default function History() {
                         </p>
                         <p className="text-xs text-gray-500">{order.billing_name}</p>
                       </div>
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full font-medium whitespace-nowrap ${
-                          statusColors[order.status] ?? 'bg-gray-100 text-gray-700'
-                        }`}
-                      >
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                      </span>
+                  <span
+                    className={`px-2 py-1 text-xs rounded-full font-medium whitespace-nowrap ${
+                      statusColors[order.status] ?? 'bg-gray-100 text-gray-700'
+                    }`}
+                  >
+                    {statusFilters[order.status] ?? order.status}
+                  </span>
                     </div>
                     <p className="text-xs text-gray-500 mt-3">
                       {format(new Date(order.created_at), 'd MMM yyyy, HH:mm')}
@@ -242,13 +242,13 @@ export default function History() {
                       <p className="text-xs text-gray-500 text-right">
                         {format(new Date(selectedOrder.created_at), 'd MMM yyyy, HH:mm')}
                       </p>
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full font-medium whitespace-nowrap ${
-                          statusColors[selectedOrder.status] ?? 'bg-gray-100 text-gray-700'
-                        }`}
-                      >
-                        {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
-                      </span>
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full font-medium whitespace-nowrap ${
+                        statusColors[selectedOrder.status] ?? 'bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      {statusFilters[selectedOrder.status] ?? selectedOrder.status}
+                    </span>
                     </div>
                   </div>
                 </CardHeader>

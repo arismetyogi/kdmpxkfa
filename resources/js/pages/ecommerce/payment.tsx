@@ -1,6 +1,10 @@
 import { Head, router } from '@inertiajs/react';
 import React, { useState, useEffect } from 'react';
 import HeaderLayout from '@/layouts/header-layout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CreditCard, Wallet } from 'lucide-react';
 
 interface CartItem {
     id: string | number;
@@ -17,12 +21,6 @@ interface CartItem {
 }
 
 interface PaymentProps {
-    cartItems: CartItem[];
-    totalQuantity: number;
-    totalPrice: number;
-    subtotal: number;
-    shipping_amount: number;
-    tax: number;
     billing: {
         first_name: string;
         last_name: string;
@@ -49,35 +47,31 @@ interface PaymentProps {
 }
 
 export default function PaymentPage({
-    // cartItems,
-    // totalPrice,
-    // subtotal,
-    // shipping_amount,
-    // tax,
     billing,
     shipping,
 }: PaymentProps) {
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cad');
+    const [sourceOfFund, setSourceOfFund] = useState('pinjaman');
+    const [paymentType, setPaymentType] = useState('CAD'); // Default to Cash on Delivery / Against Document
     const [isProcessing, setIsProcessing] = useState(false);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  useEffect(() => {
-    const storedCart = localStorage.getItem("cart");
-    if (storedCart) setCartItems(JSON.parse(storedCart));
-  }, [])
+    
+    // Placeholder for credit, replace with actual data if available
+    const remainingCredit = 5000000;
 
-    const handlePaymentMethodChange = (method: string) => {
-        setSelectedPaymentMethod(method);
-    };
+    useEffect(() => {
+        const storedCart = localStorage.getItem("cart");
+        if (storedCart) setCartItems(JSON.parse(storedCart));
+    }, [])
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setIsProcessing(true);
 
-        // Get cart data from localStorage
         const cartData = localStorage.getItem("cart") || "[]";
         
         router.post(route('payment.process'), {
-            payment_method: selectedPaymentMethod,
+            source_of_fund: sourceOfFund,
+            payment_type: paymentType,
             cart: JSON.parse(cartData)
         }, {
             onSuccess: () => {
@@ -89,10 +83,10 @@ export default function PaymentPage({
         });
     };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const ppn = subtotal * 0.11;
-  const grandTotal = subtotal + ppn;
-  const shipping_amount = 0;
+    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const ppn = subtotal * 0.11;
+    const grandTotal = subtotal + ppn;
+    const shipping_amount = 0;
 
     return (
         <HeaderLayout>
@@ -103,57 +97,87 @@ export default function PaymentPage({
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                     {/* Payment Methods */}
                     <div className="lg:col-span-2">
-                        <div className="rounded-lg bg-white p-6 shadow-sm">
-                            <h2 className="mb-4 text-lg font-semibold text-gray-800">Payment Method</h2>
-
-                            <form onSubmit={handleSubmit}>
-                                <div className="space-y-4">
-                                    <div className="flex items-center">
-                                        <input
-                                            type="radio"
-                                            id="cad"
-                                            name="payment_method"
-                                            value="cad"
-                                            checked={selectedPaymentMethod === 'cad'}
-                                            onChange={() => handlePaymentMethodChange('cad')}
-                                            className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                        />
-                                        <label htmlFor="cod" className="ml-3 block text-sm font-medium text-gray-700">
-                                            Cash after Delivery
-                                        </label>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Payment Method</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    {/* Mandiri (Disabled) */}
+                                    <div className="cursor-not-allowed rounded-xl p-4 flex items-center justify-between border-2 border-gray-200 opacity-50">
+                                        <div className="flex items-center gap-3">
+                                            <div className="bg-yellow-400 p-3 rounded-full">
+                                                <CreditCard className="w-6 h-6 text-white" />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-semibold text-gray-800">Bank Mandiri</h3>
+                                                <p className="text-sm text-gray-600">Virtual Account</p>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div className="flex items-center">
-                                        <input disabled
-                                            type="radio"
-                                            id="va"
-                                            name="payment_method"
-                                            value="va"
-                                            checked={selectedPaymentMethod === 'va'}
-                                            onChange={() => handlePaymentMethodChange('va')}
-                                            className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                        />
-                                        <label htmlFor="va" className="ml-3 block text-sm font-medium text-gray-700">
-                                            Virtual Account
-                                        </label>
+                                    {/* BCA (Disabled) */}
+                                    <div className="cursor-not-allowed rounded-xl p-4 flex items-center justify-between border-2 border-gray-200 opacity-50">
+                                        <div className="flex items-center gap-3">
+                                            <div className="bg-blue-500 p-3 rounded-full">
+                                                <CreditCard className="w-6 h-6 text-white" />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-semibold text-gray-800">Bank BCA</h3>
+                                                <p className="text-sm text-gray-600">Virtual Account</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-
-                                <div className="mt-8">
-                                    <button
-                                        type="submit"
-                                        disabled={isProcessing}
-                                        className="w-full rounded-md bg-indigo-600 px-4 py-3 text-white hover:bg-indigo-700 disabled:opacity-50"
+                                    
+                                    {/* pinjaman Koperasi (Enabled) */}
+                                    <div
+                                        className={`rounded-xl p-4 flex flex-col gap-3 border-2 transition-all duration-200 ${
+                                            sourceOfFund === 'pinjaman' ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200'
+                                        }`}
                                     >
-                                        {isProcessing ? 'Processing...' : 'Place Order'}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="bg-gray-500 p-3 rounded-full">
+                                                <Wallet className="w-6 h-6 text-white" />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-semibold text-gray-800">Kredit Koperasi</h3>
+                                                <p className="text-sm text-gray-600">
+                                                    Remaining Credits: Rp {remainingCredit.toLocaleString()}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-2 pl-12">
+                                            <Label className="mb-2 block font-medium">Payment Type</Label>
+                                            <Select value={paymentType} onValueChange={setPaymentType}>
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select payment type" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="CAD">Cash on Delivery</SelectItem>
+                                                    <SelectItem value="TOP 30" disabled>Term of Payment 30 Days</SelectItem>
+                                                    <SelectItem value="TOP 60" disabled>Term of Payment 60 Days</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-4">
+                                        <button
+                                            type="submit"
+                                            disabled={isProcessing}
+                                            className="w-full rounded-md bg-indigo-600 px-4 py-3 text-white hover:bg-indigo-700 disabled:opacity-50"
+                                        >
+                                            {isProcessing ? 'Processing...' : 'Place Order'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </CardContent>
+                        </Card>
 
                         {/* Billing & Shipping Info */}
                         <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-                            <div className="rounded-lg bg-white p-6 shadow-sm">
+                             <div className="rounded-lg bg-white p-6 shadow-sm">
                                 <h3 className="mb-3 text-md font-semibold text-gray-800">Billing Address</h3>
                                 <div className="text-sm text-gray-600">
                                     <p>{billing.first_name} {billing.last_name}</p>
@@ -187,17 +211,16 @@ export default function PaymentPage({
                         <div className="rounded-lg bg-white p-6 shadow-sm">
                             <h2 className="mb-4 text-lg font-semibold text-gray-800">Order Summary</h2>
                             <div className="space-y-4">
-                                <div className="max-h-60 overflow-y-auto">
+                                <div className="max-h-60 overflow-y-auto pr-2">
                                     {cartItems.map((item) => (
-                                        <div key={item.id} className="flex items-center justify-between py-2">
-                                            <div>
+                                        <div key={item.id} className="flex items-start justify-between py-2">
+                                            <div className='flex-1'>
                                                 <p className="text-sm font-medium text-gray-800">{item.name}</p>
                                                 <p className="text-xs text-gray-500">
                                                     Qty: {item.quantity} {item.order_unit}
-                                                    <span className="block">({item.quantity * item.content} {item.base_uom})</span>
                                                 </p>
                                             </div>
-                                            <p className="text-sm font-medium text-gray-800">
+                                            <p className="text-sm font-medium text-gray-800 whitespace-nowrap">
                                                 Rp{(item.price * item.quantity).toLocaleString()}
                                             </p>
                                         </div>
@@ -217,10 +240,10 @@ export default function PaymentPage({
                                             </span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-gray-600">Tax</span>
+                                            <span className="text-gray-600">Tax (11%)</span>
                                             <span className="font-medium">Rp{ppn.toLocaleString()}</span>
                                         </div>
-                                        <div className="flex justify-between border-t pt-2">
+                                        <div className="flex justify-between border-t pt-2 mt-2">
                                             <span className="text-lg font-semibold text-gray-800">Total</span>
                                             <span className="text-lg font-semibold text-gray-800">
                                                 Rp{grandTotal.toLocaleString()}

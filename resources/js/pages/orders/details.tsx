@@ -167,7 +167,8 @@ export default function Detail() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-1">
-                      <div><span className="font-medium">Method:</span> {order.source_of_fund}</div>
+                      <div><span className="font-medium">Method:</span> {order.payment_method}</div>
+                      <div><span className="font-medium">Source of Fund:</span> {order.source_of_fund}</div>
                       <div><span className="font-medium">Payment Type:</span> {order.payment_type || '-'}</div>
                   </div>
                 </CardContent>

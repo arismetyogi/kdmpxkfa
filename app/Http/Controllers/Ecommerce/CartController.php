@@ -271,7 +271,8 @@ class CartController extends Controller
         // Let's create a temporary solution by modifying how we call the service
 
         $request->validate([
-            'payment_method' => 'required|string|in:va,cad',
+            'source_of_fund' => 'required|string|',
+            'payment_type' => 'required|string|',
             'cart' => 'required|array|min:1',
         ]);
 
@@ -303,12 +304,12 @@ class CartController extends Controller
                 'transaction_number' => \App\Models\Order::generateTransactionNumber(),
                 'user_id' => auth()->id(),
                 'tenant_id' => auth()->user()->tenant_id,
-                'source_of_fund' => 'pinjaman',
+                'source_of_fund' => $request->source_of_fund,
                 'status' => OrderStatusEnum::CREATED->value,
                 'account_no' => '', // This would need to be set based on your business logic
                 'account_bank' => '', // This would need to be set based on your business logic
-                'payment_type' => 'Cash on Delivery', // todo! no other payment available currently, subjects to change
-                'payment_method' => $request->payment_method,
+                'payment_type' => $request->payment_type, // todo! no other payment available currently, subjects to change
+                'payment_method' => '',
                 'va_number' => '', // This would need to be set based on your business logic
                 'subtotal' => $totalAmount,
                 'tax_amount' => $totalAmount * 0.11, // You can calculate tax based on your business logic
