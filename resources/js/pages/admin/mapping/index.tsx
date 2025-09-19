@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, FileDown, Search, Info, Trash2, Link2, Users, Shield, UserX, Edit } from 'lucide-react';
+import { Plus, FileDown, Search, Users, Shield, UserX, Edit, Link2 } from 'lucide-react';
 import UserMappingModal from '@/components/admin/UserMappingModal';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -101,11 +101,12 @@ export default function Mapping({ users, apoteks, allUsers, activeUsers }: Mappi
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="User Mapping" />
 
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4 md:p-6">
+            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4 md:p-6">
+                {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">User Mapping</h1>
-                        <p className="text-muted-foreground">Manage user details, roles and their associated apoteks</p>
+                        <p className="text-muted-foreground">Manage user details, roles, and their assigned apoteks</p>
                     </div>
                     <Button
                         variant="outline"
@@ -115,39 +116,44 @@ export default function Mapping({ users, apoteks, allUsers, activeUsers }: Mappi
                         <FileDown className="w-4 h-4" /> Export
                     </Button>
                 </div>
+
+                {/* Statistic Cards */}
                 <div className="grid gap-4 md:grid-cols-3">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <Card className="bg-white dark:bg-gray-800 shadow-md rounded-xl hover:shadow-xl transition-all duration-300">
+                        <CardHeader className="flex items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <Users className="h-5 w-5 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{allUsers}</div>
-                            <p className="text-xs text-muted-foreground">All users in the system</p>
+                            <div className="text-2xl font-bold text-center">{allUsers}</div>
+                            <p className="text-xs text-muted-foreground text-center">All registered users</p>
                         </CardContent>
                     </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-                            <Shield className="h-4 w-4 text-muted-foreground" />
+
+                    <Card className="bg-white dark:bg-gray-800 shadow-md rounded-xl hover:shadow-xl transition-all duration-300">
+                        <CardHeader className="flex items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">Mapped Users</CardTitle>
+                            <Link2 className="h-5 w-5 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{activeUsers}</div>
-                            <p className="text-xs text-muted-foreground">Active users in the system</p>
+                            <div className="text-2xl font-bold text-center">{users.data.filter(u => u.apotek !== null).length}</div>
+                            <p className="text-xs text-muted-foreground text-center">Users assigned to an apotek</p>
                         </CardContent>
                     </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Dormant</CardTitle>
-                            <UserX className="h-4 w-4 text-red-300" />
+
+                    <Card className="bg-white dark:bg-gray-800 shadow-md rounded-xl hover:shadow-xl transition-all duration-300">
+                        <CardHeader className="flex items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">Not Mapped</CardTitle>
+                            <UserX className="h-5 w-5 text-rose-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{allUsers - activeUsers}</div>
-                            <p className="text-xs text-muted-foreground">Total inactive users in the system</p>
+                            <div className="text-2xl font-bold text-center">{users.data.filter(u => u.apotek === null).length}</div>
+                            <p className="text-xs text-muted-foreground text-center">Users not yet assigned</p>
                         </CardContent>
                     </Card>
                 </div>
 
+                {/* Filters & Search */}
                 <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
                     <div className="flex gap-2 flex-wrap">
                         <Button
@@ -183,6 +189,7 @@ export default function Mapping({ users, apoteks, allUsers, activeUsers }: Mappi
                     </div>
                 </div>
 
+                {/* User Table */}
                 <Card className="rounded-xl overflow-hidden">
                     <CardHeader>
                         <CardTitle>Users</CardTitle>
@@ -196,7 +203,7 @@ export default function Mapping({ users, apoteks, allUsers, activeUsers }: Mappi
                                         <TableHead>Role</TableHead>
                                         <TableHead>Permissions</TableHead>
                                         <TableHead>Status</TableHead>
-                                        <TableHead>Outlet Mapping</TableHead>
+                                        <TableHead>Apotek Mapping</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -217,7 +224,7 @@ export default function Mapping({ users, apoteks, allUsers, activeUsers }: Mappi
                                                             </Badge>
                                                         ))
                                                     ) : (
-                                                        <span className="text-sm text-muted-foreground">No role assigned</span>
+                                                        <span className="text-sm text-muted-foreground">No role</span>
                                                     )}
                                                 </div>
                                             </TableCell>
@@ -243,7 +250,7 @@ export default function Mapping({ users, apoteks, allUsers, activeUsers }: Mappi
                                             <TableCell>
                                                 <div className="flex items-center space-x-2">
                                                     {user.apotek ?
-                                                        user.apotek?.name
+                                                        user.apotek.name
                                                         :
                                                         <Button variant="outline" size="sm" onClick={() => handleMapUserApotek(user)}>
                                                             <Edit className="h-4 w-4" /> Map

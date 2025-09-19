@@ -13,60 +13,67 @@ use Inertia\Inertia;
 
 class MappingController extends Controller
 {
-    /**
-     * Display the mapping page.
-     */
-    public function index(Request $request)
-    {
-        // Check if user has permission to view users
-        if (! $request->user()->can('view users')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $users = User::query()->with('apotek', 'roles', 'permissions')->whereDoesntHave('roles', function ($q) {
-            $q->whereIn('name', ['super-admin', 'admin']);
-        });
-
-        $paginatedUsers = $users->latest()->paginate(15);
-
-        return Inertia::render('admin/mapping/index', [
-            'users' => PaginatedResourceResponse::make($paginatedUsers, UserResource::class),
-            'allUsers' => User::all()->count(),
-            'activeUsers' => User::active()->count(),
-            'apoteks' => Apotek::active()->get(),
-        ]);
+    
+   public function index(Request $request)
+{
+    if (! $request->user()->can('view users')) {
+        abort(403, 'Unauthorized action.');
     }
+
+    $users = User::query()
+    ->with('apotek', 'roles', 'permissions')
+    ->where('status', 'Approved') // hanya user yang sudah di-approve
+    ->whereDoesntHave('roles', function ($q) {
+        $q->whereIn('name', ['super-admin', 'admin']);
+    })
+    ->latest()
+    ->paginate(15);
+
+ 
+    return Inertia::render('admin/mapping/index', [
+        'users' => PaginatedResourceResponse::make($users, UserResource::class),
+        'allUsers' => User::count(),
+        'activeUsers' => User::active()->count(),
+        'apoteks' => Apotek::active()->get(),
+    ]);
+}
+
 
     /**
      * Map a user to an apotek.
      */
     public function mapUser(Request $request, User $user)
-    {
-        if (! $user) {
-            Log::error('User not found during mapUser', [
-                'userId' => null,
-                'url' => $request->fullUrl(),
-                'payload' => $request->all(),
-            ]);
-
-            return response()->json([
-                'message' => 'User not found',
-            ], 404);
-        }
-
-        if (! $request->user()->can('update users')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $validated = $request->validate([
-            'apotek_id' => ['required', 'exists:apoteks,id'],
+{
+    if (! $user) {
+        Log::error('User not found during mapUser', [
+            'userId' => null,
+            'url' => $request->fullUrl(),
+            'payload' => $request->all(),
         ]);
 
-        $user->update([
-            'apotek_id' => $validated['apotek_id'],
-            'is_active' => true,
-        ]);
-
-        return back()->with('success', 'User mapped successfully.');
+        return response()->json([
+            'message' => 'User not found',
+        ], 404);
     }
+
+    if (! $request->user()->can('update users')) {
+        abort(403, 'Unauthorized action.');
+    }
+
+
+    if ($user->status !== 'Approved') {
+        return back()->with('error', 'User belum di-approve. Tidak bisa di-mapping.');
+    }
+
+    $validated = $request->validate([
+        'apotek_id' => ['required', 'exists:apoteks,id'],
+    ]);
+
+    $user->update([
+        'apotek_id' => $validated['apotek_id'],
+        'is_active' => true,
+    ]);
+
+    return back()->with('success', 'User mapped successfully.');
+}
 }

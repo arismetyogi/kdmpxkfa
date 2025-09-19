@@ -88,9 +88,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/{purchase}/reject', [PurchaseController::class, 'reject'])->name('reject');
         });
 
-        // Rute untuk manajemen Mapping dan Akun
-        Route::get('/mapping', [MappingController::class, 'index'])->name('mapping.index');
-        Route::get('/account', [AccountManageController::class, 'index'])->name('account.index');
+      Route::prefix('admin/account')->name('account.')->group(function () {
+    Route::get('/', [AccountManageController::class, 'index'])->name('index');
+    Route::post('/{user}/approve', [AccountManageController::class, 'approve'])->name('approve');
+    Route::post('/{user}/reject', [AccountManageController::class, 'reject'])->name('reject');
+});
+
+
+
+
+        Route::prefix('mapping')->name('mapping.')->group(function () {
+        Route::get('/', [MappingController::class, 'index'])->name('index');
+        Route::post('/{user}/map', [MappingController::class, 'mapUser'])->name('map');
+        });
 
         // Rute CRUD Resources
         Route::resource('permissions', PermissionController::class)->except(['show', 'edit']);

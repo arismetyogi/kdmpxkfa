@@ -3,7 +3,7 @@ import AppLayout from "@/layouts/app-layout";
 import { type BreadcrumbItem } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, User } from "lucide-react";
+import { Calendar, User, Mail } from "lucide-react";
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -14,6 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { format } from "date-fns";
+import { Inertia } from "@inertiajs/inertia";
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: "Dashboard", href: "/dashboard" },
@@ -47,16 +48,21 @@ export default function MappingUsers() {
     return matchStatus && matchName && matchDate;
   });
 
-  // Approve / Reject handler
   const handleConfirm = (type: "approve" | "reject", account: any) => {
-    setAccountsState((prev: any[]) =>
-      prev.map((acc) =>
-        acc.id === account.id
-          ? { ...acc, status: type === "approve" ? "Approved" : "Rejected" }
-          : acc
-      )
-    );
-    setConfirmAction(null);
+    const url = `account/${account.id}/${type}`;
+    Inertia.post(url, {}, {
+      onSuccess: () => {
+        setAccountsState((prev: any[]) =>
+          prev.map(acc =>
+            acc.id === account.id
+              ? { ...acc, status: type === "approve" ? "Approved" : "Rejected" }
+              : acc
+          )
+        );
+        setConfirmAction(null);
+      },
+      onError: (errors) => console.error(errors),
+    });
   };
 
   return (
@@ -79,6 +85,19 @@ export default function MappingUsers() {
             <Button
               key={s}
               variant={filter === s ? "default" : "outline"}
+              className={`transition-all duration-200 ${
+                s === "Pending"
+                  ? filter === s
+                    ? "bg-yellow-600 text-white hover:bg-yellow-700"
+                    : "border-yellow-400 text-yellow-600 hover:bg-yellow-50"
+                  : s === "Approved"
+                  ? filter === s
+                    ? "bg-teal-600 text-white hover:bg-teal-700"
+                    : "border-teal-400 text-teal-600 hover:bg-teal-50"
+                  : filter === s
+                  ? "bg-red-700 text-white hover:bg-red-800"
+                  : "border-red-400 text-red-700 hover:bg-red-50"
+              }`}
               onClick={() => setFilter(s as any)}
             >
               {s} ({accountsState.filter((a: any) => a.status === s).length})
@@ -92,7 +111,7 @@ export default function MappingUsers() {
             placeholder="Search by cooperative name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="max-w-sm"
+            className="max-w-sm rounded-full"
           />
           <div className="flex items-center gap-2">
             <Calendar size={18} />
@@ -106,57 +125,42 @@ export default function MappingUsers() {
         </div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
           {filteredAccounts.length > 0 ? (
             filteredAccounts.map((acc: any) => (
               <Card
                 key={acc.id}
-                className="border border-gray-200 dark:border-gray-700 shadow-md dark:bg-gray-800 hover:shadow-lg hover:scale-[1.01] transition-all duration-300 rounded-2xl"
+                className="border border-gray-200 dark:border-gray-700 shadow-lg dark:bg-gray-800 rounded-xl hover:shadow-xl transition-all duration-300"
               >
-                <CardContent className="p-5 flex flex-col gap-4">
+                <CardContent className="p-6 flex flex-col justify-between gap-4">
+                  {/* Header */}
                   <div className="flex justify-between items-start">
-                    <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">
-                      {acc.tenant_name || acc.name}
-                    </h3>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        {acc.tenant_name || acc.name}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                        <Mail className="w-4 h-4" />: {acc.email}
+                      </p>
+                    </div>
                     <span
-                      className={`px-3 py-1 text-xs font-semibold rounded-full shadow-sm ${
+                      className={`px-3 py-1 text-xs font-medium rounded-full ${
                         acc.status === "Pending"
-                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+                          ? "bg-yellow-200 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
                           : acc.status === "Approved"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                          : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                          ? "bg-teal-600 text-white"
+                          : "bg-red-700 text-white"
                       }`}
                     >
                       {acc.status}
                     </span>
                   </div>
 
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    📅{" "}
-                    {acc.created_at
-                      ? format(new Date(acc.created_at), "yyyy-MM-dd, hh:mm:ss a")
-                      : "-"}
-                  </p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">
-                    👤 {acc.name}
-                  </p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">
-                    📧 {acc.email}
-                  </p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">
-                    📞 {acc.phone ?? "-"}
-                  </p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">
-                    🏥 {acc.apotek?.name ?? "-"}
-                  </p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">
-                    🔑 {acc.roles?.map((r: any) => r.name).join(", ")}
-                  </p>
-
-                  <div className="flex gap-3 mt-3">
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 mt-3">
                     <Button
                       variant="outline"
-                      className="flex-1"
+                      className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-100 transition-all duration-200"
                       onClick={() => setSelectedAccount(acc)}
                     >
                       View Details
@@ -164,18 +168,14 @@ export default function MappingUsers() {
                     {acc.status === "Pending" && (
                       <>
                         <Button
-                          className="flex-1 bg-green-600 text-white"
-                          onClick={() =>
-                            setConfirmAction({ type: "approve", account: acc })
-                          }
+                          className="flex-1 bg-teal-600 text-white hover:bg-teal-700 transition-all duration-200"
+                          onClick={() => setConfirmAction({ type: "approve", account: acc })}
                         >
                           Approve
                         </Button>
                         <Button
-                          className="flex-1 bg-red-600 text-white"
-                          onClick={() =>
-                            setConfirmAction({ type: "reject", account: acc })
-                          }
+                          className="flex-1 bg-red-700 text-white hover:bg-red-800 transition-all duration-200"
+                          onClick={() => setConfirmAction({ type: "reject", account: acc })}
                         >
                           Reject
                         </Button>
@@ -186,7 +186,7 @@ export default function MappingUsers() {
               </Card>
             ))
           ) : (
-            <p className="text-gray-500 dark:text-gray-400">
+            <p className="text-gray-500 dark:text-gray-400 col-span-full">
               No {filter} accounts found.
             </p>
           )}
@@ -197,7 +197,7 @@ export default function MappingUsers() {
           open={!!selectedAccount}
           onOpenChange={() => setSelectedAccount(null)}
         >
-          <DialogContent className="max-w-2xl rounded-2xl shadow-lg dark:bg-gray-900 dark:border-gray-700 w-full">
+          <DialogContent className="max-w-2xl rounded-2xl shadow-lg dark:bg-gray-900 dark:border-gray-700 w-full p-6">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-lg font-bold text-blue-600 dark:text-blue-400">
                 <User className="w-5 h-5" /> Account Details
@@ -225,6 +225,14 @@ export default function MappingUsers() {
                     <b>Roles:</b>{" "}
                     {selectedAccount.roles?.map((r: any) => r.name).join(", ")}
                   </p>
+                  <p>
+                    <b>SIA Number:</b>{" "}
+                    {selectedAccount.sia_number}
+                  </p>
+                  <p>
+                    <b>ID Tenant:</b>{" "}
+                    {selectedAccount.tenant_id}
+                  </p>
                 </div>
               </div>
             )}
@@ -234,13 +242,13 @@ export default function MappingUsers() {
         {/* Confirm Modal */}
         <Dialog open={!!confirmAction} onOpenChange={() => setConfirmAction(null)}>
           {confirmAction && (
-            <DialogContent className="max-w-md rounded-xl dark:bg-gray-900 dark:border-gray-700">
+            <DialogContent className="max-w-md rounded-xl dark:bg-gray-900 dark:border-gray-700 p-6">
               <DialogHeader>
                 <DialogTitle className="text-lg font-bold">
                   Konfirmasi {confirmAction.type === "approve" ? "Approve" : "Reject"}
                 </DialogTitle>
               </DialogHeader>
-              <p>
+              <p className="mt-2">
                 Apakah Anda yakin ingin{" "}
                 <b>
                   {confirmAction.type === "approve" ? "Menyetujui" : "Menolak"}
@@ -248,13 +256,19 @@ export default function MappingUsers() {
                 akun <b>{confirmAction.account.name}</b>?
               </p>
               <DialogFooter className="mt-4 flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setConfirmAction(null)}>
+                <Button
+                  variant="outline"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-100 transition-all duration-200"
+                  onClick={() => setConfirmAction(null)}
+                >
                   Batal
                 </Button>
                 <Button
-                  variant={
-                    confirmAction.type === "approve" ? "default" : "destructive"
-                  }
+                  className={`${
+                    confirmAction.type === "approve"
+                      ? "bg-teal-600 text-white hover:bg-teal-700"
+                      : "bg-red-700 text-white hover:bg-red-800"
+                  } transition-all duration-200`}
                   onClick={() =>
                     handleConfirm(confirmAction.type, confirmAction.account)
                   }
