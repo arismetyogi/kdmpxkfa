@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\OrderStatusEnum;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\OrderResource;
+use App\Http\Resources\PaginatedResourceResponse;
 use App\Models\Order;
 use App\Services\Admin\OrderService;
 use App\Services\DigikopTransactionService;
@@ -43,20 +45,21 @@ class OrderController extends Controller
         }
         // Super admin can view all orders (no additional filtering needed)
 
-        $orders = $ordersQuery->latest()->get();
+        $orders = $ordersQuery->latest()->paginate(10);
 
         // Calculate statistics
         $totalOrders = $orders->count();
-        $newOrders = $orders->where('status', 'new')->count();
-        $deliveringOrders = $orders->where('status', 'delivering')->count();
-        $completedOrders = $orders->where('status', 'received')->count();
+        $newOrders = $orders->where('status', OrderStatusEnum::CREATED)->count();
+        $deliveringOrders = $orders->where('status', OrderStatusEnum::DELIVERY)->count();
+        $completedOrders = $orders->where('status', OrderStatusEnum::RECEIVED)->count();
 
         return Inertia::render('admin/orders/index', [
-            'orders' => $orders,
+            'orders' => PaginatedResourceResponse::make($orders, OrderResource::class),
             'totalOrders' => $totalOrders,
             'newOrders' => $newOrders,
             'deliveringOrders' => $deliveringOrders,
             'completedOrders' => $completedOrders,
+            'orderStatuses' => OrderStatusEnum::toArray(),
         ]);
     }
     /**

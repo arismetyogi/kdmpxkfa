@@ -188,6 +188,8 @@ export interface Order {
 
     created_at: string;
     updated_at: string;
+
+    user: User;
 }
 
 export interface OrderItem {

@@ -3,6 +3,7 @@
 namespace App\Services\Auth;
 
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -53,11 +54,11 @@ readonly class SsoService
                 //                'token_type' => 'Bearer',
                 //                'expires_in' => config('jwt.ttl', 3600),
                 'user' => $user,
-                'requires_onboarding' => ! $user->onboarding_completed,
+                'requires_onboarding' => !$user->onboarding_completed,
             ];
 
             // Add prefilled data for onboarding if needed
-            if (! $user->onboarding_completed) {
+            if (!$user->onboarding_completed) {
                 $result['prefilled_data'] = $this->getPrefilledData($userData);
             }
 
@@ -78,7 +79,7 @@ readonly class SsoService
         ];
 
         try {
-            $url = rtrim(config('sso.allowed_origins.digikoperasi.url'), '/').'/redirect-sso/validate';
+            $url = rtrim(config('sso.allowed_origins.digikoperasi.url'), '/') . '/redirect-sso/validate';
 
             $client = Http::withHeaders([
                 'Content-Type' => 'application/json',
@@ -99,8 +100,8 @@ readonly class SsoService
             $responseData = $response->json();
             Log::debug('Response data parsed: ', ['data' => $responseData['data']]);
 
-            if (! $response->ok() || ! isset($responseData['data'])) {
-                throw new \Exception('Invalid response from SSO server: '.$response->body());
+            if (!$response->ok() || !isset($responseData['data'])) {
+                throw new \Exception('Invalid response from SSO server: ' . $response->body());
             }
 
             return $responseData['data'];
@@ -110,7 +111,7 @@ readonly class SsoService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            throw new \Exception('SSO validation failed: '.$e->getMessage());
+            throw new \Exception('SSO validation failed: ' . $e->getMessage());
         }
     }
 
@@ -184,11 +185,11 @@ readonly class SsoService
     {
         $user = User::where('external_id', $userData['sub'])->first();
 
-        if (! $user) {
+        if (!$user) {
             $user = User::where('email', $userData['email'])->first();
         }
 
-        if (! $user) {
+        if (!$user) {
             $user = User::create([
                 'uuid' => Str::uuid(),
                 'name' => $userData['name'],
@@ -254,6 +255,36 @@ readonly class SsoService
             'timestamp' => now()->timestamp,
         ]);
 
-        return $baseUrl.'/sso/callback?'.$params;
+        return $baseUrl . '/sso/callback?' . $params;
+    }
+
+    private function decryptSsoField($encryptedValue, $stateSecret)
+    {
+        if (empty($encryptedValue) || empty($stateSecret)) {
+            return null;
+        }
+        try {
+            $algorithm = 'aes-256-cbc';
+            $data = base64_decode($encryptedValue);
+            $parts = explode(':', $data, 2);
+            if (count($parts) !== 2) {
+                throw new Exception('Format data terenkripsi tidak valid');
+            }
+            $ivHex = $parts[0];
+            $encrypted = $parts[1];
+            // Buat kunci 32-byte dari secret
+            $key = hash('sha256', $stateSecret, true);
+            $iv = hex2bin($ivHex);
+            $decrypted = openssl_decrypt($encrypted, $algorithm, $key,
+                OPENSSL_RAW_DATA,
+                $iv);
+            if ($decrypted === false) {
+                throw new Exception('Dekripsi gagal');
+            }
+            return json_decode($decrypted, true);
+        } catch (Exception $e) {
+            Log::error('Dekripsi field SSO gagal: ' . $e->getMessage());
+            return null;
+        }
     }
 }
