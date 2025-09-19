@@ -1,16 +1,18 @@
 import React from "react";
 import { ShoppingCart } from "lucide-react";
-import { Product, CartItem } from '@/types/index.js';
+import { Product } from '@/types/index.js';
+import { motion } from "framer-motion";
 
 interface ProductCardProps {
     product: Product;
+    compact?: boolean;
+    addToCart: (product: Product) => void;
     updateCartItems?: () => void;
 }
 
-export default function ProductCard({ product, updateCartItems }: ProductCardProps) {
+export default function ProductCard({ product, addToCart, compact = false }: ProductCardProps) {
     const {
         id,
-        sku,
         name,
         price,
         base_uom,
@@ -18,60 +20,103 @@ export default function ProductCard({ product, updateCartItems }: ProductCardPro
         image,
         is_active,
         content,
-        weight,
         category,
     } = product;
+
+  const buttonVariants = {
+    hover: { scale: 1.05 },
+    tap: { scale: 0.95 },
+  };
+
+  const cardVariants = {
+    hover: { 
+      y: compact ? -3 : -5,
+      boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
+      transition: { duration: 0.2 }
+    },
+    tap: { 
+      scale: 0.98,
+      transition: { duration: 0.1 }
+    }
+  };
+
+  const imageVariants = {
+    hover: { 
+      scale: 1.05,
+      transition: { duration: 0.3 }
+    }
+  };
+
+  if (compact) {
+    return (
+      <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="border rounded-lg p-2 shadow-sm transition-colors flex flex-col justify-between h-full relative cursor-pointer"
+          onClick={() => window.location.href = route('orders.show', { id })}
+          variants={cardVariants}
+          whileHover="hover"
+          whileTap="tap"
+      >
+        
+        {/* Floating Category Badge */}
+        <div className="relative w-full mb-2 overflow-hidden rounded-md">
+        {category?.main_category && (
+          <span className="absolute top-1 z-10 right-1 text-xs px-1 py-0.5 rounded-full bg-blue-100 text-blue-800 whitespace-nowrap shadow">
+            {category.main_category}
+          </span>
+        )}
+
+        {/* Bagian Atas */}
+        <div>
+          <motion.img
+            src={image}
+            alt={name}
+            className="w-full h-46 object-cover rounded-md mb-6"
+            variants={imageVariants}
+            whileHover="hover"
+          />
+          </div>
+
+          <h3 className="font-semibold leading-tight text-sm mb-1">
+            {name.length > 25 ? name.slice(0, 16) + "..." : name}
+          </h3>
+
+          <div className="flex items-center justify-between gap-1">
+          <span className="text-xs text-muted-foreground block">
+            {content} {base_uom} per {order_unit}
+          </span>
+          <div>
+          <p className="text-md font-bold text-blue-600 pr-2">
+            Rp {price?.toLocaleString('id-ID') ?? "0"}
+          </p>
+        </div>
+
+
+
+        </div>
+      </div>
+
+
+      </motion.div>
+    );
+  }
 
     // Calculate price per order unit
     const pricePerOrderUnit = price / content;
 
-    const addToCart = () => {
-        if (!is_active) return;
-        
-        const newItem: CartItem = {
-            id: id,
-            sku: sku,
-            name: name,
-            price: price,
-            image: image,
-            order_unit: order_unit,
-            weight: weight,
-            quantity: 1,
-            content: content,
-            base_uom: base_uom
-        };
-
-        // Get current cart from localStorage
-        const storedCart = localStorage.getItem("cart");
-        const cart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
-        
-        // Check if item already exists in cart
-        const existingItemIndex = cart.findIndex(item => item.sku === sku);
-        
-        let updatedCart;
-        if (existingItemIndex >= 0) {
-            // Update quantity if item exists
-            updatedCart = [...cart];
-            updatedCart[existingItemIndex] = {
-                ...updatedCart[existingItemIndex],
-                quantity: updatedCart[existingItemIndex].quantity + 1
-            };
-        } else {
-            // Add new item to cart
-            updatedCart = [...cart, newItem];
-        }
-
-        // Update localStorage
-        localStorage.setItem("cart", JSON.stringify(updatedCart));
-        
-        // Notify parent component to update cart items
-        if (updateCartItems) {
-            updateCartItems();
-        }
-    };
-
     return (
-        <div className="relative flex h-full flex-col justify-between rounded-lg border p-3 shadow-sm transition-colors">
+    <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="border rounded-lg p-3 shadow-sm transition-colors flex flex-col justify-between h-full relative cursor-pointer"
+        onClick={() => window.location.href = route('orders.show', { id })}
+        variants={cardVariants}
+        whileHover="hover"
+        whileTap="tap"
+    >
             {/* Floating Category Badge */}
             {category?.subcategory1 && (
                 <span className="absolute top-2 right-2 rounded-full bg-blue-100 px-2 py-1 text-xs whitespace-nowrap text-blue-800 shadow">
@@ -114,9 +159,15 @@ export default function ProductCard({ product, updateCartItems }: ProductCardPro
                 </p>
 
                 {/* Full width Add to Cart button */}
-                <button
+                <motion.button
                     disabled={!is_active}
-                    onClick={addToCart}
+                    onClick={(e) => {
+                        e.stopPropagation(); 
+                        addToCart(product)}
+                    }
+                    variants={buttonVariants}
+                    whileHover="hover"
+                    whileTap="tap"
                     className={`w-full flex items-center justify-center gap-2 mt-2 px-3 py-2 rounded text-white font-semibold transition-colors ${
                         is_active
                             ? "bg-blue-600 hover:bg-blue-700"
@@ -124,8 +175,8 @@ export default function ProductCard({ product, updateCartItems }: ProductCardPro
                     }`}
                 >
                     <ShoppingCart size={16} /> Add to Cart
-                </button>
+                </motion.button>
             </div>
-        </div>
+        </motion.div>
     );
 }

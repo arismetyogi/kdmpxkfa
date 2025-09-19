@@ -50,13 +50,16 @@ export default function PaymentPage({
     billing,
     shipping,
 }: PaymentProps) {
-    const [sourceOfFund, setSourceOfFund] = useState('pinjaman');
+    const [sourceOfFund] = useState('pinjaman');
     const [paymentType, setPaymentType] = useState('CAD'); // Default to Cash on Delivery / Against Document
     const [isProcessing, setIsProcessing] = useState(false);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     
     // Placeholder for credit, replace with actual data if available
-    const remainingCredit = 5000000;
+    const storedData = localStorage.getItem('creditLimitData')|| 'null';
+    const parsedData = JSON.parse(storedData);
+    const creditLimit = parsedData.creditLimit;
+    
 
     useEffect(() => {
         const storedCart = localStorage.getItem("cart");
@@ -142,7 +145,7 @@ export default function PaymentPage({
                                             <div>
                                                 <h3 className="font-semibold text-gray-800">Kredit Koperasi</h3>
                                                 <p className="text-sm text-gray-600">
-                                                    Remaining Credits: Rp {remainingCredit.toLocaleString()}
+                                                    Remaining Credits: Rp {creditLimit.toLocaleString()}
                                                 </p>
                                             </div>
                                         </div>

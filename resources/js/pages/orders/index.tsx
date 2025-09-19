@@ -117,6 +117,49 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
 
     const totalItems = cartItems.length;
 
+    const addToCart = (product: Product) => {
+        if (!product.is_active) return;
+        
+        const newItem: CartItem = {
+            id: product.id,
+            sku: product.sku,
+            name: product.name,
+            price: product.price,
+            image: product.image,
+            order_unit: product.order_unit,
+            weight: product.weight,
+            quantity: 1,
+            content: product.content,
+            base_uom: product.base_uom
+        };
+
+        // Get current cart from localStorage
+        const storedCart = localStorage.getItem("cart");
+        const cart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
+        
+        // Check if item already exists in cart
+        const existingItemIndex = cart.findIndex(item => item.sku === product.sku);
+        
+        let updatedCart;
+        if (existingItemIndex >= 0) {
+            // Update quantity if item exists
+            updatedCart = [...cart];
+            updatedCart[existingItemIndex] = {
+                ...updatedCart[existingItemIndex],
+                quantity: updatedCart[existingItemIndex].quantity + 1
+            };
+        } else {
+            // Add new item to cart
+            updatedCart = [...cart, newItem];
+        }
+
+        // Update localStorage
+        localStorage.setItem("cart", JSON.stringify(updatedCart));
+        
+        // Notify parent component to update cart items
+        updateCartItems();
+    };
+
 
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
@@ -170,7 +213,7 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                                 {products.data.map((p) => (
                                     <div key={p.id} className="cursor-pointer">
-                                        <ProductCard product={p} updateCartItems={updateCartItems} />
+                                        <ProductCard product={p} addToCart={addToCart} updateCartItems={updateCartItems} />
                                     </div>
                                 ))}
                             </div>
