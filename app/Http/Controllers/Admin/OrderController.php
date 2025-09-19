@@ -167,7 +167,7 @@ class OrderController extends Controller
             'account_bank' => $order->account_bank ?? '', // Optional field
             'payment_type' => $order->payment_type ?? 'cad',
             'payment_method' => $order->payment_method ?? 'Mandiri', // Default to Mandiri
-            'va_number' => ! isNull($order->va_number) ? $order->va_number : '00112233445566', // No Rek KFA
+            'va_number' => $order->va_number ?? '00112233445566', // WARNING! No Rek KFA per BM
             'timestamp' => $order->shipped_at ? $order->shipped_at->toIso8601String() : now()->toIso8601String(), // Use shipped_at timestamp or current time
             'product_detail' => $productDetails,
         ];
