@@ -59,30 +59,12 @@ class OrderController extends Controller
             'completedOrders' => $completedOrders,
         ]);
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Order $order)
     {
-        $order = Order::with(['user', 'user.apotek', 'orderItems.product.category'])->findOrFail($id);
-
+        $order->load(['user', 'user.apotek', 'orderItems.product.category']);
         $user = Auth::user();
 
         // Check if user has permission to view this order
@@ -96,28 +78,17 @@ class OrderController extends Controller
             'order' => $order,
         ]);
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
     /**
      * Update the specified resource in storage.
      */
-   public function update(Request $request, string $id)
-{
-    $order = Order::with('orderItems')->findOrFail($id);
-
-    // Validasi input
-    $request->validate([
-        'order_items' => 'required|array',
-        'order_items.*.id' => 'required|exists:order_items,id',
-        'order_items.*.qty_delivered' => 'required|integer|min:0',
-    ]);
+    public function update(Request $request, Order $order)
+    {
+        // Validate the request
+        $request->validate([
+            'order_items' => 'array',
+            'order_items.*.id' => 'required|exists:order_items,id',
+            'order_items.*.qty_delivered' => 'required|integer|min:0',
+        ]);
 
     // Update qty_delivered di masing-masing order item
     foreach ($request->order_items as $itemData) {
@@ -205,7 +176,7 @@ class OrderController extends Controller
             'account_bank' => $order->account_bank ?? '', // Optional field
             'payment_type' => $order->payment_type ?? 'cad',
             'payment_method' => $order->payment_method ?? 'Mandiri', // Default to Mandiri
-            'va_number' => ! isNull($order->va_number) ? $order->va_number : '00112233445566', // No Rek KFA
+            'va_number' => $order->va_number ?? '00112233445566', // WARNING! No Rek KFA per BM
             'timestamp' => $order->shipped_at ? $order->shipped_at->toIso8601String() : now()->toIso8601String(), // Use shipped_at timestamp or current time
             'product_detail' => $productDetails,
         ];
