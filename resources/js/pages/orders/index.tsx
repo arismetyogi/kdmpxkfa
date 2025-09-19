@@ -164,7 +164,7 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Products" />
-            <h1 className="text-2xl font-bold ml-6 lg:ml-9 text-blue-800">Medicine Catalog</h1>
+            <h1 className="text-2xl font-bold ml-6 lg:ml-9 text-primary">Medicine Catalog</h1>
             <div className="flex flex-col gap-4 p-4 lg:gap-6 lg:p-6 lg:flex-row">
                 {/* Sidebar Filters */}
                 <div className="lg:w-1/5 w-full lg:mr-4">

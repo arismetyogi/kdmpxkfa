@@ -2,6 +2,7 @@ import React from "react";
 import { ShoppingCart } from "lucide-react";
 import { Product } from '@/types/index.js';
 import { motion } from "framer-motion";
+import { cn } from "@/lib/utils"; // Assuming you have a utility for merging class names
 
 interface ProductCardProps {
     product: Product;
@@ -10,7 +11,7 @@ interface ProductCardProps {
     updateCartItems?: () => void;
 }
 
-export default function ProductCard({ product, addToCart, compact = false }: ProductCardProps) {
+export default function ProductCard({ product, compact = false, addToCart }: ProductCardProps) {
     const {
         id,
         name,
@@ -31,7 +32,7 @@ export default function ProductCard({ product, addToCart, compact = false }: Pro
   const cardVariants = {
     hover: { 
       y: compact ? -3 : -5,
-      boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
+      boxShadow: "var(--shadow-md)",
       transition: { duration: 0.2 }
     },
     tap: { 
@@ -53,52 +54,44 @@ export default function ProductCard({ product, addToCart, compact = false }: Pro
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="border rounded-lg p-2 shadow-sm transition-colors flex flex-col justify-between h-full relative cursor-pointer"
+          className="bg-card text-card-foreground border rounded-lg p-2 shadow-sm flex flex-col justify-between h-full relative cursor-pointer"
           onClick={() => window.location.href = route('orders.show', { id })}
           variants={cardVariants}
           whileHover="hover"
           whileTap="tap"
       >
-        
-        {/* Floating Category Badge */}
         <div className="relative w-full mb-2 overflow-hidden rounded-md">
-        {category?.main_category && (
-          <span className="absolute top-1 z-10 right-1 text-xs px-1 py-0.5 rounded-full bg-blue-100 text-blue-800 whitespace-nowrap shadow">
-            {category.main_category}
-          </span>
-        )}
-
-        {/* Bagian Atas */}
-        <div>
-          <motion.img
-            src={image}
-            alt={name}
-            className="w-full h-46 object-cover rounded-md mb-6"
-            variants={imageVariants}
-            whileHover="hover"
-          />
-          </div>
-
-          <h3 className="font-semibold leading-tight text-sm mb-1">
-            {name.length > 25 ? name.slice(0, 16) + "..." : name}
-          </h3>
-
-          <div className="flex items-center justify-between gap-1">
-          <span className="text-xs text-muted-foreground block">
-            {content} {base_uom} per {order_unit}
-          </span>
-          <div>
-          <p className="text-md font-bold text-blue-600 pr-2">
-            Rp {price?.toLocaleString('id-ID') ?? "0"}
-          </p>
+            {category?.main_category && (
+                <span className="absolute top-1 z-10 right-1 text-xs px-1 py-0.5 rounded-full bg-secondary text-secondary-foreground whitespace-nowrap shadow">
+                    {category.main_category}
+                </span>
+            )}
+            <div>
+                <motion.img
+                    src={image && image !== "" ? image : "/products/Placeholder_Medicine.png"}
+                    alt={name}
+                    className="w-full h-46 object-cover rounded-md mb-6"
+                    variants={imageVariants}
+                    whileHover="hover"
+                    onError={({ currentTarget }) => {
+                        currentTarget.src = "/products/Placeholder_Medicine.png";
+                    }}
+                />
+            </div>
+            <h3 className="font-semibold leading-tight text-sm mb-1">
+                {name.length > 25 ? name.slice(0, 16) + "..." : name}
+            </h3>
+            <div className="flex items-center justify-between gap-1">
+                <span className="text-xs text-muted-foreground block">
+                    {content} {base_uom} per {order_unit}
+                </span>
+                <div>
+                    <p className="text-md font-bold text-primary pr-2">
+                        Rp {price?.toLocaleString('id-ID') ?? "0"}
+                    </p>
+                </div>
+            </div>
         </div>
-
-
-
-        </div>
-      </div>
-
-
       </motion.div>
     );
   }
@@ -111,15 +104,14 @@ export default function ProductCard({ product, addToCart, compact = false }: Pro
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="border rounded-lg p-3 shadow-sm transition-colors flex flex-col justify-between h-full relative cursor-pointer"
+        className="bg-card text-card-foreground border rounded-lg p-3 shadow-sm flex flex-col justify-between h-full relative cursor-pointer"
         onClick={() => window.location.href = route('orders.show', { id })}
         variants={cardVariants}
         whileHover="hover"
         whileTap="tap"
     >
-            {/* Floating Category Badge */}
             {category?.subcategory1 && (
-                <span className="absolute top-2 right-2 rounded-full bg-blue-100 px-2 py-1 text-xs whitespace-nowrap text-blue-800 shadow">
+                <span className="absolute top-2 right-2 rounded-full bg-blue-600 px-2 py-1 text-xs whitespace-nowrap text-white shadow">
                     {category.subcategory1}
                 </span>
             )}
@@ -141,12 +133,12 @@ export default function ProductCard({ product, addToCart, compact = false }: Pro
                     {content} {base_uom} per {order_unit}
                 </span>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-muted-foreground"> 
                     Status:{' '}
                     {is_active ? (
                         <span className="font-semibold text-blue-600">Tersedia</span>
                     ) : (
-                        <span className="font-semibold text-red-600">HABIS</span>
+                        <span className="font-semibold text-destructive">HABIS</span>
                     )}
                 </p>
             </div>
@@ -158,7 +150,6 @@ export default function ProductCard({ product, addToCart, compact = false }: Pro
                     Rp {pricePerOrderUnit?.toLocaleString() ?? '0'} per {base_uom}
                 </p>
 
-                {/* Full width Add to Cart button */}
                 <motion.button
                     disabled={!is_active}
                     onClick={(e) => {
@@ -168,11 +159,12 @@ export default function ProductCard({ product, addToCart, compact = false }: Pro
                     variants={buttonVariants}
                     whileHover="hover"
                     whileTap="tap"
-                    className={`w-full flex items-center justify-center gap-2 mt-2 px-3 py-2 rounded text-white font-semibold transition-colors ${
+                    className={cn(
+                        "w-full flex items-center justify-center gap-2 mt-2 px-3 py-2 rounded font-semibold transition-colors",
                         is_active
-                            ? "bg-blue-600 hover:bg-blue-700"
-                            : "bg-gray-400 cursor-not-allowed"
-                    }`}
+                            ? "bg-blue-600 text-primary-foreground" // Active state
+                            : "bg-muted text-muted-foreground cursor-not-allowed"   // Disabled state
+                    )}
                 >
                     <ShoppingCart size={16} /> Add to Cart
                 </motion.button>
