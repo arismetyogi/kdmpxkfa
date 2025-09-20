@@ -10,30 +10,33 @@ interface OrderCompletedProps {
 }
 
 export default function OrderCompletedPage({ order }: OrderCompletedProps) {
-    console.log('ini isi order', order)
     return (
         <HeaderLayout>
             <Head title="Order Completed" />
             <div className="container mx-auto px-4 py-8">
                 <div className="max-w-3xl mx-auto">
                     <div className="text-center mb-8">
-                        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100">
-                            <CheckCircle className="h-10 w-10 text-green-600" />
+                        {/* --- THEME CHANGE #1: Themed success icon --- */}
+                        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/50">
+                            <CheckCircle className="h-10 w-10 text-green-600 dark:text-green-400" />
                         </div>
-                        <h1 className="mt-4 text-2xl font-bold text-gray-800">Order Placed Successfully!</h1>
-                        <p className="mt-2 text-gray-600">
+                        {/* --- THEME CHANGE #2: Themed header text --- */}
+                        <h1 className="mt-4 text-2xl font-bold text-foreground">Order Placed Successfully!</h1>
+                        <p className="mt-2 text-muted-foreground">
                             Thank you for your order. We've sent a confirmation email to {order.billing_email}.
                         </p>
                     </div>
 
-                    <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    {/* --- THEME CHANGE #3: Use card colors for containers --- */}
+                    <div className="bg-card text-card-foreground rounded-lg shadow-sm p-6 mb-6">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <h2 className="text-lg font-semibold text-gray-800">Order #{order.transaction_number}</h2>
-                                <p className="text-sm text-gray-600">Placed on {order.created_at}</p>
+                                <h2 className="text-lg font-semibold">Order #{order.transaction_number}</h2>
+                                <p className="text-sm text-muted-foreground">Placed on {order.created_at}</p>
                             </div>
                             <div className="mt-2 sm:mt-0">
-                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                {/* --- THEME CHANGE #4: Themed status badge --- */}
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                                     {order.status}
                                 </span>
                             </div>
@@ -41,28 +44,28 @@ export default function OrderCompletedPage({ order }: OrderCompletedProps) {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div className="bg-white rounded-lg shadow-sm p-6">
-                            <h3 className="text-md font-semibold text-gray-800 mb-3">Billing Address</h3>
-                            <div className="text-sm text-gray-600">
-                                <p>{order.billing_name}</p>
+                        <div className="bg-card text-card-foreground rounded-lg shadow-sm p-6">
+                            <h3 className="text-md font-semibold mb-3">Billing Address</h3>
+                            <div className="text-sm text-muted-foreground space-y-1">
+                                <p className="text-card-foreground">{order.billing_name}</p>
                                 <p>{order.billing_email}</p>
                                 <p className="mt-2">{order.billing_address}</p>
                                 <p>{order.billing_city}, {order.billing_state} {order.billing_zip}</p>
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg shadow-sm p-6">
-                            <h3 className="text-md font-semibold text-gray-800 mb-3">Shipping Address</h3>
-                            <div className="text-sm text-gray-600">
-                                <p>{order.shipping_name}</p>
+                        <div className="bg-card text-card-foreground rounded-lg shadow-sm p-6">
+                            <h3 className="text-md font-semibold mb-3">Shipping Address</h3>
+                            <div className="text-sm text-muted-foreground space-y-1">
+                                <p className="text-card-foreground">{order.shipping_name}</p>
                                 <p className="mt-2">{order.shipping_address}</p>
                                 <p>{order.shipping_city}, {order.shipping_state} {order.shipping_zip}</p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                        <h3 className="text-md font-semibold text-gray-800 mb-4">Order Items</h3>
+                    <div className="bg-card text-card-foreground rounded-lg shadow-sm p-6 mb-6">
+                        <h3 className="text-md font-semibold mb-4">Order Items</h3>
                         <div className="space-y-4">
                             {order.order_items?.map((item) => (
                                 <div key={item.id} className="flex items-center">
@@ -73,22 +76,23 @@ export default function OrderCompletedPage({ order }: OrderCompletedProps) {
                                             className="h-16 w-16 rounded-md object-cover"
                                         />
                                     ) : (
-                                        <div className="h-16 w-16 rounded-md bg-gray-200 flex items-center justify-center">
-                                            <span className="text-xs text-gray-500">No Image</span>
+                                        // --- THEME CHANGE #5: Themed image placeholder ---
+                                        <div className="h-16 w-16 rounded-md bg-muted flex items-center justify-center">
+                                            <span className="text-xs text-muted-foreground">No Image</span>
                                         </div>
                                     )}
                                     <div className="ml-4 flex-1">
-                                        <h4 className="text-sm font-medium text-gray-800">{item.product_name}</h4>
-                                        <p className="text-sm text-gray-600">
+                                        <h4 className="text-sm font-medium">{item.product_name}</h4>
+                                        <p className="text-sm text-muted-foreground">
                                             {item.quantity} {item.product.order_unit}
                                             <span className="block">({item.quantity * item.product.content} {item.product.base_uom})</span>
                                         </p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-sm font-medium text-gray-800">
+                                        <p className="text-sm font-medium">
                                             Rp{item?.total_price.toLocaleString()}
                                         </p>
-                                        <p className="text-sm text-gray-600">
+                                        <p className="text-sm text-muted-foreground">
                                             Rp{item?.unit_price.toLocaleString()} each
                                         </p>
                                     </div>
@@ -96,29 +100,30 @@ export default function OrderCompletedPage({ order }: OrderCompletedProps) {
                             ))}
                         </div>
 
-                        <div className="mt-6 pt-4 border-t">
+                        <div className="mt-6 pt-4 border-t border-border">
+                            {/* --- THEME CHANGE #6: Use primary color for total for emphasis --- */}
                             <div className="flex justify-between">
-                                <span className="text-lg font-semibold text-gray-800">Total</span>
-                                <span className="text-lg font-semibold text-gray-800">
+                                <span className="text-lg font-semibold text-primary">Total</span>
+                                <span className="text-lg font-semibold text-primary">
                                     Rp{order?.total_price.toLocaleString()}
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                            {/* Action Buttons */}
-                            <div className="mt-4 flex flex-col sm:flex-row justify-center gap-3">
-                                <Link href="/orders/history" className="w-full sm:w-auto">
-                                    <Button variant="outline" className="w-full">
-                                        Go to Order History
-                                    </Button>
-                                </Link>
-                                <Link href={route('orders.products')} className="w-full sm:w-auto">
-                                    <Button className="w-full">
-                                        Continue Shopping
-                                    </Button>
-                                </Link>
-                            </div>
+                    {/* Action Buttons are already themed via the Button component */}
+                    <div className="mt-4 flex flex-col sm:flex-row justify-center gap-3">
+                        <Link href="/orders/history" className="w-full sm:w-auto">
+                            <Button variant="outline" className="w-full">
+                                Go to Order History
+                            </Button>
+                        </Link>
+                        <Link href={route('orders.products')} className="w-full sm:w-auto">
+                            <Button className="w-full bg-blue-600 hover:bg-blue-600/90">
+                                Continue Shopping
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
             </div>
         </HeaderLayout>
