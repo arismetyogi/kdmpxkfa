@@ -24,9 +24,6 @@ const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Order History', href: '/pemesanan/history' },
 ];
 
-// ✅ Samakan dengan seeder
-// const statusFilters = ['Semua', 'On Delivery', 'Received'];
-
 export default function History() {
   const { orders, statusColors, statusFilters } = usePage<{ orders: Order[], statusColors: Record<string, string>, statusFilters: Record<string, string> }>().props;
 
@@ -35,13 +32,6 @@ export default function History() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-
-  // const statusColors: Record<string, string> = {
-  //   'dibuat': 'bg-amber-100 text-amber-700',
-  //   'dalam pengiriman': 'bg-sky-100 text-sky-700',
-  //   'diterima': 'bg-green-100 text-green-700',
-  //   'diproses': 'bg-yellow-100 text-yellow-700',
-  // };
 
   // --- FILTERING & SORTING ---
   const filteredOrders = orders.filter((order) => {
@@ -262,6 +252,16 @@ export default function History() {
                         </p>
                       );
                     }
+
+                    // ✅ Recalculate total from items
+                    const calculatedTotal = items.reduce((sum, item) => {
+                      const qty = item.pivot?.qty_delivered ?? item.pivot?.quantity ?? 1;
+                      return sum + (item.price * qty);
+                    }, 0);
+
+                    // we’ll use this later in CardFooter instead of selectedOrder.total_price
+                    selectedOrder.total_price = calculatedTotal + (calculatedTotal * 0.11);
+
                     const showItems = items.slice(0, 3);
                     const moreCount = items.length > 3 ? items.length - 3 : 0;
 
@@ -284,10 +284,12 @@ export default function History() {
                               <p className="font-medium text-sm leading-tight">
                                 {item.name}
                               </p>
-                              <p className="text-xs text-gray-500">Qty: {item.pivot?.quantity}</p>
+                              <p className="text-xs text-gray-500">
+                                Qty: {item.pivot?.qty_delivered ?? item.pivot?.quantity}
+                              </p>
                             </div>
                             <p className="text-sm font-medium text-gray-600 ml-auto whitespace-nowrap">
-                            {currency(item.price * (item.pivot?.quantity ?? 1))}
+                              {currency(item.price * (item.pivot?.qty_delivered ?? item.pivot?.quantity ?? 1))}
                             </p>
                           </div>
                         ))}

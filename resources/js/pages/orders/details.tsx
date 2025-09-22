@@ -195,14 +195,14 @@ export default function Detail() {
                     )}
                     <div className="flex-1 min-w-0"> {/* Added min-w-0 to prevent overflow */}
                       <div className="font-medium text-base truncate">{item.name}</div> {/* Added truncate */}
-                      <div className="text-sm">Qty: {item.pivot?.quantity}</div>
+                      <div className="text-sm">Qty: {item.pivot?.qty_delivered ?? item.pivot?.quantity}</div>
                     </div>
                     <div className="text-right shrink-0">
                       <div className="font-semibold whitespace-nowrap">
                         {currency(item.price)}
                       </div>
                       <div className="text-sm text-muted-foreground whitespace-nowrap">
-                        {currency(item.price * (item.pivot?.quantity ?? 1))}
+                        {currency(item.price * (item.pivot?.qty_delivered ?? item.pivot?.quantity ?? 1))}
                       </div>
                     </div>
                   </div>
@@ -217,26 +217,48 @@ export default function Detail() {
               <CardHeader>
                 <CardTitle>Order Summary</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-2 text-sm"> {/* Reduced text size */}
-                  <div>Product Price</div>
-                  <div className="text-right">{currency(order.subtotal)}</div>
+<CardContent>
+  {(() => {
+    // ✅ Subtotal (sum of price × quantity)
+    const subtotal = order.products?.reduce((sum, item) => {
+      const qty = item.pivot?.qty_delivered ?? item.pivot?.quantity ?? 1;
+      return sum + (item.price * qty);
+    }, 0) ?? 0;
 
-                  <div>Product Tax</div>
-                  <div className="text-right">{currency(order.tax_amount)}</div>
+    // ✅ Tax (11%)
+    const tax = subtotal * 0.11;
 
-                  <div>Shipping Cost</div>
-                  <div className="text-right">{currency(order.shipping_amount)}</div>
+    // ✅ Shipping cost (fallback 0 if not available)
+    const shipping = order.shipping_amount ?? 0;
 
-                  <div>Discount</div>
-                  <div className="text-right">-{currency(order.discount_amount)}</div>
+    // ✅ Discount (fallback 0 if not available)
+    const discount = order.discount_amount ?? 0;
 
-                  <div className="font-semibold text-base">Total</div> {/* Increased total font size */}
-                  <div className="text-right font-semibold text-base">
-                    {currency(order.total_price)}
-                  </div>
-                </div>
-              </CardContent>
+    // ✅ Final total
+    const total = subtotal + tax ;
+
+    return (
+      <div className="grid grid-cols-2 gap-2 text-sm">
+        <div>Product Price</div>
+        <div className="text-right">{currency(subtotal)}</div>
+
+        <div>Product Tax (11%)</div>
+        <div className="text-right">{currency(tax)}</div>
+
+        <div>Shipping Cost</div>
+        <div className="text-right">{currency(shipping)}</div>
+
+        <div>Discount</div>
+        <div className="text-right">-{currency(discount)}</div>
+
+        <div className="font-semibold text-base">Total</div>
+        <div className="text-right font-semibold text-base">
+          {currency(total)}
+        </div>
+      </div>
+    );
+  })()}
+</CardContent>
             </Card>
 
             {/* Confirmation */}
