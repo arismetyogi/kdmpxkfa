@@ -13,6 +13,7 @@ use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Illuminate\Validation\ValidationException;
 
 use function Pest\Laravel\json;
 
@@ -288,7 +289,10 @@ class CartController extends Controller
             $creditValidation = $transactionService->validateCreditLimit($user->tenant_id, $totalAmount);
 
             if (! $creditValidation['valid']) {
-                return back()->with('error', $creditValidation['message']);
+                // This handles the credit limit business logic failure
+                throw ValidationException::withMessages([
+                    'credit_limit_error' => $creditValidation['message'],
+                ]);
             }
 
             \DB::beginTransaction();
@@ -365,13 +369,17 @@ class CartController extends Controller
 
             \Log::error('Order creation failed with exception: '.$e->getMessage());
 
-            return back()->with('error', 'Koperasi belum dimapping dengan Apotek KF, Silakan hubungi administrator.');
+            throw ValidationException::withMessages([
+                'mapping_error' => 'Koperasi belum dimapping dengan Apotek KF, Silakan hubungi administrator.',
+            ]);
         } catch (\Throwable $e) {
             \DB::rollBack();
 
             \Log::error('Order creation failed with throwable: '.$e->getMessage());
 
-            return back()->with('error', $e->getMessage());
+            throw ValidationException::withMessages([
+                'generic_payment_error' => 'A critical error occurred. Our team has been notified. Please try again later.',
+            ]);
         }
     }
 

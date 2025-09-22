@@ -178,7 +178,6 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                 <a
                                                     key={item.title}
                                                     href={item.href}
-                                                    target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="flex items-center rounded-md py-2 font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                                                 >

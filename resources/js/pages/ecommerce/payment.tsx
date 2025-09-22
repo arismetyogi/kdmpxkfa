@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CreditCard, Wallet } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface CartItem {
     id: string | number;
@@ -57,8 +58,7 @@ export default function PaymentPage({
     
     const storedData = localStorage.getItem('creditLimitData') || 'null';
     const parsedData = JSON.parse(storedData);
-    const creditLimit = parsedData?.creditLimit ?? 0; // Added nullish coalescing for safety
-    
+    const creditLimit = parsedData?.creditLimit ?? 0;
 
     useEffect(() => {
         const storedCart = localStorage.getItem("cart");
@@ -83,6 +83,17 @@ export default function PaymentPage({
             onSuccess: () => {
                 localStorage.removeItem("cart");
             },
+            onError: (errors) => {
+                if (errors.credit_limit_error) {
+                    toast.error("Payment Failed", { description: errors.credit_limit_error });
+                } else if (errors.mapping_error) {
+                    toast.error("Configuration Error", { description: errors.mapping_error });
+                } else if (errors.generic_payment_error) {
+                    toast.error("Payment Failed", { description: errors.generic_payment_error });
+                } else {
+                    toast.error("An unknown error occurred. Please check your details and try again.");
+                }
+            },
             onFinish: () => {
                 setIsProcessing(false);
             }
@@ -97,21 +108,19 @@ export default function PaymentPage({
     return (
         <HeaderLayout>
             <Head title="Payment" />
-            <div className="container mx-auto px-4 py-8">
-                {/* --- THEME CHANGE #1: Use foreground for main title --- */}
+            <div className="container mx-auto px-4 py-8 pb-28 lg:pb-8">
                 <h1 className="mb-8 text-2xl font-bold text-foreground">Payment</h1>
 
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                     {/* Payment Methods */}
                     <div className="lg:col-span-2">
-                        {/* The `Card` component is already themed */}
                         <Card>
                             <CardHeader>
                                 <CardTitle>Payment Method</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <form onSubmit={handleSubmit} className="space-y-4">
-                                    {/* Mandiri (Disabled) - THEME CHANGE #2: Use theme colors */}
+                                <form id="payment-form" onSubmit={handleSubmit} className="space-y-4">
+                                    {/* ... Mandiri and BCA divs ... */}
                                     <div className="cursor-not-allowed rounded-xl p-4 flex items-center justify-between border-2 border-border opacity-50">
                                         <div className="flex items-center gap-3">
                                             <div className="bg-yellow-400 p-3 rounded-full">
@@ -123,8 +132,6 @@ export default function PaymentPage({
                                             </div>
                                         </div>
                                     </div>
-
-                                    {/* BCA (Disabled) - THEME CHANGE #3: Use theme colors */}
                                     <div className="cursor-not-allowed rounded-xl p-4 flex items-center justify-between border-2 border-border opacity-50">
                                         <div className="flex items-center gap-3">
                                             <div className="bg-blue-500 p-3 rounded-full">
@@ -137,14 +144,12 @@ export default function PaymentPage({
                                         </div>
                                     </div>
                                     
-                                    {/* pinjaman Koperasi (Enabled) - THEME CHANGE #4: Use theme colors for selected state */}
                                     <div
                                         className={`rounded-xl p-4 flex flex-col gap-3 border-2 transition-all duration-200 ${
                                             sourceOfFund === 'pinjaman' ? 'border-primary bg-primary/10' : 'border-border'
                                         }`}
                                     >
                                         <div className="flex items-center gap-3">
-                                            {/* --- THEME CHANGE #5: Use secondary for the icon background --- */}
                                             <div className="bg-secondary p-3 rounded-full">
                                                 <Wallet className="w-6 h-6 text-secondary-foreground" />
                                             </div>
@@ -155,10 +160,8 @@ export default function PaymentPage({
                                                 </p>
                                             </div>
                                         </div>
-
                                         <div className="mt-2 pl-12">
                                             <Label className="mb-2 block font-medium">Payment Type</Label>
-                                            {/* The `Select` component is already themed */}
                                             <Select value={paymentType} onValueChange={setPaymentType}>
                                                 <SelectTrigger className="w-full">
                                                     <SelectValue placeholder="Select payment type" />
@@ -172,8 +175,7 @@ export default function PaymentPage({
                                         </div>
                                     </div>
 
-                                    <div className="pt-4">
-                                        {/* --- THEME CHANGE #6: Use primary colors for the button --- */}
+                                    <div className="pt-4 hidden lg:block">
                                         <button
                                             type="submit"
                                             disabled={isProcessing}
@@ -186,44 +188,35 @@ export default function PaymentPage({
                             </CardContent>
                         </Card>
 
-                        {/* Billing & Shipping Info - THEME CHANGE #7: Use card colors */}
+                        {/* ... Billing & Shipping Info ... */}
                         <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
                              <div className="rounded-lg bg-card text-card-foreground p-6 shadow-sm">
                                 <h3 className="mb-3 text-md font-semibold">Billing Address</h3>
                                 <div className="text-sm text-muted-foreground space-y-1">
-                                    <p className="text-card-foreground">
-                                        {billing.first_name} {billing.last_name}
-                                    </p>
+                                    <p className="text-card-foreground">{billing.first_name} {billing.last_name}</p>
                                     <p>{billing.email}</p>
                                     <p>{billing.phone}</p>
                                     <p className="mt-2">{billing.address}</p>
-                                    <p>
-                                        {billing.city}, {billing.state} {billing.zip}
-                                    </p>
+                                    <p>{billing.city}, {billing.state} {billing.zip}</p>
                                     <p>{billing.country}</p>
                                     {billing.notes && <p className="mt-2 italic">Notes: {billing.notes}</p>}
                                 </div>
                             </div>
-
                             <div className="rounded-lg bg-card text-card-foreground p-6 shadow-sm">
                                 <h3 className="text-md mb-3 font-semibold">Shipping Address</h3>
                                 <div className="text-sm text-muted-foreground space-y-1">
-                                    <p className="text-card-foreground">
-                                        {shipping.first_name} {shipping.last_name}
-                                    </p>
+                                    <p className="text-card-foreground">{shipping.first_name} {shipping.last_name}</p>
                                     <p>{shipping.email}</p>
                                     <p>{shipping.phone}</p>
                                     <p className="mt-2">{shipping.address}</p>
-                                    <p>
-                                        {shipping.city}, {shipping.state} {shipping.zip}
-                                    </p>
+                                    <p>{shipping.city}, {shipping.state} {shipping.zip}</p>
                                     <p>{shipping.country}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Order Summary - THEME CHANGE #8: Use card colors */}
+                    {/* ... Order Summary ... */}
                     <div className="lg:col-span-1">
                         <div className="rounded-lg bg-card text-card-foreground p-6 shadow-sm">
                             <h2 className="mb-4 text-lg font-semibold">Order Summary</h2>
@@ -233,43 +226,47 @@ export default function PaymentPage({
                                         <div key={item.id} className="flex items-start justify-between py-2">
                                             <div className='flex-1'>
                                                 <p className="text-sm font-medium">{item.name}</p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    Qty: {item.quantity} {item.order_unit}
-                                                </p>
+                                                <p className="text-xs text-muted-foreground">Qty: {item.quantity} {item.order_unit}</p>
                                             </div>
-                                            <p className="text-sm font-medium whitespace-nowrap">
-                                                Rp{(item.price * item.quantity).toLocaleString()}
-                                            </p>
+                                            <p className="text-sm font-medium whitespace-nowrap">Rp{(item.price * item.quantity).toLocaleString()}</p>
                                         </div>
                                     ))}
                                 </div>
-
                                 <div className="border-t border-border pt-4">
                                     <div className="space-y-2">
-                                        <div className="flex justify-between">
-                                            <span className="text-muted-foreground">Subtotal</span>
-                                            <span className="font-medium">Rp{subtotal.toLocaleString()}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-muted-foreground">Shipping</span>
-                                            {/* --- THEME CHANGE #9: Make "Free" text readable in dark mode --- */}
-                                            <span className="font-medium text-green-600 dark:text-green-400">
-                                                {shipping_amount === 0 ? 'Free' : `Rp${(shipping_amount as number).toLocaleString()}`}
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-muted-foreground">Tax (11%)</span>
-                                            <span className="font-medium">Rp{ppn.toLocaleString()}</span>
-                                        </div>
-                                        {/* --- THEME CHANGE #10: Use primary color for the total --- */}
-                                        <div className="flex justify-between border-t border-border pt-2 mt-2">
-                                            <span className="text-lg font-semibold text-primary">Total</span>
-                                            <span className="text-lg font-semibold text-primary">Rp{grandTotal.toLocaleString()}</span>
-                                        </div>
+                                        <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span className="font-medium">Rp{subtotal.toLocaleString()}</span></div>
+                                        <div className="flex justify-between"><span className="text-muted-foreground">Shipping</span><span className="font-medium text-green-600 dark:text-green-400">{shipping_amount === 0 ? 'Free' : `Rp${(shipping_amount as number).toLocaleString()}`}</span></div>
+                                        <div className="flex justify-between"><span className="text-muted-foreground">Tax (11%)</span><span className="font-medium">Rp{ppn.toLocaleString()}</span></div>
+                                        <div className="flex justify-between border-t border-border pt-2 mt-2"><span className="text-lg font-semibold text-primary">Total</span><span className="text-lg font-semibold text-primary">Rp{grandTotal.toLocaleString()}</span></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* NEW: Mobile Sticky Footer with Centered Layout */}
+            <div className="block lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)] pt-2 pb-3 px-4">
+                <div className="flex flex-col items-center gap-2 max-w-screen-xl mx-auto">
+                    {/* Total Information */}
+                    <div className="text-center">
+                        <span className="text-xs text-muted-foreground">Total Payment</span>
+                        <p className="text-lg font-bold text-primary">
+                            Rp {grandTotal.toLocaleString()}
+                        </p>
+                    </div>
+                    
+                    {/* Checkout Button */}
+                    <div className="w-full max-w-sm">
+                        <button 
+                            type="submit"
+                            form="payment-form"
+                            disabled={isProcessing}
+                            className="w-full rounded-md bg-primary px-4 py-3 text-primary-foreground hover:bg-primary/90 disabled:opacity-50 text-sm font-semibold"
+                        >
+                            {isProcessing ? 'Processing...' : 'Place Order'}
+                        </button>
                     </div>
                 </div>
             </div>

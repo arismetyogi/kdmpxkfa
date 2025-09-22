@@ -42,7 +42,7 @@ export default function Detail() {
   const stepIndexByStatus: Record<string, number> = {
     dibuat: 0,
     diproses: 1,
-    'dalam pengiriman': 2,
+    'dalam-pengiriman': 2,
     diterima: 3,
   };
   const activeIndex = stepIndexByStatus[order.status] ?? 0;
@@ -60,7 +60,7 @@ export default function Detail() {
                 // Added 'Pesanan Diproses' step
                 { key: 'dibuat', label: 'Order Dibuat', icon: <Package size={16} /> },
                 { key: 'diproses', label: 'Pesanan Diproses', icon: <ShoppingBag size={16} /> },
-                { key: 'dalam pengiriman', label: 'Dalam Pengiriman', icon: <Truck size={16} /> },
+                { key: 'dalam-pengiriman', label: 'Dalam Pengiriman', icon: <Truck size={16} /> },
                 { key: 'diterima', label: 'Diterima', icon: <CheckCircle size={16} /> },
               ].map((st, idx) => {
                 const done = idx <= activeIndex;
@@ -240,7 +240,7 @@ export default function Detail() {
             </Card>
 
             {/* Confirmation */}
-            {order.status === 'dalam pengiriman' && (
+            {order.status === 'dalam-pengiriman' && (
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">PAKET SUDAH TIBA</CardTitle> {/* Adjusted title size */}
