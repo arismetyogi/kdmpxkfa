@@ -234,7 +234,7 @@ export default function Detail() {
                   <div className="font-semibold text-base">Total</div> {/* Increased total font size */}
                   <div className="text-right font-semibold text-base">
                     {currency(order.total_price)}
-                  </div>
+                  </div>s
                 </div>
               </CardContent>
             </Card>
