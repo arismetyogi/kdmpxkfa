@@ -39,7 +39,6 @@ export default function Detail() {
     }
   };
 
-  // Updated status mapping to include 'diproses' and a more accurate first step 'dibuat'
   const stepIndexByStatus: Record<string, number> = {
     dibuat: 0,
     diproses: 1,
@@ -59,9 +58,9 @@ export default function Detail() {
             <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:gap-8 justify-center pb-10">
               {[
                 // Added 'Pesanan Diproses' step
-                { key: 'new', label: 'Order Dibuat', icon: <Package size={16} /> },
+                { key: 'dibuat', label: 'Order Dibuat', icon: <Package size={16} /> },
                 { key: 'diproses', label: 'Pesanan Diproses', icon: <ShoppingBag size={16} /> },
-                { key: 'dalam-pengiriman', label: 'Dalam Pengiriman', icon: <Truck size={16} /> },
+                { key: 'dalam pengiriman', label: 'Dalam Pengiriman', icon: <Truck size={16} /> },
                 { key: 'diterima', label: 'Diterima', icon: <CheckCircle size={16} /> },
               ].map((st, idx) => {
                 const done = idx <= activeIndex;
@@ -102,7 +101,7 @@ export default function Detail() {
                 );
               })}
             </div>
-
+        
         <div className="flex flex-col md:flex-row items-start justify-between gap-6">
           {/* LEFT SIDE - Takes full width on mobile, expands on medium screens */}
           <div className="flex-1 space-y-6 w-full md:w-auto">
@@ -122,7 +121,7 @@ export default function Detail() {
                   <Button size="sm" className="w-full sm:w-auto">
                     Send Invoice
                   </Button>
-                  <Link href={route('history.index')} className="w-full sm:w-auto">
+                  <Link href="/orders/history" className="w-full sm:w-auto">
                     <Button
                       size="sm"
                       variant="outline"
@@ -167,7 +166,8 @@ export default function Detail() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-1">
-                      <div><span className="font-medium">Method:</span> {order.source_of_fund}</div>
+                      <div><span className="font-medium">Method:</span> {order.payment_method}</div>
+                      <div><span className="font-medium">Source of Fund:</span> {order.source_of_fund}</div>
                       <div><span className="font-medium">Payment Type:</span> {order.payment_type || '-'}</div>
                   </div>
                 </CardContent>
@@ -240,7 +240,7 @@ export default function Detail() {
             </Card>
 
             {/* Confirmation */}
-            {order.status === 'dalam-pengiriman' && (
+            {order.status === 'dalam pengiriman' && (
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">PAKET SUDAH TIBA</CardTitle> {/* Adjusted title size */}

@@ -84,16 +84,22 @@ class OrderController extends Controller
 
         $products = $query->paginate(12)->withQueryString();
 
-        // Get all unique categories and packages for the filter dropdowns
-        $allCategories = Category::query()
+        // Get all unique categories that have at least one product associated with them
+        $allCategories = Category::whereHas('products')
             ->whereNotNull('subcategory1')
             ->distinct()
-            ->pluck('subcategory1');
+            ->pluck('subcategory1')
+            ->sort()
+            ->values();
 
+        // Get all unique packages from existing products
         $allPackages = Product::query()
             ->whereNotNull('base_uom')
+            ->where('base_uom', '!=', '') // Also ensure it's not an empty string
             ->distinct()
-            ->pluck('base_uom');
+            ->pluck('base_uom')
+            ->sort()
+            ->values();
 
         return Inertia::render('orders/index', [
             'products' => PaginatedResourceResponse::make($products, ProductResource::class),
@@ -102,6 +108,23 @@ class OrderController extends Controller
             'filters' => $request->only(['search', 'categories', 'packages', 'sort_by']),
         ]);
     }
+
+    public function show(Product $product)
+    {
+        $product->load('category:id,subcategory1');
+        // Fetch related products from the same category (limit to 4)
+        $relatedProducts = Product::with('category:id,subcategory1')
+            ->where('category_id', $product->category_id)
+            ->where('id', '!=', $product->id) // Exclude the current product
+            ->limit(10)
+            ->get(['id', 'sku', 'name', 'price', 'image', 'category_id', 'order_unit', 'is_active', 'content', 'base_uom', 'weight']);
+
+        return Inertia::render('ecommerce/DetailProduct', [
+            'product' => $product,
+            'relatedProducts' => $relatedProducts,
+        ]);
+    }
+
 
     public function history()
     {

@@ -54,6 +54,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Rute E-commerce untuk pengguna
     Route::get('/orders/products', [OrderController::class, 'index'])->name('orders.products');
+    Route::get('orders/products/{product}', [OrderController::class, 'show'])->name('orders.show');
     // Route::get('/orders/history', [OrderController::class, 'history'])->name('orders.history');
     Route::post('/orders/{order}/accept', [OrderController::class, 'acceptOrder'])->name('orders.accept');
     Route::get('/cart', [OrderController::class, 'cart'])->name('cart');

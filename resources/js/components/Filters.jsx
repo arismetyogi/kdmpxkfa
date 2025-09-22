@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 
 const FilterCard = ({ icon: Icon, label, isSelected, onClick, color = 'gray' }) => {
@@ -25,9 +26,9 @@ const colorStyles = {
     icon: "text-green-500" 
   },
   gray: { 
-    base: "border-border text-card-foreground hover:bg-blue-50", 
-    selected: "border-primary ring-2 ring-primary/50 bg-blue-100", 
-    icon: "text-primary" 
+    base: "border-border text-card-foreground hover:bg-primary/90 dark:hover:bg-primary/30 hover:text-white dark:hover:text-foreground", 
+    selected: "border-primary text-white dark:text-foreground ring-2 ring-primary/50 bg-primary dark:bg-primary/30", 
+    // icon: "text-primary" 
   },
   blue: {
     base: "border-blue-500/30 text-blue-800 bg-blue-50 hover:bg-blue-100",
@@ -141,7 +142,8 @@ export default function Filters({
   };
 
   return (
-    <div className="lg:w-64 w-full pt-3 pl-4 pr-2 border rounded-lg bg-card text-card-foreground">
+    <ScrollArea className="h-288 lg:w-64 w-full rounded-md border p-4">
+    {/* <div className="lg:w-64 w-full pt-3 pl-4 pr-2 border rounded-lg bg-card text-card-foreground"> */}
       
       <button 
         className="flex items-center justify-between w-full mb-4 lg:hidden"
@@ -250,7 +252,8 @@ export default function Filters({
           </div>
         </div>
       </div>
-    </div>
+    {/* </div> */}
+    </ScrollArea>
   );
 }
 

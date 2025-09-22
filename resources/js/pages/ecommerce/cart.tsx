@@ -1,8 +1,9 @@
 import HeaderLayout from '@/layouts/header-layout';
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, Minus, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BreadcrumbItem } from '@/types';
+import { toast } from 'sonner';
 
 interface CartItem {
     id: string | number;
@@ -67,6 +68,16 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
             href: route('dashboard'),
         },
     ];
+
+const message = localStorage.getItem("cartmsg");
+console.log(message);
+useEffect(() => {
+  if (message) {
+    toast.error(message);
+    localStorage.removeItem("cartRedirectMessage");
+    console.log(message)
+  }
+});
 
     if (cartItems.length === 0) {
         return (

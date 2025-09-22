@@ -270,7 +270,8 @@ class CartController extends Controller
         // Let's create a temporary solution by modifying how we call the service
 
         $request->validate([
-            'payment_type' => 'required|string|in:va,cad',
+            'source_of_fund' => 'required|string|',
+            'payment_type' => 'required|string|',
             'cart' => 'required|array|min:1',
         ]);
 
@@ -300,11 +301,11 @@ class CartController extends Controller
                 'transaction_number' => Order::generateTransactionNumber(),
                 'user_id' => auth()->id(),
                 'tenant_id' => auth()->user()->tenant_id,
-                'source_of_fund' => 'pinjaman',
+                'source_of_fund' => $request->source_of_fund,
                 'status' => OrderStatusEnum::CREATED->value,
                 'account_no' => '', // This would need to be set based on your business logic
                 'account_bank' => '', // This would need to be set based on your business logic
-                'payment_type' => $request['payment_type'], // todo! no other payment available currently, subjects to change
+                'payment_type' => $request->payment_type, // todo! no other payment available currently, subjects to change
                 'payment_method' => 'mandiri',
                 'va_number' => '00112233445566', // No Rek KFA -> branch
                 'subtotal' => $totalAmount,
@@ -353,7 +354,7 @@ class CartController extends Controller
 
             // Clear cart and checkout data from session after successful payment
             // Log::debug("message", session('cart'));
-            // session()->forget(['cart', 'checkout.billing', 'checkout.shipping']);
+            // // session()->forget(['cart', 'checkout.billing', 'checkout.shipping']);
 
             \DB::commit();
 

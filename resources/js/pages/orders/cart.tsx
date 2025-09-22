@@ -3,6 +3,7 @@ import { Head, Link } from "@inertiajs/react";
 import { useState, useEffect } from "react";
 import { type BreadcrumbItem, type CartItem } from "@/types";
 import { ShoppingBag } from "lucide-react";
+import { toast } from "sonner";
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: "Dashboard", href: "/dashboard" },
@@ -16,7 +17,12 @@ export default function Cart() {
   useEffect(() => {
     const storedCart = localStorage.getItem("cart");
     if (storedCart) setCart(JSON.parse(storedCart));
-  }, []);
+  
+  const message = localStorage.getItem("cartmsg")
+   if (message){
+    toast.error(message)
+    localStorage.removeItem("cartmsg")
+   }}, []);
 
   const updateQuantity = (sku: string, delta: number) => {
     const updated = cart
@@ -56,13 +62,13 @@ export default function Cart() {
       <div className="p-4 sm:p-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-blue-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-blue-600 tracking-tight">
             🛒 Keranjang Belanja
           </h1>
           {cart.length > 0 && (
             <button
               onClick={clearCart}
-              className="px-4 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition text-sm sm:text-base"
+              className="px-4 py-2 text-destructive hover:bg-destructive/10 rounded-lg transition text-sm sm:text-base"
             >
               Hapus Semua
             </button>
@@ -71,13 +77,13 @@ export default function Cart() {
 
         {/* Empty State */}
         {cart.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-72 text-gray-500 text-center px-4 bg-gray-50 rounded-2xl shadow-inner">
+          <div className="flex flex-col items-center justify-center h-72 text-muted-foreground text-center px-4 rounded-2xl">
             <ShoppingBag size={80} className="mb-6 opacity-50" />
             <p className="text-lg sm:text-xl font-semibold mb-4">
               Keranjang masih kosong
             </p>
             <Link href={route("orders.products")} className="w-full max-w-xs">
-              <button className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition w-full font-medium shadow-md">
+              <button className="bg-blue-600 text-primary-foreground px-6 py-3 rounded-xl hover:bg-blue-600/90 transition w-full font-medium shadow-md">
                 Mulai Belanja
               </button>
             </Link>
@@ -89,7 +95,7 @@ export default function Cart() {
               {cart.map((item, i) => (
                 <div
                   key={i}
-                  className="flex flex-col sm:flex-row justify-between sm:items-center border border-gray-200 p-5 rounded-xl shadow-md hover:shadow-lg transition bg-white"
+                  className="flex flex-col sm:flex-row justify-between sm:items-center border bg-card text-card-foreground p-5 rounded-xl shadow-md hover:shadow-lg transition"
                 >
                   {/* Info Produk */}
                   <div className="flex items-center gap-5">
@@ -99,13 +105,14 @@ export default function Cart() {
                       className="w-20 h-20 rounded-lg object-cover shadow"
                     />
                     <div>
-                      <h2 className="font-semibold text-lg text-gray-800">
+                      {/* Text now inherits from `text-card-foreground` */}
+                      <h2 className="font-semibold text-lg">
                         {item.name}
                       </h2>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted-foreground">
                         {item.weight} gram / {item.order_unit}
                       </p>
-                      <p className="text-blue-700 font-bold text-base mt-1">
+                      <p className="text-blue-600 font-bold text-base mt-1">
                         Rp {(item.price ?? 0).toLocaleString()}
                       </p>
                     </div>
@@ -113,22 +120,23 @@ export default function Cart() {
 
                   {/* Quantity & Actions */}
                   <div className="flex items-center gap-3 mt-4 sm:mt-0">
+                    {/* --- THEME CHANGE #6: Use secondary colors for interactive elements --- */}
                     <button
                       onClick={() => updateQuantity(item.sku, -1)}
-                      className="px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition font-bold"
+                      className="px-3 py-1.5 bg-secondary rounded-lg hover:bg-secondary/80 transition font-bold"
                     >
                       -
                     </button>
                     <span className="font-semibold text-lg">{item.quantity}</span>
                     <button
                       onClick={() => updateQuantity(item.sku, 1)}
-                      className="px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition font-bold"
+                      className="px-3 py-1.5 bg-secondary rounded-lg hover:bg-secondary/80 transition font-bold"
                     >
                       +
                     </button>
                     <button
                       onClick={() => removeItem(item.sku)}
-                      className="ml-3 text-red-600 hover:text-red-800 text-sm sm:text-base"
+                      className="ml-3 text-destructive hover:text-destructive/80 text-sm sm:text-base"
                     >
                       Hapus
                     </button>
@@ -138,20 +146,20 @@ export default function Cart() {
             </div>
 
             {/* Ringkasan Belanja */}
-            <div className="border border-gray-200 rounded-2xl p-6 shadow-lg bg-white lg:sticky lg:top-20 self-start">
-              <h2 className="font-bold text-xl mb-5 text-gray-800">
+            <div className="border bg-card text-card-foreground rounded-2xl p-6 shadow-lg lg:sticky lg:top-20 self-start">
+              <h2 className="font-bold text-xl mb-5">
                 Ringkasan Belanja
               </h2>
               <div className="space-y-3 text-sm sm:text-base">
-                <div className="flex justify-between text-gray-600">
+                <div className="flex justify-between text-muted-foreground">
                   <span>Subtotal</span>
                   <span>Rp {subtotal.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between text-gray-600">
+                <div className="flex justify-between text-muted-foreground">
                   <span>PPN (11%)</span>
                   <span>Rp {ppn.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between border-t pt-3 mt-3 text-lg sm:text-xl font-bold text-blue-900">
+                <div className="flex justify-between border-t pt-3 mt-3 text-lg sm:text-xl font-bold text-blue-600">
                   <span>Total</span>
                   <span>Rp {grandTotal.toLocaleString()}</span>
                 </div>
@@ -159,8 +167,9 @@ export default function Cart() {
 
               <div className="mt-8">
                 <Link href={route("checkout")} >
+                {/* --- THEME CHANGE #11: Use primary colors for the checkout button, removing gradient for better theming --- */}
                 <button 
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition w-full font-semibold shadow-md"
+                  className="bg-blue-600 text-primary-foreground px-6 py-3 rounded-xl hover:bg-blue-600/90 transition w-full font-semibold shadow-md"
                 >
                   Cetak Purchase Order
                 </button>
@@ -169,13 +178,6 @@ export default function Cart() {
             </div>
           </div>
         )}
-
-{/* Mulai Belanja */}
-{cart.length === 0 && (
-  <div className="mt-8 flex justify-center">
-  </div>
-)}
-
       </div>
     </HeaderLayout>
   );
