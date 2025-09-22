@@ -101,4 +101,44 @@ class SsoController extends Controller
             return $this->errorResponse('Failed to retrieve user data', 500);
         }
     }
+
+    /**
+     * Decrypt an SSO field value
+     */
+    public function decrypt(Request $request)
+    {
+        try {
+            $encryptedValue = $request->input('value');
+
+            if (empty($encryptedValue)) {
+                if ($request->wantsJson()) {
+                    return $this->errorResponse('Missing encrypted value', 400);
+                }
+                return back()->with('error', 'Missing encrypted value');
+            }
+
+            $decrypted = $this->ssoService->decryptSsoField($encryptedValue);
+
+            if ($decrypted === null) {
+                if ($request->wantsJson()) {
+                    return $this->errorResponse('Failed to decrypt value', 400);
+                }
+                return back()->with('error', 'Failed to decrypt value');
+            }
+
+            if ($request->wantsJson()) {
+                return $this->successResponse([
+                    'decrypted' => $decrypted
+                ], 'Value decrypted successfully');
+            }
+
+            return redirect()->back()->with('data', ['decrypted' => $decrypted]);
+
+        } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return $this->errorResponse('Decryption failed: ' . $e->getMessage(), 500);
+            }
+            return back()->with('error', 'Decryption failed: ' . $e->getMessage());
+        }
+    }
 }
