@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             // Tambah status approval user
             $table->string('status')
-                ->default('Pending')
+                ->default('pending')
                 ->after('password');
 
-            
+
             $table->unsignedBigInteger('approved_by')
                 ->nullable()
                 ->after('status');

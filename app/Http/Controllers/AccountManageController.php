@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\RoleEnum;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -11,8 +12,8 @@ class AccountManageController extends Controller
     public function index(Request $request)
     {
         $users = User::with('apotek', 'roles')
-            ->whereDoesntHave('roles', function ($q) {
-                $q->whereIn('name', ['super-admin', 'admin']);
+            ->whereHas('roles', function ($q) {
+                $q->whereIn('name', [RoleEnum::USER->value]);
             })
             ->latest()
             ->get();
@@ -24,12 +25,12 @@ class AccountManageController extends Controller
 
     public function approve(Request $request, User $user)
     {
-        if ($user->status !== 'Pending') {
+        if ($user->status !== 'pending') {
             return back()->with('error', 'User sudah diproses sebelumnya.');
         }
 
         $user->update([
-            'status' => 'Approved',
+            'status' => 'approved',
             'approved_by' => $request->user()->id,
             'approved_at' => now(),
         ]);
@@ -39,12 +40,12 @@ class AccountManageController extends Controller
 
     public function reject(Request $request, User $user)
     {
-        if ($user->status !== 'Pending') {
+        if ($user->status !== 'pending') {
             return back()->with('error', 'User sudah diproses sebelumnya.');
         }
 
         $user->update([
-            'status' => 'Rejected',
+            'status' => 'rejected',
             'approved_by' => $request->user()->id,
             'approved_at' => now(),
         ]);
