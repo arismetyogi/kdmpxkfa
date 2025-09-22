@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\RoleEnum;
 use App\Http\Resources\PaginatedResourceResponse;
 use App\Http\Resources\UserResource;
 use App\Models\Apotek;
@@ -22,8 +23,8 @@ class MappingController extends Controller
         $users = User::query()
             ->with('apotek', 'roles', 'permissions')
             ->where('status', 'approved') // hanya user yang sudah di-approve
-            ->whereDoesntHave('roles', function ($q) {
-                $q->whereIn('name', ['super-admin', 'admin']);
+            ->whereHas('roles', function ($q) {
+                $q->whereIn('name', [RoleEnum::USER]);
             })
             ->latest()
             ->paginate(15);

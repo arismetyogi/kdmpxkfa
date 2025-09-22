@@ -71,7 +71,7 @@ export default function Mapping({ users, apoteks, allUsers }: MappingProps) {
         const rows = filteredUsers.map((u) => [
             u.name,
             u.email,
-            u.roles.length > 0 ? u.roles.map((role) => role.name).join(', ') : 'No Role',
+            u.roles?.map((role) => role.name).join(', ') ?? 'No Role',
             u.is_active ? 'Active' : 'Inactive',
             u.apotek ? u.apotek.name : 'Not Mapped',
         ]);

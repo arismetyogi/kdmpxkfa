@@ -99,6 +99,7 @@ export interface User {
     permissions?: Permission[];
     apotek?: Apotek;
     phone?: string;
+    status: string;
     [key: string]: unknown; // This allows for additional properties...
 }
 
