@@ -6,7 +6,7 @@ import { Category, Product } from '@/types';
 import { X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import SearchableSelect from '@/components/searchable-select';
-import { router } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 
 interface ProductFormModalProps {
     isOpen: boolean;
@@ -16,7 +16,7 @@ interface ProductFormModalProps {
 }
 
 export default function ProductFormModal({ isOpen, onClose, product, categories }: ProductFormModalProps) {
-    const [data, setData] = useState({
+    const { data, setData, post, put, processing, errors, reset } = useForm({
         name: '',
         sku: '',
         description: '',
@@ -32,16 +32,33 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
         height: 0,
         weight: 0,
         price: 0,
-        image: '',
+        image: null as File | string | null,
         is_active: true,
+    } as {
+        name: string;
+        sku: string;
+        description: string;
+        dosage: string[];
+        pharmacology: string;
+        category_id: string;
+        base_uom: string;
+        order_unit: string;
+        content: number;
+        brand: string;
+        length: number;
+        width: number;
+        height: number;
+        weight: number;
+        price: number;
+        image: File | string | null;
+        is_active: boolean;
     });
 
     const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
         if (product) {
-            setData({
+            reset({
                 ...product,
                 category_id: product.category_id?.toString() ?? '',
                 image: product.image ?? '',
@@ -52,7 +69,7 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                 setImagePreview(product.image);
             }
         } else {
-            setData({
+            reset({
                 name: '',
                 sku: '',
                 description: '',
@@ -68,79 +85,33 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                 height: 0,
                 weight: 0,
                 price: 0,
-                image: '',
+                image: null,
                 is_active: true,
             });
             setImagePreview(null);
         }
-    }, [product]);
+    }, [product, reset]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setProcessing(true);
-
-        // Create FormData for proper file upload handling
-        const formData = new FormData();
-
-        // Add all product data to form
-        formData.append('sku', data.sku || '');
-        formData.append('name', data.name || '');
-        formData.append('description', data.description || '');
-        formData.append('pharmacology', data.pharmacology || '');
-        formData.append('category_id', data.category_id || '');
-        formData.append('base_uom', data.base_uom || '');
-        formData.append('order_unit', data.order_unit || '');
-        formData.append('content', data.content?.toString() || '1');
-        formData.append('brand', data.brand || '');
-        formData.append('price', data.price?.toString() || '0');
-        formData.append('weight', data.weight?.toString() || '0');
-        formData.append('length', data.length?.toString() || '0');
-        formData.append('width', data.width?.toString() || '0');
-        formData.append('height', data.height?.toString() || '0');
-        formData.append('is_active', data.is_active ? '1' : '0');
-
-        // Handle dosage array
-        data.dosage.forEach((dose, index) => {
-            formData.append(`dosage[${index}]`, dose);
-        });
-
-        // Append image if File
-        if (data.image instanceof File) {
-            formData.append('image', data.image);
-        }
 
         if (product) {
             // Update existing product
-            formData.append('_method', 'put');
-            router.post(
-                route('admin.products.update', product.id),
-                formData,
-                {
-                    forceFormData: true,
-                    onSuccess: () => {
-                        setProcessing(false);
-                        onClose();
-                    },
-                    onError: () => {
-                        setProcessing(false);
-                    }
+            put(route('admin.products.update', product.id), {
+                data,
+                forceFormData: true,
+                onSuccess: () => {
+                    onClose();
                 },
-            );
+            });
         } else {
             // Create new product
-            router.post(
-                route('admin.products.store'),
-                formData,
-                {
-                    onSuccess: () => {
-                        setProcessing(false);
-                        onClose();
-                    },
-                    onError: () => {
-                        setProcessing(false);
-                    }
-                }
-            );
+            post(route('admin.products.store'), {
+                data,
+                onSuccess: () => {
+                    onClose();
+                },
+            });
         }
     };
     const handleInputChange = (
@@ -151,27 +122,18 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
         // Handle checkbox separately
         if (type === 'checkbox') {
             const checked = (e.target as HTMLInputElement).checked;
-            setData(prev => ({
-                ...prev,
-                [name]: checked,
-            }));
+            setData(name as keyof typeof data, checked as any);
             return;
         }
 
-        setData(prev => ({
-            ...prev,
-            [name]: value,
-        }));
+        setData(name as keyof typeof data, value as any);
     };
 
     // handle image file input
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setData(prev => ({
-                ...prev,
-                image: file,
-            }));
+            setData('image', file as any);
 
             // Create preview
             const reader = new FileReader();
@@ -184,22 +146,16 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
 
     // handle category select (since ShadCN Select doesn't give a real event)
     const handleCategoryChange = (value: string) => {
-        setData(prev => ({
-            ...prev,
-            category_id: value,
-        }));
+        setData('category_id', value as any);
     };
 
     // handle dosage (array of strings) → store as comma-separated input
     const handleDosageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = e.target;
-        setData(prev => ({
-            ...prev,
-            dosage: value
-                .split(',')
-                .map((d) => d.trim())
-                .filter(Boolean),
-        }));
+        setData('dosage', value
+            .split(',')
+            .map((d) => d.trim())
+            .filter(Boolean) as any);
     };
 
     if (!isOpen) return null;
@@ -221,10 +177,12 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                         <div>
                             <Label htmlFor="name">Product Name</Label>
                             <Input id="name" name="name" value={data.name} onChange={handleInputChange} required />
+                            {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
                         </div>
                         <div>
                             <Label htmlFor="sku">SKU</Label>
                             <Input id="sku" name="sku" value={data.sku} onChange={handleInputChange} required />
+                            {errors.sku && <p className="mt-1 text-sm text-red-600">{errors.sku}</p>}
                         </div>
                     </div>
 
@@ -232,20 +190,22 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                         <div>
                             <Label htmlFor="brand">Brand</Label>
                             <Input id="brand" name="brand" value={data.brand} onChange={handleInputChange} required />
+                            {errors.brand && <p className="mt-1 text-sm text-red-600">{errors.brand}</p>}
                         </div>
                         <div>
                             <Label htmlFor="category_id">Category</Label>
                             <SearchableSelect
-                                options={categories.map((c) => ({
-                                    value: c.id.toString(),
-                                    label: `${c.main_category} > ${c.subcategory1} > ${c.subcategory2}`,
-                                }))}
-                                value={data.category_id?.toString()}
-                                onChange={handleCategoryChange}
-                                placeholder="Select category..."
-                                searchPlaceholder="Search for category..."
-                                maxResults={10}
-                            />
+                            options={categories.map((c) => ({
+                                value: c.id.toString(),
+                                label: `${c.main_category} > ${c.subcategory1} > ${c.subcategory2}`,
+                            }))}
+                            value={data.category_id}
+                            onChange={handleCategoryChange}
+                            placeholder="Select category..."
+                            searchPlaceholder="Search for category..."
+                            maxResults={10}
+                        />
+                        {errors.category_id && <p className="mt-1 text-sm text-red-600">{errors.category_id}</p>}
                         </div>
                     </div>
 
@@ -254,14 +214,17 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                         <div>
                             <Label htmlFor="price">Price</Label>
                             <Input id="price" name="price" type="number" step="0.01" value={data.price} onChange={handleInputChange} required />
+                            {errors.price && <p className="mt-1 text-sm text-red-600">{errors.price}</p>}
                         </div>
                         <div>
                             <Label htmlFor="base_uom">Base UOM</Label>
                             <Input id="base_uom" name="base_uom" value={data.base_uom} onChange={handleInputChange} required />
+                            {errors.base_uom && <p className="mt-1 text-sm text-red-600">{errors.base_uom}</p>}
                         </div>
                         <div>
                             <Label htmlFor="order_unit">Order Unit</Label>
                             <Input id="order_unit" name="order_unit" value={data.order_unit} onChange={handleInputChange} required />
+                            {errors.order_unit && <p className="mt-1 text-sm text-red-600">{errors.order_unit}</p>}
                         </div>
                     </div>
 
@@ -269,10 +232,12 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                         <div>
                             <Label htmlFor="content">Content</Label>
                             <Input id="content" name="content" type="number" value={data.content} onChange={handleInputChange} required />
+                            {errors.content && <p className="mt-1 text-sm text-red-600">{errors.content}</p>}
                         </div>
                         <div>
                             <Label htmlFor="weight">Weight (g)</Label>
                             <Input id="weight" name="weight" type="number" value={data.weight} onChange={handleInputChange} required />
+                            {errors.weight && <p className="mt-1 text-sm text-red-600">{errors.weight}</p>}
                         </div>
                     </div>
 
@@ -280,9 +245,18 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                     <div>
                         <Label>Dimensions (cm)</Label>
                         <div className="grid grid-cols-3 gap-2">
-                            <Input name="length" type="number" placeholder="Length" value={data.length} onChange={handleInputChange} required />
-                            <Input name="width" type="number" placeholder="Width" value={data.width} onChange={handleInputChange} required />
-                            <Input name="height" type="number" placeholder="Height" value={data.height} onChange={handleInputChange} required />
+                            <div>
+                                <Input name="length" type="number" placeholder="Length" value={data.length} onChange={handleInputChange} required />
+                                {errors.length && <p className="mt-1 text-sm text-red-600">{errors.length}</p>}
+                            </div>
+                            <div>
+                                <Input name="width" type="number" placeholder="Width" value={data.width} onChange={handleInputChange} required />
+                                {errors.width && <p className="mt-1 text-sm text-red-600">{errors.width}</p>}
+                            </div>
+                            <div>
+                                <Input name="height" type="number" placeholder="Height" value={data.height} onChange={handleInputChange} required />
+                                {errors.height && <p className="mt-1 text-sm text-red-600">{errors.height}</p>}
+                            </div>
                         </div>
                     </div>
 
@@ -290,16 +264,19 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                     <div>
                         <Label htmlFor="pharmacology">Pharmacology</Label>
                         <Textarea id="pharmacology" name="pharmacology" value={data.pharmacology} onChange={handleInputChange} rows={2} />
+                        {errors.pharmacology && <p className="mt-1 text-sm text-red-600">{errors.pharmacology}</p>}
                     </div>
                     <div>
                         <Label htmlFor="dosage">Dosage (comma-separated)</Label>
                         <Input id="dosage" name="dosage" value={data.dosage?.join(', ') || ''} onChange={handleDosageChange} />
+                        {errors.dosage && <p className="mt-1 text-sm text-red-600">{errors.dosage}</p>}
                     </div>
 
                     {/* Description */}
                     <div>
                         <Label htmlFor="description">Description</Label>
                         <Textarea id="description" name="description" value={data.description} onChange={handleInputChange} rows={3} />
+                        {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
                     </div>
 
                     {/* Image */}
@@ -307,6 +284,7 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                         <div>
                             <Label htmlFor="image">Product Image</Label>
                             <Input id="image" name="image" type="file" accept="image/*" onChange={handleImageChange} />
+                            {errors.image && <p className="mt-1 text-sm text-red-600">{errors.image}</p>}
                         </div>
                     </div>
 
@@ -336,11 +314,11 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                     {/* Actions */}
                     <div className="flex justify-end space-x-3 pt-4">
                         <Button type="button" variant="outline" onClick={onClose} disabled={processing}>
-                            Cancel
-                        </Button>
-                        <Button type="submit" disabled={processing}>
-                            {processing ? 'Saving...' : (product ? 'Update Product' : 'Create Product')}
-                        </Button>
+                        Cancel
+                    </Button>
+                    <Button type="submit" disabled={processing}>
+                        {processing ? 'Saving...' : (product ? 'Update Product' : 'Create Product')}
+                    </Button>
                     </div>
                 </form>
             </div>

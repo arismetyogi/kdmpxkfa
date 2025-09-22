@@ -125,7 +125,7 @@ export interface Product {
     brand?: string;
     image?: string;
     description?: string;
-    dosage?: string;
+    dosage?: string[];
     pharmacology?: string;
     image_alt?: string;
     is_active?: boolean;
