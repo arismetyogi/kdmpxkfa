@@ -36,6 +36,9 @@ class User extends Authenticatable implements HasMedia
         'external_id',
         'tenant_id',
         'apotek_id',
+        'status',       
+        'approved_by',   
+        'approved_at',
     ];
 
     /**
@@ -77,4 +80,10 @@ class User extends Authenticatable implements HasMedia
     {
         return $query->where('is_active', true);
     }
+
+    public function approvedBy()
+{
+    return $this->belongsTo(User::class, 'approved_by');
+}
+    
 }
