@@ -1,5 +1,5 @@
 import AppLayout from "@/layouts/app-layout";
-import { Head, Link, usePage, router } from "@inertiajs/react";
+import { Head, Link, router } from "@inertiajs/react";
 import { useState } from "react";
 import { Search, Filter, Eye, Check, X } from "lucide-react";
 import {
@@ -19,21 +19,17 @@ import {
     DialogTitle,
     DialogFooter,
 } from "@/components/ui/dialog";
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'sonner';
 
-export default function PurchaseOrders() {
-    
-    const { props }: any = usePage();
-    const orders = props.orders?.data || props.orders || [];
+export default function PurchaseOrders( {orders}: {orders?: any[]}) {
 
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("ALL");
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedPO, setSelectedPO] = useState<string | null>(null);
 
-  
-    const filteredOrders = orders.filter((po: any) => {
+
+    const filteredOrders = orders?.filter((po) => {
         const matchSearch = po.id_transaksi
             .toLowerCase()
             .includes(search.toLowerCase());
@@ -142,7 +138,7 @@ export default function PurchaseOrders() {
                         </thead>
                         <tbody className="text-sm divide-y dark:divide-gray-700">
                             {/* Gunakan filteredOrders di sini */}
-                            {filteredOrders.map((po: any) => (
+                            {filteredOrders?.map((po) => (
                                 <tr
                                     key={po.id_transaksi}
                                     className="hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -188,7 +184,7 @@ export default function PurchaseOrders() {
                                     </td>
                                 </tr>
                             ))}
-                            {filteredOrders.length === 0 && (
+                            {filteredOrders?.length === 0 && (
                                 <tr>
                                     <td colSpan={7} className="p-3 text-center text-muted-foreground">
                                         Tidak ada pesanan ditemukan.
