@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import UserMappingModal from '@/components/admin/UserMappingModal';
+import UserMappingModal from '@/components/admin/user-mapping-modal';
 
 
 const breadcrumbs: BreadcrumbItem[] = [

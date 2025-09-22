@@ -113,7 +113,7 @@ class ProductSeeder extends Seeder
                     'length' => $item['length'] ?? null,
                     'width' => $item['width'] ?? null,
                     'height' => $item['height'] ?? null,
-                    'brand' => $item['brand'] ?? null,
+                    'brand' => $item['brand'] ?? 'no brand',
                     'category_id' => $item['category_id'] ?? null,
                     'is_active' => true,
                 ]

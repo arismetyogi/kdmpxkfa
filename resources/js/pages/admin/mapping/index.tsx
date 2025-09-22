@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FileDown, Search, Users, UserX, Edit, Link2 } from 'lucide-react';
-import UserMappingModal from '@/components/admin/UserMappingModal';
+import UserMappingModal from '@/components/admin/user-mapping-modal';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: route('admin.dashboard') },

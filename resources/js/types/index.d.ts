@@ -125,7 +125,7 @@ export interface Product {
     brand?: string;
     image?: string;
     description?: string;
-    dosage?: string;
+    dosage?: string[];
     pharmacology?: string;
     image_alt?: string;
     is_active?: boolean;
@@ -275,4 +275,10 @@ export interface Paginated<T> {
         from: number;
         to: number;
     };
+}
+export class Category {
+    id: number;
+    main_category: string;
+    subcategory1: string;
+    subcategory2: string;
 }
