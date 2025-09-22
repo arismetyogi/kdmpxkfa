@@ -25,6 +25,7 @@ class UserResource extends JsonResource
             'permissions' => $this->getAllPermissions(),
             'avatar' => $this->getFirstMediaUrl('avatar'),
             'is_active' => $this->is_active,
+            'status' => $this->status,
             'onboarding_info' => [
                 'user_id' => $this->external_id,
                 'tenant_id' => $this->tenant_id,

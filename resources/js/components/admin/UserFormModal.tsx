@@ -8,30 +8,7 @@ import { Loader2, Save } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { toast } from 'sonner';
 import SearchableSelect from '@/components/searchable-select';
-
-interface Role {
-    id: number;
-    name: string;
-}
-
-interface Apotek {
-    id: number;
-    sap_id: string;
-    name: string;
-    branch: string;
-}
-
-interface User {
-    id?: number;
-    name?: string;
-    username?: string;
-    email?: string;
-    password?: string;
-    password_confirmation?: string;
-    apotek_id?: number;
-    apotek?: Apotek;
-    roles?: Role[];
-}
+import { Apotek, Role, User } from '@/types';
 
 interface UserFormModalProps {
     isOpen: boolean;
@@ -44,14 +21,14 @@ interface UserFormModalProps {
 export default function UserFormModal({ isOpen, onClose, user, roles, apoteks }: UserFormModalProps) {
     const isEditing = !!user?.id;
 
-    const { data, setData, put, post, processing, errors, reset, clearErrors } = useForm({
+    const { data, setData, put, post, processing, errors, clearErrors } = useForm({
         name: user?.name || '',
         username: user?.username || '',
         email: user?.email || '',
-        password: user?.password || '',
+        password: '',
         password_confirmation: '',
+        apotek_id: user?.apotek_id || '',
         roles: user?.roles?.map((p) => p.id) || [],
-        apotek_id: user?.apotek_id || ''
     });
 
     // reset form when modal opens/closes or role changes
@@ -61,8 +38,8 @@ export default function UserFormModal({ isOpen, onClose, user, roles, apoteks }:
                 name: user?.name || '',
                 username: user?.username || '',
                 email: user?.email || '',
-                password: user?.password || '',
-                password_confirmation: user?.password_confirmation || '',
+                password: '',
+                password_confirmation: '',
                 apotek_id: user?.apotek_id || '',
                 roles: user?.roles?.map((p) => p.id) || [],
             });
@@ -74,7 +51,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles, apoteks }:
         setData('roles', data.roles.includes(roleId) ? data.roles.filter((id) => id !== roleId) : [...data.roles, roleId]);
     };
 
-    const handleApotekChange = (value: string) => {
+    const handleApotekChange = (value: string | number) => {
         setData('apotek_id', value);
     };
 
@@ -208,7 +185,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles, apoteks }:
                                     value: a.id.toString(),
                                     label: `${a.sap_id} - ${a.name}`,
                                 }))}
-                                value={data.apotek_id}
+                                value={data.apotek_id.toString()}
                                 onChange={handleApotekChange}
                                 placeholder="Select an apotek..."
                                 searchPlaceholder="Search apoteks..."

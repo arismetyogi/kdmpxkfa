@@ -19,7 +19,7 @@ interface SelectOption {
 interface SearchableSelectProps {
     options: SelectOption[];
     value: string | number | null;
-    onChange: (value: any) => void;
+    onChange: (value: string | number | '') => void;
     placeholder?: string;
     searchPlaceholder?: string;
     maxResults?: number;

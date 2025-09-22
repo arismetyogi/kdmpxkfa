@@ -19,7 +19,8 @@
         "predis/predis": "^3.2",
         "spatie/laravel-medialibrary": "^11.14",
         "spatie/laravel-permission": "*",
-        "tightenco/ziggy": "^2.4"
+        "tightenco/ziggy": "^2.4",
+        "ext-openssl": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

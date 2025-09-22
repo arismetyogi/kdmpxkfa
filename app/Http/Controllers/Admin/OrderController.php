@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\OrderStatusEnum;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\OrderResource;
+use App\Http\Resources\PaginatedResourceResponse;
 use App\Models\Order;
 use App\Services\Admin\OrderService;
 use App\Services\DigikopTransactionService;
@@ -43,20 +45,21 @@ class OrderController extends Controller
         }
         // Super admin can view all orders (no additional filtering needed)
 
-        $orders = $ordersQuery->latest()->get();
+        $orders = $ordersQuery->latest()->paginate(10);
 
         // Calculate statistics
         $totalOrders = $orders->count();
-        $newOrders = $orders->where('status', 'new')->count();
-        $deliveringOrders = $orders->where('status', 'delivering')->count();
-        $completedOrders = $orders->where('status', 'received')->count();
+        $newOrders = $orders->where('status', OrderStatusEnum::CREATED)->count();
+        $deliveringOrders = $orders->where('status', OrderStatusEnum::DELIVERY)->count();
+        $completedOrders = $orders->where('status', OrderStatusEnum::RECEIVED)->count();
 
         return Inertia::render('admin/orders/index', [
-            'orders' => $orders,
+            'orders' => PaginatedResourceResponse::make($orders, OrderResource::class),
             'totalOrders' => $totalOrders,
             'newOrders' => $newOrders,
             'deliveringOrders' => $deliveringOrders,
             'completedOrders' => $completedOrders,
+            'orderStatuses' => OrderStatusEnum::toArray(),
         ]);
     }
     /**
@@ -90,26 +93,35 @@ class OrderController extends Controller
             'order_items.*.qty_delivered' => 'required|integer|min:0',
         ]);
 
-        // Use the service to update order delivery
-        $this->orderService->updateOrderDelivery($order, $request->order_items);
-
-        // Prepare transaction data according to documentation
-        $transactionData = $this->prepareTransactionData($order);
-
-        // Send transaction data to Digikoperasi
-        $response = $this->digikopTransactionService->sendTransaction($transactionData);
-
-        // Handle response
-        if (! $response['success']) {
-            // Log the error but don't fail the order update
-            \Log::error('Failed to send transaction to Digikoperasi', [
-                'order_id' => $order->id,
-                'error' => $response['message'],
-            ]);
+    // Update qty_delivered di masing-masing order item
+    foreach ($request->order_items as $itemData) {
+        $orderItem = $order->orderItems->where('id', $itemData['id'])->first();
+        if ($orderItem) {
+            $orderItem->qty_delivered = $itemData['qty_delivered'];
+            $orderItem->save();
         }
-
-        return redirect()->back()->with('success', 'Order updated successfully.');
     }
+
+    // Update status pesanan jadi "delivering"
+    $order->status = OrderStatusEnum::DELIVERY->value;
+    $order->shipped_at = now();
+    $order->save();
+
+    // Siapkan data transaksi utk Digikoperasi
+    $transactionData = $this->prepareTransactionData($order);
+
+    // Kirim ke Digikoperasi
+    $response = $this->digikopTransactionService->sendTransaction($transactionData);
+
+    if (! $response['success']) {
+        \Log::error('Failed to send transaction to Digikoperasi', [
+            'order_id' => $order->id,
+            'error' => $response['message'],
+        ]);
+    }
+
+    return redirect()->back()->with('success', 'Order updated successfully.');
+}
 
     /**
      * Prepare transaction data according to Digikoperasi API documentation
