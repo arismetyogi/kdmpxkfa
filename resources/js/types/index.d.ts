@@ -75,9 +75,21 @@ export interface SharedData {
     [key: string]: unknown;
 }
 
+export interface Role {
+    id: number;
+    name: string;
+    permissions?: Permission[];
+}
+
+export interface Permission {
+    id: number;
+    name: string;
+}
+
 export interface User {
     id: number;
     name: string;
+    username: string;
     email: string;
     avatar?: string;
     email_verified_at: string | null;
@@ -85,7 +97,6 @@ export interface User {
     updated_at: string;
     roles?: Role[];
     permissions?: Permission[];
-    apotek_id?: number;
     apotek?: Apotek;
     phone?: string;
     [key: string]: unknown; // This allows for additional properties...
@@ -200,11 +211,7 @@ export interface OrderItem {
     qty_delivered: number;
     unit_price: number;
     total_price: number;
-    product: {
-        base_uom: string;
-        order_unit: string;
-        content: number;
-    };
+    product: Product;
 }
 
 // ✅ OrderPayload untuk request create order
