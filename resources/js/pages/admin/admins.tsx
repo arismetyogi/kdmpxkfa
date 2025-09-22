@@ -6,9 +6,9 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import UserFormModal from '@/components/admin/UserFormModal';
+import UserFormModal from '@/components/admin/user-form-modal';
 import { Button } from '@/components/ui/button';
-import DeleteUserModal from '@/components/admin/DeleteUserModal';
+import DeleteUserModal from '@/components/admin/user-delete-modal';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

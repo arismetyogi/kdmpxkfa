@@ -25,7 +25,7 @@ interface PermissionFormModalProps {
     permission: Permission | null;
 }
 
-export default function PermissionFormModal({
+export default function PermissionsFormModal({
     isOpen,
     onClose,
     permission,

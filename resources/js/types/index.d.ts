@@ -276,3 +276,9 @@ export interface Paginated<T> {
         to: number;
     };
 }
+export class Category {
+    id: number;
+    main_category: string;
+    subcategory1: string;
+    subcategory2: string;
+}
