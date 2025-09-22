@@ -1,5 +1,5 @@
-import DeleteCategoryModal from '@/components/admin/DeleteCategoryModal';
-import CategoryFormModal from '@/components/admin/CategoryFormModal';
+import CategoryDeleteModal from '@/components/admin/category-delete-modal';
+import CategoryFormModal from '@/components/admin/category-form-modal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -171,7 +171,7 @@ export default function AdminCategories({ categories }: AdminCategoryProps) {
             />
 
             {/* Delete Category Modal */}
-            <DeleteCategoryModal
+            <CategoryDeleteModal
                 isOpen={isDeleteModalOpen}
                 onClose={closeModals}
                 category={selectedCategory}

@@ -258,8 +258,10 @@ readonly class SsoService
         return $baseUrl . '/sso/callback?' . $params;
     }
 
-    private function decryptSsoField($encryptedValue, $stateSecret)
+    private function decryptSsoField($encryptedValue)
     {
+        $stateSecret = config('sso.allowed_origins.digikoperasi.state_secret');
+
         if (empty($encryptedValue) || empty($stateSecret)) {
             return null;
         }

@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+<<<<<<< HEAD
 use App\Http\Controllers\Controller;
+=======
+use App\Enums\RoleEnum;
+>>>>>>> source/master
 use App\Http\Resources\PaginatedResourceResponse;
 use App\Http\Resources\UserResource;
 use App\Models\Apotek;
@@ -13,6 +17,7 @@ use Inertia\Inertia;
 
 class MappingController extends Controller
 {
+<<<<<<< HEAD
     
    public function index(Request $request)
 {
@@ -38,10 +43,38 @@ class MappingController extends Controller
     ]);
 }
 
+=======
+
+    public function index(Request $request)
+    {
+        if (!$request->user()->can('view users')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $users = User::query()
+            ->with('apotek', 'roles', 'permissions')
+            ->where('status', 'approved') // hanya user yang sudah di-approve
+            ->whereHas('roles', function ($q) {
+                $q->whereIn('name', [RoleEnum::USER]);
+            })
+            ->latest()
+            ->paginate(15);
+
+
+        return Inertia::render('admin/mapping/index', [
+            'users' => PaginatedResourceResponse::make($users, UserResource::class),
+            'allUsers' => User::count(),
+            'activeUsers' => User::active()->count(),
+            'apoteks' => Apotek::active()->get(),
+        ]);
+    }
+
+>>>>>>> source/master
 
     /**
      * Map a user to an apotek.
      */
+<<<<<<< HEAD
     public function mapUser(Request $request, User $user)
 {
     if (! $user) {
@@ -76,4 +109,40 @@ class MappingController extends Controller
 
     return back()->with('success', 'User mapped successfully.');
 }
+=======
+    public function mapUser(Request $request, ?User $user)
+    {
+        if (!$user) {
+            Log::error('User not found during mapUser', [
+                'userId' => null,
+                'url' => $request->fullUrl(),
+                'payload' => $request->all(),
+            ]);
+
+            return response()->json([
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        if (!$request->user()->can('update users')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+
+        if ($user->status !== 'approved') {
+            return back()->with('error', 'User belum di-approve. Tidak bisa di-mapping.');
+        }
+
+        $validated = $request->validate([
+            'apotek_id' => ['required', 'exists:apoteks,id'],
+        ]);
+
+        $user->update([
+            'apotek_id' => $validated['apotek_id'],
+            'is_active' => true,
+        ]);
+
+        return back()->with('success', 'User mapped successfully.');
+    }
+>>>>>>> source/master
 }

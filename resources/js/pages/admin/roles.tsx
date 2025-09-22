@@ -14,8 +14,8 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { useState } from 'react';
-import RoleFormModal from '@/components/admin/RoleFormModal';
-import DeleteRoleModal from '@/components/admin/DeleteRoleModal';
+import RoleFormModal from '@/components/admin/role-form-modal';
+import RoleDeleteModal from '@/components/admin/role-delete-modal';
 
 interface Role {
     id: number;
@@ -273,7 +273,7 @@ export default function AdminRoles({ roles, permissions }: AdminRolesProps) {
             />
 
             {/* Delete Role Modal */}
-            <DeleteRoleModal
+            <RoleDeleteModal
                 isOpen={isDeleteModalOpen}
                 onClose={closeModals}
                 role={selectedRole}

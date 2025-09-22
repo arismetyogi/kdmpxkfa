@@ -14,8 +14,8 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { useState } from 'react';
-import PermissionFormModal from '@/components/admin/PermissionFormModal';
-import DeletePermissionModal from '@/components/admin/DeletePermissionModal';
+import PermissionsFormModal from '@/components/admin/permissions-form-modal';
+import PermissionDeleteModal from '@/components/admin/permission-delete-modal';
 
 interface Permission {
     id: number;
@@ -193,21 +193,21 @@ export default function AdminPermission({ permissions }: AdminPermissionProps) {
                 </Card>
 
             {/* Create Permission Modal */}
-            <PermissionFormModal
+            <PermissionsFormModal
                 isOpen={isCreateModalOpen}
                 onClose={closeModals}
                 permission={null}
             />
 
             {/* Edit Permission Modal */}
-            <PermissionFormModal
+            <PermissionsFormModal
                 isOpen={isEditModalOpen}
                 onClose={closeModals}
                 permission={selectedPermission}
             />
 
             {/* Delete Permission Modal */}
-            <DeletePermissionModal
+            <PermissionDeleteModal
                 isOpen={isDeleteModalOpen}
                 onClose={closeModals}
                 permission={selectedPermission}

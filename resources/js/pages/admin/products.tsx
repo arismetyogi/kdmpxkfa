@@ -1,5 +1,5 @@
-import DeleteProductModal from '@/components/admin/DeleteProductModal';
-import ProductFormModal from '@/components/admin/ProductFormModal';
+import ProductDeleteModal from '@/components/admin/product-delete-modal';
+import ProductFormModal from '@/components/admin/product-form-modal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +11,7 @@ import { BreadcrumbItem, Category, Paginated, Product } from '@/types';
 import { router } from '@inertiajs/react';
 import { Edit, PackageX, Plus, Search, Trash2, X } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
-import ProductShowModal from "@/components/admin/ProductShowModal";
+import ProductShowModal from "@/components/admin/product-show-modal";
 import { CustomPagination } from '@/components/custom-pagination';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -327,7 +327,7 @@ export default function AdminProducts({ products, categories, allProducts, activ
             />
 
             {/* Delete Product Modal */}
-            <DeleteProductModal isOpen={isDeleteModalOpen} onClose={closeModals} product={selectedProduct} />
+            <ProductDeleteModal isOpen={isDeleteModalOpen} onClose={closeModals} product={selectedProduct} />
         </AppLayout>
     );
 }

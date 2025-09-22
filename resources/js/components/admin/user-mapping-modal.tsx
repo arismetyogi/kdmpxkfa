@@ -25,20 +25,20 @@ interface UserMappingModalProps {
 export default function UserMappingModal({ isOpen, onClose, user, apoteks }: UserMappingModalProps) {
     // ✅ Initialize useForm
     const { data, setData, post, processing, errors, reset } = useForm({
-        apotek_id: user?.apotek_id ?? '',
+        apotek_id: user?.apotek_id?.toString() ?? null,
     });
 
     // ✅ Reset form when modal opens/closes or user changes
     useEffect(() => {
         if (user) {
-            setData('apotek_id', user.apotek_id?.toString() ?? '');
+            setData('apotek_id', user.apotek_id?.toString() ?? null);
         } else {
             reset();
         }
     }, [user, isOpen]);
 
-    const handleApotekChange = (value: string) => {
-        setData('apotek_id', value);
+    const handleApotekChange = (value: string | number) => {
+        setData('apotek_id', value.toString());
     };
 
     const submit = (e: React.FormEvent) => {
@@ -108,7 +108,7 @@ export default function UserMappingModal({ isOpen, onClose, user, apoteks }: Use
                                     value: a.id.toString(),
                                     label: `${a.sap_id} - ${a.name}`,
                                 }))}
-                                value={data.apotek_id}
+                                value={data.apotek_id || null}
                                 onChange={handleApotekChange}
                                 placeholder="Select an apotek..."
                                 searchPlaceholder="Search apoteks..."

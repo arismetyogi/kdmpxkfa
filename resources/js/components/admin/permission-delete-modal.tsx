@@ -1,4 +1,4 @@
-import { Trash2, AlertTriangle, Loader2 } from 'lucide-react';
+import { Trash2, AlertTriangle } from 'lucide-react';
 import { Form } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,26 +11,26 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
-interface Role {
+interface Permission {
     id: number;
     name: string;
     users_count?: number;
 }
 
-interface DeleteRoleModalProps {
+interface DeletePermissionModalProps {
     isOpen: boolean;
     onClose: () => void;
-    role: Role | null;
+    permission: Permission | null;
 }
 
-export default function DeleteRoleModal({
+export default function PermissionDeleteModal({
     isOpen,
     onClose,
-    role,
-}: DeleteRoleModalProps) {
-    if (!role) return null;
+    permission,
+}: DeletePermissionModalProps) {
+    if (!permission) return null;
 
-    const hasUsers = (role.users_count || 0) > 0;
+    const hasUsers = (permission.users_count || 0) > 0;
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -38,10 +38,10 @@ export default function DeleteRoleModal({
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-red-600">
                         <Trash2 className="h-5 w-5" />
-                        Delete Role
+                        Delete Permission
                     </DialogTitle>
                     <DialogDescription>
-                        Are you sure you want to delete the role "{role.name}"?
+                        Are you sure you want to delete the permission "{permission.name}"?
                     </DialogDescription>
                 </DialogHeader>
 
@@ -52,15 +52,15 @@ export default function DeleteRoleModal({
                             <div className="text-sm text-yellow-800 dark:text-yellow-200">
                                 <p className="font-medium">Warning</p>
                                 <p>
-                                    This role is currently assigned to {role.users_count} user(s).
-                                    Deleting it will remove the role from all users.
+                                    This permission is currently assigned to {permission.users_count} user(s).
+                                    Deleting it will remove the permission from all users.
                                 </p>
                             </div>
                         </div>
                     )}
 
                     <div className="text-sm text-muted-foreground">
-                        <p>This action cannot be undone. The role and all its permission assignments will be permanently removed.</p>
+                        <p>This action cannot be undone. The permission will be permanently removed.</p>
                     </div>
                 </div>
 
@@ -74,10 +74,10 @@ export default function DeleteRoleModal({
                     </Button>
                     <Form
                         method="delete"
-                        action={route('admin.roles.destroy', role.id)}
+                        action={route('admin.permissions.destroy', permission.id)}
                         onSuccess={() => {
                             onClose()
-                            toast.success('Role deleted successfully')
+                            toast.success('Permission deleted successfully')
                         }}
                     >
                         <Button
@@ -85,7 +85,7 @@ export default function DeleteRoleModal({
                             variant="destructive"
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
-                            Delete Role
+                            Delete Permission
                         </Button>
                     </Form>
                 </DialogFooter>

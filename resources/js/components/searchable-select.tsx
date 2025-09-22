@@ -18,8 +18,8 @@ interface SelectOption {
 
 interface SearchableSelectProps {
     options: SelectOption[];
-    value: string | number | null;
-    onChange: (value: any) => void;
+    value: string | number | null | undefined;
+    onChange: (value: string | number) => void;
     placeholder?: string;
     searchPlaceholder?: string;
     maxResults?: number;
@@ -48,19 +48,21 @@ export default function SearchableSelect({
         return results.slice(0, maxResults);
     }, [options, query, maxResults]);
 
+    const displayValue = value !== null && value !== undefined ? String(value) : '';
+
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button variant="outline" role="combobox" className="w-full justify-between">
-                    {value
-                        ? options.find((opt) => String(opt.value) === String(value))?.label
+                    {displayValue
+                        ? options.find((opt) => String(opt.value) === displayValue)?.label
                         : placeholder}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[300px] p-0">
                 <Command shouldFilter={false}>
-                    {/* disable shadcn’s auto filter */}
+                    {/* disable shadcn's auto filter */}
                     <CommandInput
                         placeholder={searchPlaceholder}
                         onInput={(e) => setQuery((e.target as HTMLInputElement).value)}

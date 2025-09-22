@@ -1,5 +1,9 @@
 import AppLayout from "@/layouts/app-layout";
+<<<<<<< HEAD
 import { Head, Link, usePage, router } from "@inertiajs/react";
+=======
+import { Head, Link, router } from "@inertiajs/react";
+>>>>>>> source/master
 import { useState } from "react";
 import { Search, Filter, Eye, Check, X } from "lucide-react";
 import {
@@ -19,6 +23,7 @@ import {
     DialogTitle,
     DialogFooter,
 } from "@/components/ui/dialog";
+<<<<<<< HEAD
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -26,14 +31,24 @@ export default function PurchaseOrders() {
     
     const { props }: any = usePage();
     const orders = props.orders?.data || props.orders || [];
+=======
+import { toast } from 'sonner';
+
+export default function PurchaseOrders( {orders}: {orders?: any[]}) {
+>>>>>>> source/master
 
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("ALL");
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedPO, setSelectedPO] = useState<string | null>(null);
 
+<<<<<<< HEAD
   
     const filteredOrders = orders.filter((po: any) => {
+=======
+
+    const filteredOrders = orders?.filter((po) => {
+>>>>>>> source/master
         const matchSearch = po.id_transaksi
             .toLowerCase()
             .includes(search.toLowerCase());
@@ -142,7 +157,11 @@ export default function PurchaseOrders() {
                         </thead>
                         <tbody className="text-sm divide-y dark:divide-gray-700">
                             {/* Gunakan filteredOrders di sini */}
+<<<<<<< HEAD
                             {filteredOrders.map((po: any) => (
+=======
+                            {filteredOrders?.map((po) => (
+>>>>>>> source/master
                                 <tr
                                     key={po.id_transaksi}
                                     className="hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -188,7 +207,11 @@ export default function PurchaseOrders() {
                                     </td>
                                 </tr>
                             ))}
+<<<<<<< HEAD
                             {filteredOrders.length === 0 && (
+=======
+                            {filteredOrders?.length === 0 && (
+>>>>>>> source/master
                                 <tr>
                                     <td colSpan={7} className="p-3 text-center text-muted-foreground">
                                         Tidak ada pesanan ditemukan.
