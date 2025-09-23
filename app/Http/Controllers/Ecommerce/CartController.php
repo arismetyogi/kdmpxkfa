@@ -289,7 +289,7 @@ class CartController extends Controller
             $creditValidation = $transactionService->validateCreditLimit($user->tenant_id, $totalAmount);
 
             if (! $creditValidation['valid']) {
-                // This handles the credit limit business logic failure
+                // Handle credit limit exceeded
                 throw ValidationException::withMessages([
                     'credit_limit_error' => $creditValidation['message'],
                 ]);
@@ -364,19 +364,50 @@ class CartController extends Controller
 
             // Redirect to order confirmation page
             return redirect()->route('order.complete', $order->id)->with('success', 'Order placed successfully!');
+        } catch (ValidationException $e) {
+            // Re-throw validation exceptions as they are already properly formatted
+            \DB::rollBack();
+            throw $e;
         } catch (\Exception $e) {
             \DB::rollBack();
 
             \Log::error('Order creation failed with exception: '.$e->getMessage());
-
+            
+            // Check if this is a pharmacy mapping error
+            if (strpos($e->getMessage(), 'mapped') !== false || 
+                strpos($e->getMessage(), 'pharmacy') !== false ||
+                strpos($e->getMessage(), 'apotek') !== false) {
+                throw ValidationException::withMessages([
+                    'mapping_error' => 'Koperasi belum dimapping dengan Apotek KF, Silakan hubungi administrator.',
+                ]);
+            }
+            
+            // Generic error for other exceptions
             throw ValidationException::withMessages([
-                'mapping_error' => 'Koperasi belum dimapping dengan Apotek KF, Silakan hubungi administrator.',
+                'generic_payment_error' => 'A critical error occurred. Our team has been notified. Please try again later.',
             ]);
         } catch (\Throwable $e) {
             \DB::rollBack();
 
             \Log::error('Order creation failed with throwable: '.$e->getMessage());
 
+            // Check if this is specifically a credit limit issue
+            if (strpos($e->getMessage(), 'credit') !== false) {
+                throw ValidationException::withMessages([
+                    'credit_limit_error' => 'Insufficient credit limit to complete this transaction.',
+                ]);
+            }
+            
+            // Check if this is a pharmacy mapping error
+            if (strpos($e->getMessage(), 'mapped') !== false || 
+                strpos($e->getMessage(), 'pharmacy') !== false ||
+                strpos($e->getMessage(), 'apotek') !== false) {
+                throw ValidationException::withMessages([
+                    'mapping_error' => 'Koperasi belum dimapping dengan Apotek KF, Silakan hubungi administrator.',
+                ]);
+            }
+            
+            // Generic error for other exceptions
             throw ValidationException::withMessages([
                 'generic_payment_error' => 'A critical error occurred. Our team has been notified. Please try again later.',
             ]);

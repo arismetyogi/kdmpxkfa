@@ -85,13 +85,22 @@ export default function PaymentPage({
             },
             onError: (errors) => {
                 if (errors.credit_limit_error) {
-                    toast.error("Payment Failed", { description: errors.credit_limit_error });
+                    toast.error("Saldo Kredit Anda Kurang!, Cek kembali Saldo Kredit yang Anda miliki!", { 
+                        duration: 5000
+                    });
                 } else if (errors.mapping_error) {
-                    toast.error("Configuration Error", { description: errors.mapping_error });
+                    toast.error("Koperasi belum dimapping dengan Apotek KF, Silakan hubungi administrator.", { 
+                        duration: 5000
+                    });
                 } else if (errors.generic_payment_error) {
-                    toast.error("Payment Failed", { description: errors.generic_payment_error });
+                    toast.error("A technical error occurred. Our team has been notified. Please try again later.", { 
+                        duration: 5000
+                    });
                 } else {
-                    toast.error("An unknown error occurred. Please check your details and try again.");
+                    toast.error("Payment Failed", { 
+                        description: "An unknown error occurred. Please check your details and try again.",
+                        duration: 10000
+                    });
                 }
             },
             onFinish: () => {
