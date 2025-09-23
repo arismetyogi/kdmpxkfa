@@ -2,7 +2,7 @@ import HeaderLayout from "@/layouts/header-layout";
 import { Head, Link } from "@inertiajs/react";
 import { useState, useEffect } from "react";
 import { type BreadcrumbItem, type CartItem } from "@/types";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, ShoppingBasket } from "lucide-react";
 import { toast } from "sonner";
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -63,8 +63,8 @@ export default function Cart() {
       <div className="p-4 sm:p-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-blue-600 tracking-tight">
-            🛒 Keranjang Belanja
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary tracking-tight flex gap-3">
+            <ShoppingBasket size={36}/>Keranjang Belanja
           </h1>
           {cart.length > 0 && (
             <button
@@ -112,7 +112,7 @@ export default function Cart() {
                         <p className="text-sm text-muted-foreground">
                           {item.weight} gram / {item.order_unit}
                         </p>
-                        <p className="text-blue-600 font-bold text-sm sm:text-base mt-1">
+                        <p className="text-primary font-bold text-sm sm:text-base mt-1">
                           Rp {(item.price ?? 0).toLocaleString()}
                         </p>
                       </div>
@@ -122,14 +122,14 @@ export default function Cart() {
                     <div className="flex items-center gap-3 mt-4 sm:mt-0">
                       <button
                         onClick={() => updateQuantity(item.sku, -1)}
-                        className="px-3 py-1.5 bg-secondary rounded-lg hover:bg-secondary/80 transition font-bold"
+                        className="px-3 py-1.5 bg-primary-foreground rounded-4xl hover:bg-primary/80 transition font-bold border-1"
                       >
                         -
                       </button>
-                      <span className="font-semibold text-lg">{item.quantity}</span>
+                      <span className="font-semibold text-lg text-primary">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.sku, 1)}
-                        className="px-3 py-1.5 bg-secondary rounded-lg hover:bg-secondary/80 transition font-bold"
+                        className="px-3 py-1.5 bg-primary-foreground rounded-4xl hover:bg-primary/80 transition font-bold border-1"
                       >
                         +
                       </button>
@@ -158,7 +158,7 @@ export default function Cart() {
                     <span>PPN (11%)</span>
                     <span>Rp {ppn.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between border-t pt-3 mt-3 text-lg sm:text-xl font-bold text-blue-600">
+                  <div className="flex justify-between border-t pt-3 mt-3 text-lg sm:text-xl font-bold text-primary">
                     <span>Total</span>
                     <span>Rp {grandTotal.toLocaleString()}</span>
                   </div>
@@ -182,7 +182,7 @@ export default function Cart() {
                   {/* Total Information */}
                   <div className="text-center">
                     <span className="text-xs text-muted-foreground">Total Belanja</span>
-                    <p className="text-lg font-bold text-blue-600">
+                    <p className="text-lg font-bold text-primary">
                       Rp {grandTotal.toLocaleString()}
                     </p>
                   </div>

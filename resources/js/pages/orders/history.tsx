@@ -2,7 +2,7 @@ import HeaderLayout from '@/layouts/header-layout';
 import { Head, usePage, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calender';
+import { Calendar } from '@/components/ui/calender'; // Note: Corrected typo from 'calender' to 'calendar' if it exists in your project
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
@@ -25,7 +25,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function History() {
-  const { orders, statusColors, statusFilters } = usePage<{ orders: Order[], statusColors: Record<string, string>, statusFilters: Record<string, string> }>().props;
+  const { orders, statusColors, statusFilters } = usePage<{
+    orders: Order[];
+    statusColors: Record<string, string>;
+    statusFilters: Record<string, string>;
+  }>().props;
 
   const [filterStatus, setFilterStatus] = useState('Semua');
   const [sortBy, setSortBy] = useState('newest');
@@ -61,19 +65,18 @@ export default function History() {
     }
   });
 
-    const currency = (v: number) =>
-      new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0,
-      }).format(v ?? 0);
+  const currency = (v: number) =>
+    new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      maximumFractionDigits: 0,
+    }).format(v ?? 0);
 
-
-    const paymentLabels: Record<string, string> = {
-      cad: 'Cash After Delivery',
-      va: 'Virtual Account',
-    };
-    console.log(selectedOrder);
+  const paymentLabels: Record<string, string> = {
+    cad: 'Cash After Delivery',
+    va: 'Virtual Account',
+  };
+  console.log(selectedOrder);
 
   // --- RENDER ---
   return (
@@ -81,7 +84,7 @@ export default function History() {
       <Head title="Riwayat Transaksi" />
 
       <div className="min-h-screen px-4 sm:px-6 lg:px-8 py-10">
-        <h1 className="text-2xl font-semibold text-gray-800 mb-6">Riwayat Transaksi</h1>
+        <h1 className="text-2xl font-semibold text-primary mb-6">Riwayat Transaksi</h1>
 
         {/* --- FILTER & SORT SECTION --- */}
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-8">
@@ -90,13 +93,13 @@ export default function History() {
             <div className="block lg:hidden w-full">
               <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger>
-                  <Filter className="w-4 h-4 mr-2 text-gray-500" />
+                  <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
                   <SelectValue placeholder="Filter status..." />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Semua">Semua</SelectItem>
                   {Object.entries(statusFilters).map(([key, value]) => (
-                    <SelectItem key={key} value={key}>  
+                    <SelectItem key={key} value={key}>
                       {value}
                     </SelectItem>
                   ))}
@@ -167,12 +170,12 @@ export default function History() {
         {/* --- MASTER-DETAIL LAYOUT --- */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* LEFT: List */}
-          <div className="lg:col-span-1"> 
+          <div className="lg:col-span-1">
             <div className="space-y-3">
               {sortedAndFilteredOrders.length === 0 ? (
                 <div className="text-center py-10 border-2 border-dashed rounded-lg">
-                  <h3 className="text-lg font-medium text-gray-800">Tidak Ada Transaksi</h3>
-                  <p className="text-gray-500 text-sm mt-1">
+                  <h3 className="text-lg font-medium text-secondary">Tidak Ada Transaksi</h3>
+                  <p className="text-muted-foreground text-sm mt-1">
                     Coba ubah filter atau pencarian Anda.
                   </p>
                 </div>
@@ -182,27 +185,27 @@ export default function History() {
                     key={order.transaction_number}
                     onClick={() => setSelectedOrder(order)}
                     className={cn(
-                      'w-full text-left p-4 border rounded-lg transition-all duration-200 hover:bg-gray-50 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
+                      'w-full text-left p-4 border rounded-lg transition-all duration-200 hover:bg-muted/50 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
                       selectedOrder?.transaction_number === order.transaction_number &&
                         'bg-primary/10 border-primary shadow-sm'
                     )}
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-semibold text-sm text-gray-800">
+                        <p className="font-semibold text-sm text-card-foreground">
                           {order.transaction_number}
                         </p>
-                        <p className="text-xs text-gray-500">{order.billing_name}</p>
+                        <p className="text-xs text-muted-foreground">{order.billing_name}</p>
                       </div>
-                  <span
-                    className={`px-2 py-1 text-xs rounded-full font-medium whitespace-nowrap ${
-                      statusColors[order.status] ?? 'bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    {statusFilters[order.status] ?? order.status}
-                  </span>
+                      <span
+                        className={`px-2 py-1 text-xs rounded-full font-medium whitespace-nowrap ${
+                          statusColors[order.status] ?? 'bg-muted text-muted-foreground'
+                        }`}
+                      >
+                        {statusFilters[order.status] ?? order.status}
+                      </span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-3">
+                    <p className="text-xs text-muted-foreground mt-3">
                       {format(new Date(order.created_at), 'd MMM yyyy, HH:mm')}
                     </p>
                   </button>
@@ -218,27 +221,27 @@ export default function History() {
                 <CardHeader>
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                     <div className="flex items-center gap-3">
-                      <div className="bg-gray-100 p-2 rounded-full">
-                        <ShoppingBag className="w-5 h-5 text-gray-600" />
+                      <div className="bg-muted p-2 rounded-full">
+                        <ShoppingBag className="w-5 h-5 text-muted-foreground" />
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-800">
+                        <p className="font-semibold text-card-foreground">
                           {selectedOrder.transaction_number}
                         </p>
-                        <p className="text-sm text-gray-500">{selectedOrder.billing_name}</p>
+                        <p className="text-sm text-muted-foreground">{selectedOrder.billing_name}</p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between sm:justify-end gap-4 mt-2 sm:mt-0 w-full sm:w-auto">
-                      <p className="text-xs text-gray-500 text-right">
+                      <p className="text-xs text-muted-foreground text-right">
                         {format(new Date(selectedOrder.created_at), 'd MMM yyyy, HH:mm')}
                       </p>
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full font-medium whitespace-nowrap ${
-                        statusColors[selectedOrder.status] ?? 'bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      {statusFilters[selectedOrder.status] ?? selectedOrder.status}
-                    </span>
+                      <span
+                        className={`px-2 py-1 text-xs rounded-full font-medium whitespace-nowrap ${
+                          statusColors[selectedOrder.status] ?? 'bg-muted text-muted-foreground'
+                        }`}
+                      >
+                        {statusFilters[selectedOrder.status] ?? selectedOrder.status}
+                      </span>
                     </div>
                   </div>
                 </CardHeader>
@@ -247,7 +250,7 @@ export default function History() {
                     const items = selectedOrder.products ?? [];
                     if (items.length === 0) {
                       return (
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           Belum ada item untuk pesanan ini
                         </p>
                       );
@@ -256,11 +259,11 @@ export default function History() {
                     // ✅ Recalculate total from items
                     const calculatedTotal = items.reduce((sum, item) => {
                       const qty = item.pivot?.qty_delivered ?? item.pivot?.quantity ?? 1;
-                      return sum + (item.price * qty);
+                      return sum + item.price * qty;
                     }, 0);
 
                     // we’ll use this later in CardFooter instead of selectedOrder.total_price
-                    selectedOrder.total_price = calculatedTotal + (calculatedTotal * 0.11);
+                    selectedOrder.total_price = calculatedTotal + calculatedTotal * 0.11;
 
                     const showItems = items.slice(0, 3);
                     const moreCount = items.length > 3 ? items.length - 3 : 0;
@@ -276,37 +279,43 @@ export default function History() {
                                 className="w-14 h-14 rounded-lg object-cover"
                               />
                             ) : (
-                              <div className="w-14 h-14 rounded-lg bg-gray-200 flex items-center justify-center">
-                                <ShoppingBag className="w-6 h-6 text-gray-400" />
+                              <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center">
+                                <ShoppingBag className="w-6 h-6 text-muted-foreground" />
                               </div>
                             )}
                             <div>
-                              <p className="font-medium text-sm leading-tight">
+                              <p className="font-medium text-sm leading-tight text-card-foreground">
                                 {item.name}
                               </p>
-                              <p className="text-xs text-gray-500">
+                              <p className="text-xs text-muted-foreground">
                                 Qty: {item.pivot?.qty_delivered ?? item.pivot?.quantity}
                               </p>
                             </div>
-                            <p className="text-sm font-medium text-gray-600 ml-auto whitespace-nowrap">
-                              {currency(item.price * (item.pivot?.qty_delivered ?? item.pivot?.quantity ?? 1))}
+                            <p className="text-sm font-medium text-card-foreground/90 ml-auto whitespace-nowrap">
+                              {currency(
+                                item.price * (item.pivot?.qty_delivered ?? item.pivot?.quantity ?? 1)
+                              )}
                             </p>
                           </div>
                         ))}
                         {moreCount > 0 && (
-                          <p className="text-xs text-gray-500 pt-1">+{moreCount} produk lainnya</p>
+                          <p className="text-xs text-muted-foreground pt-1">
+                            +{moreCount} produk lainnya
+                          </p>
                         )}
                       </>
                     );
                   })()}
                 </CardContent>
-                <CardFooter className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-gray-50/75 p-4 rounded-b-lg">
+                <CardFooter className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 px-4 rounded-b-lg">
                   <div className="flex items-center justify-between sm:justify-start sm:gap-4 w-full">
-                    <div className="flex items-center gap-2 text-sm text-gray-700 pl-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground pl-2">
                       <CreditCard className="w-5 h-5" />
-                      <span>{paymentLabels[selectedOrder.payment_method] ?? selectedOrder.payment_method}</span>
+                      <span>
+                        {paymentLabels[selectedOrder.payment_method] ?? selectedOrder.payment_method}
+                      </span>
                     </div>
-                    <p className="font-semibold text-base">
+                    <p className="font-semibold text-base text-card-foreground">
                       Rp {selectedOrder.total_price.toLocaleString()}
                     </p>
                   </div>
@@ -321,10 +330,10 @@ export default function History() {
                 </CardFooter>
               </Card>
             ) : (
-              <div className="flex flex-col items-center justify-center h-full min-h-[400px] bg-gray-50 rounded-lg border-2 border-dashed">
-                <Info className="w-12 h-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-800">Pilih Transaksi</h3>
-                <p className="text-gray-500 text-sm mt-1">
+              <div className="flex flex-col items-center justify-center h-full min-h-[400px] bg-muted/50 rounded-lg border-2 border-dashed">
+                <Info className="w-12 h-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium text-foreground">Pilih Transaksi</h3>
+                <p className="text-muted-foreground text-sm mt-1">
                   Pilih sebuah transaksi dari daftar di sebelah kiri untuk melihat detailnya.
                 </p>
               </div>

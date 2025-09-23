@@ -89,7 +89,7 @@ const categoryConfig = {
   "Perlengkapan Medis":       { icon: BriefcaseMedical,    color: "blue" },
   "Produk Dewasa":            { icon: SmilePlus,                color: "orange" },
   "Tulang Otot & Sendi":       { icon: Bone,                color: "green" },
-  "Masker":                   { icon: Drama,                 color: "pink" },
+  "Masker":                   { icon: SmilePlus,                 color: "green" },
   "Perlengkapan Kebersihan":  { icon: Brush, color: "teal" },
   default: { icon: HelpCircle, color: "gray" },
 };

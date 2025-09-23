@@ -109,7 +109,7 @@ export default function CreditLimitAlert({ tenantId }: CreditLimitAlertProps) {
                 <div className="flex items-center gap-3 sm:gap-4">
                     <div className="flex-1">
                         <div className="flex items-center gap-2">
-                            <span className="text-xs text-accent">Credit Limit:</span>
+                            <span className="text-xs text-primary">Credit Limit:</span>
                             {loading ? (
                                 <div className="animate-pulse h-5 w-24 rounded bg-gray-300/50 dark:bg-zinc-600/50"></div>
                             ) : error ? (
@@ -124,11 +124,11 @@ export default function CreditLimitAlert({ tenantId }: CreditLimitAlertProps) {
                                 <span className="text-sm">Unable to load</span>
                             )}
                         </div>
-                        <span className="text-xs text-accent-foreground opacity-75">
+                        <span className="text-xs text-primary-foreground opacity-75">
                             Last updated: {formattedLastUpdated}
                         </span>
                     </div>
-                    <Info className="size-6 sm:size-8 my-auto flex-shrink-0 text-accent"/>
+                    <Info className="size-6 sm:size-8 my-auto flex-shrink-0 text-primary"/>
                 </div>
             </AlertDescription>
         </Alert>

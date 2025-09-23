@@ -12,6 +12,7 @@ use App\Models\Product;
 use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -85,12 +86,19 @@ class OrderController extends Controller
         $products = $query->paginate(12)->withQueryString();
 
         // Get all unique categories that have at least one product associated with them
-        $allCategories = Category::whereHas('products')
-            ->whereNotNull('subcategory1')
-            ->distinct()
-            ->pluck('subcategory1')
-            ->sort()
-            ->values();
+
+        $allCategories = Category::withCount('products')
+        ->where('products_count', '>', 0)
+        ->groupBy('subcategory1')
+        ->orderByDesc('products_count')
+        ->pluck('subcategory1');
+
+        // $allCategories = Category::whereHas('products')
+        //     ->whereNotNull('subcategory1')
+        //     ->distinct()
+        //     ->pluck('subcategory1')
+        //     ->sort()
+        //     ->values();
 
         // Get all unique packages from existing products
         $allPackages = Product::query()
