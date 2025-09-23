@@ -40,13 +40,13 @@ class OrderController extends Controller
 
         // 🔎 Filter kategori
         if ($request->filled('categories')) {
-            $categories = (array) $request->categories;
+            $categories = (array)$request->categories;
             // Remove "Semua Produk" if it exists
             $categories = array_filter($categories, function ($cat) {
                 return $cat !== 'Semua Produk';
             });
 
-            if (! empty($categories)) {
+            if (!empty($categories)) {
                 $query->whereHas('category', function ($q) use ($categories) {
                     $q->whereIn('subcategory1', $categories);
                 });
@@ -55,13 +55,13 @@ class OrderController extends Controller
 
         // 🔹 Filter Package (base_uom)
         if ($request->filled('packages')) {
-            $packages = (array) $request->packages;
+            $packages = (array)$request->packages;
             // Remove "Semua Paket" if it exists
             $packages = array_filter($packages, function ($pack) {
                 return $pack !== 'Semua Paket';
             });
 
-            if (! empty($packages)) {
+            if (!empty($packages)) {
                 $query->whereIn('base_uom', $packages);
             }
         }
@@ -87,11 +87,14 @@ class OrderController extends Controller
 
         // Get all unique categories that have at least one product associated with them
 
-        $allCategories = Category::withCount('products')
-        ->where('products_count', '>', 0)
-        ->groupBy('subcategory1')
-        ->orderByDesc('products_count')
-        ->pluck('subcategory1');
+        $allCategories = Category::query()
+            ->select('subcategory1') // Select subcategory1 for grouping
+            ->addSelect(DB::raw('COUNT(products.id) as products_count')) // Count products
+            ->join('products', 'categories.id', '=', 'products.category_id') // Join with products table
+            ->groupBy('subcategory1') // Group by subcategory1
+            ->having('products_count', '>', 0) // Filter by the aggregated count
+            ->orderByDesc('products_count') // Order by the aggregated count
+            ->pluck('subcategory1');
 
         // $allCategories = Category::whereHas('products')
         //     ->whereNotNull('subcategory1')

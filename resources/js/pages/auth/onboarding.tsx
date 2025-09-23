@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import CascadingRegionSelect from "@/components/cascading-region-select";
 
 type PrefilledData = {
     username: string | null;
@@ -149,6 +150,18 @@ export default function OnboardingPage({ prefilled_data }: OnboardingPageProps) 
                                 />
                             </div>
 
+                            {/* Cascading Region Select */}
+                            <CascadingRegionSelect
+                                onProvinceChange={(value) => setData("province_code", value)}
+                                onCityChange={(value) => setData("city_code", value)}
+                                onDistrictChange={(value) => setData("district_code", value)}
+                                onVillageChange={(value) => setData("village_code", value)}
+                                initialProvince={data.province_code}
+                                initialCity={data.city_code}
+                                initialDistrict={data.district_code}
+                                initialVillage={data.village_code}
+                            />
+
                             {/* Address */}
                             <div className="space-y-2">
                                 <Label htmlFor="address">Address</Label>
@@ -165,86 +178,6 @@ export default function OnboardingPage({ prefilled_data }: OnboardingPageProps) 
                                         <AlertCircle className="h-4 w-4" />
                                         <AlertTitle>Error</AlertTitle>
                                         <AlertDescription>{errors.address}</AlertDescription>
-                                    </Alert>
-                                )}
-                            </div>
-
-                            {/* Province Code */}
-                            <div className="space-y-2">
-                                <Label htmlFor="province_code">Province Code</Label>
-                                <Input
-                                    id="province_code"
-                                    type="text"
-                                    value={data.province_code}
-                                    onChange={(e) => setData("province_code", e.target.value)}
-                                    placeholder="Enter province code"
-                                    required
-                                />
-                                {errors.province_code && (
-                                    <Alert variant="destructive">
-                                        <AlertCircle className="h-4 w-4" />
-                                        <AlertTitle>Error</AlertTitle>
-                                        <AlertDescription>{errors.province_code}</AlertDescription>
-                                    </Alert>
-                                )}
-                            </div>
-
-                            {/* City Code */}
-                            <div className="space-y-2">
-                                <Label htmlFor="city_code">City Code</Label>
-                                <Input
-                                    id="city_code"
-                                    type="text"
-                                    value={data.city_code}
-                                    onChange={(e) => setData("city_code", e.target.value)}
-                                    placeholder="Enter city code"
-                                    required
-                                />
-                                {errors.city_code && (
-                                    <Alert variant="destructive">
-                                        <AlertCircle className="h-4 w-4" />
-                                        <AlertTitle>Error</AlertTitle>
-                                        <AlertDescription>{errors.city_code}</AlertDescription>
-                                    </Alert>
-                                )}
-                            </div>
-
-                            {/* District Code */}
-                            <div className="space-y-2">
-                                <Label htmlFor="district_code">District Code</Label>
-                                <Input
-                                    id="district_code"
-                                    type="text"
-                                    value={data.district_code}
-                                    onChange={(e) => setData("district_code", e.target.value)}
-                                    placeholder="Enter district code"
-                                    required
-                                />
-                                {errors.district_code && (
-                                    <Alert variant="destructive">
-                                        <AlertCircle className="h-4 w-4" />
-                                        <AlertTitle>Error</AlertTitle>
-                                        <AlertDescription>{errors.district_code}</AlertDescription>
-                                    </Alert>
-                                )}
-                            </div>
-
-                            {/* Village Code */}
-                            <div className="space-y-2">
-                                <Label htmlFor="village_code">Village Code</Label>
-                                <Input
-                                    id="village_code"
-                                    type="text"
-                                    value={data.village_code}
-                                    onChange={(e) => setData("village_code", e.target.value)}
-                                    placeholder="Enter village code"
-                                    required
-                                />
-                                {errors.village_code && (
-                                    <Alert variant="destructive">
-                                        <AlertCircle className="h-4 w-4" />
-                                        <AlertTitle>Error</AlertTitle>
-                                        <AlertDescription>{errors.village_code}</AlertDescription>
                                     </Alert>
                                 )}
                             </div>

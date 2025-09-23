@@ -88,8 +88,16 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard untuk pengguna biasa
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/credit-limit', [TransactionController::class, 'creditLimit'])->name('credit.limit');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/credit-limit', [TransactionController::class, 'creditLimit'])->name('credit.limit');
+
+        // Region routes
+        Route::prefix('regions')->group(function () {
+            Route::get('/provinces', [App\Http\Controllers\RegionController::class, 'provinces']);
+            Route::get('/cities/{provinceCode}', [App\Http\Controllers\RegionController::class, 'cities']);
+            Route::get('/districts/{cityCode}', [App\Http\Controllers\RegionController::class, 'districts']);
+            Route::get('/villages/{districtCode}', [App\Http\Controllers\RegionController::class, 'villages']);
+        });
 
     // Rute E-commerce untuk pengguna
     Route::get('/orders/products', [OrderController::class, 'index'])->name('orders.products');

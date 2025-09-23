@@ -23,6 +23,7 @@ interface SearchableSelectProps {
     placeholder?: string;
     searchPlaceholder?: string;
     maxResults?: number;
+    disabled?: boolean;
 }
 
 export default function SearchableSelect({
@@ -32,6 +33,7 @@ export default function SearchableSelect({
                                              placeholder = 'Select an option...',
                                              searchPlaceholder = 'Search...',
                                              maxResults = 10,
+                                             disabled = false,
                                          }: SearchableSelectProps) {
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
@@ -53,7 +55,12 @@ export default function SearchableSelect({
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button variant="outline" role="combobox" className="w-full justify-between">
+                <Button 
+                    variant="outline" 
+                    role="combobox" 
+                    className="w-full justify-between"
+                    disabled={disabled}
+                >
                     {displayValue
                         ? options.find((opt) => String(opt.value) === displayValue)?.label
                         : placeholder}
