@@ -27,7 +27,7 @@ class DigikopAuthService
             $this->login(); // get new token
             $token = Cache::get('digikoperasi_token');
         }
-        Log::info('Token data received: ', [$token]);
+        //        Log::info('Token data received: ', [$token]);
 
         return $token;
     }

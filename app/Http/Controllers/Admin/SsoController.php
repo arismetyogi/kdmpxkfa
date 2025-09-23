@@ -114,6 +114,7 @@ class SsoController extends Controller
                 if ($request->wantsJson()) {
                     return $this->errorResponse('Missing encrypted value', 400);
                 }
+
                 return back()->with('error', 'Missing encrypted value');
             }
 
@@ -123,12 +124,13 @@ class SsoController extends Controller
                 if ($request->wantsJson()) {
                     return $this->errorResponse('Failed to decrypt value', 400);
                 }
+
                 return back()->with('error', 'Failed to decrypt value');
             }
 
             if ($request->wantsJson()) {
                 return $this->successResponse([
-                    'decrypted' => $decrypted
+                    'decrypted' => $decrypted,
                 ], 'Value decrypted successfully');
             }
 
@@ -136,9 +138,10 @@ class SsoController extends Controller
 
         } catch (\Exception $e) {
             if ($request->wantsJson()) {
-                return $this->errorResponse('Decryption failed: ' . $e->getMessage(), 500);
+                return $this->errorResponse('Decryption failed: '.$e->getMessage(), 500);
             }
-            return back()->with('error', 'Decryption failed: ' . $e->getMessage());
+
+            return back()->with('error', 'Decryption failed: '.$e->getMessage());
         }
     }
 }

@@ -2,30 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Purchase; // Sesuaikan dengan nama model Anda, misalnya PurchaseOrder
-use App\Models\Order; // Tambahkan model Order jika Anda menggunakannya
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\DB; // 
-use Illuminate\Support\Facades\Auth;
+use App\Models\Order; // Sesuaikan dengan nama model Anda, misalnya PurchaseOrder
+use App\Models\Purchase; // Tambahkan model Order jika Anda menggunakannya
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia; //
 
 class PurchaseController extends Controller
 {
-
     public function index()
     {
         // Gunakan pagination untuk data yang lebih efisien
         $orders = Purchase::latest()->paginate(10); // Menampilkan 10 data per halaman
 
         return Inertia::render('admin/purchase/index', [
-            'orders' => $orders
+            'orders' => $orders,
         ]);
     }
 
     public function show(Purchase $purchase)
     {
         return Inertia::render('admin/purchase/show', [
-            'purchase' => $purchase
+            'purchase' => $purchase,
         ]);
     }
 
@@ -63,7 +60,7 @@ class PurchaseController extends Controller
             // Rollback jika terjadi error
             DB::rollBack();
 
-            return redirect()->back()->with('error', 'Gagal menyetujui purchase: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menyetujui purchase: '.$e->getMessage());
         }
     }
 
@@ -71,7 +68,7 @@ class PurchaseController extends Controller
     {
         // Tidak perlu transaksi jika hanya update 1 tabel
         $purchase->update(['status' => 'Rejected']);
-        
+
         return redirect()->back()->with('success', 'Purchase berhasil ditolak.');
     }
 }

@@ -29,7 +29,7 @@ class UserProfile extends Model
         'nib_file',
         'ktp_file',
         'npwp_file',
-        'sia_number'
+        'sia_number',
     ];
 
     protected $casts = [

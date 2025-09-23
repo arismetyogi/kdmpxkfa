@@ -48,7 +48,7 @@ class OnboardingController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'tenant_id' => ['required', 'string', 'max:255'],
             'tenant_name' => ['nullable', 'string', 'max:255'],
-            'province_code' =>['required', 'string', 'max:255'],
+            'province_code' => ['required', 'string', 'max:255'],
             'city_code' => ['required', 'string', 'max:255'],
             'district_code' => ['required', 'string', 'max:255'],
             'village_code' => ['required', 'string', 'max:255'],

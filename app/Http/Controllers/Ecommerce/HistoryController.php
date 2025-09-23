@@ -11,7 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
-
 class HistoryController extends Controller
 {
     public function history()
@@ -20,7 +19,6 @@ class HistoryController extends Controller
             'products',
             'user.apotek', // eager load relasi apotek dari user
         ])->latest()->get();
-
 
         return Inertia::render('orders/history', [
             'orders' => $orders,

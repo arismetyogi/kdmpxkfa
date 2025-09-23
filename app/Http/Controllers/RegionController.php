@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Services\RegionService;
-use Illuminate\Http\Request;
 
 class RegionController extends Controller
 {
@@ -20,6 +19,7 @@ class RegionController extends Controller
     public function provinces()
     {
         $provinces = $this->regionService->getProvinces();
+
         return response()->json($provinces);
     }
 
@@ -29,6 +29,7 @@ class RegionController extends Controller
     public function cities($provinceCode)
     {
         $cities = $this->regionService->getCitiesByProvince($provinceCode);
+
         return response()->json($cities);
     }
 
@@ -38,6 +39,7 @@ class RegionController extends Controller
     public function districts($cityCode)
     {
         $districts = $this->regionService->getDistrictsByCity($cityCode);
+
         return response()->json($districts);
     }
 
@@ -47,6 +49,7 @@ class RegionController extends Controller
     public function villages($districtCode)
     {
         $villages = $this->regionService->getVillagesByDistrict($districtCode);
+
         return response()->json($villages);
     }
 }

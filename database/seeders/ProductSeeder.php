@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
@@ -68,10 +67,10 @@ class ProductSeeder extends Seeder
         $data = [];
 
         if (($handle = fopen($filePath, 'r')) !== false) {
-            while (($row = fgetcsv($handle,0, ',')) !== false) {
+            while (($row = fgetcsv($handle, 0, ',')) !== false) {
                 if (! $header) {
                     $header = $row;
-//                    dd($header);
+                    //                    dd($header);
                 } else {
                     $data[] = array_combine($header, $row);
                 }

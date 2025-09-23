@@ -11,8 +11,8 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class OrderController extends Controller
 {
@@ -40,13 +40,13 @@ class OrderController extends Controller
 
         // 🔎 Filter kategori
         if ($request->filled('categories')) {
-            $categories = (array)$request->categories;
+            $categories = (array) $request->categories;
             // Remove "Semua Produk" if it exists
             $categories = array_filter($categories, function ($cat) {
                 return $cat !== 'Semua Produk';
             });
 
-            if (!empty($categories)) {
+            if (! empty($categories)) {
                 $query->whereHas('category', function ($q) use ($categories) {
                     $q->whereIn('subcategory1', $categories);
                 });
@@ -55,13 +55,13 @@ class OrderController extends Controller
 
         // 🔹 Filter Package (base_uom)
         if ($request->filled('packages')) {
-            $packages = (array)$request->packages;
+            $packages = (array) $request->packages;
             // Remove "Semua Paket" if it exists
             $packages = array_filter($packages, function ($pack) {
                 return $pack !== 'Semua Paket';
             });
 
-            if (!empty($packages)) {
+            if (! empty($packages)) {
                 $query->whereIn('base_uom', $packages);
             }
         }
@@ -135,7 +135,6 @@ class OrderController extends Controller
             'relatedProducts' => $relatedProducts,
         ]);
     }
-
 
     public function history()
     {

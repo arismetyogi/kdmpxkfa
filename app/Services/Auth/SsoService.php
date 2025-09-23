@@ -3,8 +3,6 @@
 namespace App\Services\Auth;
 
 use App\Models\User;
-use App\Models\UserProfile;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -31,7 +29,7 @@ readonly class SsoService
         return DB::transaction(function () use ($data) {
             $userData = $this->validateSSOTokenWithDigikoperasi($data['sso_token'], $data['state'] ?? null);
 
-            Log::debug('Callback validate data: ', $userData);
+            //            Log::debug('Callback validate data: ', $userData);
 
             // Find or create user
             $user = $this->findOrCreateUser($userData);
@@ -41,11 +39,11 @@ readonly class SsoService
 
             $result = [
                 'user' => $user,
-                'requires_onboarding' => !$user->onboarding_completed,
+                'requires_onboarding' => ! $user->onboarding_completed,
             ];
 
             // Add prefilled data for onboarding if needed
-            if (!$user->onboarding_completed) {
+            if (! $user->onboarding_completed) {
                 $result['prefilled_data'] = $this->getPrefilledData($userData);
             }
 
@@ -66,7 +64,7 @@ readonly class SsoService
         ];
 
         try {
-            $url = rtrim(config('sso.allowed_origins.digikoperasi.url'), '/') . '/redirect-sso/validate';
+            $url = rtrim(config('sso.allowed_origins.digikoperasi.url'), '/').'/redirect-sso/validate';
 
             $client = Http::withHeaders([
                 'Content-Type' => 'application/json',
@@ -75,20 +73,20 @@ readonly class SsoService
                 ->withBody(json_encode($payload), 'application/json');
             $response = $client->post($url);
 
-            Log::debug('SSO URL: ', ['url' => $url]);
-            Log::debug('SSO head: ', $client->getOptions());
-            Log::debug('SSO Validate Request Body: ', $payload);
-
-            Log::debug('SSO Validate Response: ', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
+            //            Log::debug('SSO URL: ', ['url' => $url]);
+            //            Log::debug('SSO head: ', $client->getOptions());
+            //            Log::debug('SSO Validate Request Body: ', $payload);
+            //
+            //            Log::debug('SSO Validate Response: ', [
+            //                'status' => $response->status(),
+            //                'body' => $response->body(),
+            //            ]);
 
             $responseData = $response->json();
-            Log::debug('Response data parsed: ', ['data' => $responseData['data']]);
+            //            Log::debug('Response data parsed: ', ['data' => $responseData['data']]);
 
-            if (!$response->ok() || !isset($responseData['data'])) {
-                throw new \Exception('Invalid response from SSO server: ' . $response->body());
+            if (! $response->ok() || ! isset($responseData['data'])) {
+                throw new \Exception('Invalid response from SSO server: '.$response->body());
             }
 
             return $responseData['data'];
@@ -98,25 +96,26 @@ readonly class SsoService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            throw new \Exception('SSO validation failed: ' . $e->getMessage());
+            throw new \Exception('SSO validation failed: '.$e->getMessage());
         }
     }
 
     /**
      * Find existing user or create new one
+     *
      * @throws \Exception
      */
     private function findOrCreateUser(array $userData): User
     {
         $user = User::where('external_id', $userData['sub'])->first();
         $email = $this->decryptSsoField($userData['email']) ?? null;
-        Log::info('Decrypted SSO user: ' . $email);
+        //        Log::info('Decrypted SSO user: ' . $email);
 
-        if (!$user) {
+        if (! $user) {
             $user = User::where('email', $email)->first();
         }
 
-        if (!$user) {
+        if (! $user) {
             $user = User::create([
                 'uuid' => Str::uuid(),
                 'name' => $userData['name'],
@@ -131,12 +130,12 @@ readonly class SsoService
                 'is_active' => true,
             ]);
             $user->assignRole('user');
-            Log::info('User created: ' . $user);
+            //            Log::info('User created: ' . $user);
 
             $this->createUserProfile($user, $userData);
         }
 
-        if (!$user) {
+        if (! $user) {
             Log::error('User creation failed');
         }
 
@@ -153,13 +152,13 @@ readonly class SsoService
         $decryptedPicName = $this->decryptSsoField($userData['pic_name']) ?? '';
         $decryptedPicPhone = $this->decryptSsoField($userData['pic_phone']) ?? '';
         $decryptedNibNumber = $this->decryptSsoField($userData['nib_number']) ?? '';
-        $decryptedBankAccount = (array)$this->decryptSsoField($userData['bank_account']) ?? [];
+        $decryptedBankAccount = (array) $this->decryptSsoField($userData['bank_account']) ?? [];
         $decryptedNpwp = $this->decryptSsoField($userData['npwp_number']) ?? '';
         $decryptedSkNumber = $this->decryptSsoField($userData['sk_number']) ?? '';
 
         // Handle latitude and longitude with proper defaults
-        $latitude = isset($userData['latitude']) ? (float)$userData['latitude'] : 0.0;
-        $longitude = isset($userData['longitude']) ? (float)$userData['longitude'] : 0.0;
+        $latitude = isset($userData['latitude']) ? (float) $userData['latitude'] : 0.0;
+        $longitude = isset($userData['longitude']) ? (float) $userData['longitude'] : 0.0;
 
         // Ensure all required string fields have values
         $profileData = [
@@ -168,10 +167,10 @@ readonly class SsoService
             'tenant_id' => $userData['tenant_id'] ?? '',
             'tenant_name' => $userData['tenant_name'] ?? '',
             'source_app' => $userData['source_app'] ?? '',
-            'province_code' => (string)$userData['province_code'] ?? '',
-            'city_code' => (string)$userData['regency_city_code'] ?? '',
-            'district_code' => (string)$userData['district_code'] ?? '',
-            'village_code' => (string)$userData['village_code'] ?? '',
+            'province_code' => (string) $userData['province_code'] ?? '',
+            'city_code' => (string) $userData['regency_city_code'] ?? '',
+            'district_code' => (string) $userData['district_code'] ?? '',
+            'village_code' => (string) $userData['village_code'] ?? '',
             'address' => $userData['registered_address'] ?? '',
             'latitude' => $latitude,
             'longitude' => $longitude,
@@ -189,17 +188,19 @@ readonly class SsoService
 
         try {
             $user->userProfile()->updateOrCreate($profileData);
-            Log::info('Profile created for user: ' . $user->email);
+
+            //            Log::info('Profile created for user: ' . $user->email);
             return $user;
         } catch (\Exception $e) {
-            Log::error('Failed to create user profile: ' . $e->getMessage(), [
+            Log::error('Failed to create user profile: '.$e->getMessage(), [
                 'user_id' => $user->id,
                 'profile_data' => $profileData,
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
         }
     }
+
     /**
      * Create SSO session record
      */
@@ -235,8 +236,8 @@ readonly class SsoService
             'tenant_id' => $userData['tenant_id'] ?? null,
             'tenant_name' => $userData['tenant_name'] ?? null,
             'address' => $userData['registered_address'],
-            'latitude' => (float)$userData['latitude'] ?? null,
-            'longitude' => (float)$userData['longitude'] ?? null,
+            'latitude' => (float) $userData['latitude'] ?? null,
+            'longitude' => (float) $userData['longitude'] ?? null,
         ];
     }
 
@@ -252,7 +253,7 @@ readonly class SsoService
             'timestamp' => now()->timestamp,
         ]);
 
-        return $baseUrl . '/sso/callback?' . $params;
+        return $baseUrl.'/sso/callback?'.$params;
     }
 
     /**
@@ -290,11 +291,12 @@ readonly class SsoService
             $ivHex = bin2hex($iv);
 
             // Concatenate ivHex:encryptedHex, then base64 encode
-            $data = $ivHex . ':' . bin2hex($encrypted);
+            $data = $ivHex.':'.bin2hex($encrypted);
 
             return base64_encode($data);
         } catch (\Throwable $e) {
-            Log::error('Enkripsi field SSO gagal: ' . $e->getMessage());
+            Log::error('Enkripsi field SSO gagal: '.$e->getMessage());
+
             return null;
         }
     }
@@ -317,7 +319,7 @@ readonly class SsoService
 
             [$ivHex, $encryptedHex] = explode(':', $data, 2);
 
-            if (!$ivHex || !$encryptedHex) {
+            if (! $ivHex || ! $encryptedHex) {
                 throw new \Exception('Invalid encrypted data format');
             }
 
@@ -343,7 +345,8 @@ readonly class SsoService
 
             return json_decode($decrypted, true);
         } catch (\Throwable $e) {
-            Log::error('Dekripsi field SSO gagal: ' . $e->getMessage());
+            Log::error('Dekripsi field SSO gagal: '.$e->getMessage());
+
             return null;
         }
     }

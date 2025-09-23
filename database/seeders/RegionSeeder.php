@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Region;
 use App\Models\RegionDetail;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class RegionSeeder extends Seeder
@@ -84,12 +83,12 @@ class RegionSeeder extends Seeder
                     'code' => $item['code'] ?? null,
                     'name' => $item['name'] ?? null,
                     'capital' => $item['capital'] ?? null,
-                    'latitude' => (float)$item['lat'] ?? null,
-                    'longitude' => (float)$item['long'] ?? null,
-                    'elevation' => (float)$item['elv'] ?? null,
-                    'timezone' => (int)$item['timezone'] ?? null,
-                    'area' => (float)$item['area'] ?? null,
-                    'population' => (int)$item['population'] ?? null,
+                    'latitude' => (float) $item['lat'] ?? null,
+                    'longitude' => (float) $item['long'] ?? null,
+                    'elevation' => (float) $item['elv'] ?? null,
+                    'timezone' => (int) $item['timezone'] ?? null,
+                    'area' => (float) $item['area'] ?? null,
+                    'population' => (int) $item['population'] ?? null,
                     'path' => $item['path'] ?? null,
                 ]
             );
