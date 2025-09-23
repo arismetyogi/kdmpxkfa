@@ -16,9 +16,9 @@ class OnboardingController extends Controller
         $prefilled = session('prefilled_data') ?? [
             'email' => $request->user()->email ?? $request['email'],
             'name' => $request->user()->name ?? $request['name'],
-            'phone' => $request['phone'] ?? null,
-            'tenant_id' => $request['tenant_id'] ?? null,
-            'tenant_name' => $request['tenant_name'] ?? null,
+            'phone' => $request->user()->phone ?? $request['phone'] ?? null,
+            'tenant_id' => $request->user()->tenant_id ?? $request['tenant_id'] ?? null,
+            'tenant_name' => $request->user()->tenant_name ?? $request['tenant_name'] ?? null,
         ];
 
         return Inertia::render('auth/onboarding', [

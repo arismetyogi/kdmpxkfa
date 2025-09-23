@@ -29,12 +29,10 @@ readonly class SsoService
         return DB::transaction(function () use ($data) {
             $userData = $this->validateSSOTokenWithDigikoperasi($data['sso_token'], $data['state'] ?? null);
 
-            Log::debug('Callback validate token: ', $userData);
+            Log::debug('Callback validate data: ', $userData);
 
             // Find or create user
             $user = $this->findOrCreateUser($userData);
-
-            Log::debug('Callback user: ', $user->toArray());
 
             // Create SSO session
             $this->createSSOSession($user, $data, $userData);
@@ -49,10 +47,6 @@ readonly class SsoService
             //            $refreshToken = $this->jwtService->generateRefreshToken($tokenPayload);
 
             $result = [
-                //                'access_token' => $accessToken,
-                //                'refresh_token' => $refreshToken,
-                //                'token_type' => 'Bearer',
-                //                'expires_in' => config('jwt.ttl', 3600),
                 'user' => $user,
                 'requires_onboarding' => !$user->onboarding_completed,
             ];
@@ -194,10 +188,13 @@ readonly class SsoService
                 'uuid' => Str::uuid(),
                 'name' => $userData['name'],
                 'username' => Str::before($userData['email'], '@'),
-                'email' => $userData['email'],
+                'email' => $this->decryptSsoField($userData['email']),
                 'email_verified_at' => now(),
                 'onboarding_completed' => false,
                 'external_id' => $userData['sub'],
+                'tenant_id' => $userData['tenant_id'],
+                'tenant_name' => $userData['tenant_name'],
+                'phone' => $userData['phone'],
                 'is_active' => true,
             ]);
             $user->assignRole('user');
@@ -235,7 +232,7 @@ readonly class SsoService
     private function getPrefilledData(array $userData): array
     {
         return [
-            'email' => $userData['email'] ?? null,
+            'email' => $this->decryptSsoField($userData['email']) ?? null,
             'name' => $userData['name'] ?? null,
             'phone' => $userData['phone'] ?? null,
             'tenant_id' => $userData['tenant_id'] ?? null,
