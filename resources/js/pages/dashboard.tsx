@@ -105,12 +105,14 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                 </h1>
                                 <p className="mb-8 text-lg leading-relaxed text-white/80 md:text-xl">Pilihan terbaik untuk kesehatan keluarga Anda</p>
                                 <div className="flex flex-col justify-center gap-4 sm:flex-row md:justify-start">
-                                    <Button
-                                        variant="default"
-                                        className="gap-2 rounded-full bg-yellow-400 px-8 py-6 text-lg font-bold text-slate-900 shadow-lg hover:bg-yellow-500"
-                                    >
-                                        <ShoppingBag className="h-5 w-5" /> Beli Paket
-                                    </Button>
+                                    <Link href={route('packages.index')}>
+                                        <Button
+                                            variant="default"
+                                            className="gap-2 rounded-full bg-yellow-400 px-8 py-6 text-lg font-bold text-slate-900 shadow-lg hover:bg-yellow-500"
+                                        >
+                                            <ShoppingBag className="h-5 w-5" /> Beli Paket
+                                        </Button>
+                                    </Link>
                                     <Button
                                         variant="outline"
                                         className="rounded-full border-2 border-white/40 px-8 py-6 text-lg font-semibold text-black backdrop-blur-sm hover:bg-white/10 dark:text-white"
@@ -235,10 +237,12 @@ export default function Dashboard({ products }: { products?: Product[] }) {
 
                                 {/* CTA Button */}
                                 <div className="flex justify-center md:justify-start">
-                                    <Button size="lg" className="rounded-xl bg-blue-600 py-7 text-lg font-bold text-white shadow-lg hover:bg-blue-700">
-                                        <ShoppingCart className="mr-3 h-5 w-5" />
-                                        Buy Package Now
-                                    </Button>
+                                    <Link href={route('packages.index')}>
+                                        <Button size="lg" className="rounded-xl bg-blue-600 py-7 text-lg font-bold text-white shadow-lg hover:bg-blue-700">
+                                            <ShoppingCart className="mr-3 h-5 w-5" />
+                                            Buy Package Now
+                                        </Button>
+                                    </Link>
                                 </div>
 
                                 {/* Features */}
