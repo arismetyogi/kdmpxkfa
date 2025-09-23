@@ -29,6 +29,8 @@ class OnboardingController extends Controller
             'district_code' => $user->userProfile->district_code ?? $request['district_code'] ?? null,
             'village_code' => $user->userProfile->village_code ?? $request['village_code'] ?? null,
             'address' => $user->userProfile->address ?? $request['address'] ?? null,
+            'zipcode' => $user->userProfile->zipcode ?? $request['zipcode'] ?? null,
+            'sia_number' => $user->userProfile->sia_number ?? $request['sia_number'] ?? null,
         ];
 
         return Inertia::render('auth/onboarding', [
@@ -56,7 +58,7 @@ class OnboardingController extends Controller
             'sia_document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'], // 2MB max
         ]);
 
-        $user = auth()->user();
+        $user = $request->user();
 
         // Update user's profile
         $user->userProfile()->update([
@@ -69,6 +71,12 @@ class OnboardingController extends Controller
             'address' => $validated['address'],
             'zipcode' => $validated['zipcode'],
             'sia_number' => $validated['sia_number'],
+        ]);
+
+        // update onboarding status and display name
+        $user->update([
+            'name' => $validated['name'],
+            'onboarding_completed' => true,
         ]);
 
         // Handle SIA document upload

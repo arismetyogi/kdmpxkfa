@@ -102,6 +102,7 @@ class ProductSeeder extends Seeder
             Product::updateOrCreate(
                 ['sku' => $item['sku']],
                 [
+                    'sap_code' => $item['sap_code'],
                     'name' => $name,
                     'slug' => $slug,
                     'description' => $item['description'] ?? '',
