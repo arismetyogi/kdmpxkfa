@@ -16,7 +16,7 @@ export function AppSidebar() {
         user?.roles?.some((r: { name: string }) => roles.includes(r.name));
 
     // 🔹 Main Navigation
-    const mainNavItems: NavItem[] = hasRole(['super-admin', 'admin', 'admin-apotek'])
+    const mainNavItems: NavItem[] = hasRole(['super-admin', 'admin', 'admin-apotek','admin-busdev'])
         ? [
               {
                   title: 'Admin Dashboard',
@@ -106,7 +106,7 @@ export function AppSidebar() {
         : [];
 
     // 🔹 Tentukan link logo sesuai role
-    const logoHref = hasRole(['super-admin', 'admin', 'admin-apotek, admin-busdev'])
+    const logoHref = hasRole(['super-admin', 'admin', 'admin-apotek', 'admin-busdev'])
         ? route('admin.dashboard')
         : route('home');
 

@@ -65,7 +65,7 @@ class AdminController extends Controller
         ];
     } elseif ($user->hasRole('admin-busdev')) {
         $stats = [
-            'tenant_id' => \App\Models\User::count(),
+            'total_mapping' => \App\Models\User::count(),
             'total_accounts' => \App\Models\User::count(),
         ];
     }
