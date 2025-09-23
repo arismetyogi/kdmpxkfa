@@ -4,8 +4,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Inertia } from '@inertiajs/inertia';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { Calendar, Mail, User } from 'lucide-react';
 import { useState } from 'react';
@@ -39,7 +38,7 @@ export default function MappingUsers() {
 
     const handleConfirm = (type: 'approve' | 'reject', account: any) => {
         const url = `account/${account.id}/${type}`;
-        Inertia.post(
+        router.post(
             url,
             {},
             {
