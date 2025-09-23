@@ -27,7 +27,7 @@ export default function Dashboard({ user, stats }: DashboardProps) {
 
     const isSuperAdmin = roles.includes('super-admin');
     const isApotek = roles.includes('admin-apotek');
-    const isBusdev = roles.includes('busdev');
+    const isBusdev = roles.includes('admin-busdev');
 
     // Super Admin Dashboard
     const renderSuperAdminDashboard = () => (
