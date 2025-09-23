@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
@@ -36,8 +37,8 @@ class User extends Authenticatable implements HasMedia
         'external_id',
         'tenant_id',
         'apotek_id',
-        'status',       
-        'approved_by',   
+        'status',
+        'approved_by',
         'approved_at',
     ];
 
@@ -82,40 +83,41 @@ class User extends Authenticatable implements HasMedia
     }
 
     public function approvedBy()
-{
-    return $this->belongsTo(User::class, 'approved_by');
-}
-
-// app/Models/User.php
-
-public function getMenusAttribute()
-{
-    $roles = $this->roles->pluck('name')->toArray();
-
-    if (in_array('super-admin', $roles)) {
-        return [
-            ['title' => 'Users', 'href' => route('admin.users.index')],
-            ['title' => 'Roles', 'href' => route('admin.roles.index')],
-            ['title' => 'Permissions', 'href' => route('admin.permissions.index')],
-        ];
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
-    if (in_array('admin-apotek', $roles)) {
-        return [
-            ['title' => 'Orders', 'href' => route('admin.orders.index')],
-            ['title' => 'Products', 'href' => route('admin.products.index')],
-        ];
+    public function getMenusAttribute()
+    {
+        $roles = $this->roles->pluck('name')->toArray();
+
+        if (in_array('super-admin', $roles)) {
+            return [
+                ['title' => 'Users', 'href' => route('admin.users.index')],
+                ['title' => 'Roles', 'href' => route('admin.roles.index')],
+                ['title' => 'Permissions', 'href' => route('admin.permissions.index')],
+            ];
+        }
+
+        if (in_array('admin-apotek', $roles)) {
+            return [
+                ['title' => 'Orders', 'href' => route('admin.orders.index')],
+                ['title' => 'Products', 'href' => route('admin.products.index')],
+            ];
+        }
+
+        if (in_array('busdev', $roles)) {
+            return [
+                ['title' => 'Mapping', 'href' => route('admin.mapping.index')],
+                ['title' => 'Accounts', 'href' => route('admin.accounts.index')],
+            ];
+        }
+
+        return [];
     }
 
-    if (in_array('busdev', $roles)) {
-        return [
-            ['title' => 'Mapping', 'href' => route('admin.mapping.index')],
-            ['title' => 'Accounts', 'href' => route('admin.accounts.index')],
-        ];
+    public function userProfile(): HasOne
+    {
+        return $this->hasOne(UserProfile::class);
     }
-
-    return [];
-}
-
-    
 }

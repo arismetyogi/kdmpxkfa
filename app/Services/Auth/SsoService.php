@@ -3,6 +3,7 @@
 namespace App\Services\Auth;
 
 use App\Models\User;
+use App\Models\UserProfile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -34,17 +35,10 @@ readonly class SsoService
             // Find or create user
             $user = $this->findOrCreateUser($userData);
 
+            $profile = $this->createUserProfile($user, $userData);
+
             // Create SSO session
             $this->createSSOSession($user, $data, $userData);
-
-            //            $tokenPayload = [
-            //                'user_id' => $user->id,
-            //                'email' => $user->email,
-            //                'external_id' => $user->external_id,
-            //            ];
-
-            //            $accessToken = $this->jwtService->generateToken($tokenPayload);
-            //            $refreshToken = $this->jwtService->generateRefreshToken($tokenPayload);
 
             $result = [
                 'user' => $user,
@@ -109,69 +103,6 @@ readonly class SsoService
         }
     }
 
-    //    private function validateSSOTokenWithDigikoperasi(string $token, ?string $state): array
-    //    {
-    //        $payload = ['sso_token' => $token, 'state' => $state,];
-    //        $base = rtrim(config('sso.allowed_origins.digikoperasi.url', ''), '/');
-    //        $url = $base . '/redirect-sso/validate';
-    //        // Log initial details
-    //        Log::debug('SSO validate target', ['url' => $url, 'payload' => $payload]);
-    //        // optional: file to store Guzzle raw debug (createable by web server)
-    //        $debugFile = storage_path('logs/sso_http_debug.log');
-    //        try {
-    //            $client = Http::withHeaders([
-    //                'Content-Type' => 'application/json',
-    //                'x-api-key' => config('sso.allowed_origins.digikoperasi.api_key')
-    //            ])->withOptions([
-    //                // Guzzle debug to file so you can inspect raw request and response
-    //                'debug' => fopen($debugFile, 'a')]);
-    //            // Try sending as JSON (most likely) Log::debug('Attempting POST as JSON');
-    //            $response = $client->post($url, $payload);
-    //            // Laravel sends JSON when array provided
-    //            Log::debug('Response status', ['status' => $response->status()]);
-    //            Log::debug('Response headers', ['headers' => $response->headers()]);
-    //            Log::debug('Response body', ['body' => $response->body()]);
-    //            // If server says method not allowed (405) try alternate content type
-    //            if ($response->status() === 405) {
-    //                Log::warning('Got 405, retrying as x-www-form-urlencoded (asForm)');
-    //                $response = Http::withHeaders(['x-api-key' => config('sso.allowed_origins.digikoperasi.api_key'), 'Accept' => 'application/json',])->asForm()->withOptions(['debug' => fopen($debugFile, 'a')])->post($url, $payload);
-    //                Log::debug('Retry Response status', ['status' => $response->status()]);
-    //                Log::debug('Retry Response headers', ['headers' => $response->headers()]);
-    //                Log::debug('Retry Response body', ['body' => $response->body()]);
-    //            }
-    //            if (!$response->successful()) {
-    //                // include response status, headers and body in exception to help debug
-    //                $msg = sprintf("Token validation failed with Digikoperasi: status=%s, body=%s, headers=%s",
-    //                    $response->status(), $response->body(), json_encode($response->headers()));
-    //                throw new \Exception($msg);
-    //            }
-    //            $responseData = $response->json();
-    //            if (!isset($responseData['success']) || !$responseData['success']) {
-    //                throw new \Exception('Invalid SSO token: ' . ($responseData['message'] ?? json_encode($responseData)));
-    //            }
-    //            return $responseData['data'] ?? [];
-    //        } catch (\Exception $e) {
-    //            // capture debug file location in the message so you can inspect raw HTTP exchange
-    //            throw new \Exception('SSO validation failed: ' . $e->getMessage() . ' (see ' . $debugFile . ' for raw request/response)');
-    //        }
-    //    }
-
-    /**
-     * Validate JWT signature (fallback method)
-     *
-     * @throws \Exception
-     */
-    //    private function validateJWTToken(string $token): array
-    //    {
-    //        try {
-    //            $decoded = $this->jwtService->validateToken($token);
-    //            return $decoded['data'] ?? $decoded;
-    //
-    //        } catch (\Exception $e) {
-    //            throw new \Exception('Invalid JWT token: ' . $e->getMessage());
-    //        }
-    //    }
-
     /**
      * Find existing user or create new one
      */
@@ -179,6 +110,7 @@ readonly class SsoService
     {
         $user = User::where('external_id', $userData['sub'])->first();
         $email = $this->decryptSsoField($userData['email']) ?? null;
+        Log::info('Decrypted SSO user: ' . $email);
 
         if (!$user) {
             $user = User::where('email', $email)->first();
@@ -199,11 +131,73 @@ readonly class SsoService
                 'is_active' => true,
             ]);
             $user->assignRole('user');
+            Log::info('User created: ' . $user);
+        }
+
+        if (!$user) {
+            Log::error('User creation failed');
         }
 
         return $user;
     }
 
+    /**
+     * @throws \Exception
+     */
+    private function createUserProfile(User $user, array $userData): UserProfile
+    {
+        // Decrypt sensitive fields
+        $decryptedNik = $this->decryptSsoField($userData['nik']) ?? '';
+        $decryptedPicName = $this->decryptSsoField($userData['pic_name']) ?? '';
+        $decryptedPicPhone = $this->decryptSsoField($userData['pic_phone']) ?? '';
+        $decryptedNibNumber = $this->decryptSsoField($userData['nib_number']) ?? '';
+        $decryptedBankAccount = (array)$this->decryptSsoField($userData['bank_account']) ?? [];
+        $decryptedNpwp = $this->decryptSsoField($userData['npwp_number']) ?? '';
+        $decryptedSkNumber = $this->decryptSsoField($userData['sk_number']) ?? '';
+
+        // Handle latitude and longitude with proper defaults
+        $latitude = isset($userData['latitude']) ? (float)$userData['latitude'] : 0.0;
+        $longitude = isset($userData['longitude']) ? (float)$userData['longitude'] : 0.0;
+
+        // Ensure all required string fields have values
+        $profileData = [
+            'user_id' => $user->id,
+            'name' => $userData['name'] ?? '',
+            'tenant_id' => $userData['tenant_id'] ?? '',
+            'tenant_name' => $userData['tenant_name'] ?? '',
+            'source_app' => $userData['source_app'] ?? '',
+            'province_code' => (string)$userData['province_code'] ?? '',
+            'city_code' => (string)$userData['regency_city_code'] ?? '',
+            'district_code' => (string)$userData['district_code'] ?? '',
+            'village_code' => (string)$userData['village_code'] ?? '',
+            'address' => $userData['registered_address'] ?? '',
+            'latitude' => $latitude,
+            'longitude' => $longitude,
+            'nik' => $decryptedNik,
+            'pic_name' => $decryptedPicName,
+            'pic_phone' => $decryptedPicPhone,
+            'nib_number' => $decryptedNibNumber,
+            'bank_account' => $decryptedBankAccount,
+            'npwp' => $decryptedNpwp,
+            'sk_number' => $decryptedSkNumber,
+            'nib_file' => $userData['nib_file'] ?? '',
+            'ktp_file' => $userData['ktp_file'] ?? '',
+            'npwp_file' => $userData['npwp_file'] ?? '',
+        ];
+
+        try {
+            $profile = UserProfile::create($profileData);
+            Log::info('Profile created for user: ' . $user->id);
+            return $profile;
+        } catch (\Exception $e) {
+            Log::error('Failed to create user profile: ' . $e->getMessage(), [
+                'user_id' => $user->id,
+                'profile_data' => $profileData,
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
+        }
+    }
     /**
      * Create SSO session record
      */
@@ -238,6 +232,9 @@ readonly class SsoService
             'phone' => $userData['phone'] ?? null,
             'tenant_id' => $userData['tenant_id'] ?? null,
             'tenant_name' => $userData['tenant_name'] ?? null,
+            'address' => $userData['registered_address'],
+            'latitude' => (float)$userData['latitude'] ?? null,
+            'longitude' => (float)$userData['longitude'] ?? null,
         ];
     }
 
@@ -303,7 +300,7 @@ readonly class SsoService
     /**
      * Decrypt back to array
      */
-    public function decryptSsoField(?string $encryptedValue): ?string
+    public function decryptSsoField(?string $encryptedValue)
     {
         if (empty($encryptedValue) || empty($this->stateSecret)) {
             return null;
