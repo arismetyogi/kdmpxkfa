@@ -217,48 +217,48 @@ export default function Detail() {
               <CardHeader>
                 <CardTitle>Order Summary</CardTitle>
               </CardHeader>
-<CardContent>
-  {(() => {
-    // ✅ Subtotal (sum of price × quantity)
-    const subtotal = order.products?.reduce((sum, item) => {
-      const qty = item.pivot?.qty_delivered ?? item.pivot?.quantity ?? 1;
-      return sum + (item.price * qty);
-    }, 0) ?? 0;
+              <CardContent>
+                {(() => {
+                  // ✅ Subtotal (sum of price × quantity)
+                  const subtotal = order.products?.reduce((sum, item) => {
+                    const qty = item.pivot?.qty_delivered ?? item.pivot?.quantity ?? 1;
+                    return sum + (item.price * qty);
+                  }, 0) ?? 0;
 
-    // ✅ Tax (11%)
-    const tax = subtotal * 0.11;
+                  // ✅ Tax (11%)
+                  const tax = subtotal * 0.11;
 
-    // ✅ Shipping cost (fallback 0 if not available)
-    const shipping = order.shipping_amount ?? 0;
+                  // ✅ Shipping cost (fallback 0 if not available)
+                  const shipping = order.shipping_amount ?? 0;
 
-    // ✅ Discount (fallback 0 if not available)
-    const discount = order.discount_amount ?? 0;
+                  // ✅ Discount (fallback 0 if not available)
+                  const discount = order.discount_amount ?? 0;
 
-    // ✅ Final total
-    const total = subtotal + tax ;
+                  // ✅ Final total
+                  const total = subtotal + tax ;
 
-    return (
-      <div className="grid grid-cols-2 gap-2 text-sm">
-        <div>Product Price</div>
-        <div className="text-right">{currency(subtotal)}</div>
+                  return (
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>Product Price</div>
+                      <div className="text-right">{currency(subtotal)}</div>
 
-        <div>Product Tax (11%)</div>
-        <div className="text-right">{currency(tax)}</div>
+                      <div>Product Tax (11%)</div>
+                      <div className="text-right">{currency(tax)}</div>
 
-        <div>Shipping Cost</div>
-        <div className="text-right">{currency(shipping)}</div>
+                      <div>Shipping Cost</div>
+                      <div className="text-right">{currency(shipping)}</div>
 
-        <div>Discount</div>
-        <div className="text-right">-{currency(discount)}</div>
+                      <div>Discount</div>
+                      <div className="text-right">-{currency(discount)}</div>
 
-        <div className="font-semibold text-base">Total</div>
-        <div className="text-right font-semibold text-base">
-          {currency(total)}
-        </div>
-      </div>
-    );
-  })()}
-</CardContent>
+                      <div className="font-semibold text-base">Total</div>
+                      <div className="text-right font-semibold text-base">
+                        {currency(total)}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </CardContent>
             </Card>
 
             {/* Confirmation */}
