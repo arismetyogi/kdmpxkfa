@@ -178,17 +178,18 @@ readonly class SsoService
     private function findOrCreateUser(array $userData): User
     {
         $user = User::where('external_id', $userData['sub'])->first();
+        $email = $this->decryptSsoField($userData['email']) ?? null;
 
         if (!$user) {
-            $user = User::where('email', $userData['email'])->first();
+            $user = User::where('email', $email)->first();
         }
 
         if (!$user) {
             $user = User::create([
                 'uuid' => Str::uuid(),
                 'name' => $userData['name'],
-                'username' => Str::before($userData['email'], '@'),
-                'email' => $this->decryptSsoField($userData['email']),
+                'username' => Str::before($email, '@'),
+                'email' => $email,
                 'email_verified_at' => now(),
                 'onboarding_completed' => false,
                 'external_id' => $userData['sub'],
