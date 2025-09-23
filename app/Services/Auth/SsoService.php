@@ -3,7 +3,6 @@
 namespace App\Services\Auth;
 
 use App\Models\User;
-use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -13,11 +12,12 @@ use Illuminate\Support\Str;
 
 readonly class SsoService
 {
-    //    public function __construct(
-    //        private JWTService $jwtService
-    //    )
-    //    {
-    //    }
+    private string $stateSecret;
+
+    public function __construct()
+    {
+        $this->stateSecret = config('sso.allowed_origins.digikoperasi.state_secret');
+    }
 
     /**
      * Handle SSO callback and authenticate user
@@ -29,12 +29,10 @@ readonly class SsoService
         return DB::transaction(function () use ($data) {
             $userData = $this->validateSSOTokenWithDigikoperasi($data['sso_token'], $data['state'] ?? null);
 
-            Log::debug('Callback validate token: ', $userData);
+            Log::debug('Callback validate data: ', $userData);
 
             // Find or create user
             $user = $this->findOrCreateUser($userData);
-
-            Log::debug('Callback user: ', $user->toArray());
 
             // Create SSO session
             $this->createSSOSession($user, $data, $userData);
@@ -49,10 +47,6 @@ readonly class SsoService
             //            $refreshToken = $this->jwtService->generateRefreshToken($tokenPayload);
 
             $result = [
-                //                'access_token' => $accessToken,
-                //                'refresh_token' => $refreshToken,
-                //                'token_type' => 'Bearer',
-                //                'expires_in' => config('jwt.ttl', 3600),
                 'user' => $user,
                 'requires_onboarding' => !$user->onboarding_completed,
             ];
@@ -194,10 +188,13 @@ readonly class SsoService
                 'uuid' => Str::uuid(),
                 'name' => $userData['name'],
                 'username' => Str::before($userData['email'], '@'),
-                'email' => $userData['email'],
+                'email' => $this->decryptSsoField($userData['email']),
                 'email_verified_at' => now(),
                 'onboarding_completed' => false,
                 'external_id' => $userData['sub'],
+                'tenant_id' => $userData['tenant_id'],
+                'tenant_name' => $userData['tenant_name'],
+                'phone' => $userData['phone'],
                 'is_active' => true,
             ]);
             $user->assignRole('user');
@@ -235,7 +232,7 @@ readonly class SsoService
     private function getPrefilledData(array $userData): array
     {
         return [
-            'email' => $userData['email'] ?? null,
+            'email' => $this->decryptSsoField($userData['email']) ?? null,
             'name' => $userData['name'] ?? null,
             'phone' => $userData['phone'] ?? null,
             'tenant_id' => $userData['tenant_id'] ?? null,
@@ -258,33 +255,94 @@ readonly class SsoService
         return $baseUrl . '/sso/callback?' . $params;
     }
 
-    private function decryptSsoField($encryptedValue)
+    /**
+     * Encrypt an array into base64(ivHex:encrypted) format
+     */
+    public function encryptSsoField(array $payload): ?string
     {
-        $stateSecret = config('sso.allowed_origins.digikoperasi.state_secret');
+        try {
+            // Prepare plaintext JSON
+            $plaintext = json_encode($payload, JSON_UNESCAPED_UNICODE);
 
-        if (empty($encryptedValue) || empty($stateSecret)) {
+            if ($plaintext === false) {
+                throw new \Exception('Failed to encode payload');
+            }
+
+            // Generate 32-byte key
+            $key = hash('sha256', $this->stateSecret, true);
+
+            // Generate random 16-byte IV
+            $iv = random_bytes(16);
+
+            // Encrypt
+            $encrypted = openssl_encrypt(
+                $plaintext,
+                'AES-256-CBC',
+                $key,
+                OPENSSL_RAW_DATA,
+                $iv
+            );
+
+            if ($encrypted === false) {
+                throw new \Exception('Encryption failed');
+            }
+
+            $ivHex = bin2hex($iv);
+
+            // Concatenate ivHex:encryptedHex, then base64 encode
+            $data = $ivHex . ':' . bin2hex($encrypted);
+
+            return base64_encode($data);
+        } catch (\Throwable $e) {
+            Log::error('Enkripsi field SSO gagal: ' . $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * Decrypt back to array
+     */
+    public function decryptSsoField(?string $encryptedValue): ?string
+    {
+        if (empty($encryptedValue) || empty($this->stateSecret)) {
+            return null;
+        }
+
         try {
-            $algorithm = 'aes-256-cbc';
-            $data = base64_decode($encryptedValue);
-            $parts = explode(':', $data, 2);
-            if (count($parts) !== 2) {
-                throw new Exception('Format data terenkripsi tidak valid');
+            $data = base64_decode($encryptedValue, true);
+
+            if ($data === false) {
+                throw new \Exception('Base64 decode failed');
             }
-            $ivHex = $parts[0];
-            $encrypted = $parts[1];
-            // Buat kunci 32-byte dari secret
-            $key = hash('sha256', $stateSecret, true);
+
+            [$ivHex, $encryptedHex] = explode(':', $data, 2);
+
+            if (!$ivHex || !$encryptedHex) {
+                throw new \Exception('Invalid encrypted data format');
+            }
+
+            $key = hash('sha256', $this->stateSecret, true);
             $iv = hex2bin($ivHex);
-            $decrypted = openssl_decrypt($encrypted, $algorithm, $key,
-                OPENSSL_RAW_DATA,
-                $iv);
-            if ($decrypted === false) {
-                throw new Exception('Dekripsi gagal');
+            $encrypted = hex2bin($encryptedHex);
+
+            if ($iv === false || $encrypted === false) {
+                throw new \Exception('Invalid hex encoding');
             }
+
+            $decrypted = openssl_decrypt(
+                $encrypted,
+                'AES-256-CBC',
+                $key,
+                OPENSSL_RAW_DATA,
+                $iv
+            );
+
+            if ($decrypted === false) {
+                throw new \Exception('Decryption failed');
+            }
+
             return json_decode($decrypted, true);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Dekripsi field SSO gagal: ' . $e->getMessage());
             return null;
         }

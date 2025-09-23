@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
@@ -67,9 +68,10 @@ class ProductSeeder extends Seeder
         $data = [];
 
         if (($handle = fopen($filePath, 'r')) !== false) {
-            while (($row = fgetcsv($handle, 1000, ',')) !== false) {
+            while (($row = fgetcsv($handle,0, ',')) !== false) {
                 if (! $header) {
                     $header = $row;
+//                    dd($header);
                 } else {
                     $data[] = array_combine($header, $row);
                 }
@@ -116,6 +118,16 @@ class ProductSeeder extends Seeder
                     'brand' => $item['brand'] ?? 'no brand',
                     'category_id' => $item['category_id'] ?? null,
                     'is_active' => true,
+
+                    // additional informative columns
+                    'usage_direction' => $item['usage_direction'] ?? '',
+                    'contraindication' => $item['contraindication'] ?? '',
+                    'adverse_effects' => $item['adverse_effects'] ?? '',
+                    'caution' => $item['caution'] ?? '',
+                    'storage' => $item['storage'] ?? '',
+                    'registration_number' => $item['registration_number'] ?? '',
+                    'dosage_form' => $item['dosage_form'] ?? '',
+                    'active_ingredients' => $item['active_ingredients'] ? json_decode($item['active_ingredients'], true) : null,
                 ]
             );
         }

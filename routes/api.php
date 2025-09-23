@@ -14,6 +14,7 @@ Route::prefix('v1')->group(function () {
     // Authentication routes
     Route::prefix('auth')->group(function () {
         Route::get('sso/callback', [SsoController::class, 'callback']);
+        Route::post('sso/decrypt', [SsoController::class, 'decrypt']);
         Route::post('refresh', [SsoController::class, 'refresh']);
     });
 

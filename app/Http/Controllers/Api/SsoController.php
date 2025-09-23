@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Services\Auth\SsoService;
 use App\Traits\HasApiReponse;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class SsoController extends Controller
@@ -14,109 +13,33 @@ class SsoController extends Controller
     use HasApiReponse;
 
     public function __construct(
-        private readonly SSOService $ssoService
+        private readonly SsoService $ssoService
     ) {}
 
     /**
-     * Handle SSO callback from Digikoperasi
+     * Decrypt an SSO field value
      */
-    public function callback(Request $request): RedirectResponse
+    public function decrypt(SsoService $crypto): JsonResponse
     {
         try {
-            $ssoToken = $request->query('sso_token');
-            $state = $request->query('state');
+            $encryptedValue = request('value');
 
-            if (! $ssoToken) {
-                return redirect('/login?error=sso_failed&message=missing_token');
+            if (empty($encryptedValue)) {
+                return $this->errorResponse('Missing encrypted value', 400);
             }
 
-            if (! $state) {
-                return redirect('/login?error=sso_failed&message=missing_state');
+            $decrypted = $crypto->decryptSsoField($encryptedValue);
+
+            if ($decrypted === null) {
+                return $this->errorResponse('Failed to decrypt value', 400);
             }
-
-            $result = $this->ssoService->handleCallback([
-                'sso_token' => $ssoToken,
-                'state' => $state,
-            ]);
-
-            $sessionCookie = cookie(
-                'auth_session',
-                $result['token'],
-                config('sso.token_expiry') / 60, // Convert seconds to minutes
-                '/',
-                null,
-                true, // secure
-                true  // httpOnly
-            );
-
-            if ($result['requires_onboarding']) {
-                return redirect('/onboarding')
-                    ->withCookie($sessionCookie)
-                    ->with('user_data', $result['user'])
-                    ->with('prefilled_data', $result['prefilled_data']);
-            }
-
-            $targetUrl = $request->query('redirect_to', '/dashboard');
-
-            return redirect($targetUrl)
-                ->withCookie($sessionCookie)
-                ->with('user_data', $result['user']);
-
-        } catch (\Exception $e) {
-            return redirect('/login?error=sso_failed&message='.urlencode($e->getMessage()));
-        } catch (\Throwable $e) {
-            return redirect('/login?error=sso_failed&message='.urlencode($e->getMessage()));
-        }
-    }
-
-    /**
-     * Refresh authentication token
-     */
-    public function refresh(Request $request): JsonResponse
-    {
-        try {
-            $token = auth()->refresh();
 
             return $this->successResponse([
-                'access_token' => $token,
-                'token_type' => 'Bearer',
-                'expires_in' => config('sso.token_expiry'),
-            ], 'Token refreshed successfully.');
+                'decrypted' => $decrypted
+            ], 'Value decrypted successfully');
 
         } catch (\Exception $e) {
-            return $this->errorResponse('Token refresh failed', 401);
-        }
-    }
-
-    /**
-     * Logout user and invalidate token
-     */
-    public function logout(): JsonResponse
-    {
-        try {
-            auth()->logout();
-
-            return $this->successResponse([], 'Successfully logged out.');
-
-        } catch (\Exception $e) {
-            return $this->errorResponse('Logout failed', 500);
-        }
-    }
-
-    /**
-     * Get authenticated user profile
-     */
-    public function me(): JsonResponse
-    {
-        try {
-            $user = auth()->user();
-
-            return $this->successResponse([
-                'user' => $user->load('profile'),
-            ]);
-
-        } catch (\Exception $e) {
-            return $this->errorResponse('Failed to retrieve user data', 500);
+            return $this->errorResponse('Decryption failed: ' . $e->getMessage(), 500);
         }
     }
 }

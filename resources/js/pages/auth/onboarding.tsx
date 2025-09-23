@@ -8,6 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
 type PrefilledData = {
+    username: string | null;
     email: string | null;
     name: string | null;
     phone: string | null;
