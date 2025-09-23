@@ -14,6 +14,9 @@ type PrefilledData = {
     phone: string | null;
     tenant_id: string | null;
     tenant_name: string | null;
+    address: string | null;
+    latitude: string | null;
+    longitude: string | null;
 };
 
 interface OnboardingPageProps {
@@ -27,6 +30,7 @@ export default function OnboardingPage({ prefilled_data }: OnboardingPageProps) 
         phone: prefilled_data.phone || "",
         tenant_id: prefilled_data.tenant_id || "",
         tenant_name: prefilled_data.tenant_name || "",
+        address: prefilled_data.address || "",
         sia_number: "",
         sia_document: null as File | null,
     });

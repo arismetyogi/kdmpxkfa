@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
@@ -36,8 +37,8 @@ class User extends Authenticatable implements HasMedia
         'external_id',
         'tenant_id',
         'apotek_id',
-        'status',       
-        'approved_by',   
+        'status',
+        'approved_by',
         'approved_at',
     ];
 
@@ -82,8 +83,13 @@ class User extends Authenticatable implements HasMedia
     }
 
     public function approvedBy()
-{
-    return $this->belongsTo(User::class, 'approved_by');
-}
-    
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function userProfile(): HasOne
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
 }

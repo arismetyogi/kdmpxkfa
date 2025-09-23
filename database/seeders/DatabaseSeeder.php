@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             RoleAndPermissionSeeder::class,
             ProductSeeder::class,
             ApotekSeeder::class,
+            RegionSeeder::class,
             OrderSeeder::class,
             OrderProductSeeder::class,
         ]);
