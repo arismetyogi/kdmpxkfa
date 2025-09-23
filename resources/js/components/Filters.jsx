@@ -89,7 +89,7 @@ const categoryConfig = {
   "Perlengkapan Medis":       { icon: BriefcaseMedical,    color: "blue" },
   "Produk Dewasa":            { icon: SmilePlus,                color: "orange" },
   "Tulang Otot & Sendi":       { icon: Bone,                color: "green" },
-  "Masker":                   { icon: Drama,                 color: "pink" },
+  "Masker":                   { icon: SmilePlus,                 color: "green" },
   "Perlengkapan Kebersihan":  { icon: Brush, color: "teal" },
   default: { icon: HelpCircle, color: "gray" },
 };
@@ -142,7 +142,7 @@ export default function Filters({
   };
 
   return (
-    <ScrollArea className="h-288 lg:w-64 w-full rounded-md border p-4">
+    <ScrollArea className="lg:h-288 lg:w-64 w-full rounded-md border p-4">
     {/* <div className="lg:w-64 w-full pt-3 pl-4 pr-2 border rounded-lg bg-card text-card-foreground"> */}
       
       <button 

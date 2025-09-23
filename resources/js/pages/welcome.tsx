@@ -25,11 +25,11 @@ export default function Welcome() {
                             <>
                                 <Link
                                     href={route(dashRoute)}
-                                    className="inline-block rounded-sm border border-border px-5 py-1.5 text-sm leading-normal text-foreground hover:border-accent-foreground"
+                                    className="inline-block rounded-sm border border-border px-5 py-1.5 text-sm leading-normal text-foreground hover:border-primary-foreground"
                                 >
                                     {isUser ? 'Dashboard' : 'Admin Dashboard'}
                                 </Link>
-                                <Link className="inline-block rounded-sm border px-4 py-1.5 border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground" method="post" href={route('logout')}>Logout</Link>
+                                <Link className="inline-block rounded-sm border px-4 py-1.5 border-border bg-background text-foreground hover:bg-primary hover:text-primary-foreground" method="post" href={route('logout')}>Logout</Link>
                             </>
                         ) : (
                             <>

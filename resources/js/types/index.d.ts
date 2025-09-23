@@ -192,7 +192,7 @@ export interface Order {
     // Relasi
     order_items?: OrderItem[];
 
-    products?: (Product & { pivot?: { quantity: number } })[];
+    products?: (Product & { pivot?: { quantity: number, qty_delivered: number } })[];
     product_detail: {
         sku: string;
         quantity: number;

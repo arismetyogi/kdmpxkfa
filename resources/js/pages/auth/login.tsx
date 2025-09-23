@@ -30,7 +30,7 @@ export default function Login({ status, canResetPassword, digikopUrl }: LoginPro
                         <Button
                             variant="outline"
                             asChild
-                            className="w-full border-border bg-accent text-foreground hover:bg-accent hover:text-accent-foreground"
+                            className="w-full border-border bg-primary text-foreground hover:bg-primary/90 hover:text-accent-foreground"
                         >
                             <a href={digikopUrl} target="_blank" className="cursor-pointer">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="778" height="778" viewBox="0 0 778 778" version="1.1">

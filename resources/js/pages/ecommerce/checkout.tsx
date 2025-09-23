@@ -348,7 +348,7 @@ export default function CheckoutPage({ billingData, shippingData,  }: CheckoutPr
                     {/* Order Summary */}
                     <div className="md:col-span-1">
                         {/* --- THEME CHANGE #7: Use card colors for summary --- */}
-                        <div className="border bg-card text-card-foreground rounded-2xl p-5 shadow-lg lg:sticky lg:top-5 self-start ">
+                        <div className="border bg-card text-card-foreground rounded-2xl p-5 shadow-lg lg:sticky lg:top-32 self-start ">
                             <h2 className="mb-2 text-sm font-semibold">Order Summary</h2>
                             <div className="space-y-3">
                                 <div className="space-y-1">
