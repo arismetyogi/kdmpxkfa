@@ -3,10 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import axios from 'axios';
-import React, { useState } from 'react';
-import { toast } from 'sonner';
 import HeaderLayout from '@/layouts/header-layout';
+import axios from 'axios';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface DecryptProps {
     sampleData?: Record<string, any>;

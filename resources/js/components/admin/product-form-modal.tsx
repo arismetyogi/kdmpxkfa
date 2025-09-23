@@ -1,12 +1,12 @@
+import SearchableSelect from '@/components/searchable-select';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Category, Product } from '@/types';
+import { useForm } from '@inertiajs/react';
 import { X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import SearchableSelect from '@/components/searchable-select';
-import { useForm } from '@inertiajs/react';
 
 interface ProductFormModalProps {
     isOpen: boolean;
@@ -114,9 +114,7 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
             });
         }
     };
-    const handleInputChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-    ) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
 
         // Handle checkbox separately
@@ -152,18 +150,21 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
     // handle dosage (array of strings) → store as comma-separated input
     const handleDosageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = e.target;
-        setData('dosage', value
-            .split(',')
-            .map((d) => d.trim())
-            .filter(Boolean) as any);
+        setData(
+            'dosage',
+            value
+                .split(',')
+                .map((d) => d.trim())
+                .filter(Boolean) as any,
+        );
     };
 
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="fixed inset-0 bg-black/50 " onClick={onClose} />
-            <div className="relative mx-4 max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white dark:bg-zinc-700/90 backdrop-blur-lg shadow-xl">
+            <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+            <div className="relative mx-4 max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white shadow-xl backdrop-blur-lg dark:bg-zinc-700/90">
                 <div className="flex items-center justify-between border-b p-6">
                     <h2 className="text-lg font-semibold">{product ? 'Edit Product' : 'Create Product'}</h2>
                     <button onClick={onClose} className="text-gray-400 transition-colors hover:text-gray-600">
@@ -195,17 +196,17 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                         <div>
                             <Label htmlFor="category_id">Category</Label>
                             <SearchableSelect
-                            options={categories.map((c) => ({
-                                value: c.id.toString(),
-                                label: `${c.main_category} > ${c.subcategory1} > ${c.subcategory2}`,
-                            }))}
-                            value={data.category_id}
-                            onChange={handleCategoryChange}
-                            placeholder="Select category..."
-                            searchPlaceholder="Search for category..."
-                            maxResults={10}
-                        />
-                        {errors.category_id && <p className="mt-1 text-sm text-red-600">{errors.category_id}</p>}
+                                options={categories.map((c) => ({
+                                    value: c.id.toString(),
+                                    label: `${c.main_category} > ${c.subcategory1} > ${c.subcategory2}`,
+                                }))}
+                                value={data.category_id}
+                                onChange={handleCategoryChange}
+                                placeholder="Select category..."
+                                searchPlaceholder="Search for category..."
+                                maxResults={10}
+                            />
+                            {errors.category_id && <p className="mt-1 text-sm text-red-600">{errors.category_id}</p>}
                         </div>
                     </div>
 
@@ -293,7 +294,7 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                         <div>
                             <Label>Image Preview</Label>
                             <div className="mt-2">
-                                <img src={imagePreview} alt="Preview" className="h-32 w-32 object-cover rounded-lg" />
+                                <img src={imagePreview} alt="Preview" className="h-32 w-32 rounded-lg object-cover" />
                             </div>
                         </div>
                     )}
@@ -314,11 +315,11 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                     {/* Actions */}
                     <div className="flex justify-end space-x-3 pt-4">
                         <Button type="button" variant="outline" onClick={onClose} disabled={processing}>
-                        Cancel
-                    </Button>
-                    <Button type="submit" disabled={processing}>
-                        {processing ? 'Saving...' : (product ? 'Update Product' : 'Create Product')}
-                    </Button>
+                            Cancel
+                        </Button>
+                        <Button type="submit" disabled={processing}>
+                            {processing ? 'Saving...' : product ? 'Update Product' : 'Create Product'}
+                        </Button>
                     </div>
                 </form>
             </div>

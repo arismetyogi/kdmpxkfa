@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
 import SearchableSelect from '@/components/searchable-select';
 import axios from 'axios';
+import { useEffect, useState } from 'react';
 
 interface RegionOption {
     code: string;
@@ -32,12 +32,12 @@ export default function CascadingRegionSelect({
     const [cities, setCities] = useState<RegionOption[]>([]);
     const [districts, setDistricts] = useState<RegionOption[]>([]);
     const [villages, setVillages] = useState<RegionOption[]>([]);
-    
+
     const [selectedProvince, setSelectedProvince] = useState<string>(initialProvince || '');
     const [selectedCity, setSelectedCity] = useState<string>(initialCity || '');
     const [selectedDistrict, setSelectedDistrict] = useState<string>(initialDistrict || '');
     const [selectedVillage, setSelectedVillage] = useState<string>(initialVillage || '');
-    
+
     const [loadingProvinces, setLoadingProvinces] = useState(true);
     const [loadingCities, setLoadingCities] = useState(false);
     const [loadingDistricts, setLoadingDistricts] = useState(false);
@@ -50,7 +50,7 @@ export default function CascadingRegionSelect({
                 setLoadingProvinces(true);
                 const response = await axios.get('/regions/provinces');
                 setProvinces(response.data);
-                
+
                 // If there's an initial province, load its cities
                 if (initialProvince) {
                     setSelectedProvince(initialProvince);
@@ -72,14 +72,14 @@ export default function CascadingRegionSelect({
             setLoadingCities(true);
             const response = await axios.get(`/regions/cities/${provinceCode}`);
             setCities(response.data);
-            
+
             // Reset dependent selections
             setDistricts([]);
             setVillages([]);
             setSelectedCity('');
             setSelectedDistrict('');
             setSelectedVillage('');
-            
+
             // If there's an initial city, load its districts
             if (initialCity && response.data.some((city: RegionOption) => city.code === initialCity)) {
                 setSelectedCity(initialCity);
@@ -98,12 +98,12 @@ export default function CascadingRegionSelect({
             setLoadingDistricts(true);
             const response = await axios.get(`/regions/districts/${cityCode}`);
             setDistricts(response.data);
-            
+
             // Reset dependent selections
             setVillages([]);
             setSelectedDistrict('');
             setSelectedVillage('');
-            
+
             // If there's an initial district, load its villages
             if (initialDistrict && response.data.some((district: RegionOption) => district.code === initialDistrict)) {
                 setSelectedDistrict(initialDistrict);
@@ -122,10 +122,10 @@ export default function CascadingRegionSelect({
             setLoadingVillages(true);
             const response = await axios.get(`/regions/villages/${districtCode}`);
             setVillages(response.data);
-            
+
             // Reset selection
             setSelectedVillage('');
-            
+
             // If there's an initial village, select it
             if (initialVillage && response.data.some((village: RegionOption) => village.code === initialVillage)) {
                 setSelectedVillage(initialVillage);
@@ -173,7 +173,7 @@ export default function CascadingRegionSelect({
                     Province *
                 </label>
                 <SearchableSelect
-                    options={provinces.map(p => ({ label: p.name, value: p.code }))}
+                    options={provinces.map((p) => ({ label: p.name, value: p.code }))}
                     value={selectedProvince}
                     onChange={handleProvinceChange}
                     placeholder="Select province..."
@@ -189,10 +189,10 @@ export default function CascadingRegionSelect({
                     City *
                 </label>
                 <SearchableSelect
-                    options={cities.map(c => ({ label: c.name, value: c.code }))}
+                    options={cities.map((c) => ({ label: c.name, value: c.code }))}
                     value={selectedCity}
                     onChange={handleCityChange}
-                    placeholder={selectedProvince ? "Select city..." : "Select a province first"}
+                    placeholder={selectedProvince ? 'Select city...' : 'Select a province first'}
                     searchPlaceholder="Search city..."
                     disabled={!selectedProvince || loadingCities}
                 />
@@ -205,10 +205,10 @@ export default function CascadingRegionSelect({
                     District *
                 </label>
                 <SearchableSelect
-                    options={districts.map(d => ({ label: d.name, value: d.code }))}
+                    options={districts.map((d) => ({ label: d.name, value: d.code }))}
                     value={selectedDistrict}
                     onChange={handleDistrictChange}
-                    placeholder={selectedCity ? "Select district..." : "Select a city first"}
+                    placeholder={selectedCity ? 'Select district...' : 'Select a city first'}
                     searchPlaceholder="Search district..."
                     disabled={!selectedCity || loadingDistricts}
                 />
@@ -221,10 +221,10 @@ export default function CascadingRegionSelect({
                     Village *
                 </label>
                 <SearchableSelect
-                    options={villages.map(v => ({ label: v.name, value: v.code }))}
+                    options={villages.map((v) => ({ label: v.name, value: v.code }))}
                     value={selectedVillage}
                     onChange={handleVillageChange}
-                    placeholder={selectedDistrict ? "Select village..." : "Select a district first"}
+                    placeholder={selectedDistrict ? 'Select village...' : 'Select a district first'}
                     searchPlaceholder="Search village..."
                     disabled={!selectedDistrict || loadingVillages}
                 />

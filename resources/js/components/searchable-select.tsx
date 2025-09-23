@@ -1,12 +1,5 @@
 import { Button } from '@/components/ui/button';
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from '@/components/ui/command';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ChevronsUpDown } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -27,14 +20,14 @@ interface SearchableSelectProps {
 }
 
 export default function SearchableSelect({
-                                             options,
-                                             value,
-                                             onChange,
-                                             placeholder = 'Select an option...',
-                                             searchPlaceholder = 'Search...',
-                                             maxResults = 10,
-                                             disabled = false,
-                                         }: SearchableSelectProps) {
+    options,
+    value,
+    onChange,
+    placeholder = 'Select an option...',
+    searchPlaceholder = 'Search...',
+    maxResults = 10,
+    disabled = false,
+}: SearchableSelectProps) {
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
 
@@ -42,10 +35,7 @@ export default function SearchableSelect({
         const nq = query.trim().toLowerCase();
         if (!nq) return options.slice(0, maxResults);
 
-        const results = options.filter(
-            (opt) =>
-                opt.label.toLowerCase().includes(nq)
-        );
+        const results = options.filter((opt) => opt.label.toLowerCase().includes(nq));
 
         return results.slice(0, maxResults);
     }, [options, query, maxResults]);
@@ -55,25 +45,15 @@ export default function SearchableSelect({
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button 
-                    variant="outline" 
-                    role="combobox" 
-                    className="w-full justify-between"
-                    disabled={disabled}
-                >
-                    {displayValue
-                        ? options.find((opt) => String(opt.value) === displayValue)?.label
-                        : placeholder}
+                <Button variant="outline" role="combobox" className="w-full justify-between" disabled={disabled}>
+                    {displayValue ? options.find((opt) => String(opt.value) === displayValue)?.label : placeholder}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[300px] p-0">
                 <Command shouldFilter={false}>
                     {/* disable shadcn's auto filter */}
-                    <CommandInput
-                        placeholder={searchPlaceholder}
-                        onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
-                    />
+                    <CommandInput placeholder={searchPlaceholder} onInput={(e) => setQuery((e.target as HTMLInputElement).value)} />
                     <CommandList>
                         <CommandEmpty>No results found.</CommandEmpty>
                         <CommandGroup>

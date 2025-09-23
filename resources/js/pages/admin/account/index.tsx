@@ -1,14 +1,14 @@
-import { Head, usePage } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Calendar, Mail, User } from 'lucide-react';
-import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { format } from 'date-fns';
+import { Input } from '@/components/ui/input';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
 import { Inertia } from '@inertiajs/inertia';
+import { Head, usePage } from '@inertiajs/react';
+import { format } from 'date-fns';
+import { Calendar, Mail, User } from 'lucide-react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: route('admin.dashboard') },

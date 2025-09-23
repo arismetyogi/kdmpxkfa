@@ -1,21 +1,14 @@
-import { Head } from '@inertiajs/react';
-import { Plus, Shield, Users, Settings, Edit, Trash2 } from 'lucide-react';
+import PermissionDeleteModal from '@/components/admin/permission-delete-modal';
+import PermissionsFormModal from '@/components/admin/permissions-form-modal';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
+import { Head } from '@inertiajs/react';
+import { Edit, Plus, Settings, Shield, Trash2, Users } from 'lucide-react';
 import { useState } from 'react';
-import PermissionsFormModal from '@/components/admin/permissions-form-modal';
-import PermissionDeleteModal from '@/components/admin/permission-delete-modal';
 
 interface Permission {
     id: number;
@@ -39,7 +32,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function AdminPermission({ permissions }: AdminPermissionProps) {
-
     // Modal states
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -49,7 +41,7 @@ export default function AdminPermission({ permissions }: AdminPermissionProps) {
     const formatPermissionName = (permission: string) => {
         return permission
             .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
     };
 
@@ -79,13 +71,11 @@ export default function AdminPermission({ permissions }: AdminPermissionProps) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Permission Management" />
 
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Permission Management</h1>
-                        <p className="text-muted-foreground">
-                            Manage permissions
-                        </p>
+                        <p className="text-muted-foreground">Manage permissions</p>
                     </div>
                     <Button onClick={handleCreatePermission}>
                         <Plus className="mr-2 h-4 w-4" />
@@ -101,9 +91,7 @@ export default function AdminPermission({ permissions }: AdminPermissionProps) {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{permissions.length}</div>
-                            <p className="text-xs text-muted-foreground">
-                                Active permissions in the system
-                            </p>
+                            <p className="text-xs text-muted-foreground">Active permissions in the system</p>
                         </CardContent>
                     </Card>
                     <Card>
@@ -113,9 +101,7 @@ export default function AdminPermission({ permissions }: AdminPermissionProps) {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{permissions.length}</div>
-                            <p className="text-xs text-muted-foreground">
-                                Available permissions
-                            </p>
+                            <p className="text-xs text-muted-foreground">Available permissions</p>
                         </CardContent>
                     </Card>
                     <Card>
@@ -127,9 +113,7 @@ export default function AdminPermission({ permissions }: AdminPermissionProps) {
                             <div className="text-2xl font-bold">
                                 {permissions.reduce((total, permission) => total + (permission.users_count || 0), 0)}
                             </div>
-                            <p className="text-xs text-muted-foreground">
-                                Users with assigned permissions
-                            </p>
+                            <p className="text-xs text-muted-foreground">Users with assigned permissions</p>
                         </CardContent>
                     </Card>
                 </div>
@@ -137,9 +121,7 @@ export default function AdminPermission({ permissions }: AdminPermissionProps) {
                 <Card>
                     <CardHeader>
                         <CardTitle>Permission & Permissions</CardTitle>
-                        <CardDescription>
-                            View and manage all permissions and their associated permissions
-                        </CardDescription>
+                        <CardDescription>View and manage all permissions and their associated permissions</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Table>
@@ -155,9 +137,7 @@ export default function AdminPermission({ permissions }: AdminPermissionProps) {
                                     <TableRow key={permission.id}>
                                         <TableCell>
                                             <div className="flex items-center space-x-2">
-                                                <Badge >
-                                                    {formatPermissionName(permission.name)}
-                                                </Badge>
+                                                <Badge>{formatPermissionName(permission.name)}</Badge>
                                             </div>
                                         </TableCell>
                                         <TableCell>
@@ -168,11 +148,7 @@ export default function AdminPermission({ permissions }: AdminPermissionProps) {
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center space-x-2">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleEditPermission(permission)}
-                                                >
+                                                <Button variant="outline" size="sm" onClick={() => handleEditPermission(permission)}>
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
                                                 <Button
@@ -192,26 +168,14 @@ export default function AdminPermission({ permissions }: AdminPermissionProps) {
                     </CardContent>
                 </Card>
 
-            {/* Create Permission Modal */}
-            <PermissionsFormModal
-                isOpen={isCreateModalOpen}
-                onClose={closeModals}
-                permission={null}
-            />
+                {/* Create Permission Modal */}
+                <PermissionsFormModal isOpen={isCreateModalOpen} onClose={closeModals} permission={null} />
 
-            {/* Edit Permission Modal */}
-            <PermissionsFormModal
-                isOpen={isEditModalOpen}
-                onClose={closeModals}
-                permission={selectedPermission}
-            />
+                {/* Edit Permission Modal */}
+                <PermissionsFormModal isOpen={isEditModalOpen} onClose={closeModals} permission={selectedPermission} />
 
-            {/* Delete Permission Modal */}
-            <PermissionDeleteModal
-                isOpen={isDeleteModalOpen}
-                onClose={closeModals}
-                permission={selectedPermission}
-            />
+                {/* Delete Permission Modal */}
+                <PermissionDeleteModal isOpen={isDeleteModalOpen} onClose={closeModals} permission={selectedPermission} />
             </div>
         </AppLayout>
     );
