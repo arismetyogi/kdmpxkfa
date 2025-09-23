@@ -30,7 +30,7 @@ use Inertia\Inertia;
 */
 Route::get('/', function () {
     return Inertia::render('welcome');
-})->name('home');   
+})->name('home');
 
 Route::get('sso/callback', [SsoController::class, 'callback']);
 Route::get('sso/decrypt', function () {
@@ -67,7 +67,7 @@ Route::get('sso/decrypt', function () {
         "ktp_file" => "https://storage.googleapis.com/kopdes-merah-putih-dev/business-partnership/pic-ktp/ktp_Y2xFU5yPFkIFesiw_1758002071.pdf",
         "npwp_file" => "https://storage.googleapis.com/kopdes-merah-putih-dev/npwp_file/npwp_1757660750.pdf"
     ];
-    
+
     return Inertia::render('Sso/Decrypt', [
         'sampleData' => $sampleData
     ]);
@@ -129,18 +129,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/{purchase}/reject', [PurchaseController::class, 'reject'])->name('reject');
         });
 
-      Route::prefix('admin/account')->name('account.')->group(function () {
-    Route::get('/', [AccountManageController::class, 'index'])->name('index');
-    Route::post('/{user}/approve', [AccountManageController::class, 'approve'])->name('approve');
-    Route::post('/{user}/reject', [AccountManageController::class, 'reject'])->name('reject');
-});
-
-
-
+        Route::prefix('account')->name('account.')->group(function () {
+            Route::get('/', [AccountManageController::class, 'index'])->name('index');
+            Route::post('/{user}/approve', [AccountManageController::class, 'approve'])->name('approve');
+            Route::post('/{user}/reject', [AccountManageController::class, 'reject'])->name('reject');
+        });
 
         Route::prefix('mapping')->name('mapping.')->group(function () {
-        Route::get('/', [MappingController::class, 'index'])->name('index');
-        Route::post('/{user}/map', [MappingController::class, 'mapUser'])->name('map');
+            Route::get('/', [MappingController::class, 'index'])->name('index');
+            Route::post('/{user}/map', [MappingController::class, 'mapUser'])->name('map');
         });
 
         // Rute CRUD Resources
@@ -154,7 +151,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::middleware('permission:' . \App\Enums\PermissionEnum::VIEW_ORDERS->value)->group(function () {
             Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
         });
-        
+
         // Rute untuk manajemen Roles
         Route::prefix('roles')->name('roles.')->group(function () {
             Route::get('/', [AdminController::class, 'roles'])->name('index');
@@ -178,7 +175,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 |
 */
 Route::bind('role', function ($value) {
-    return  \Spatie\Permission\Models\Role::findOrFail($value);
+    return \Spatie\Permission\Models\Role::findOrFail($value);
 });
 Route::bind('permission', function ($value) {
     return \Spatie\Permission\Models\Permission::findOrFail($value);
@@ -191,5 +188,5 @@ Route::bind('order', function ($value) {
     return Order::findOrFail($value);
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

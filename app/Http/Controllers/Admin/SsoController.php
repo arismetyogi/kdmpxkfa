@@ -42,7 +42,7 @@ class SsoController extends Controller
                 return redirect(route('onboarding.create'))->with('prefilled_data', $result['prefilled_data']);
             }
 
-            return redirect(route('orders.products'))->withSuccess('Login sukses.');
+            return redirect(route('dashboard'))->withSuccess('Login sukses.');
 
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());

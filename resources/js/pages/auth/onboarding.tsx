@@ -14,7 +14,12 @@ type PrefilledData = {
     phone: string | null;
     tenant_id: string | null;
     tenant_name: string | null;
+    province_code: string | null;
+    city_code: string | null;
+    district_code: string | null;
+    village_code: string | null;
     address: string | null;
+    zipcode: string | null;
     latitude: string | null;
     longitude: string | null;
 };
@@ -30,7 +35,12 @@ export default function OnboardingPage({ prefilled_data }: OnboardingPageProps) 
         phone: prefilled_data.phone || "",
         tenant_id: prefilled_data.tenant_id || "",
         tenant_name: prefilled_data.tenant_name || "",
+        province_code: prefilled_data.province_code || "",
+        city_code: prefilled_data.city_code || "",
+        district_code: prefilled_data.district_code || "",
+        village_code: prefilled_data.village_code || "",
         address: prefilled_data.address || "",
+        zipcode: prefilled_data.zipcode || "",
         sia_number: "",
         sia_document: null as File | null,
     });
@@ -137,6 +147,125 @@ export default function OnboardingPage({ prefilled_data }: OnboardingPageProps) 
                                     onChange={(e) => setData("tenant_name", e.target.value)}
                                     disabled
                                 />
+                            </div>
+
+                            {/* Address */}
+                            <div className="space-y-2">
+                                <Label htmlFor="address">Address</Label>
+                                <Input
+                                    id="address"
+                                    type="text"
+                                    value={data.address}
+                                    onChange={(e) => setData("address", e.target.value)}
+                                    placeholder="Enter your full address"
+                                    required
+                                />
+                                {errors.address && (
+                                    <Alert variant="destructive">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertTitle>Error</AlertTitle>
+                                        <AlertDescription>{errors.address}</AlertDescription>
+                                    </Alert>
+                                )}
+                            </div>
+
+                            {/* Province Code */}
+                            <div className="space-y-2">
+                                <Label htmlFor="province_code">Province Code</Label>
+                                <Input
+                                    id="province_code"
+                                    type="text"
+                                    value={data.province_code}
+                                    onChange={(e) => setData("province_code", e.target.value)}
+                                    placeholder="Enter province code"
+                                    required
+                                />
+                                {errors.province_code && (
+                                    <Alert variant="destructive">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertTitle>Error</AlertTitle>
+                                        <AlertDescription>{errors.province_code}</AlertDescription>
+                                    </Alert>
+                                )}
+                            </div>
+
+                            {/* City Code */}
+                            <div className="space-y-2">
+                                <Label htmlFor="city_code">City Code</Label>
+                                <Input
+                                    id="city_code"
+                                    type="text"
+                                    value={data.city_code}
+                                    onChange={(e) => setData("city_code", e.target.value)}
+                                    placeholder="Enter city code"
+                                    required
+                                />
+                                {errors.city_code && (
+                                    <Alert variant="destructive">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertTitle>Error</AlertTitle>
+                                        <AlertDescription>{errors.city_code}</AlertDescription>
+                                    </Alert>
+                                )}
+                            </div>
+
+                            {/* District Code */}
+                            <div className="space-y-2">
+                                <Label htmlFor="district_code">District Code</Label>
+                                <Input
+                                    id="district_code"
+                                    type="text"
+                                    value={data.district_code}
+                                    onChange={(e) => setData("district_code", e.target.value)}
+                                    placeholder="Enter district code"
+                                    required
+                                />
+                                {errors.district_code && (
+                                    <Alert variant="destructive">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertTitle>Error</AlertTitle>
+                                        <AlertDescription>{errors.district_code}</AlertDescription>
+                                    </Alert>
+                                )}
+                            </div>
+
+                            {/* Village Code */}
+                            <div className="space-y-2">
+                                <Label htmlFor="village_code">Village Code</Label>
+                                <Input
+                                    id="village_code"
+                                    type="text"
+                                    value={data.village_code}
+                                    onChange={(e) => setData("village_code", e.target.value)}
+                                    placeholder="Enter village code"
+                                    required
+                                />
+                                {errors.village_code && (
+                                    <Alert variant="destructive">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertTitle>Error</AlertTitle>
+                                        <AlertDescription>{errors.village_code}</AlertDescription>
+                                    </Alert>
+                                )}
+                            </div>
+
+                            {/* Zipcode */}
+                            <div className="space-y-2">
+                                <Label htmlFor="zipcode">Zipcode</Label>
+                                <Input
+                                    id="zipcode"
+                                    type="text"
+                                    value={data.zipcode}
+                                    onChange={(e) => setData("zipcode", e.target.value)}
+                                    placeholder="Enter zipcode"
+                                />
+                                {errors.zipcode && (
+                                    <Alert variant="destructive">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertTitle>Error</AlertTitle>
+                                        <AlertDescription>{errors.zipcode}</AlertDescription>
+                                    </Alert>
+                                )}
                             </div>
 
                             {/* SIA Number */}

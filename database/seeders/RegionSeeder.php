@@ -14,7 +14,7 @@ class RegionSeeder extends Seeder
      */
     public function run(): void
     {
-//        $this->seedRegions();
+        $this->seedRegions();
         $this->seedRegionsLevel1And2();
     }
 

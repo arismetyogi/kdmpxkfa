@@ -4,6 +4,7 @@ namespace App\Services\Auth;
 
 use App\Models\User;
 use App\Models\UserProfile;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -34,8 +35,6 @@ readonly class SsoService
 
             // Find or create user
             $user = $this->findOrCreateUser($userData);
-
-            $profile = $this->createUserProfile($user, $userData);
 
             // Create SSO session
             $this->createSSOSession($user, $data, $userData);
@@ -105,6 +104,7 @@ readonly class SsoService
 
     /**
      * Find existing user or create new one
+     * @throws \Exception
      */
     private function findOrCreateUser(array $userData): User
     {
@@ -132,6 +132,8 @@ readonly class SsoService
             ]);
             $user->assignRole('user');
             Log::info('User created: ' . $user);
+
+            $this->createUserProfile($user, $userData);
         }
 
         if (!$user) {
@@ -144,7 +146,7 @@ readonly class SsoService
     /**
      * @throws \Exception
      */
-    private function createUserProfile(User $user, array $userData): UserProfile
+    private function createUserProfile(User $user, array $userData): User
     {
         // Decrypt sensitive fields
         $decryptedNik = $this->decryptSsoField($userData['nik']) ?? '';
@@ -186,9 +188,9 @@ readonly class SsoService
         ];
 
         try {
-            $profile = UserProfile::create($profileData);
-            Log::info('Profile created for user: ' . $user->id);
-            return $profile;
+            $user->userProfile()->updateOrCreate($profileData);
+            Log::info('Profile created for user: ' . $user->email);
+            return $user;
         } catch (\Exception $e) {
             Log::error('Failed to create user profile: ' . $e->getMessage(), [
                 'user_id' => $user->id,
