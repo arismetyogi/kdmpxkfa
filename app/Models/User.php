@@ -89,31 +89,31 @@ class User extends Authenticatable implements HasMedia
 
 // app/Models/User.php
 
-public function getMenusAttribute()
-{
-    $roles = $this->roles->pluck('name')->toArray();
+    public function getMenusAttribute()
+    {
+        $roles = $this->roles->pluck('name')->toArray();
 
-    if (in_array('super-admin', $roles)) {
-        return [
-            ['title' => 'Users', 'href' => route('admin.users.index')],
-            ['title' => 'Roles', 'href' => route('admin.roles.index')],
-            ['title' => 'Permissions', 'href' => route('admin.permissions.index')],
-        ];
-    }
+        if (in_array('super-admin', $roles)) {
+            return [
+                ['title' => 'Users', 'href' => route('admin.users.index')],
+                ['title' => 'Roles', 'href' => route('admin.roles.index')],
+                ['title' => 'Permissions', 'href' => route('admin.permissions.index')],
+            ];
+        }
 
-    if (in_array('admin-apotek', $roles)) {
-        return [
-            ['title' => 'Orders', 'href' => route('admin.orders.index')],
-            ['title' => 'Products', 'href' => route('admin.products.index')],
-        ];
-    }
+        if (in_array('admin-apotek', $roles)) {
+            return [
+                ['title' => 'Orders', 'href' => route('admin.orders.index')],
+                ['title' => 'Products', 'href' => route('admin.products.index')],
+            ];
+        }
 
-    if (in_array('busdev', $roles)) {
-        return [
-            ['title' => 'Mapping', 'href' => route('admin.mapping.index')],
-            ['title' => 'Accounts', 'href' => route('admin.accounts.index')],
-        ];
-    }
+        if (in_array('busdev', $roles)) {
+            return [
+                ['title' => 'Mapping', 'href' => route('admin.mapping.index')],
+                ['title' => 'Accounts', 'href' => route('admin.accounts.index')],
+            ];
+        }
 
     return [];
 }
