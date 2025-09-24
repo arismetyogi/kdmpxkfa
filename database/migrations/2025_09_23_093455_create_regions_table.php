@@ -13,11 +13,7 @@ return new class extends Migration
     {
         Schema::create('regions', function (Blueprint $table) {
             $table->id();
-<<<<<<< HEAD
-            $table->string('code')->unique();
-=======
             $table->string('code');
->>>>>>> KDMP/master
             $table->string('name');
             $table->timestamps();
 

@@ -1,45 +1,8 @@
 import { cn } from '@/lib/utils'; // Assuming you have a utility for merging class names
 import { Product } from '@/types/index.js';
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils"; // Assuming you have a utility for merging class names
-
-// Helper component for custom price formatting
-const PriceDisplay = ({
-  price,
-  currency = "Rp",
-  className,
-  decimalClassName,
-}: {
-  price: number | null | undefined;
-  currency?: string;
-  className?: string;
-  decimalClassName?: string;
-}) => {
-  if (price === null || typeof price === 'undefined' || isNaN(price)) {
-    return <span className={className}>{currency} 0</span>;
-  }
-
-  // Format the number to a string with two decimal places, using Indonesian locale.
-  // This will use '.' for thousands and ',' for the decimal separator.
-  const formattedPrice = new Intl.NumberFormat('id-ID', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(price);
-
-  const [integerPart, decimalPart] = formattedPrice.split(',');
-
-  return (
-    <span className={className}>
-      {currency} {integerPart}
-      <span className={cn(
-        "font-normal text-[0.7em] tracking-tighter align-baseline",
-        decimalClassName
-      )}>
-        ,{decimalPart}
-      </span>
-    </span>
-  );
-};
+import { ShoppingCart } from 'lucide-react';
+import PriceDisplay from '@/components/priceDisplay'
 
 
 interface ProductCardProps {
