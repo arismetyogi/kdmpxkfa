@@ -159,7 +159,7 @@ export default function OrdersIndex({
                                                 <TableCell className="text-foreground">
                                                     {format(new Date(order.created_at), 'MMM dd, yyyy')}
                                                 </TableCell>
-                                                <TableCell className="text-foreground">Rp{Number(order.total_price).toLocaleString()}</TableCell>
+                                                <TableCell className="text-foreground">Rp{Number(order.total_price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</TableCell>
                                                 <TableCell>
                                                     <Badge
                                                         className={`${statusStyle[order.status] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'} flex items-center gap-1`}
