@@ -41,7 +41,7 @@ export default function HeaderLayout({ children, breadcrumbs, ...props }: AppLay
     return (
         <div className="relative">
             {auth.user?.tenant_id && (
-                <div className="fixed z-50 top-20 right-4 w-fit">
+                <div className="fixed top-20 right-4 z-50 w-fit">
                     <CreditLimitAlert tenantId={auth.user.tenant_id} />
                 </div>
             )}

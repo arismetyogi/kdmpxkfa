@@ -2771,11 +2771,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     </g>
                 </mask>
                 <g id="surface8" clipPath="url(#clip1)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M48.973 7.523q.202.018.148.223a.31.31 0 0 1-.273-.074q.063-.077.125-.149m0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M48.973 7.523q.202.018.148.223a.31.31 0 0 1-.273-.074q.063-.077.125-.149m0 0"></path>
                 </g>
                 <g id="surface16" clipPath="url(#clip2)">
                     <path
@@ -2785,11 +2781,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface24" clipPath="url(#clip3)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M46.148 7.574h.172c0 .27-.086.305-.246.098.028-.031.051-.067.074-.098m0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M46.148 7.574h.172c0 .27-.086.305-.246.098.028-.031.051-.067.074-.098m0 0"></path>
                 </g>
                 <g id="surface36" clipPath="url(#clip4)">
                     <path
@@ -2841,11 +2833,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface92" clipPath="url(#clip11)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M48.898 8.965h.27q.07.314-.246.273a.5.5 0 0 0-.074-.172.2.2 0 0 1 .05-.101m0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M48.898 8.965h.27q.07.314-.246.273a.5.5 0 0 0-.074-.172.2.2 0 0 1 .05-.101m0 0"></path>
                 </g>
                 <g id="surface100" clipPath="url(#clip12)">
                     <path
@@ -2876,11 +2864,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface140" clipPath="url(#clip16)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M40.105 9.09h.2q.024.152-.098.223c-.09-.047-.121-.122-.102-.223m0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M40.105 9.09h.2q.024.152-.098.223c-.09-.047-.121-.122-.102-.223m0 0"></path>
                 </g>
                 <g id="surface148" clipPath="url(#clip17)">
                     <path
@@ -2918,11 +2902,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface188" clipPath="url(#clip22)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M38.398 9.762q.204-.04.274.148a.12.12 0 0 1-.078.063q-.096.017-.196.011zm0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M38.398 9.762q.204-.04.274.148a.12.12 0 0 1-.078.063q-.096.017-.196.011zm0 0"></path>
                 </g>
                 <g id="surface196" clipPath="url(#clip23)">
                     <path
@@ -2953,25 +2933,13 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface228" clipPath="url(#clip27)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M52.488 9.762h.32v.297h-.32zm0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M52.488 9.762h.32v.297h-.32zm0 0"></path>
                 </g>
                 <g id="surface236" clipPath="url(#clip28)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M54.246 9.762a.12.12 0 0 1 .113.05.6.6 0 0 1 .012.172q-.387.036-.125-.222m0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M54.246 9.762a.12.12 0 0 1 .113.05.6.6 0 0 1 .012.172q-.387.036-.125-.222m0 0"></path>
                 </g>
                 <g id="surface244" clipPath="url(#clip29)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M55.113 9.762h.2q-.029.386-.274.086a.3.3 0 0 0 .074-.086m0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M55.113 9.762h.2q-.029.386-.274.086a.3.3 0 0 0 .074-.086m0 0"></path>
                 </g>
                 <g id="surface252" clipPath="url(#clip30)">
                     <path
@@ -3065,11 +3033,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface356" clipPath="url(#clip43)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M37.086 10.559h.172v.273q-.353.019-.172-.273m0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M37.086 10.559h.172v.273q-.353.019-.172-.273m0 0"></path>
                 </g>
                 <g id="surface364" clipPath="url(#clip44)">
                     <path
@@ -3163,11 +3127,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface472" clipPath="url(#clip57)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M55.684 11.254q.35-.1.285.25c-.13.148-.246.148-.36 0q-.071-.163.075-.25m0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M55.684 11.254q.35-.1.285.25c-.13.148-.246.148-.36 0q-.071-.163.075-.25m0 0"></path>
                 </g>
                 <g id="surface480" clipPath="url(#clip58)">
                     <path
@@ -3177,11 +3137,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface488" clipPath="url(#clip59)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M36.367 11.328c.238.074.254.176.035.297a2 2 0 0 1-.16-.148zm0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M36.367 11.328c.238.074.254.176.035.297a2 2 0 0 1-.16-.148zm0 0"></path>
                 </g>
                 <g id="surface496" clipPath="url(#clip60)">
                     <path
@@ -3191,11 +3147,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface504" clipPath="url(#clip61)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M34.758 11.477q.111-.006.222.011c.067.055.06.094-.023.125q-.1.018-.2.012zm0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M34.758 11.477q.111-.006.222.011c.067.055.06.094-.023.125q-.1.018-.2.012zm0 0"></path>
                 </g>
                 <g id="surface512" clipPath="url(#clip62)">
                     <path
@@ -3310,18 +3262,10 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface640" clipPath="url(#clip78)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M59.422 12.148h.2v.149a.24.24 0 0 1-.25-.086.16.16 0 0 0 .05-.063m0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M59.422 12.148h.2v.149a.24.24 0 0 1-.25-.086.16.16 0 0 0 .05-.063m0 0"></path>
                 </g>
                 <g id="surface648" clipPath="url(#clip79)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M33.988 12.2h.274v.222h-.274zm0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M33.988 12.2h.274v.222h-.274zm0 0"></path>
                 </g>
                 <g id="surface656" clipPath="url(#clip80)">
                     <path
@@ -3415,11 +3359,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface760" clipPath="url(#clip93)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M57.266 12.672q.532.275.027.598a.4.4 0 0 1-.297-.301.41.41 0 0 1 .27-.297m0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M57.266 12.672q.532.275.027.598a.4.4 0 0 1-.297-.301.41.41 0 0 1 .27-.297m0 0"></path>
                 </g>
                 <g id="surface768" clipPath="url(#clip94)">
                     <path
@@ -3443,11 +3383,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface792" clipPath="url(#clip97)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M60.215 12.871h.2v.2a.4.4 0 0 1-.2-.028c-.067-.059-.067-.113 0-.172m0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M60.215 12.871h.2v.2a.4.4 0 0 1-.2-.028c-.067-.059-.067-.113 0-.172m0 0"></path>
                 </g>
                 <g id="surface800" clipPath="url(#clip98)">
                     <path
@@ -3653,11 +3589,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface1036" clipPath="url(#clip127)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M63.238 14.438q.167.062.121.25h-.172a.37.37 0 0 1 .051-.25m0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M63.238 14.438q.167.062.121.25h-.172a.37.37 0 0 1 .051-.25m0 0"></path>
                 </g>
                 <g id="surface1044" clipPath="url(#clip128)">
                     <path
@@ -3716,11 +3648,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface1108" clipPath="url(#clip136)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M63.805 15.184h.347q.006.122-.011.25-.424.229-.336-.25m0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M63.805 15.184h.347q.006.122-.011.25-.424.229-.336-.25m0 0"></path>
                 </g>
                 <g id="surface1116" clipPath="url(#clip137)">
                     <path
@@ -3744,11 +3672,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface1140" clipPath="url(#clip140)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M61.75 15.805q.51-.066.434.449-.306.246-.618 0c-.066-.207-.004-.36.184-.45m0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M61.75 15.805q.51-.066.434.449-.306.246-.618 0c-.066-.207-.004-.36.184-.45m0 0"></path>
                 </g>
                 <g id="surface1148" clipPath="url(#clip141)">
                     <path
@@ -3758,11 +3682,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface1156" clipPath="url(#clip142)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M63.16 15.953c.313-.055.45.067.41.375q-.164.174-.41.11-.293-.246 0-.485m0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M63.16 15.953c.313-.055.45.067.41.375q-.164.174-.41.11-.293-.246 0-.485m0 0"></path>
                 </g>
                 <g id="surface1164" clipPath="url(#clip143)">
                     <path
@@ -3905,11 +3825,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface1328" clipPath="url(#clip163)">
-                    <path
-                        fill="#F17122"
-                        fillRule="evenodd"
-                        d="M24.453 20.703q.123.031.2.137a.25.25 0 0 1-.247.09.32.32 0 0 1 .047-.227m0 0"
-                    ></path>
+                    <path fill="#F17122" fillRule="evenodd" d="M24.453 20.703q.123.031.2.137a.25.25 0 0 1-.247.09.32.32 0 0 1 .047-.227m0 0"></path>
                 </g>
                 <g id="surface1336" clipPath="url(#clip164)">
                     <path
@@ -3989,11 +3905,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface1424" clipPath="url(#clip175)">
-                    <path
-                        fill="#28AAE1"
-                        fillRule="evenodd"
-                        d="M83.84 30.156a.54.54 0 0 1 .222.024l-.109.023q-.077 0-.113-.047m0 0"
-                    ></path>
+                    <path fill="#28AAE1" fillRule="evenodd" d="M83.84 30.156a.54.54 0 0 1 .222.024l-.109.023q-.077 0-.113-.047m0 0"></path>
                 </g>
                 <g id="surface1432" clipPath="url(#clip176)">
                     <path
@@ -4038,11 +3950,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface1484" clipPath="url(#clip182)">
-                    <path
-                        fill="#0097B0"
-                        fillRule="evenodd"
-                        d="M60.758 34.059h.472v.421h-.472zm0 0"
-                    ></path>
+                    <path fill="#0097B0" fillRule="evenodd" d="M60.758 34.059h.472v.421h-.472zm0 0"></path>
                 </g>
                 <g id="surface1492" clipPath="url(#clip183)">
                     <path
@@ -4136,11 +4044,7 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                     ></path>
                 </g>
                 <g id="surface1596" clipPath="url(#clip196)">
-                    <path
-                        fill="#0097B0"
-                        fillRule="evenodd"
-                        d="M60.758 34.758h.472v1.762h-.472zm0 0"
-                    ></path>
+                    <path fill="#0097B0" fillRule="evenodd" d="M60.758 34.758h.472v1.762h-.472zm0 0"></path>
                 </g>
                 <g id="surface1604" clipPath="url(#clip197)">
                     <path
@@ -4149,18 +4053,8 @@ export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
                         d="M80.027 34.758h.493c-.004.379 0 .762.015 1.14q.175.352.531.188a.47.47 0 0 0 .16-.262q.018-.532.012-1.066h.496v1.762h-.496a.5.5 0 0 0-.011-.149.82.82 0 0 1-.707.164.67.67 0 0 1-.48-.535 33 33 0 0 1-.013-1.242m0 0"
                     ></path>
                 </g>
-                <filter
-                    id="alpha"
-                    width="100%"
-                    height="100%"
-                    x="0%"
-                    y="0%"
-                    filterUnits="objectBoundingBox"
-                >
-                    <feColorMatrix
-                        in="SourceGraphic"
-                        values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"
-                    ></feColorMatrix>
+                <filter id="alpha" width="100%" height="100%" x="0%" y="0%" filterUnits="objectBoundingBox">
+                    <feColorMatrix in="SourceGraphic" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"></feColorMatrix>
                 </filter>
             </defs>
             <g id="surface1">

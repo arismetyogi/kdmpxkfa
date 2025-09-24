@@ -3,10 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import axios from 'axios';
-import React, { useState } from 'react';
-import { toast } from 'sonner';
 import HeaderLayout from '@/layouts/header-layout';
+import axios from 'axios';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface DecryptProps {
     sampleData?: Record<string, any>;
@@ -89,7 +89,8 @@ export default function Decrypt({ sampleData }: DecryptProps) {
                                 <h3 className="font-medium">Decryption Error</h3>
                                 <p className="mt-1 text-sm">{error}</p>
                                 <p className="mt-2 text-xs">
-                                    If decryption continues to fail, please check the application logs for more details or contact the Digikoperasi team.
+                                    If decryption continues to fail, please check the application logs for more details or contact the Digikoperasi
+                                    team.
                                 </p>
                             </div>
                         )}
@@ -99,7 +100,11 @@ export default function Decrypt({ sampleData }: DecryptProps) {
                                 <Label>Decrypted Value</Label>
                                 <Card className="bg-muted">
                                     <CardContent className="p-4">
-                                        <pre className="overflow-x-auto text-sm">{decryptedValue}</pre>
+                                        {Array.isArray(decryptedValue) || typeof decryptedValue === 'object' ? (
+                                            <pre className="overflow-x-auto text-sm">{JSON.stringify(decryptedValue, null, 2)}</pre>
+                                        ) : (
+                                            <pre className="overflow-x-auto text-sm">{decryptedValue}</pre>
+                                        )}
                                     </CardContent>
                                 </Card>
                             </div>
@@ -110,8 +115,8 @@ export default function Decrypt({ sampleData }: DecryptProps) {
                                 <h3 className="text-lg font-medium">Sample Encrypted Fields</h3>
                                 <div className="rounded-md bg-blue-50 p-4">
                                     <p className="text-sm text-blue-800">
-                                        <strong>Note:</strong> Some values may not decrypt correctly due to encryption method differences. 
-                                        If decryption fails, please contact the Digikoperasi team for assistance.
+                                        <strong>Note:</strong> Some values may not decrypt correctly due to encryption method differences. If
+                                        decryption fails, please contact the Digikoperasi team for assistance.
                                     </p>
                                 </div>
                                 <div className="grid gap-3">

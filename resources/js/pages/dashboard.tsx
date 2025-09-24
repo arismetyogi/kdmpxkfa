@@ -7,7 +7,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import Autoplay from 'embla-carousel-autoplay';
 import { motion } from 'framer-motion';
-import { HeartPulse, Pill, ShoppingBag, Syringe } from 'lucide-react';
+import { HeartPulse, Pill, RefreshCw, ShieldCheck, ShoppingBag, ShoppingCart, Syringe, Truck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 type Product = {
@@ -82,17 +82,17 @@ export default function Dashboard({ products }: { products?: Product[] }) {
         <AppHeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="KFA" />
 
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+            <div className="min-h-screen from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
                 <div className="mx-auto flex max-w-7xl flex-col gap-20 p-4 md:p-8">
                     {/* Hero Section */}
                     <motion.div
                         initial={{ opacity: 0, y: -40 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
-                        className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-900 via-blue-800 to-indigo-700 shadow-2xl"
+                        className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-orange-700 via-orange-500 to-orange-700 shadow-2xl"
                     >
-                        <div className="absolute inset-0 bg-[url('/pattern.svg')] bg-cover bg-center opacity-20"></div>
-                        <div className="relative z-10 flex flex-col items-center justify-between gap-12 px-8 py-20 md:flex-row md:px-16">
+                        <div className="absolute inset-0 bg-[url('/display.jpeg')] bg-cover bg-center opacity-20"></div>
+                        <div className="relative z-10 flex flex-col items-center justify-between gap-12 px-8 pt-5 md:flex-row md:px-16 lg:pt-0">
                             <motion.div
                                 initial={{ opacity: 0, x: -60 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -105,17 +105,20 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                 </h1>
                                 <p className="mb-8 text-lg leading-relaxed text-white/80 md:text-xl">Pilihan terbaik untuk kesehatan keluarga Anda</p>
                                 <div className="flex flex-col justify-center gap-4 sm:flex-row md:justify-start">
-                                    <Button className="rounded-full bg-yellow-400 px-8 py-6 text-lg font-bold text-slate-900 shadow-lg hover:bg-yellow-500">
-                                        <ShoppingBag className="mr-2 h-5 w-5" /> Mulai Belanja
-                                    </Button>
-                                    <a href="https://www.kimiafarmaapotek.co.id/">
+                                    <Link href={route('packages.index')}>
                                         <Button
-                                            variant="outline"
-                                            className="rounded-full border-2 border-white/40 px-8 py-6 text-lg font-semibold text-black backdrop-blur-sm hover:bg-white/10 dark:text-white"
+                                            variant="default"
+                                            className="gap-2 rounded-full bg-yellow-400 px-8 py-6 text-lg font-bold text-slate-900 shadow-lg hover:bg-yellow-500"
                                         >
-                                            About Us
+                                            <ShoppingBag className="h-5 w-5" /> Beli Paket
                                         </Button>
-                                    </a>
+                                    </Link>
+                                    <Button
+                                        variant="outline"
+                                        className="rounded-full border-2 border-white/40 px-8 py-6 text-lg font-semibold text-black backdrop-blur-sm hover:bg-white/10 dark:text-white"
+                                    >
+                                        Lanjut Belanja
+                                    </Button>
                                 </div>
                             </motion.div>
 
@@ -124,11 +127,7 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                 animate={{ opacity: 1, x: 0, scale: 1 }}
                                 transition={{ duration: 1, delay: 0.4 }}
                             >
-                                <img
-                                    src="/Logo KFA member of BioFarma 300x300-01.png"
-                                    alt="Premium Pharmacy"
-                                    className="w-[280px] drop-shadow-2xl md:w-[420px]"
-                                />
+                                <img src="/Model2.png" alt="Premium Pharmacy" className="h-full w-[280px] drop-shadow-2xl md:w-[420px]" />
                             </motion.div>
                         </div>
                     </motion.div>
@@ -182,7 +181,7 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                                 <div className="relative overflow-hidden">
                                                     <img
                                                         src={p.image || '/placeholder.jpg'}
-                                                    alt={p.image_alt || p.name}
+                                                        alt={p.image_alt || p.name}
                                                         className="h-48 w-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                     />
                                                 </div>
@@ -203,35 +202,56 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                         </Carousel>
                     </motion.div>
 
-                    {/* Banner Promo */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.4 }}
-                        className="relative overflow-hidden rounded-3xl shadow-2xl"
-                    >
-                        <div className="grid items-center bg-gradient-to-r from-indigo-900 to-blue-700 md:grid-cols-2">
-                            <div className="space-y-6 p-10 text-white md:p-16">
-                                <h2 className="text-3xl leading-tight font-extrabold md:text-5xl">
-                                    📢 MAKIN HEMAT BELANJA DI KIMIA FARMA APOTEK! 🎉
+                    <Card className="rounded-3xl bg-white p-8 shadow-xl ring-1 ring-slate-900/5 md:p-12 dark:bg-slate-800/50">
+                        <motion.div
+                            initial={{ opacity: 0, y: 40 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.4 }}
+                            className="grid items-center gap-8 md:grid-cols-2 lg:gap-12"
+                        >
+                            {/* Image on the left */}
+                            <div className="">
+                                <img src="/Package (2).png" alt="Paket Koperasi Merah Putih" className="h-full w-full rounded-3xl object-cover" />
+                            </div>
+
+                            {/* Content on the right */}
+                            <div className="flex flex-col text-center md:text-left">
+                                <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-slate-800 md:text-5xl dark:text-white">
+                                    Paket Koperasi Merah Putih
                                 </h2>
-                                <p className="text-lg text-white/80">
-                                    Gunakan kartu/layanan dari bank pilihanmu & nikmati promo menarik mulai dari
-                                    <span className="font-bold text-yellow-300"> Rp75.000 </span>
-                                    dan promo spesial lainnya ✨
-                                </p>
-                                <a href="https://www.instagram.com/p/DOLfje-EqgW/?img_index=2">
-                                    <Button className="rounded-full bg-yellow-400 px-8 py-6 text-lg font-bold text-slate-900 shadow-lg hover:bg-yellow-500">
-                                        Belanja Sekarang
-                                    </Button>
-                                </a>
+                                <p className="mb-6 text-lg text-slate-600 dark:text-slate-300">Paket Obat lengkap senilai 30 juta untuk mengisi</p>
+
+                                {/* CTA Button */}
+                                <div className="flex justify-center md:justify-start">
+                                    <Link href={route('packages.index')}>
+                                        <Button
+                                            size="lg"
+                                            className="rounded-xl bg-blue-600 py-7 text-lg font-bold text-white shadow-lg hover:bg-blue-700"
+                                        >
+                                            <ShoppingCart className="mr-3 h-5 w-5" />
+                                            Buy Package Now
+                                        </Button>
+                                    </Link>
+                                </div>
+
+                                {/* Features */}
+                                <div className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-slate-600 md:justify-start dark:text-slate-400">
+                                    <div className="flex items-center gap-2">
+                                        <Truck className="h-5 w-5 text-slate-400" />
+                                        <span>Free shipping</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <RefreshCw className="h-5 w-5 text-slate-400" />
+                                        <span>30-day returns</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <ShieldCheck className="h-5 w-5 text-slate-400" />
+                                        <span>Warranty included</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="relative h-64 md:h-full">
-                                <img src="/promo kf.jpg" alt="Promo Banner" className="absolute inset-0 h-full w-full object-cover" />
-                                <div className="absolute inset-0 bg-black/20"></div>
-                            </div>
-                        </div>
-                    </motion.div>
+                        </motion.div>
+                    </Card>
 
                     {/* Grid Produk */}
                     <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.5 }}>

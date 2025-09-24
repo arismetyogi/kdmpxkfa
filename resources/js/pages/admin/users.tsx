@@ -1,14 +1,13 @@
+import UserMappingModal from '@/components/admin/user-mapping-modal';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { Apotek, BreadcrumbItem, Paginated, User } from '@/types';
 import { Head } from '@inertiajs/react';
 import { Edit, Shield, Users, UserX } from 'lucide-react';
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import UserMappingModal from '@/components/admin/user-mapping-modal';
-
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -46,7 +45,7 @@ export default function AdminUsers({ users, apoteks, allUsers, activeUsers }: Ad
     const formatRoleName = (role: string) => {
         return role
             .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
     };
 
@@ -167,13 +166,13 @@ export default function AdminUsers({ users, apoteks, allUsers, activeUsers }: Ad
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center space-x-2">
-                                                {user.apotek ?
+                                                {user.apotek ? (
                                                     user.apotek?.name
-                                                    :
-                                                <Button variant="outline" size="sm" onClick={() => handleMapUserApotek(user)}>
-                                                    <Edit className="h-4 w-4" /> Map
-                                                </Button>
-                                                }
+                                                ) : (
+                                                    <Button variant="outline" size="sm" onClick={() => handleMapUserApotek(user)}>
+                                                        <Edit className="h-4 w-4" /> Map
+                                                    </Button>
+                                                )}
                                             </div>
                                         </TableCell>
                                     </TableRow>

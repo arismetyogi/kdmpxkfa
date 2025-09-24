@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('purchases', function (Blueprint $table) {
             $table->id();
-            $table->string('id_transaksi')->unique();   
-            $table->string('merchant_name');            
-            $table->integer('total_qty');               
-            $table->decimal('total_nominal', 15, 2);   
+            $table->string('id_transaksi')->unique();
+            $table->string('merchant_name');
+            $table->integer('total_qty');
+            $table->decimal('total_nominal', 15, 2);
             $table->enum('status', ['Pending', 'Accepted', 'Rejected'])
-                  ->default('Pending');                 
-            $table->timestamps();                       
+                ->default('Pending');
+            $table->timestamps();
         });
     }
 
