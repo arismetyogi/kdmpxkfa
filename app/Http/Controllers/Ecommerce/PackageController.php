@@ -19,7 +19,11 @@ class PackageController extends Controller
                 // Set assignedQuantity to always be the same as maxQuantity
                 $maxQuantity = rand(1, 5);
                 $assignedQuantity = $maxQuantity;
+<<<<<<< HEAD
                 
+=======
+
+>>>>>>> KDMP/master
                 return [
                     'id' => $product->id,
                     'sku' => $product->sku,
@@ -35,12 +39,23 @@ class PackageController extends Controller
                     'description' => $product->description,
                     'is_active' => $product->is_active,
                     'assignedQuantity' => $assignedQuantity,
+<<<<<<< HEAD
                     'maxQuantity' => $maxQuantity
+=======
+                    'maxQuantity' => $maxQuantity,
+>>>>>>> KDMP/master
                 ];
             })->toArray();
 
         return Inertia::render('orders/Package', [
+<<<<<<< HEAD
             'products' => $products
         ]);
     }
 }
+=======
+            'products' => $products,
+        ]);
+    }
+}
+>>>>>>> KDMP/master

@@ -17,7 +17,6 @@ return new class extends Migration
                 ->default('pending')
                 ->after('password');
 
-
             $table->unsignedBigInteger('approved_by')
                 ->nullable()
                 ->after('status');
@@ -32,18 +31,18 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-  public function down(): void
-{
-    Schema::table('users', function (Blueprint $table) {
-        if (Schema::hasColumn('users', 'status')) {
-            $table->dropColumn('status');
-        }
-        if (Schema::hasColumn('users', 'approved_by')) {
-            $table->dropColumn('approved_by');
-        }
-        if (Schema::hasColumn('users', 'approved_at')) {
-            $table->dropColumn('approved_at');
-        }
-    });
-}
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            if (Schema::hasColumn('users', 'status')) {
+                $table->dropColumn('status');
+            }
+            if (Schema::hasColumn('users', 'approved_by')) {
+                $table->dropColumn('approved_by');
+            }
+            if (Schema::hasColumn('users', 'approved_at')) {
+                $table->dropColumn('approved_at');
+            }
+        });
+    }
 };

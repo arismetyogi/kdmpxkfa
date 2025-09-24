@@ -1,16 +1,9 @@
-import { Trash2 } from 'lucide-react';
-import { Form } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { User } from '@/types';
+import { Form } from '@inertiajs/react';
+import { Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface DeleteUserModalProps {
     isOpen: boolean;
@@ -18,11 +11,7 @@ interface DeleteUserModalProps {
     user: User | null;
 }
 
-export default function UserDeleteModal({
-    isOpen,
-    onClose,
-    user,
-}: DeleteUserModalProps) {
+export default function UserDeleteModal({ isOpen, onClose, user }: DeleteUserModalProps) {
     if (!user) return null;
 
     return (
@@ -33,9 +22,7 @@ export default function UserDeleteModal({
                         <Trash2 className="h-5 w-5" />
                         Delete User
                     </DialogTitle>
-                    <DialogDescription>
-                        Are you sure you want to delete the user "{user.name}"?
-                    </DialogDescription>
+                    <DialogDescription>Are you sure you want to delete the user "{user.name}"?</DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-4">
@@ -45,25 +32,18 @@ export default function UserDeleteModal({
                 </div>
 
                 <DialogFooter>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={onClose}
-                    >
+                    <Button type="button" variant="outline" onClick={onClose}>
                         Cancel
                     </Button>
                     <Form
                         method="delete"
                         action={route('admin.users.destroy', user.id)}
                         onSuccess={() => {
-                            onClose()
-                            toast.success('User deleted successfully')
+                            onClose();
+                            toast.success('User deleted successfully');
                         }}
                     >
-                        <Button
-                            type="submit"
-                            variant="destructive"
-                        >
+                        <Button type="submit" variant="destructive">
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete User
                         </Button>

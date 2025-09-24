@@ -1,14 +1,13 @@
-import { Head, usePage } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Calendar, Mail, User } from 'lucide-react';
-import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, router, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
-import { Inertia } from '@inertiajs/inertia';
+import { Calendar, Mail, User } from 'lucide-react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: route('admin.dashboard') },
@@ -39,7 +38,7 @@ export default function MappingUsers() {
 
     const handleConfirm = (type: 'approve' | 'reject', account: any) => {
         const url = `account/${account.id}/${type}`;
-        Inertia.post(
+        router.post(
             url,
             {},
             {

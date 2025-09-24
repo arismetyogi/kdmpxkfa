@@ -1,13 +1,6 @@
 import SearchableSelect from '@/components/searchable-select';
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Apotek, User } from '@/types';
@@ -78,26 +71,13 @@ export default function UserMappingModal({ isOpen, onClose, user, apoteks }: Use
                         {/* User Name */}
                         <div>
                             <Label htmlFor="name">Full Name</Label>
-                            <Input
-                                id="name"
-                                name="name"
-                                value={user?.name ?? ''}
-                                className="mt-1"
-                                disabled
-                            />
+                            <Input id="name" name="name" value={user?.name ?? ''} className="mt-1" disabled />
                         </div>
 
                         {/* Email */}
                         <div>
                             <Label htmlFor="email">Email</Label>
-                            <Input
-                                id="email"
-                                name="email"
-                                type="email"
-                                value={user?.email ?? ''}
-                                className="mt-1"
-                                disabled
-                            />
+                            <Input id="email" name="email" type="email" value={user?.email ?? ''} className="mt-1" disabled />
                         </div>
 
                         {/* Apotek */}
@@ -114,9 +94,7 @@ export default function UserMappingModal({ isOpen, onClose, user, apoteks }: Use
                                 searchPlaceholder="Search apoteks..."
                                 maxResults={10}
                             />
-                            {errors.apotek_id && (
-                                <p className="text-sm text-red-600 mt-1">{errors.apotek_id}</p>
-                            )}
+                            {errors.apotek_id && <p className="mt-1 text-sm text-red-600">{errors.apotek_id}</p>}
                         </div>
                     </div>
 

@@ -12,6 +12,7 @@ use App\Services\CartService;
 use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Illuminate\Validation\ValidationException;
 
@@ -176,8 +177,8 @@ class CartController extends Controller
             'zip' => ['required', 'string', 'max:20'],
         ]);
 
-        Log::info('Billing Data:', $billingData);
-        Log::info('Shipping Data:', $shippingData);
+        //        Log::info('Billing Data:', $billingData);
+        //        Log::info('Shipping Data:', $shippingData);
 
         // Store billing/shipping info in session for payment page
         session([
@@ -186,7 +187,7 @@ class CartController extends Controller
             // 'cart' => $cartItems // Store cart items in session for payment page
         ]);
 
-        Log::info('Check Session Billing and Shipping', session('checkout.billing'));
+        //        Log::info('Check Session Billing and Shipping', session('checkout.billing'));
 
         // Log::info('Cart saved in session:', session('cart'));
         // dd(session('cart'));
@@ -247,7 +248,7 @@ class CartController extends Controller
         // Get cart items from session (set during checkout process)
         $cartItems = $request->input('cart', []);
 
-        Log::debug('Cart items for payment process:', $cartItems);
+        //        Log::debug('Cart items for payment process:', $cartItems);
 
         if (empty($cartItems)) {
             return redirect()->route('cart')->with('error', 'Your cart is empty.');
@@ -256,7 +257,7 @@ class CartController extends Controller
         // Add cart items to request so CartService can process them
         $request->merge(['cart_items' => $cartItems]);
 
-        Log::info('Cart items for order placement:', $cartItems);
+        //        Log::info('Cart items for order placement:', $cartItems);
 
         // Temporarily override CartService's getCartItems method
         //        $originalGetCartItems = function() use ($cartItems) {
@@ -372,16 +373,16 @@ class CartController extends Controller
             \DB::rollBack();
 
             \Log::error('Order creation failed with exception: '.$e->getMessage());
-            
+
             // Check if this is a pharmacy mapping error
-            if (strpos($e->getMessage(), 'mapped') !== false || 
+            if (strpos($e->getMessage(), 'mapped') !== false ||
                 strpos($e->getMessage(), 'pharmacy') !== false ||
                 strpos($e->getMessage(), 'apotek') !== false) {
                 throw ValidationException::withMessages([
                     'mapping_error' => 'Koperasi belum dimapping dengan Apotek KF, Silakan hubungi administrator.',
                 ]);
             }
-            
+
             // Generic error for other exceptions
             throw ValidationException::withMessages([
                 'generic_payment_error' => 'A critical error occurred. Our team has been notified. Please try again later.',
@@ -397,16 +398,16 @@ class CartController extends Controller
                     'credit_limit_error' => 'Insufficient credit limit to complete this transaction.',
                 ]);
             }
-            
+
             // Check if this is a pharmacy mapping error
-            if (strpos($e->getMessage(), 'mapped') !== false || 
+            if (strpos($e->getMessage(), 'mapped') !== false ||
                 strpos($e->getMessage(), 'pharmacy') !== false ||
                 strpos($e->getMessage(), 'apotek') !== false) {
                 throw ValidationException::withMessages([
                     'mapping_error' => 'Koperasi belum dimapping dengan Apotek KF, Silakan hubungi administrator.',
                 ]);
             }
-            
+
             // Generic error for other exceptions
             throw ValidationException::withMessages([
                 'generic_payment_error' => 'A critical error occurred. Our team has been notified. Please try again later.',
