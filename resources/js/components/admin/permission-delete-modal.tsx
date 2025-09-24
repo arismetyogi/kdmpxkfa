@@ -1,14 +1,7 @@
-import { Trash2, AlertTriangle } from 'lucide-react';
-import { Form } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Form } from '@inertiajs/react';
+import { AlertTriangle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Permission {
@@ -23,11 +16,7 @@ interface DeletePermissionModalProps {
     permission: Permission | null;
 }
 
-export default function PermissionDeleteModal({
-    isOpen,
-    onClose,
-    permission,
-}: DeletePermissionModalProps) {
+export default function PermissionDeleteModal({ isOpen, onClose, permission }: DeletePermissionModalProps) {
     if (!permission) return null;
 
     const hasUsers = (permission.users_count || 0) > 0;
@@ -40,20 +29,18 @@ export default function PermissionDeleteModal({
                         <Trash2 className="h-5 w-5" />
                         Delete Permission
                     </DialogTitle>
-                    <DialogDescription>
-                        Are you sure you want to delete the permission "{permission.name}"?
-                    </DialogDescription>
+                    <DialogDescription>Are you sure you want to delete the permission "{permission.name}"?</DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-4">
                     {hasUsers && (
-                        <div className="flex items-start gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md dark:bg-yellow-900/20 dark:border-yellow-800">
-                            <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex items-start gap-3 rounded-md border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-800 dark:bg-yellow-900/20">
+                            <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-600" />
                             <div className="text-sm text-yellow-800 dark:text-yellow-200">
                                 <p className="font-medium">Warning</p>
                                 <p>
-                                    This permission is currently assigned to {permission.users_count} user(s).
-                                    Deleting it will remove the permission from all users.
+                                    This permission is currently assigned to {permission.users_count} user(s). Deleting it will remove the permission
+                                    from all users.
                                 </p>
                             </div>
                         </div>
@@ -65,25 +52,18 @@ export default function PermissionDeleteModal({
                 </div>
 
                 <DialogFooter>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={onClose}
-                    >
+                    <Button type="button" variant="outline" onClick={onClose}>
                         Cancel
                     </Button>
                     <Form
                         method="delete"
                         action={route('admin.permissions.destroy', permission.id)}
                         onSuccess={() => {
-                            onClose()
-                            toast.success('Permission deleted successfully')
+                            onClose();
+                            toast.success('Permission deleted successfully');
                         }}
                     >
-                        <Button
-                            type="submit"
-                            variant="destructive"
-                        >
+                        <Button type="submit" variant="destructive">
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete Permission
                         </Button>

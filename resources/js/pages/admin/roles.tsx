@@ -1,21 +1,14 @@
-import { Head } from '@inertiajs/react';
-import { Plus, Shield, Users, Settings, Edit, Trash2 } from 'lucide-react';
+import RoleDeleteModal from '@/components/admin/role-delete-modal';
+import RoleFormModal from '@/components/admin/role-form-modal';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
+import { Head } from '@inertiajs/react';
+import { Edit, Plus, Settings, Shield, Trash2, Users } from 'lucide-react';
 import { useState } from 'react';
-import RoleFormModal from '@/components/admin/role-form-modal';
-import RoleDeleteModal from '@/components/admin/role-delete-modal';
 
 interface Role {
     id: number;
@@ -55,7 +48,7 @@ export default function AdminRoles({ roles, permissions }: AdminRolesProps) {
     const formatPermissionName = (permission: string) => {
         return permission
             .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
     };
 
@@ -100,13 +93,11 @@ export default function AdminRoles({ roles, permissions }: AdminRolesProps) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Role Management" />
 
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Role Management</h1>
-                        <p className="text-muted-foreground">
-                            Manage user roles and their associated permissions
-                        </p>
+                        <p className="text-muted-foreground">Manage user roles and their associated permissions</p>
                     </div>
                     <Button onClick={handleCreateRole}>
                         <Plus className="mr-2 h-4 w-4" />
@@ -122,9 +113,7 @@ export default function AdminRoles({ roles, permissions }: AdminRolesProps) {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{roles.length}</div>
-                            <p className="text-xs text-muted-foreground">
-                                Active roles in the system
-                            </p>
+                            <p className="text-xs text-muted-foreground">Active roles in the system</p>
                         </CardContent>
                     </Card>
                     <Card>
@@ -134,9 +123,7 @@ export default function AdminRoles({ roles, permissions }: AdminRolesProps) {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{permissions.length}</div>
-                            <p className="text-xs text-muted-foreground">
-                                Available permissions
-                            </p>
+                            <p className="text-xs text-muted-foreground">Available permissions</p>
                         </CardContent>
                     </Card>
                     <Card>
@@ -145,12 +132,8 @@ export default function AdminRoles({ roles, permissions }: AdminRolesProps) {
                             <Users className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">
-                                {roles.reduce((total, role) => total + (role.users_count || 0), 0)}
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                                Users with assigned roles
-                            </p>
+                            <div className="text-2xl font-bold">{roles.reduce((total, role) => total + (role.users_count || 0), 0)}</div>
+                            <p className="text-xs text-muted-foreground">Users with assigned roles</p>
                         </CardContent>
                     </Card>
                 </div>
@@ -158,9 +141,7 @@ export default function AdminRoles({ roles, permissions }: AdminRolesProps) {
                 <Card>
                     <CardHeader>
                         <CardTitle>Roles & Permissions</CardTitle>
-                        <CardDescription>
-                            View and manage all roles and their associated permissions
-                        </CardDescription>
+                        <CardDescription>View and manage all roles and their associated permissions</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Table>
@@ -177,27 +158,19 @@ export default function AdminRoles({ roles, permissions }: AdminRolesProps) {
                                     <TableRow key={role.id}>
                                         <TableCell>
                                             <div className="flex items-center space-x-2">
-                                                <Badge className={getRoleColor(role.name)}>
-                                                    {role.name}
-                                                </Badge>
+                                                <Badge className={getRoleColor(role.name)}>{role.name}</Badge>
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex flex-wrap gap-1">
                                                 {role.permissions && role.permissions.length > 0 ? (
                                                     role.permissions.map((permission) => (
-                                                        <Badge
-                                                            key={permission.id}
-                                                            variant="secondary"
-                                                            className="text-xs"
-                                                        >
+                                                        <Badge key={permission.id} variant="secondary" className="text-xs">
                                                             {formatPermissionName(permission.name)}
                                                         </Badge>
                                                     ))
                                                 ) : (
-                                                    <span className="text-muted-foreground text-sm">
-                                                        No permissions
-                                                    </span>
+                                                    <span className="text-sm text-muted-foreground">No permissions</span>
                                                 )}
                                             </div>
                                         </TableCell>
@@ -209,11 +182,7 @@ export default function AdminRoles({ roles, permissions }: AdminRolesProps) {
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center space-x-2">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleEditRole(role)}
-                                                >
+                                                <Button variant="outline" size="sm" onClick={() => handleEditRole(role)}>
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
                                                 <Button
@@ -236,18 +205,12 @@ export default function AdminRoles({ roles, permissions }: AdminRolesProps) {
                 <Card>
                     <CardHeader>
                         <CardTitle>Available Permissions</CardTitle>
-                        <CardDescription>
-                            All permissions that can be assigned to roles
-                        </CardDescription>
+                        <CardDescription>All permissions that can be assigned to roles</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
                             {permissions.map((permission) => (
-                                <Badge
-                                    key={permission.id}
-                                    variant="outline"
-                                    className="justify-center py-2"
-                                >
+                                <Badge key={permission.id} variant="outline" className="justify-center py-2">
                                     {formatPermissionName(permission.name)}
                                 </Badge>
                             ))}
@@ -257,27 +220,13 @@ export default function AdminRoles({ roles, permissions }: AdminRolesProps) {
             </div>
 
             {/* Create Role Modal */}
-            <RoleFormModal
-                isOpen={isCreateModalOpen}
-                onClose={closeModals}
-                role={null}
-                permissions={permissions}
-            />
+            <RoleFormModal isOpen={isCreateModalOpen} onClose={closeModals} role={null} permissions={permissions} />
 
             {/* Edit Role Modal */}
-            <RoleFormModal
-                isOpen={isEditModalOpen}
-                onClose={closeModals}
-                role={selectedRole}
-                permissions={permissions}
-            />
+            <RoleFormModal isOpen={isEditModalOpen} onClose={closeModals} role={selectedRole} permissions={permissions} />
 
             {/* Delete Role Modal */}
-            <RoleDeleteModal
-                isOpen={isDeleteModalOpen}
-                onClose={closeModals}
-                role={selectedRole}
-            />
+            <RoleDeleteModal isOpen={isDeleteModalOpen} onClose={closeModals} role={selectedRole} />
         </AppLayout>
     );
 }

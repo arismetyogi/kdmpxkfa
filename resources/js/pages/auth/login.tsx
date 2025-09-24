@@ -5,13 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import AuthLayout from '@/layouts/auth-layout';
+import { SharedData } from '@/types';
 import { Form } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
-import { SharedData } from '@/types';
-import { Separator } from '@/components/ui/separator';
 
-interface LoginProps extends SharedData{
+interface LoginProps extends SharedData {
     status?: string;
     canResetPassword: boolean;
     digikopUrl: string;

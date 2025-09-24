@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class OrderController extends Controller
@@ -86,11 +87,14 @@ class OrderController extends Controller
 
         // Get all unique categories that have at least one product associated with them
 
-        $allCategories = Category::withCount('products')
-        ->where('products_count', '>', 0)
-        ->groupBy('subcategory1')
-        ->orderByDesc('products_count')
-        ->pluck('subcategory1');
+        $allCategories = Category::query()
+            ->select('subcategory1') // Select subcategory1 for grouping
+            ->addSelect(DB::raw('COUNT(products.id) as products_count')) // Count products
+            ->join('products', 'categories.id', '=', 'products.category_id') // Join with products table
+            ->groupBy('subcategory1') // Group by subcategory1
+            ->having('products_count', '>', 0) // Filter by the aggregated count
+            ->orderByDesc('products_count') // Order by the aggregated count
+            ->pluck('subcategory1');
 
         // $allCategories = Category::whereHas('products')
         //     ->whereNotNull('subcategory1')
@@ -131,7 +135,6 @@ class OrderController extends Controller
             'relatedProducts' => $relatedProducts,
         ]);
     }
-
 
     public function history()
     {

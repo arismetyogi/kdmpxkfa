@@ -128,7 +128,7 @@ class ProductController extends Controller
             ]);
         }
 
-        Log::debug('Validated data: ', $validated);
+        //        Log::debug('Validated data: ', $validated);
 
         $product = Product::create([
             'sku' => $validated['sku'],

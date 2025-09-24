@@ -7,10 +7,10 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '@/components/ui/pagination';
+import { cn } from '@/lib/utils';
 import { Paginated } from '@/types';
 import { router } from '@inertiajs/react';
 import { ChevronFirst, ChevronLast } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface CustomPaginationProps {
     pagination: Paginated<any>;
@@ -27,7 +27,7 @@ export function CustomPagination({ pagination, className }: CustomPaginationProp
     const pageLinks = pagination.links.slice(1, -1);
 
     // Find the active page index
-    const activeIndex = pageLinks.findIndex(link => link.active);
+    const activeIndex = pageLinks.findIndex((link) => link.active);
 
     // Determine which pages to show (5 pages at a time)
     let startPage = 0;
@@ -54,10 +54,14 @@ export function CustomPagination({ pagination, className }: CustomPaginationProp
     // Handle pagination navigation with preserved state and scroll
     const handlePageChange = (url: string | null) => {
         if (url) {
-            router.get(url, {}, {
-                preserveState: true,
-                preserveScroll: true,
-            });
+            router.get(
+                url,
+                {},
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                },
+            );
         }
     };
 
@@ -66,7 +70,7 @@ export function CustomPagination({ pagination, className }: CustomPaginationProp
     const lastPageLink = pageLinks[pageLinks.length - 1];
 
     return (
-        <Pagination className={cn("mt-6", className)}>
+        <Pagination className={cn('mt-6', className)}>
             <PaginationContent>
                 {/* First page button */}
                 {pageLinks.length > 5 && firstPageLink && (
@@ -74,10 +78,10 @@ export function CustomPagination({ pagination, className }: CustomPaginationProp
                         <button
                             onClick={() => handlePageChange(firstPageLink.url)}
                             disabled={!firstPageLink.url || firstPageLink.active}
-                            className={firstPageLink.active ? "cursor-default" : ""}
+                            className={firstPageLink.active ? 'cursor-default' : ''}
                         >
                             <PaginationLink isActive={false} size="default">
-                                <ChevronFirst/>
+                                <ChevronFirst />
                             </PaginationLink>
                         </button>
                     </PaginationItem>
@@ -86,10 +90,7 @@ export function CustomPagination({ pagination, className }: CustomPaginationProp
                 {/* Previous button */}
                 {pagination.links[0].url && (
                     <PaginationItem>
-                        <button
-                            onClick={() => handlePageChange(pagination.links[0].url)}
-                            disabled={!pagination.links[0].url}
-                        >
+                        <button onClick={() => handlePageChange(pagination.links[0].url)} disabled={!pagination.links[0].url}>
                             <PaginationPrevious size="default" />
                         </button>
                     </PaginationItem>
@@ -106,11 +107,7 @@ export function CustomPagination({ pagination, className }: CustomPaginationProp
                 {visiblePages.map((link, index) => (
                     <PaginationItem key={startPage + index}>
                         {link.url ? (
-                            <button
-                                onClick={() => handlePageChange(link.url)}
-                                disabled={link.active}
-                                className={link.active ? "cursor-default" : ""}
-                            >
+                            <button onClick={() => handlePageChange(link.url)} disabled={link.active} className={link.active ? 'cursor-default' : ''}>
                                 <PaginationLink isActive={link.active} size={undefined}>
                                     {link.label.replace('&laquo;', '').replace('&raquo;', '').trim()}
                                 </PaginationLink>
@@ -148,10 +145,10 @@ export function CustomPagination({ pagination, className }: CustomPaginationProp
                         <button
                             onClick={() => handlePageChange(lastPageLink.url)}
                             disabled={!lastPageLink.url || lastPageLink.active}
-                            className={lastPageLink.active ? "cursor-default" : ""}
+                            className={lastPageLink.active ? 'cursor-default' : ''}
                         >
                             <PaginationLink isActive={false} size={undefined}>
-                                <ChevronLast/>
+                                <ChevronLast />
                             </PaginationLink>
                         </button>
                     </PaginationItem>

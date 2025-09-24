@@ -8,12 +8,7 @@ interface PermissionCheckProps {
     fallback?: ReactNode;
 }
 
-export default function PermissionCheck({
-    permission,
-    role,
-    children,
-    fallback = null
-}: PermissionCheckProps) {
+export default function PermissionCheck({ permission, role, children, fallback = null }: PermissionCheckProps) {
     const { auth } = usePage().props as { auth: { user: any } };
     const user = auth.user;
 
@@ -24,9 +19,7 @@ export default function PermissionCheck({
     // Check if user has the required permission
     if (permission && !user.permissions?.some((p: any) => p.name === permission)) {
         // Also check if any of the user's roles have this permission
-        const hasPermissionViaRole = user.roles?.some((r: any) =>
-            r.permissions?.some((p: any) => p.name === permission)
-        );
+        const hasPermissionViaRole = user.roles?.some((r: any) => r.permissions?.some((p: any) => p.name === permission));
 
         if (!hasPermissionViaRole) {
             return fallback;
