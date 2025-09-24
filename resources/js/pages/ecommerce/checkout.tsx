@@ -5,6 +5,7 @@ import { router } from '@inertiajs/react';
 import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { type BreadcrumbItem } from '@/types';
+import PriceDisplay from '@/components/priceDisplay'
 
 
 interface CartItem {
@@ -336,8 +337,8 @@ export default function CheckoutPage({ billingData, shippingData,  }: CheckoutPr
                                                     ({item.quantity * item.content} {item.base_uom})
                                                 </span>
                                             </TableCell>
-                                            <TableCell className="text-xs">Rp{item.price.toLocaleString()}</TableCell>
-                                            <TableCell className="text-right text-xs">Rp{(item.price * item.quantity).toLocaleString()}</TableCell>
+                                            <TableCell className="text-xs"><PriceDisplay price={item.price} /></TableCell>
+                                            <TableCell className="text-right text-xs"><PriceDisplay price={(item.price * item.quantity)}/></TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -354,22 +355,24 @@ export default function CheckoutPage({ billingData, shippingData,  }: CheckoutPr
                                 <div className="space-y-1">
                                     <div className="flex justify-between">
                                         <span className="text-sm text-muted-foreground">Subtotal</span>
-                                        <span className="text-sm font-medium">Rp{subtotal.toLocaleString()}</span>
+                                        <PriceDisplay price={subtotal} />
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-sm text-muted-foreground">Shipping</span>
                                         {/* --- THEME CHANGE #8: Make "Free" text dark-mode compatible --- */}
                                         <span className="text-sm font-medium text-green-600 dark:text-green-400">
-                                            {shipping === 0 ? 'Free' : `Rp${(shipping as number).toLocaleString()}`}
+                                            {shipping === 0 ? 'Free' : <PriceDisplay price={shipping} />}
                                         </span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-sm text-muted-foreground">Tax</span>
-                                        <span className="text-sm font-medium">Rp{ppn.toLocaleString()}</span>
+                                        <PriceDisplay price={ppn} />
                                     </div>
                                     <div className="flex justify-between border-t pt-5 mt-3">
                                         <span className="text-sm font-semibold text-primary">Total</span>
-                                        <span className="text-sm font-semibold text-primary">Rp{grandTotal.toLocaleString()}</span>
+                                        <PriceDisplay 
+                                        price={grandTotal}
+                                        className="text-lg font-semibold text-primary" />
                                     </div>
                                 </div>
                                 <button

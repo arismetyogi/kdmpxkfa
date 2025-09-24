@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { type BreadcrumbItem, type CartItem } from "@/types";
 import { ShoppingBag, ShoppingBasket } from "lucide-react";
 import { toast } from "sonner";
+import PriceDisplay from "@/components/priceDisplay";
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: "Dashboard", href: "/dashboard" },
@@ -112,9 +113,11 @@ export default function Cart() {
                         <p className="text-sm text-muted-foreground">
                           {item.weight} gram / {item.order_unit}
                         </p>
-                        <p className="text-primary font-bold text-sm sm:text-base mt-1">
-                          Rp {(item.price ?? 0).toLocaleString()}
-                        </p>
+                        {/* UPDATED PRICE DISPLAY */}
+                        <PriceDisplay 
+                          price={item.price}
+                          className="text-primary font-bold text-sm sm:text-base mt-1"
+                        />
                       </div>
                     </div>
 
@@ -152,15 +155,18 @@ export default function Cart() {
                 <div className="space-y-3 text-sm sm:text-base">
                   <div className="flex justify-between text-muted-foreground">
                     <span>Subtotal</span>
-                    <span>Rp {subtotal.toLocaleString()}</span>
+                    {/* UPDATED SUBTOTAL DISPLAY */}
+                    <PriceDisplay price={subtotal} />
                   </div>
                   <div className="flex justify-between text-muted-foreground">
                     <span>PPN (11%)</span>
-                    <span>Rp {ppn.toLocaleString()}</span>
+                    {/* UPDATED PPN DISPLAY */}
+                    <PriceDisplay price={ppn} />
                   </div>
                   <div className="flex justify-between border-t pt-3 mt-3 text-lg sm:text-xl font-bold text-primary">
                     <span>Total</span>
-                    <span>Rp {grandTotal.toLocaleString()}</span>
+                    {/* UPDATED GRAND TOTAL DISPLAY */}
+                    <PriceDisplay price={grandTotal} />
                   </div>
                 </div>
                 <div className="mt-8">
@@ -182,9 +188,11 @@ export default function Cart() {
                   {/* Total Information */}
                   <div className="text-center">
                     <span className="text-xs text-muted-foreground">Total Belanja</span>
-                    <p className="text-lg font-bold text-primary">
-                      Rp {grandTotal.toLocaleString()}
-                    </p>
+                    {/* UPDATED MOBILE GRAND TOTAL DISPLAY */}
+                    <PriceDisplay 
+                      price={grandTotal}
+                      className="text-lg font-bold text-primary"
+                    />
                   </div>
                   
                   {/* Checkout Button */}

@@ -13,6 +13,7 @@ use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Illuminate\Validation\ValidationException;
 
 use function Pest\Laravel\json;
 

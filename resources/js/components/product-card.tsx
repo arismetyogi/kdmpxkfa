@@ -4,6 +4,45 @@ import { Product } from '@/types/index.js';
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils"; // Assuming you have a utility for merging class names
 
+// Helper component for custom price formatting
+const PriceDisplay = ({
+  price,
+  currency = "Rp",
+  className,
+  decimalClassName,
+}: {
+  price: number | null | undefined;
+  currency?: string;
+  className?: string;
+  decimalClassName?: string;
+}) => {
+  if (price === null || typeof price === 'undefined' || isNaN(price)) {
+    return <span className={className}>{currency} 0</span>;
+  }
+
+  // Format the number to a string with two decimal places, using Indonesian locale.
+  // This will use '.' for thousands and ',' for the decimal separator.
+  const formattedPrice = new Intl.NumberFormat('id-ID', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(price);
+
+  const [integerPart, decimalPart] = formattedPrice.split(',');
+
+  return (
+    <span className={className}>
+      {currency} {integerPart}
+      <span className={cn(
+        "font-normal text-[0.7em] tracking-tighter align-baseline",
+        decimalClassName
+      )}>
+        ,{decimalPart}
+      </span>
+    </span>
+  );
+};
+
+
 interface ProductCardProps {
     product: Product;
     compact?: boolean;
@@ -86,9 +125,10 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
                     {content} {base_uom} per {order_unit}
                 </span>
                 <div>
-                    <p className="text-md font-bold text-primary pr-2">
-                        Rp {price?.toLocaleString('id-ID') ?? "0"}
-                    </p>
+                    <PriceDisplay
+                      price={price}
+                      className="text-md font-bold text-primary pr-2"
+                    />
                 </div>
             </div>
         </div>
@@ -145,9 +185,13 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
 
             {/* Bagian Bawah */}
             <div className="mt-3">
-                <p className="text-lg font-bold text-blue-600 md:text-xl">Rp {price?.toLocaleString() ?? '0'}</p>
+                <PriceDisplay 
+                    price={price} 
+                    className="text-lg font-bold text-blue-600 md:text-xl"
+                />
+
                 <p className="text-xs text-muted-foreground">
-                    Rp {pricePerOrderUnit?.toLocaleString() ?? '0'} per {base_uom}
+                    <PriceDisplay price={pricePerOrderUnit} /> per {base_uom}
                 </p>
 
                 <motion.button

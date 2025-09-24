@@ -24,6 +24,11 @@ const mainNavItems: NavItem[] = [
         href: '/dashboard',
         icon: LayoutGrid,
     },
+        {
+        title: 'Paket Merah Putih',
+        href: '/packages',
+        icon: Package,
+    },
     {
         title: 'Products',
         href: '/orders/products',

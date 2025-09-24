@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CreditCard, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
+import PriceDisplay from "@/components/priceDisplay";
 
 interface CartItem {
     id: string | number;
@@ -243,16 +244,18 @@ export default function PaymentPage({
                                 </div>
                                 <div className="border-t border-border pt-4">
                                     <div className="space-y-2">
-                                        <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span className="font-medium">Rp{subtotal.toLocaleString()}</span></div>
-                                        <div className="flex justify-between"><span className="text-muted-foreground">Shipping</span><span className="font-medium text-green-600 dark:text-green-400">{shipping_amount === 0 ? 'Free' : `Rp${(shipping_amount as number).toLocaleString()}`}</span></div>
-                                        <div className="flex justify-between"><span className="text-muted-foreground">Tax (11%)</span><span className="font-medium">Rp{ppn.toLocaleString()}</span></div>
-                                        <div className="flex justify-between border-t border-border pt-2 mt-2"><span className="text-lg font-semibold text-primary">Total</span><span className="text-lg font-semibold text-primary">Rp{grandTotal.toLocaleString()}</span></div>
+                                        <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><PriceDisplay price={subtotal} /></div>
+                                        <div className="flex justify-between"><span className="text-muted-foreground">Shipping</span><span className="font-medium text-green-600 dark:text-green-400">{shipping_amount === 0 ? 'Free' : <PriceDisplay price={shipping_amount} />}</span></div>
+                                        <div className="flex justify-between"><span className="text-muted-foreground">Tax (11%)</span><PriceDisplay price={ppn} /></div>
+                                        <div className="flex justify-between border-t border-border pt-2 mt-2"><span className="text-lg font-semibold text-primary">Total</span>                                        <PriceDisplay 
+                                        price={grandTotal}
+                                        className="text-lg font-semibold text-primary" /></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>  
             </div>
 
             {/* NEW: Mobile Sticky Footer with Centered Layout */}
