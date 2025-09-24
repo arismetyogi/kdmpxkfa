@@ -116,8 +116,14 @@ class User extends Authenticatable implements HasMedia
         return [];
     }
 
+    protected $appends = ['user_profile_data'];
     public function userProfile(): HasOne
     {
         return $this->hasOne(UserProfile::class);
+    }
+
+    public function getUserProfileDataAttribute()
+    {
+        return $this->userProfile;
     }
 }

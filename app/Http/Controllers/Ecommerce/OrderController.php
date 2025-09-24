@@ -128,7 +128,7 @@ class OrderController extends Controller
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id) // Exclude the current product
             ->limit(10)
-            ->get(['id', 'sku', 'name', 'price', 'image', 'category_id', 'order_unit', 'is_active', 'content', 'base_uom', 'weight']);
+            ->get();
 
         return Inertia::render('ecommerce/DetailProduct', [
             'product' => $product,
