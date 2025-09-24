@@ -13,6 +13,7 @@ import Autoplay from 'embla-carousel-autoplay';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, Minus, Plus, ShoppingCart } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { idrFormatter } from '@/lib/utils';
 
 const MotionButton = motion(Button);
 
@@ -107,7 +108,7 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                             </p>
                             <div className="mt-4 space-y-2">
                                 <div className="flex items-baseline gap-2">
-                                    <p className="text-3xl font-bold text-primary lg:text-4xl">Rp {product.price.toLocaleString('id-ID')}</p>
+                                    <p className="text-3xl font-bold text-primary lg:text-4xl">{idrFormatter.format(product.price)}</p>
                                     <span className="text-sm text-muted-foreground">/ {product.order_unit}</span>
                                 </div>
                                 <div className="flex items-center gap-4">
@@ -255,7 +256,7 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                                     <div className="flex items-center justify-between">
                                         <p className="text-xl font-bold">Subtotal:</p>
                                         <div className="text-right">
-                                            <p className="text-xl font-bold text-primary">Rp {product.price.toLocaleString('id-ID')}</p>
+                                            <p className="text-xl font-bold text-primary">{idrFormatter.format(product.price)}</p>
                                             <p className="text-xs text-muted-foreground">/ {product.order_unit}</p>
                                         </div>
                                     </div>
