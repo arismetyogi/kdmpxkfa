@@ -6,6 +6,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { ArrowLeft, ArrowRight, CheckCircle, Package, ShoppingBag, Truck } from 'lucide-react';
 import React from 'react';
+import { currency } from '@/lib/utils';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -199,27 +200,27 @@ export default function Detail() {
                                 <CardTitle>Order Summary</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                {(() => {
-                                    // ✅ Subtotal (sum of price × quantity)
-                                    const subtotal =
+                                    {(() => {
+                                        // ✅ Subtotal (sum of price × quantity)
+                                        const subtotal =
                                         order.products?.reduce((sum, item) => {
                                             const qty = item.pivot?.qty_delivered ?? item.pivot?.quantity ?? 1;
                                             return sum + item.price * qty;
                                         }, 0) ?? 0;
 
-                                    // ✅ Tax (11%)
-                                    const tax = subtotal * 0.11;
+                                        // ✅ Tax (11%)
+                                        const tax = subtotal * 0.11;
 
-                                    // ✅ Shipping cost (fallback 0 if not available)
-                                    const shipping = order.shipping_amount ?? 0;
+                                        // ✅ Shipping cost (fallback 0 if not available)
+                                        const shipping = order.shipping_amount ?? 0;
 
-                                    // ✅ Discount (fallback 0 if not available)
-                                    const discount = order.discount_amount ?? 0;
+                                        // ✅ Discount (fallback 0 if not available)
+                                        const discount = order.discount_amount ?? 0;
 
-                                    // ✅ Final total
-                                    const total = subtotal + tax;
+                                        // ✅ Final total
+                                        const total = subtotal + tax;
 
-                                    return (
+                                        return (
                                         <div className="grid grid-cols-2 gap-2 text-sm">
                                             <div>Product Price</div>
                                             <div className="text-right">{currency(subtotal)}</div>
@@ -233,13 +234,18 @@ export default function Detail() {
                                             <div>Discount</div>
                                             <div className="text-right">-{currency(discount)}</div>
 
-                  <div className="font-semibold text-base">Total</div> {/* Increased total font size */}
-                  <div className="text-right font-semibold text-base">
-                    {currency(order.total_price)}
-                  </div>s
-                </div>
-              </CardContent>
-            </Card>
+                                            <div className="font-semibold text-base">
+                                            Total
+                                            </div>
+                                            <div className="text-right font-semibold text-base">
+                                            {currency(order.total_price)}
+                                            </div>
+                                        </div>
+                                        );
+                                    })()}
+                                    </CardContent>
+
+                                </Card>
 
                         {/* Confirmation */}
                         {order.status === 'dalam-pengiriman' && (
@@ -261,13 +267,14 @@ export default function Detail() {
                                                     { status: 'diterima' },
                                                 );
                                             }}
-                                            className="w-full bg-green-600 text-white hover:bg-green-700 sm:flex-1" // w-full for mobile
+                                           className="w-full bg-green-600 text-white hover:bg-green-700 sm:flex-1"
+
                                         >
                                             Paket Sudah Diterima
                                         </Button>
                                         <Button
                                             variant="destructive"
-                                            className="w-full text-white sm:flex-1" // w-full for mobile
+                                            className="w-full text-white sm:flex-1" 
                                         >
                                             Laporkan
                                         </Button>
