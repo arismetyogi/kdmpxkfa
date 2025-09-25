@@ -1,5 +1,3 @@
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';

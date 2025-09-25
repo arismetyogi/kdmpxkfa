@@ -5,6 +5,7 @@ import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import {History,Key,LayoutGrid,Package,Settings,Shield,Tag,UserCog,Users,ShoppingCart,Map,UsersIcon,} from 'lucide-react';
 import AppLogo from './app-logo';
+import DarkModeToggle from './toggle-dark-mode';
 
 export function AppSidebar() {
     const page = usePage();
@@ -77,35 +78,7 @@ export function AppSidebar() {
               },
           ]
         : [];
-    // 🔹 Apotek Navigation
-    const orderManagementNavItems: NavItem[] = hasRole(['super-admin', 'admin-apotek'])
-        ? [
-              {
-                  title: 'Orders',
-                  href: route('admin.orders.index', [], false),
-                  icon: ShoppingCart,
-              },
-          ]
-        : [];
-
-    // 🔹 BusDev Navigation
-    const busdevNavItems: NavItem[] = hasRole(['super-admin', 'admin-busdev'])
-        ? [
-              {
-                  title: 'Mapping',
-                  href: route('admin.mapping.index', [], false),
-                  icon: Map,
-              },
-              {
-                  title: 'Account Manage',
-                  href: route('admin.account.index', [], false),
-                  icon: UsersIcon,
-              },
-          ]
-        : [];
-
-    // 🔹 System Navigation (khusus super-admin)
-    const adminNavItems: NavItem[] = hasRole(['super-admin'])
+    
     // 🔹 System Navigation (khusus super-admin)
     const adminNavItems: NavItem[] = hasRole(['super-admin'])
         ? [
@@ -114,7 +87,6 @@ export function AppSidebar() {
                   href: route('admin.admins.index', [], false),
                   icon: UserCog,
               },
-              {
               {
                   title: 'User Management',
                   href: route('admin.users.index', [], false),
@@ -169,7 +141,6 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <DarkModeToggle />
                 <DarkModeToggle />
                 <NavUser />
             </SidebarFooter>
