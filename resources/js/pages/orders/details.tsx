@@ -233,13 +233,13 @@ export default function Detail() {
                                             <div>Discount</div>
                                             <div className="text-right">-{currency(discount)}</div>
 
-                                            <div className="text-base font-semibold">Total</div>
-                                            <div className="text-right text-base font-semibold">{currency(total)}</div>
-                                        </div>
-                                    );
-                                })()}
-                            </CardContent>
-                        </Card>
+                  <div className="font-semibold text-base">Total</div> {/* Increased total font size */}
+                  <div className="text-right font-semibold text-base">
+                    {currency(order.total_price)}
+                  </div>s
+                </div>
+              </CardContent>
+            </Card>
 
                         {/* Confirmation */}
                         {order.status === 'dalam-pengiriman' && (

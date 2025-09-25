@@ -87,6 +87,8 @@ class User extends Authenticatable implements HasMedia
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    // app/Models/User.php
+
     public function getMenusAttribute()
     {
         $roles = $this->roles->pluck('name')->toArray();
@@ -106,10 +108,10 @@ class User extends Authenticatable implements HasMedia
             ];
         }
 
-        if (in_array('busdev', $roles)) {
+        if (in_array('admin-busdev', $roles)) {
             return [
                 ['title' => 'Mapping', 'href' => route('admin.mapping.index')],
-                ['title' => 'Accounts', 'href' => route('admin.accounts.index')],
+                ['title' => 'Accounts', 'href' => route('admin.account.index')],
             ];
         }
 

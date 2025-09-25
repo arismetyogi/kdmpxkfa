@@ -1,21 +1,22 @@
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import DarkModeToggle from '@/components/toggle-dark-mode';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { Sidebar,SidebarContent,SidebarFooter,SidebarHeader,SidebarMenu,SidebarMenuButton,SidebarMenuItem,} from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { History, Key, LayoutGrid, Map, Package, Settings, Shield, ShoppingCart, Tag, UserCog, Users, UsersIcon } from 'lucide-react';
+import {History,Key,LayoutGrid,Package,Settings,Shield,Tag,UserCog,Users,ShoppingCart,Map,UsersIcon,} from 'lucide-react';
 import AppLogo from './app-logo';
+import DarkModeToggle from './toggle-dark-mode';
 
 export function AppSidebar() {
     const page = usePage();
     const user = (page.props as any).auth?.user;
 
     // 🔹 helper: cek apakah user punya role tertentu
-    const hasRole = (roles: string[]) => user?.roles?.some((r: { name: string }) => roles.includes(r.name));
+    const hasRole = (roles: string[]) =>
+        user?.roles?.some((r: { name: string }) => roles.includes(r.name));
 
     // 🔹 Main Navigation
-    const mainNavItems: NavItem[] = hasRole(['super-admin', 'admin', 'admin-apotek', 'admin-busdev'])
+    const mainNavItems: NavItem[] = hasRole(['super-admin', 'admin', 'admin-apotek','admin-busdev'])
         ? [
               {
                   title: 'Admin Dashboard',
@@ -77,7 +78,7 @@ export function AppSidebar() {
               },
           ]
         : [];
-
+    
     // 🔹 System Navigation (khusus super-admin)
     const adminNavItems: NavItem[] = hasRole(['super-admin'])
         ? [
@@ -105,7 +106,9 @@ export function AppSidebar() {
         : [];
 
     // 🔹 Tentukan link logo sesuai role
-    const logoHref = hasRole(['super-admin', 'admin', 'admin-apotek', 'admin-busdev']) ? route('admin.dashboard') : route('home');
+    const logoHref = hasRole(['super-admin', 'admin', 'admin-apotek', 'admin-busdev'])
+        ? route('admin.dashboard')
+        : route('home');
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -124,11 +127,17 @@ export function AppSidebar() {
             <SidebarContent>
                 <NavMain label="Home" items={mainNavItems} />
 
-                {orderManagementNavItems.length > 0 && <NavMain label="Apotek" items={orderManagementNavItems} />}
+                {orderManagementNavItems.length > 0 && (
+                    <NavMain label="Apotek" items={orderManagementNavItems} />
+                )}
 
-                {busdevNavItems.length > 0 && <NavMain label="BusDev" items={busdevNavItems} />}
+                {busdevNavItems.length > 0 && (
+                    <NavMain label="BusDev" items={busdevNavItems} />
+                )}
 
-                {adminNavItems.length > 0 && <NavMain label="System" items={adminNavItems} />}
+                {adminNavItems.length > 0 && (
+                    <NavMain label="System" items={adminNavItems} />
+                )}
             </SidebarContent>
 
             <SidebarFooter>
