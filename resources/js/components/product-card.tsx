@@ -3,45 +3,7 @@ import { ShoppingCart } from "lucide-react";
 import { Product } from '@/types/index.js';
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils"; // Assuming you have a utility for merging class names
-
-// Helper component for custom price formatting
-const PriceDisplay = ({
-  price,
-  currency = "Rp",
-  className,
-  decimalClassName,
-}: {
-  price: number | null | undefined;
-  currency?: string;
-  className?: string;
-  decimalClassName?: string;
-}) => {
-  if (price === null || typeof price === 'undefined' || isNaN(price)) {
-    return <span className={className}>{currency} 0</span>;
-  }
-
-  // Format the number to a string with two decimal places, using Indonesian locale.
-  // This will use '.' for thousands and ',' for the decimal separator.
-  const formattedPrice = new Intl.NumberFormat('id-ID', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(price);
-
-  const [integerPart, decimalPart] = formattedPrice.split(',');
-
-  return (
-    <span className={className}>
-      {currency} {integerPart}
-      <span className={cn(
-        "font-normal text-[0.7em] tracking-tighter align-baseline",
-        decimalClassName
-      )}>
-        ,{decimalPart}
-      </span>
-    </span>
-  );
-};
-
+import PriceDisplay from '@/components/priceDisplay';
 
 interface ProductCardProps {
     product: Product;
@@ -121,8 +83,8 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
                 {name.length > 25 ? name.slice(0, 16) + "..." : name}
             </h3>
             <div className="flex items-center justify-between gap-1">
-                <span className="text-xs text-muted-foreground block">
-                    {content} {base_uom} per {order_unit}
+                <span className={`block text-xs text-muted-foreground ${content === 1 ? "invisible" : ""}`}>
+                  {content} {base_uom} per {order_unit}
                 </span>
                 <div>
                     <PriceDisplay
@@ -137,7 +99,7 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
   }
 
     // Calculate price per order unit
-    const pricePerOrderUnit = price / content;
+    const pricePerOrderUnit = price * content;
 
     return (
     <motion.div 
@@ -169,8 +131,8 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
 
                 <h3 className="mb-1 text-sm leading-tight font-semibold md:text-base">{name.length > 16 ? name.slice(0, 16) + '...' : name}</h3>
 
-                <span className="block text-xs text-muted-foreground">
-                    {content} {base_uom} per {order_unit}
+                <span className={`block text-xs text-muted-foreground ${content === 1 ? "invisible" : ""}`}>
+                  {content} {base_uom} per {order_unit}
                 </span>
 
                 <p className="mt-1 text-sm text-muted-foreground"> 
@@ -186,20 +148,24 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
             {/* Bagian Bawah */}
             <div className="mt-3">
                 <PriceDisplay 
-                    price={price} 
+                    price={pricePerOrderUnit} 
                     className="text-lg font-bold text-blue-600 md:text-xl"
                 />
 
                 <p className="text-xs text-muted-foreground">
-                    <PriceDisplay price={pricePerOrderUnit} /> per {base_uom}
+                    <PriceDisplay price={price} /> per {base_uom}
                 </p>
 
                 <motion.button
                     disabled={!is_active}
                     onClick={(e) => {
                         e.stopPropagation(); 
-                        addToCart(product)}
-                    }
+                        // Create a modified product with the correct price (price per order unit)
+                        const productToAdd = {
+                            ...product,
+                        };
+                        addToCart(productToAdd)
+                    }}
                     variants={buttonVariants}
                     whileHover="hover"
                     whileTap="tap"

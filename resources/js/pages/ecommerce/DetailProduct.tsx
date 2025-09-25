@@ -54,6 +54,9 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
   }, [isAdded]);
 
   const addToCart = (productToAdd: Product, quantityToAdd: number) => {
+    // Calculate price per order unit (price * content)
+    const pricePerOrderUnit = productToAdd.price * productToAdd.content;
+    
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item.id === productToAdd.id);
       let newCart;
@@ -64,7 +67,12 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
             : item,
         );
       } else {
-        const newCartItem: Omit<CartItem, 'total'> = { ...productToAdd, quantity: quantityToAdd };
+        // Create new cart item with the price per order unit
+        const newCartItem: Omit<CartItem, 'total'> = { 
+          ...productToAdd, 
+          price: pricePerOrderUnit, // Use price per order unit
+          quantity: quantityToAdd 
+        };
         newCart = [...prevCart, newCartItem as CartItem];
       }
       localStorage.setItem('cart', JSON.stringify(newCart));

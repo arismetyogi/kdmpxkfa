@@ -149,7 +149,7 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                         whileHover={{ y: -8, scale: 1.05 }}
                                         className="w-full max-w-xs"
                                     >
-                                        <Link href={route('orders.products', { categories: cat.name })}>
+                                        <Link href={route('orders.products', { categories: [cat.name] })}>
                                             <Card className="group rounded-2xl border bg-white transition-all duration-300 hover:shadow-xl dark:bg-slate-800">
                                                 <CardContent className="flex flex-col items-center justify-center p-6 text-center">
                                                     <div

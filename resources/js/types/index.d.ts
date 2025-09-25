@@ -212,6 +212,7 @@ export interface OrderItem {
     qty_delivered: number;
     unit_price: number;
     total_price: number;
+    content: number;
     product: Product;
 }
 

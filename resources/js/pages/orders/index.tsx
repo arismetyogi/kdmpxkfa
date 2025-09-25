@@ -120,11 +120,12 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
     const addToCart = (product: Product) => {
         if (!product.is_active) return;
         
+        
         const newItem: CartItem = {
             id: product.id,
             sku: product.sku,
             name: product.name,
-            price: product.price,
+            price: product.price, // Use price per order unit
             image: product.image,
             order_unit: product.order_unit,
             weight: product.weight,

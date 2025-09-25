@@ -180,12 +180,12 @@ export default function Detail() {
                 <CardTitle>Items</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {order.products?.map((item) => (
+                {order.order_items?.map((item) => (
                   <div key={item.id} className="flex items-center gap-4">
-                    {item.image ? (
+                    {item.product.image ? (
                       <img
-                        src={item.image}
-                        alt={item.name}
+                        src={item.product.image}
+                        alt={item.product.name}
                         className="w-14 h-14 object-cover rounded shrink-0"
                       />
                     ) : (
@@ -194,15 +194,17 @@ export default function Detail() {
                     </div>
                     )}
                     <div className="flex-1 min-w-0"> {/* Added min-w-0 to prevent overflow */}
-                      <div className="font-medium text-base truncate">{item.name}</div> {/* Added truncate */}
-                      <div className="text-sm">Qty: {item.pivot?.qty_delivered ?? item.pivot?.quantity}</div>
+                      <div className="font-medium text-base truncate">{item.product.name}</div> {/* Added truncate */}
+                      <div className="text-sm">Qty: {item.qty_delivered ?? item.quantity}</div>
                     </div>
                     <div className="text-right shrink-0">
                       <div className="font-semibold whitespace-nowrap">
-                        {currency(item.price)}
+                        {currency(item.unit_price * (item.qty_delivered ?? item.quantity) * item.content)}
+                        
                       </div>
+                      
                       <div className="text-sm text-muted-foreground whitespace-nowrap">
-                        {currency(item.price * (item.pivot?.qty_delivered ?? item.pivot?.quantity ?? 1))}
+                        {currency(item.unit_price * item.content)} / {item.order_unit}
                       </div>
                     </div>
                   </div>
@@ -220,9 +222,9 @@ export default function Detail() {
 <CardContent>
   {(() => {
     // ✅ Subtotal (sum of price × quantity)
-    const subtotal = order.products?.reduce((sum, item) => {
-      const qty = item.pivot?.qty_delivered ?? item.pivot?.quantity ?? 1;
-      return sum + (item.price * qty);
+    const subtotal = order.order_items?.reduce((sum, item) => {
+      const qty = item.qty_delivered ?? item.quantity;
+      return sum + (item.unit_price * qty * item.content);
     }, 0) ?? 0;
 
     // ✅ Tax (11%)

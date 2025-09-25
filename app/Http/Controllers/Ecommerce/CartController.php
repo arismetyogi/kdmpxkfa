@@ -282,7 +282,7 @@ class CartController extends Controller
 
             // Calculate total amount from localStorage cart items
             $totalAmount = array_sum(array_map(function ($item) {
-                return $item['price'] * $item['quantity'];
+                return $item['price'] * $item['quantity'] * $item['content'];
             }, $cartItems));
 
             // Validate credit limit using tenant_id
@@ -347,7 +347,7 @@ class CartController extends Controller
                     'product_sku' => $product->sku,
                     'product_description' => $product->description,
                     'unit_price' => $cartItem['price'], // This is now the price per order unit
-                    'total_price' => $cartItem['price'] * $cartItem['quantity'],
+                    'total_price' => $cartItem['price'] * $cartItem['quantity'] * $product->content,
                     'quantity' => $cartItem['quantity'],
                     'base_quantity' => $cartItem['quantity'] * $product->content,
                     'order_unit' => $product->order_unit,

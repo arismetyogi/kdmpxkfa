@@ -172,7 +172,7 @@ export default function CheckoutPage({ billingData, shippingData,  }: CheckoutPr
         };
     }, []);
 
-    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity * item.content, 0);
     const ppn = subtotal * 0.11;
     const grandTotal = subtotal + ppn;
     const shipping = 0;
@@ -338,7 +338,7 @@ export default function CheckoutPage({ billingData, shippingData,  }: CheckoutPr
                                                 </span>
                                             </TableCell>
                                             <TableCell className="text-xs"><PriceDisplay price={item.price} /></TableCell>
-                                            <TableCell className="text-right text-xs"><PriceDisplay price={(item.price * item.quantity)}/></TableCell>
+                                            <TableCell className="text-right text-xs"><PriceDisplay price={(item.price * item.quantity * item.content)}/></TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>

@@ -110,7 +110,7 @@ export default function PaymentPage({
         });
     };
 
-    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity * item.content, 0);
     const ppn = subtotal * 0.11;
     const grandTotal = subtotal + ppn;
     const shipping_amount = 0;

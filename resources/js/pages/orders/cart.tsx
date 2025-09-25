@@ -5,6 +5,7 @@ import { type BreadcrumbItem, type CartItem } from "@/types";
 import { ShoppingBag, ShoppingBasket } from "lucide-react";
 import { toast } from "sonner";
 import PriceDisplay from "@/components/priceDisplay";
+import { Item } from "@radix-ui/react-dropdown-menu";
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: "Dashboard", href: "/dashboard" },
@@ -54,7 +55,7 @@ export default function Cart() {
     localStorage.removeItem("cart");
   };
 
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity * item.content, 0);
   const ppn = subtotal * 0.11;
   const grandTotal = subtotal + ppn;
 
@@ -115,7 +116,7 @@ export default function Cart() {
                         </p>
                         {/* UPDATED PRICE DISPLAY */}
                         <PriceDisplay 
-                          price={item.price}
+                          price={item.price * item.content}
                           className="text-primary font-bold text-sm sm:text-base mt-1"
                         />
                       </div>
