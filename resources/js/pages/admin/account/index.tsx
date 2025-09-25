@@ -206,10 +206,10 @@ export default function MappingUsers() {
                                         <b>Roles:</b> {selectedAccount.roles?.map((r: any) => r.name).join(', ')}
                                     </p>
                                     <p>
-                                        <b>SIA Number:</b> {selectedAccount.sia_number}
+                                        <b>No. SIA:</b> {selectedAccount.userProfile?.sia_number}
                                     </p>
                                     <p>
-                                        <b>ID Tenant:</b> {selectedAccount.tenant_id}
+                                        <b>NIK Koperasi:</b> {selectedAccount.tenant_id}
                                     </p>
                                 </div>
                             </div>
