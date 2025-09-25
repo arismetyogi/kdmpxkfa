@@ -9,9 +9,9 @@ use Inertia\Inertia;
 
 class AccountManageController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $users = User::with('apotek', 'roles')
+        $users = User::with('apotek', 'roles', 'userProfile')
             ->whereHas('roles', function ($q) {
                 $q->whereIn('name', [RoleEnum::USER->value]);
             })

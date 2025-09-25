@@ -174,12 +174,12 @@ export default function PaymentPage({ billing, shipping }: PaymentProps) {
                                                     <SelectValue placeholder="Select payment type" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="CAD">Cash on Delivery</SelectItem>
-                                                    <SelectItem value="TOP 30" disabled>
-                                                        Term of Payment 30 Days
+                                                    <SelectItem value="cad">Cash after Delivery</SelectItem>
+                                                    <SelectItem value="va" disabled>
+                                                        Virtual Account
                                                     </SelectItem>
-                                                    <SelectItem value="TOP 60" disabled>
-                                                        Term of Payment 60 Days
+                                                    <SelectItem value="top30" disabled>
+                                                        Term of Payment 30 Days
                                                     </SelectItem>
                                                 </SelectContent>
                                             </Select>
