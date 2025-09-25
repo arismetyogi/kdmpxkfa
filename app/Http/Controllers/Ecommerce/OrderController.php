@@ -13,7 +13,6 @@ use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
