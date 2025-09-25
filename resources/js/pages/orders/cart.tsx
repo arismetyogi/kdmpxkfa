@@ -5,7 +5,6 @@ import { type BreadcrumbItem, type CartItem } from "@/types";
 import { ShoppingBag, ShoppingBasket } from "lucide-react";
 import { toast } from "sonner";
 import PriceDisplay from "@/components/priceDisplay";
-import { Item } from "@radix-ui/react-dropdown-menu";
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },

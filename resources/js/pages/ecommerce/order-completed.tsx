@@ -3,9 +3,6 @@ import HeaderLayout from '@/layouts/header-layout';
 import { Order } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { CheckCircle } from 'lucide-react';
-import {Order} from "@/types";
-import { Link } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
 import PriceDisplay from '@/components/priceDisplay';
 
 interface OrderCompletedProps {

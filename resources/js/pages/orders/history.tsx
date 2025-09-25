@@ -1,27 +1,24 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Head, usePage, Link } from '@inertiajs/react';
 import HeaderLayout from '@/layouts/header-layout';
+
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calender'; // Corrected spelling
+import { Calendar } from '@/components/ui/calender'; // Note: Corrected typo from 'calender' to 'calendar' if it exists in your project
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+
 import { cn } from '@/lib/utils';
 import { ShoppingBag, CreditCard, Calendar as CalendarIcon, Filter, Info } from 'lucide-react';
 import { format } from 'date-fns';
 import type { BreadcrumbItem, Order, OrderItem } from '@/types';
 
+
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Order History', href: '/pemesanan/history' },
+    { title: 'Dashboard', href: '/dashboard' },
+    { title: 'Order History', href: '/pemesanan/history' },
 ];
 
 const paymentLabels: Record<string, string> = {
@@ -159,17 +156,17 @@ const OrderDetailCard: React.FC<OrderDetailCardProps> = ({ order, statusColors, 
 };
 
 export default function History() {
-  const { orders, statusColors, statusFilters } = usePage<{
-    orders: Order[];
-    statusColors: Record<string, string>;
-    statusFilters: Record<string, string>;
-  }>().props;
+    const { orders, statusColors, statusFilters } = usePage<{
+        orders: Order[];
+        statusColors: Record<string, string>;
+        statusFilters: Record<string, string>;
+    }>().props;
 
-  const [filterStatus, setFilterStatus] = useState('Semua');
-  const [sortBy, setSortBy] = useState('newest');
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+    const [filterStatus, setFilterStatus] = useState('Semua');
+    const [sortBy, setSortBy] = useState('newest');
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   const sortedAndFilteredOrders = useMemo(() => {
     const filtered = orders.filter((order) => {
