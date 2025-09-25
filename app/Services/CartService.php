@@ -153,7 +153,7 @@ class CartService
                     $cartItems = $this->getCartItemsFromCookies();
                 }
 
-                $productIds = collect($cartItems)->map(fn($item) => $item['product_id']);
+                $productIds = collect($cartItems)->map(fn ($item) => $item['product_id']);
 
                 $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
 
@@ -161,12 +161,12 @@ class CartService
                 foreach ($cartItems as $cartItem) {
                     $product = $products->get($cartItem['product_id']);
 
-                    if (!$product) {
+                    if (! $product) {
                         continue;
                     }
 
                     $imageUrl = null;
-                    if (!$imageUrl) {
+                    if (! $imageUrl) {
                         $imageUrl = $product->getFirstMediaUrl('images');
                     }
 
@@ -190,7 +190,7 @@ class CartService
             return $this->cachedCartItems;
         } catch (\Exception $e) {
             // throw $th;
-            Log::error($e->getMessage() . PHP_EOL . $e->getTraceAsString());
+            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
 
         return [];
@@ -218,7 +218,7 @@ class CartService
     protected function saveItemToCookies(int $productId, int $quantity, int $price): void
     {
         $cartItems = $this->getCartItemsFromCookies();
-        if (!isset($cartItems[$productId])) {
+        if (! isset($cartItems[$productId])) {
             $cartItems[$productId] = [
                 'id' => uniqid(),
                 'product_id' => $productId,
@@ -335,7 +335,7 @@ class CartService
     public function processPayment(Request $request, DigikopTransactionService $transactionService): array
     {
         // Check if billing information exists in session
-        if (!Session::get('checkout.billing')) {
+        if (! Session::get('checkout.billing')) {
             return [
                 'success' => false,
                 'redirect' => 'checkout',
@@ -355,7 +355,7 @@ class CartService
             // Validate credit limit using tenant_id
             $creditValidation = $transactionService->validateCreditLimit($user->tenant_id, $totalAmount);
 
-            if (!$creditValidation['valid']) {
+            if (! $creditValidation['valid']) {
                 return [
                     'success' => false,
                     'back' => true,
@@ -393,14 +393,14 @@ class CartService
                 'shipping_amount' => 0, // You can calculate shipping based on your business logic
                 'discount_amount' => 0,
                 'total_price' => $this->getSubTotal() * 1.11,
-                'billing_name' => $billingData['first_name'] . ' ' . $billingData['last_name'],
+                'billing_name' => $billingData['first_name'].' '.$billingData['last_name'],
                 'billing_email' => $billingData['email'],
                 'billing_phone' => $billingData['phone'],
                 'billing_address' => $billingData['address'],
                 'billing_city' => $billingData['city'],
                 'billing_state' => $billingData['state'],
                 'billing_zip' => $billingData['zip'],
-                'shipping_name' => $shippingData['first_name'] . ' ' . $shippingData['last_name'],
+                'shipping_name' => $shippingData['first_name'].' '.$shippingData['last_name'],
                 'shipping_address' => $shippingData['address'],
                 'shipping_city' => $shippingData['city'],
                 'shipping_state' => $shippingData['state'],
@@ -412,7 +412,7 @@ class CartService
             foreach ($cartItems as $cartItem) {
                 $product = Product::find($cartItem['product_id']);
 
-                if (!$product) {
+                if (! $product) {
                     continue;
                 }
 
@@ -450,7 +450,7 @@ class CartService
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error('Order creation failed with exception: ' . $e->getMessage());
+            Log::error('Order creation failed with exception: '.$e->getMessage());
 
             return [
                 'success' => false,
@@ -460,7 +460,7 @@ class CartService
         } catch (Throwable $e) {
             DB::rollBack();
 
-            Log::error('Order creation failed with throwable: ' . $e->getMessage());
+            Log::error('Order creation failed with throwable: '.$e->getMessage());
 
             return [
                 'success' => false,

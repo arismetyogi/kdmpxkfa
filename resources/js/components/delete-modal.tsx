@@ -1,14 +1,14 @@
 import { Button } from '@/components/ui/button';
 
 export default function DeleteModal({
-                                         isOpen = false,
-                                         onClose = false,
-                                         onConfirm = false,
-                                         title = 'Confirm Deletion',
-                                         message = 'Are you sure you want to delete this item? This action cannot be undone.',
-                                         confirmButtonText = 'Delete',
-                                         cancelButtonText = 'Cancel',
-                                     }) {
+    isOpen = false,
+    onClose = false,
+    onConfirm = false,
+    title = 'Confirm Deletion',
+    message = 'Are you sure you want to delete this item? This action cannot be undone.',
+    confirmButtonText = 'Delete',
+    cancelButtonText = 'Cancel',
+}) {
     if (!isOpen) return null;
 
     return (

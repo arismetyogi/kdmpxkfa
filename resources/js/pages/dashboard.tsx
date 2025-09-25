@@ -92,7 +92,7 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                         className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-orange-700 via-orange-500 to-orange-700 shadow-2xl"
                     >
                         <div className="absolute inset-0 bg-[url('/display.jpeg')] bg-cover bg-center opacity-20"></div>
-                        <div className="relative z-10 flex flex-col items-center justify-between gap-12 px-8 pt-5 lg:pt-0 md:flex-row md:px-16">
+                        <div className="relative z-10 flex flex-col items-center justify-between gap-12 px-8 pt-5 md:flex-row md:px-16 lg:pt-0">
                             <motion.div
                                 initial={{ opacity: 0, x: -60 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -210,7 +210,7 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                         </Carousel>
                     </motion.div>
 
-                    <Card className="rounded-3xl bg-white p-8 shadow-xl ring-1 ring-slate-900/5 dark:bg-slate-800/50 md:p-12">
+                    <Card className="rounded-3xl bg-white p-8 shadow-xl ring-1 ring-slate-900/5 md:p-12 dark:bg-slate-800/50">
                         <motion.div
                             initial={{ opacity: 0, y: 40 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -219,26 +219,23 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                         >
                             {/* Image on the left */}
                             <div className="">
-                                <img
-                                    src="/Package (2).png" 
-                                    alt="Paket Koperasi Merah Putih"
-                                    className="h-full w-full rounded-3xl object-cover"
-                                />
+                                <img src="/Package (2).png" alt="Paket Koperasi Merah Putih" className="h-full w-full rounded-3xl object-cover" />
                             </div>
 
                             {/* Content on the right */}
                             <div className="flex flex-col text-center md:text-left">
-                                <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-slate-800 dark:text-white md:text-5xl">
+                                <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-slate-800 md:text-5xl dark:text-white">
                                     Paket Koperasi Merah Putih
                                 </h2>
-                                <p className="mb-6 text-lg text-slate-600 dark:text-slate-300">
-                                    Paket Obat lengkap senilai 30 juta untuk mengisi
-                                </p>
+                                <p className="mb-6 text-lg text-slate-600 dark:text-slate-300">Paket Obat lengkap senilai 30 juta untuk mengisi</p>
 
                                 {/* CTA Button */}
                                 <div className="flex justify-center md:justify-start">
                                     <Link href={route('packages.index')}>
-                                        <Button size="lg" className="rounded-xl bg-blue-600 py-7 text-lg font-bold text-white shadow-lg hover:bg-blue-700">
+                                        <Button
+                                            size="lg"
+                                            className="rounded-xl bg-blue-600 py-7 text-lg font-bold text-white shadow-lg hover:bg-blue-700"
+                                        >
                                             <ShoppingCart className="mr-3 h-5 w-5" />
                                             Buy Package Now
                                         </Button>
@@ -246,7 +243,7 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                 </div>
 
                                 {/* Features */}
-                                <div className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-slate-600 dark:text-slate-400 md:justify-start">
+                                <div className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-slate-600 md:justify-start dark:text-slate-400">
                                     <div className="flex items-center gap-2">
                                         <Truck className="h-5 w-5 text-slate-400" />
                                         <span>Free shipping</span>

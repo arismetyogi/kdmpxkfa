@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Services\Auth\SsoService;
 use App\Traits\HasApiReponse;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class SsoController extends Controller
 {
@@ -35,11 +34,11 @@ class SsoController extends Controller
             }
 
             return $this->successResponse([
-                'decrypted' => $decrypted
+                'decrypted' => $decrypted,
             ], 'Value decrypted successfully');
 
         } catch (\Exception $e) {
-            return $this->errorResponse('Decryption failed: ' . $e->getMessage(), 500);
+            return $this->errorResponse('Decryption failed: '.$e->getMessage(), 500);
         }
     }
 }

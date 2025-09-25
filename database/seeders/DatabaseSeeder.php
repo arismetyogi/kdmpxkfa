@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             RoleAndPermissionSeeder::class,
             ProductSeeder::class,
             ApotekSeeder::class,
+            RegionSeeder::class,
             OrderSeeder::class,
             OrderProductSeeder::class,
         ]);
@@ -33,8 +34,28 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'remember_token' => Str::random(10),
         ]);
+        $apotekAdmin = User::create([
+            'uuid' => Str::uuid()->toString(),
+            'name' => 'Apotek',
+            'username' => 'apotek',
+            'email' => 'apotek@admin.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('password'),
+            'remember_token' => Str::random(10),
+        ]);
+        $busdevAdmin = User::create([
+            'uuid' => Str::uuid()->toString(),
+            'name' => 'Busdev',
+            'username' => 'busdev',
+            'email' => 'busdev@admin.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('password'),
+            'remember_token' => Str::random(10),
+        ]);
 
         // Assign admin role
         $superAdmin->assignRole(RoleEnum::SUPER_ADMIN->value);
+        $apotekAdmin->assignRole(RoleEnum::ADMIN_APOTEK->value);
+        $busdevAdmin->assignRole(RoleEnum::ADMIN_BUSDEV->value);
     }
 }

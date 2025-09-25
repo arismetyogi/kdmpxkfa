@@ -1,17 +1,10 @@
-import React, { useEffect } from 'react';
-import { useForm } from '@inertiajs/react';
-import { Save, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { useForm } from '@inertiajs/react';
+import { Loader2, Save } from 'lucide-react';
+import React, { useEffect } from 'react';
 import { toast } from 'sonner';
 
 interface Permission {
@@ -25,11 +18,7 @@ interface PermissionFormModalProps {
     permission: Permission | null;
 }
 
-export default function PermissionsFormModal({
-    isOpen,
-    onClose,
-    permission,
-}: PermissionFormModalProps) {
+export default function PermissionsFormModal({ isOpen, onClose, permission }: PermissionFormModalProps) {
     const isEditing = !!permission?.id;
 
     const form = useForm({
@@ -52,26 +41,22 @@ export default function PermissionsFormModal({
             form.put(route('admin.permissions.update', permission.id), {
                 onSuccess: () => onClose(),
             });
-            toast.success('Permission updated successfully')
+            toast.success('Permission updated successfully');
         } else {
             form.post(route('admin.permissions.store'), {
                 onSuccess: () => onClose(),
             });
-            toast.success('Permission created successfully')
-    }
+            toast.success('Permission created successfully');
+        }
     };
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
                 <DialogHeader>
-                    <DialogTitle>
-                        {isEditing ? 'Edit Permission' : 'Create New Permission'}
-                    </DialogTitle>
+                    <DialogTitle>{isEditing ? 'Edit Permission' : 'Create New Permission'}</DialogTitle>
                     <DialogDescription>
-                        {isEditing
-                            ? 'Update the permission details and permissions below.'
-                            : 'Fill in the details to create a new permission.'}
+                        {isEditing ? 'Update the permission details and permissions below.' : 'Fill in the details to create a new permission.'}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -89,21 +74,12 @@ export default function PermissionsFormModal({
                                 required
                                 className="mt-1"
                             />
-                            {form.errors.name && (
-                                <p className="text-sm text-red-600 mt-1">
-                                    {form.errors.name}
-                                </p>
-                            )}
+                            {form.errors.name && <p className="mt-1 text-sm text-red-600">{form.errors.name}</p>}
                         </div>
                     </div>
 
                     <DialogFooter>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={onClose}
-                            disabled={form.processing}
-                        >
+                        <Button type="button" variant="outline" onClick={onClose} disabled={form.processing}>
                             Cancel
                         </Button>
                         <Button type="submit" disabled={form.processing || !form.data.name.trim()}>

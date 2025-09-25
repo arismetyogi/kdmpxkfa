@@ -23,13 +23,13 @@ class OrderSeeder extends Seeder
             'tenant_id' => 'TNT-001',
 
             // Status
-            'status' => 'On Delivery',
+            'status' => 'dalam-pengiriman',
 
             // Payment
             'source_of_fund' => 'pinjaman',
             'account_no' => '1234567890',
             'account_bank' => 'BRI',
-            'payment_type' => 'cad',
+            'payment_type' => 'va',
             'payment_method' => 'bri',
             'va_number' => '9876543210',
 
@@ -72,7 +72,7 @@ class OrderSeeder extends Seeder
             'transaction_number' => 'TRX-'.strtoupper(Str::random(8)),
             'user_id' => $user->id,
             'tenant_id' => 'TNT-002',
-            'status' => 'Process',
+            'status' => 'new',
             'source_of_fund' => 'pribadi',
             'account_no' => '2233445566',
             'account_bank' => 'Mandiri',
@@ -109,7 +109,7 @@ class OrderSeeder extends Seeder
             'transaction_number' => 'TRX-'.strtoupper(Str::random(8)),
             'user_id' => $user->id,
             'tenant_id' => 'TNT-003',
-            'status' => 'On Delivery',
+            'status' => 'dalam-pengiriman',
             'source_of_fund' => 'pribadi',
             'account_no' => '2233445566',
             'account_bank' => 'Mandiri',
