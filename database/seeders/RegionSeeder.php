@@ -182,6 +182,5 @@ class RegionSeeder extends Seeder
             fclose($handle);
         }
         return $count;
-        }
-
+    }
 }
