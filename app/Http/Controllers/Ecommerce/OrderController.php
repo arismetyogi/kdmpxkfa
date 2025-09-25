@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 
@@ -128,14 +129,13 @@ class OrderController extends Controller
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id) // Exclude the current product
             ->limit(10)
-            ->get(['id', 'sku', 'name', 'price', 'image', 'category_id', 'order_unit', 'is_active', 'content', 'base_uom', 'weight']);
+            ->get();
 
         return Inertia::render('ecommerce/DetailProduct', [
             'product' => $product,
             'relatedProducts' => $relatedProducts,
         ]);
     }
-
 
     public function history()
     {

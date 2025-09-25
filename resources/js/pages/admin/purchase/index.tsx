@@ -1,39 +1,23 @@
-import AppLayout from "@/layouts/app-layout";
-import { Head, Link, router } from "@inertiajs/react";
-import { useState } from "react";
-import { Search, Filter, Eye, Check, X } from "lucide-react";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import StatusBadge from "@/components/ui/status-badge";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from "@/components/ui/dialog";
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import StatusBadge from '@/components/ui/status-badge';
+import AppLayout from '@/layouts/app-layout';
+import { Head, Link, router } from '@inertiajs/react';
+import { Check, Eye, Filter, Search, X } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
-export default function PurchaseOrders( {orders}: {orders?: any[]}) {
-
-    const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState("ALL");
+export default function PurchaseOrders({ orders }: { orders?: any[] }) {
+    const [search, setSearch] = useState('');
+    const [statusFilter, setStatusFilter] = useState('ALL');
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedPO, setSelectedPO] = useState<string | null>(null);
 
-
     const filteredOrders = orders?.filter((po) => {
-        const matchSearch = po.id_transaksi
-            .toLowerCase()
-            .includes(search.toLowerCase());
-        const matchStatus = statusFilter === "ALL" || po.status === statusFilter;
+        const matchSearch = po.id_transaksi.toLowerCase().includes(search.toLowerCase());
+        const matchStatus = statusFilter === 'ALL' || po.status === statusFilter;
         return matchSearch && matchStatus;
     });
 
@@ -45,7 +29,7 @@ export default function PurchaseOrders( {orders}: {orders?: any[]}) {
     const confirmReject = () => {
         if (selectedPO) {
             router.post(
-                route("admin.purchase.reject", selectedPO),
+                route('admin.purchase.reject', selectedPO),
                 {},
                 {
                     onSuccess: () => {
@@ -54,65 +38,63 @@ export default function PurchaseOrders( {orders}: {orders?: any[]}) {
                     },
                     onError: (errors) => {
                         setModalOpen(false);
-                        toast.error("Gagal menolak PO. Silakan coba lagi.");
+                        toast.error('Gagal menolak PO. Silakan coba lagi.');
                         console.error(errors);
                     },
-                }
+                },
             );
         }
     };
 
     const handleAccept = (poId: string) => {
         router.post(
-            route("admin.purchase.accept", poId),
+            route('admin.purchase.accept', poId),
             {},
             {
                 onSuccess: () => {
                     toast.success(`Purchase Order ${poId} berhasil disetujui.`);
                 },
                 onError: (errors) => {
-                    toast.error("Gagal menyetujui PO. Silakan coba lagi.");
+                    toast.error('Gagal menyetujui PO. Silakan coba lagi.');
                     console.error(errors);
                 },
-            }
+            },
         );
     };
 
     return (
         <AppLayout
             breadcrumbs={[
-                { title: "Dashboard", href: route('admin.dashboard') },
-                { title: "Purchase Orders", href: route('admin.purchase.index') },
+                { title: 'Dashboard', href: route('admin.dashboard') },
+                { title: 'Purchase Orders', href: route('admin.purchase.index') },
             ]}
         >
             <Head title="Purchase Orders" />
 
-            <div className="p-6 space-y-6 dark:bg-gray-950 dark:text-gray-100">
+            <div className="space-y-6 p-6 dark:bg-gray-950 dark:text-gray-100">
                 <h1 className="text-2xl font-bold">Purchase Orders</h1>
-                <p className="text-gray-500 dark:text-gray-400">
-                    Manage incoming purchase orders from cooperatives
-                </p>
+                <p className="text-gray-500 dark:text-gray-400">Manage incoming purchase orders from cooperatives</p>
 
                 {/* Search & Filter */}
-                <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+                <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
                     <div className="relative w-full sm:w-1/2">
-                        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400 dark:text-gray-500" />
+                        <Search className="absolute top-3 left-3 h-4 w-4 text-gray-400 dark:text-gray-500" />
                         <input
                             type="text"
                             placeholder="Search by PO ID..."
-                            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                            className="w-full rounded-lg border py-2 pr-4 pl-10 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <Filter className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                        <Filter className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
-                            <SelectTrigger className="w-[160px] dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100">
+                            <SelectTrigger className="w-[160px] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
                                 <SelectValue placeholder="All Status" />
                             </SelectTrigger>
-                            <SelectContent className="dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100">
+                            <SelectContent className="dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
                                 <SelectItem value="ALL">All Status</SelectItem>
                                 <SelectItem value="Pending">Pending</SelectItem>
                                 <SelectItem value="Accepted">Accepted</SelectItem>
@@ -123,9 +105,9 @@ export default function PurchaseOrders( {orders}: {orders?: any[]}) {
                 </div>
 
                 {/* Table */}
-                <Card className="overflow-x-auto dark:bg-gray-900 dark:border-gray-700">
+                <Card className="overflow-x-auto dark:border-gray-700 dark:bg-gray-900">
                     <table className="w-full border-collapse">
-                        <thead className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-sm">
+                        <thead className="bg-gray-100 text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-400">
                             <tr>
                                 <th className="p-3 text-left">PO ID</th>
                                 <th className="p-3 text-left">Nama Koperasi</th>
@@ -136,48 +118,33 @@ export default function PurchaseOrders( {orders}: {orders?: any[]}) {
                                 <th className="p-3 text-left">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="text-sm divide-y dark:divide-gray-700">
+                        <tbody className="divide-y text-sm dark:divide-gray-700">
                             {/* Gunakan filteredOrders di sini */}
                             {filteredOrders?.map((po) => (
-                                <tr
-                                    key={po.id_transaksi}
-                                    className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                                >
+                                <tr key={po.id_transaksi} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                                     <td className="p-3 font-medium">{po.id_transaksi}</td>
                                     <td className="p-3">{po.merchant_name}</td>
-                                    <td className="p-3">
-                                        {new Date(po.created_at).toLocaleDateString("id-ID")}
-                                    </td>
+                                    <td className="p-3">{new Date(po.created_at).toLocaleDateString('id-ID')}</td>
                                     <td className="p-3">{po.total_qty}</td>
-                                    <td className="p-3">
-                                        Rp{Number(po.total_nominal).toLocaleString("id-ID")}
-                                    </td>
+                                    <td className="p-3">Rp{Number(po.total_nominal).toLocaleString('id-ID')}</td>
                                     <td className="p-3">
                                         <StatusBadge status={po.status} />
                                     </td>
-                                    <td className="p-3 flex gap-2">
-                                        <Link href={route("admin.purchase.show", po.id_transaksi)}>
+                                    <td className="flex gap-2 p-3">
+                                        <Link href={route('admin.purchase.show', po.id_transaksi)}>
                                             <Button variant="ghost" size="icon">
-                                                <Eye className="w-4 h-4 text-blue-600" />
+                                                <Eye className="h-4 w-4 text-blue-600" />
                                             </Button>
                                         </Link>
 
-                                        {po.status === "Pending" && (
+                                        {po.status === 'Pending' && (
                                             <>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => handleAccept(po.id_transaksi)}
-                                                >
-                                                    <Check className="w-4 h-4 text-green-600" />
+                                                <Button variant="ghost" size="icon" onClick={() => handleAccept(po.id_transaksi)}>
+                                                    <Check className="h-4 w-4 text-green-600" />
                                                 </Button>
 
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => handleReject(po.id_transaksi)}
-                                                >
-                                                    <X className="w-4 h-4 text-red-600" />
+                                                <Button variant="ghost" size="icon" onClick={() => handleReject(po.id_transaksi)}>
+                                                    <X className="h-4 w-4 text-red-600" />
                                                 </Button>
                                             </>
                                         )}
@@ -198,17 +165,13 @@ export default function PurchaseOrders( {orders}: {orders?: any[]}) {
 
             {/* Reject Confirmation Modal */}
             <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-                <DialogContent className="dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700">
+                <DialogContent className="dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
                     <DialogHeader>
                         <DialogTitle>Reject Purchase Order</DialogTitle>
                     </DialogHeader>
                     <p>Are you sure you want to reject PO {selectedPO}?</p>
-                    <DialogFooter className="flex justify-end gap-2 mt-4">
-                        <Button
-                            variant="outline"
-                            onClick={() => setModalOpen(false)}
-                            className="dark:border-gray-700 dark:text-gray-200"
-                        >
+                    <DialogFooter className="mt-4 flex justify-end gap-2">
+                        <Button variant="outline" onClick={() => setModalOpen(false)} className="dark:border-gray-700 dark:text-gray-200">
                             Cancel
                         </Button>
                         <Button variant="destructive" onClick={confirmReject}>

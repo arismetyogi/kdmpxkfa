@@ -1,8 +1,7 @@
-import { Product } from '@/types';
-import React from 'react';
+import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
+import { Product } from '@/types';
 
 interface ProductShowModalProps {
     isOpen: boolean;
@@ -11,7 +10,6 @@ interface ProductShowModalProps {
 }
 
 export default function ProductShowModal({ isOpen, onClose, product }: ProductShowModalProps) {
-
     if (!isOpen) return null;
 
     return (

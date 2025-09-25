@@ -1,9 +1,8 @@
 import { Button } from '@/components/ui/button';
-import { Category } from '@/types';
-import { Trash2 } from 'lucide-react';
-import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Category } from '@/types';
 import { Form } from '@inertiajs/react';
+import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CategoryDeleteModalProps {
@@ -13,7 +12,6 @@ interface CategoryDeleteModalProps {
 }
 
 export default function CategoryDeleteModal({ isOpen, onClose, category }: CategoryDeleteModalProps) {
-
     if (!isOpen || !category) return null;
 
     return (

@@ -1,22 +1,27 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Icon } from '@/components/icon';
+import DarkModeToggle from '@/components/toggle-dark-mode';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
+import {
+    NavigationMenu,
+    NavigationMenuItem,
+    NavigationMenuLink,
+    NavigationMenuList,
+    navigationMenuTriggerStyle,
+} from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
-import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
+import { CartItem, type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { History, LayoutGrid, Menu, Search, ShoppingCart, Package } from 'lucide-react';
+import { History, LayoutGrid, Menu, Package, Search, ShoppingCart } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
-import DarkModeToggle from '@/components/toggle-dark-mode';
-import { useState, useEffect } from 'react';
-import { CartItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
     {
@@ -59,13 +64,13 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const page = usePage<SharedData>();
     const { auth } = page.props;
     const getInitials = useInitials();
-    
+
     const [cartCount, setCartCount] = useState(0);
 
     // Load cart count from localStorage
     useEffect(() => {
         const updateCartCount = () => {
-            const storedCart = localStorage.getItem("cart");
+            const storedCart = localStorage.getItem('cart');
             if (storedCart) {
                 const cartItems: CartItem[] = JSON.parse(storedCart);
                 const count = cartItems.reduce((total, item) => total + item.quantity, 0);
@@ -80,27 +85,26 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
         // Listen for storage changes
         const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === "cart") {
+            if (e.key === 'cart') {
                 updateCartCount();
             }
         };
 
-        window.addEventListener("storage", handleStorageChange);
-        
+        window.addEventListener('storage', handleStorageChange);
+
         // Also check for changes in the same tab
         const interval = setInterval(updateCartCount, 1000);
 
         return () => {
-            window.removeEventListener("storage", handleStorageChange);
+            window.removeEventListener('storage', handleStorageChange);
             clearInterval(interval);
         };
     }, []);
-    
+
     return (
         <>
             <header className="sticky top-0 z-50 w-full border-b border-sidebar-border/80 bg-background/95 backdrop-blur-sm">
                 <div className="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
-        
                     {/* Mobile Menu */}
                     <div className="lg:hidden">
                         <Sheet>
@@ -119,9 +123,9 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                     <div className="flex h-full flex-col justify-between text-sm">
                                         <div className="flex flex-col space-y-4">
                                             {mainNavItems.map((item) => (
-                                                <Link 
-                                                    key={item.title} 
-                                                    href={item.href} 
+                                                <Link
+                                                    key={item.title}
+                                                    href={item.href}
                                                     className="flex items-center space-x-2 rounded-md px-3 py-2 font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                                                 >
                                                     {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
@@ -129,8 +133,6 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                 </Link>
                                             ))}
                                         </div>
-
-
                                     </div>
                                 </div>
                             </SheetContent>
@@ -140,7 +142,6 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     <Link href="/dashboard" prefetch className="flex items-center space-x-2">
                         <AppLogo />
                     </Link>
-
 
                     {/* Desktop Navigation */}
                     <div className="ml-6 hidden h-full items-center space-x-6 lg:flex">
@@ -166,9 +167,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                         )}
                                     </NavigationMenuItem>
                                 ))}
-                                
                             </NavigationMenuList>
-            
                         </NavigationMenu>
                     </div>
 
@@ -204,11 +203,14 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                     className="group ml-1 inline-flex h-9 w-9 items-center justify-center rounded-md bg-transparent p-0 text-sm font-medium text-foreground/80 ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
                                                 >
                                                     <span className="sr-only">{item.title}</span>
-                                                    {item.icon && <Icon iconNode={item.icon} className="size-5 text-foreground opacity-80 group-hover:opacity-100" />}
+                                                    {item.icon && (
+                                                        <Icon
+                                                            iconNode={item.icon}
+                                                            className="size-5 text-foreground opacity-80 group-hover:opacity-100"
+                                                        />
+                                                    )}
                                                     {item.title === 'Cart' && cartCount > 0 && (
-                                                        <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-
-                                                        </span>
+                                                        <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"></span>
                                                     )}
                                                 </Link>
                                             </TooltipTrigger>

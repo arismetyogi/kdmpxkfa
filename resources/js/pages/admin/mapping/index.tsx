@@ -1,14 +1,14 @@
+import UserMappingModal from '@/components/admin/user-mapping-modal';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { Apotek, BreadcrumbItem, Paginated, User } from '@/types';
 import { Head } from '@inertiajs/react';
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { FileDown, Search, Users, UserX, Edit, Link2 } from 'lucide-react';
-import UserMappingModal from '@/components/admin/user-mapping-modal';
+import { Edit, FileDown, Link2, Search, Users, UserX } from 'lucide-react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: route('admin.dashboard') },

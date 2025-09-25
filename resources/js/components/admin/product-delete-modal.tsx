@@ -1,16 +1,9 @@
-import { Trash2 } from 'lucide-react';
-import { Form } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Product } from '@/types';
+import { Form } from '@inertiajs/react';
+import { Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface DeleteProductModalProps {
     isOpen: boolean;
@@ -18,11 +11,7 @@ interface DeleteProductModalProps {
     product: Product | null;
 }
 
-export default function ProductDeleteModal({
-    isOpen,
-    onClose,
-    product,
-}: DeleteProductModalProps) {
+export default function ProductDeleteModal({ isOpen, onClose, product }: DeleteProductModalProps) {
     if (!product) return null;
 
     return (
@@ -33,9 +22,7 @@ export default function ProductDeleteModal({
                         <Trash2 className="h-5 w-5" />
                         Delete Product
                     </DialogTitle>
-                    <DialogDescription>
-                        Are you sure you want to delete the product "{product.name}"?
-                    </DialogDescription>
+                    <DialogDescription>Are you sure you want to delete the product "{product.name}"?</DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-4">
@@ -45,25 +32,18 @@ export default function ProductDeleteModal({
                 </div>
 
                 <DialogFooter>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={onClose}
-                    >
+                    <Button type="button" variant="outline" onClick={onClose}>
                         Cancel
                     </Button>
                     <Form
                         method="delete"
                         action={route('admin.products.destroy', product.id)}
                         onSuccess={() => {
-                            onClose()
-                            toast.success('Product deleted successfully')
+                            onClose();
+                            toast.success('Product deleted successfully');
                         }}
                     >
-                        <Button
-                            type="submit"
-                            variant="destructive"
-                        >
+                        <Button type="submit" variant="destructive">
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete Product
                         </Button>

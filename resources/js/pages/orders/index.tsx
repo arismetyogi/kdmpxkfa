@@ -1,23 +1,23 @@
-import { useEffect, useState} from 'react';
 import { Head, router } from '@inertiajs/react';
-import { useDebounce } from 'use-debounce'; // A great library for debouncing input
 import pickBy from 'lodash/pickBy'; // Helper to remove empty values from an object
+import { useEffect, useState } from 'react';
+import { useDebounce } from 'use-debounce'; // A great library for debouncing input
 
 import Filters from '@/components/Filters';
-import ProductCard from '@/components/product-card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Package } from 'lucide-react';
-import HeaderLayout from '@/layouts/header-layout';
 import FloatingCart from '@/components/FloatingCart';
 import { CustomPagination } from '@/components/custom-pagination';
-import { type BreadcrumbItem, Product, Paginated, CartItem } from '@/types';
+import ProductCard from '@/components/product-card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import HeaderLayout from '@/layouts/header-layout';
+import { type BreadcrumbItem, CartItem, Paginated, Product } from '@/types';
+import { Package } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
         href: route('dashboard'),
     },
-        {
+    {
         title: 'Medicines',
         href: '#',
     },
@@ -26,8 +26,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface IndexProps {
     products: Paginated<Product>;
     allCategories: string[]; // From controller
-    allPackages: string[];   // From controller
-    filters: { // Current filters from controller
+    allPackages: string[]; // From controller
+    filters: {
+        // Current filters from controller
         search?: string;
         categories?: string[];
         packages?: string[];
@@ -36,14 +37,14 @@ interface IndexProps {
 }
 
 export default function OrdersIndexPage({ products, allCategories, allPackages, filters: initialFilters }: IndexProps) {
-    console.log("Props received from server:", { allCategories, allPackages });
-    const [search, setSearch] = useState(initialFilters.search || "");
-    const [sortBy, setSortBy] = useState(initialFilters.sort_by || "name-asc");
-    const [filters, setFilters] = useState({ 
-        categories: initialFilters.categories || ["Semua Produk"], 
-        packages: initialFilters.packages || ["Semua Paket"] 
+    console.log('Props received from server:', { allCategories, allPackages });
+    const [search, setSearch] = useState(initialFilters.search || '');
+    const [sortBy, setSortBy] = useState(initialFilters.sort_by || 'name-asc');
+    const [filters, setFilters] = useState({
+        categories: initialFilters.categories || ['Semua Produk'],
+        packages: initialFilters.packages || ['Semua Paket'],
     });
-    
+
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [animationTrigger, setAnimationTrigger] = useState(0);
 
@@ -52,33 +53,32 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
     // This effect listens for changes in filters and triggers a new Inertia request
     useEffect(() => {
         // Start with the base parameters that are always present (even if empty)
-        const baseParams = { 
-            search: debouncedSearch, 
+        const baseParams = {
+            search: debouncedSearch,
             sort_by: sortBy,
-
         };
 
-                // ====================== THE FIX IS HERE ======================
+        // ====================== THE FIX IS HERE ======================
         // Create a copy of the filters to potentially add to the parameters
         const activeFilters = {};
 
         // Conditionally add categories to the request
         // Only include it if the array is not the default ["Semua Produk"]
         if (filters.categories && (filters.categories.length > 1 || (filters.categories.length === 1 && filters.categories[0] !== 'Semua Produk'))) {
-            activeFilters.categories = filters.categories.filter(cat => cat !== 'Semua Produk');
+            activeFilters.categories = filters.categories.filter((cat) => cat !== 'Semua Produk');
         }
 
         // Conditionally add packages to the request
         // Only include it if the array is not the default ["Semua Paket"]
         if (filters.packages && (filters.packages.length > 1 || (filters.packages.length === 1 && filters.packages[0] !== 'Semua Paket'))) {
-            activeFilters.packages = filters.packages.filter(pack => pack !== 'Semua Paket');
+            activeFilters.packages = filters.packages.filter((pack) => pack !== 'Semua Paket');
         }
 
         // Combine the base params with the active filters, then clean with pickBy
         // pickBy will remove keys with empty/null/undefined values (like an empty search string)
         const queryParams = pickBy({
             ...baseParams,
-            ...activeFilters
+            ...activeFilters,
         });
 
         router.get(
@@ -86,41 +86,39 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
             queryParams,
             {
                 preserveState: true, // Prevents scroll position reset on filter change
-                replace: true,       // Avoids polluting browser history
+                replace: true, // Avoids polluting browser history
                 preserveScroll: true, // Keeps the scroll position
-            }
+            },
         );
     }, [debouncedSearch, sortBy, filters]);
 
-
     // Cart logic
     useEffect(() => {
-        const storedCart = localStorage.getItem("cart");
+        const storedCart = localStorage.getItem('cart');
         if (storedCart) setCartItems(JSON.parse(storedCart));
 
         const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === "cart" && e.newValue) setCartItems(JSON.parse(e.newValue));
+            if (e.key === 'cart' && e.newValue) setCartItems(JSON.parse(e.newValue));
         };
 
-        window.addEventListener("storage", handleStorageChange);
-        return () => window.removeEventListener("storage", handleStorageChange);
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
     const updateCartItems = () => {
-        const storedCart = localStorage.getItem("cart");
+        const storedCart = localStorage.getItem('cart');
         setCartItems(storedCart ? JSON.parse(storedCart) : []);
     };
-    
+
     useEffect(() => {
-        setAnimationTrigger(prev => prev + 1);
+        setAnimationTrigger((prev) => prev + 1);
     }, [cartItems]);
 
     const totalItems = cartItems.length;
 
     const addToCart = (product: Product) => {
         if (!product.is_active) return;
-        
-        
+
         const newItem: CartItem = {
             id: product.id,
             sku: product.sku,
@@ -131,23 +129,23 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
             weight: product.weight,
             quantity: 1,
             content: product.content,
-            base_uom: product.base_uom
+            base_uom: product.base_uom,
         };
 
         // Get current cart from localStorage
-        const storedCart = localStorage.getItem("cart");
+        const storedCart = localStorage.getItem('cart');
         const cart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
-        
+
         // Check if item already exists in cart
-        const existingItemIndex = cart.findIndex(item => item.sku === product.sku);
-        
+        const existingItemIndex = cart.findIndex((item) => item.sku === product.sku);
+
         let updatedCart;
         if (existingItemIndex >= 0) {
             // Update quantity if item exists
             updatedCart = [...cart];
             updatedCart[existingItemIndex] = {
                 ...updatedCart[existingItemIndex],
-                quantity: updatedCart[existingItemIndex].quantity + 1
+                quantity: updatedCart[existingItemIndex].quantity + 1,
             };
         } else {
             // Add new item to cart
@@ -155,25 +153,24 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
         }
 
         // Update localStorage
-        localStorage.setItem("cart", JSON.stringify(updatedCart));
-        
+        localStorage.setItem('cart', JSON.stringify(updatedCart));
+
         // Notify parent component to update cart items
         updateCartItems();
     };
 
-
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Products" />
-            <h1 className="text-2xl font-bold ml-6 lg:ml-9 text-primary">Medicine Catalog</h1>
-            <div className="flex flex-col gap-4 p-4 lg:gap-6 lg:p-6 lg:flex-row">
+            <h1 className="ml-6 text-2xl font-bold text-primary lg:ml-9">Medicine Catalog</h1>
+            <div className="flex flex-col gap-4 p-4 lg:flex-row lg:gap-6 lg:p-6">
                 {/* Sidebar Filters */}
-                <div className="lg:w-1/5 w-full lg:mr-4">
-                    <Filters 
-                        onFilterChange={setFilters} 
+                <div className="w-full lg:mr-4 lg:w-1/5">
+                    <Filters
+                        onFilterChange={setFilters}
                         // Pass the full list of categories/packages from the controller
-                        categories={["Semua Produk", ...allCategories]}
-                        packages={["Semua Paket", ...allPackages]}
+                        categories={['Semua Produk', ...allCategories]}
+                        packages={['Semua Paket', ...allPackages]}
                         // Pass the currently active filters to the component
                         activeFilters={filters}
                     />

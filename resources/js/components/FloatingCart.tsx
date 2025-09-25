@@ -1,6 +1,6 @@
-import { ShoppingCart } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 import { motion, useAnimationControls } from 'framer-motion';
+import { ShoppingCart } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 
 interface FloatingCartProps {

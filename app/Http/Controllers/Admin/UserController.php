@@ -72,7 +72,7 @@ class UserController extends Controller
             'apotek_id' => $validated['apotek_id'],
         ]);
 
-        Log::info(json_encode($validated));
+        //        Log::info(json_encode($validated));
         if (! empty($validated['roles'])) {
             $user->syncRoles($validated['roles']);
         }
@@ -136,10 +136,10 @@ class UserController extends Controller
             ], 404);
         }
 
-        Log::info('mapUser called successfully', [
-            'userId' => $user->id,
-            'url' => $request->fullUrl(),
-        ]);
+        //        Log::info('mapUser called successfully', [
+        //            'userId' => $user->id,
+        //            'url' => $request->fullUrl(),
+        //        ]);
 
         if (! $request->user()->can('update users')) {
             abort(403, 'Unauthorized action.');

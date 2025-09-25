@@ -118,11 +118,7 @@ export default function AdminCategories({ categories }: AdminCategoryProps) {
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center space-x-2">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleEditCategory(category)}
-                                                >
+                                                <Button variant="outline" size="sm" onClick={() => handleEditCategory(category)}>
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
                                                 <Button
@@ -155,27 +151,13 @@ export default function AdminCategories({ categories }: AdminCategoryProps) {
             </div>
 
             {/* Create Category Modal */}
-            <CategoryFormModal
-                isOpen={isCreateModalOpen}
-                onClose={closeModals}
-                category={null}
-                onSubmit={handleSubmitCategory}
-            />
+            <CategoryFormModal isOpen={isCreateModalOpen} onClose={closeModals} category={null} onSubmit={handleSubmitCategory} />
 
             {/* Edit Category Modal */}
-            <CategoryFormModal
-                isOpen={isEditModalOpen}
-                onClose={closeModals}
-                category={selectedCategory}
-                onSubmit={handleSubmitCategory}
-            />
+            <CategoryFormModal isOpen={isEditModalOpen} onClose={closeModals} category={selectedCategory} onSubmit={handleSubmitCategory} />
 
             {/* Delete Category Modal */}
-            <CategoryDeleteModal
-                isOpen={isDeleteModalOpen}
-                onClose={closeModals}
-                category={selectedCategory}
-            />
+            <CategoryDeleteModal isOpen={isDeleteModalOpen} onClose={closeModals} category={selectedCategory} />
         </AppLayout>
     );
 }

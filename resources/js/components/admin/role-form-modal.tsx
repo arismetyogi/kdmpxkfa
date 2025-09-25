@@ -1,18 +1,11 @@
-import React, { useEffect } from 'react';
-import { useForm } from '@inertiajs/react';
-import { Save, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { useForm } from '@inertiajs/react';
+import { Loader2, Save } from 'lucide-react';
+import React, { useEffect } from 'react';
 import { toast } from 'sonner';
 
 interface Permission {
@@ -33,12 +26,7 @@ interface RoleFormModalProps {
     permissions: Permission[];
 }
 
-export default function RoleFormModal({
-    isOpen,
-    onClose,
-    role,
-    permissions,
-}: RoleFormModalProps) {
+export default function RoleFormModal({ isOpen, onClose, role, permissions }: RoleFormModalProps) {
     const isEditing = !!role?.id;
 
     const form = useForm({
@@ -62,14 +50,14 @@ export default function RoleFormModal({
             'permissions',
             form.data.permissions.includes(permissionId)
                 ? form.data.permissions.filter((id) => id !== permissionId)
-                : [...form.data.permissions, permissionId]
+                : [...form.data.permissions, permissionId],
         );
     };
 
     const formatPermissionName = (permission: string) => {
         return permission
             .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
     };
 
@@ -80,26 +68,22 @@ export default function RoleFormModal({
             form.put(route('admin.roles.update', role.id), {
                 onSuccess: () => onClose(),
             });
-            toast.success('Role updated successfully')
+            toast.success('Role updated successfully');
         } else {
             form.post(route('admin.roles.store'), {
                 onSuccess: () => onClose(),
             });
-            toast.success('Role created successfully')
+            toast.success('Role created successfully');
         }
     };
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
                 <DialogHeader>
-                    <DialogTitle>
-                        {isEditing ? 'Edit Role' : 'Create New Role'}
-                    </DialogTitle>
+                    <DialogTitle>{isEditing ? 'Edit Role' : 'Create New Role'}</DialogTitle>
                     <DialogDescription>
-                        {isEditing
-                            ? 'Update the role details and permissions below.'
-                            : 'Fill in the details to create a new role.'}
+                        {isEditing ? 'Update the role details and permissions below.' : 'Fill in the details to create a new role.'}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -117,17 +101,13 @@ export default function RoleFormModal({
                                 required
                                 className="mt-1"
                             />
-                            {form.errors.name && (
-                                <p className="text-sm text-red-600 mt-1">
-                                    {form.errors.name}
-                                </p>
-                            )}
+                            {form.errors.name && <p className="mt-1 text-sm text-red-600">{form.errors.name}</p>}
                         </div>
 
                         {/* Permissions */}
                         <div>
                             <Label className="text-base font-medium">Permissions</Label>
-                            <div className="mt-3 grid grid-cols-2 gap-3 max-h-60 overflow-y-auto border rounded-md p-3">
+                            <div className="mt-3 grid max-h-60 grid-cols-2 gap-3 overflow-y-auto rounded-md border p-3">
                                 {permissions.map((permission) => (
                                     <div key={permission.id} className="flex items-center space-x-2">
                                         <Checkbox
@@ -135,10 +115,7 @@ export default function RoleFormModal({
                                             checked={form.data.permissions.includes(permission.id)}
                                             onCheckedChange={() => handlePermissionToggle(permission.id)}
                                         />
-                                        <Label
-                                            htmlFor={`permission-${permission.id}`}
-                                            className="text-sm font-normal cursor-pointer"
-                                        >
+                                        <Label htmlFor={`permission-${permission.id}`} className="cursor-pointer text-sm font-normal">
                                             {formatPermissionName(permission.name)}
                                         </Label>
                                     </div>
@@ -148,12 +125,7 @@ export default function RoleFormModal({
                     </div>
 
                     <DialogFooter>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={onClose}
-                            disabled={form.processing}
-                        >
+                        <Button type="button" variant="outline" onClick={onClose} disabled={form.processing}>
                             Cancel
                         </Button>
                         <Button type="submit" disabled={form.processing || !form.data.name.trim()}>

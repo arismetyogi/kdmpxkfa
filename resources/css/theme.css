@@ -2,145 +2,145 @@
 
 /* Ensure all text uses theme-appropriate colors */
 .text-theme {
-  @apply text-foreground;
+    @apply text-foreground;
 }
 
 .text-theme-muted {
-  @apply text-muted-foreground;
+    @apply text-muted-foreground;
 }
 
 .text-theme-primary {
-  @apply text-primary;
+    @apply text-primary;
 }
 
 .text-theme-secondary {
-  @apply text-secondary-foreground;
+    @apply text-secondary-foreground;
 }
 
 /* Ensure all backgrounds use theme-appropriate colors */
 .bg-theme {
-  @apply bg-background;
+    @apply bg-background;
 }
 
 .bg-theme-card {
-  @apply bg-card;
+    @apply bg-card;
 }
 
 .bg-theme-popover {
-  @apply bg-popover;
+    @apply bg-popover;
 }
 
 /* Ensure all borders use theme-appropriate colors */
 .border-theme {
-  @apply border-border;
+    @apply border-border;
 }
 
 .border-theme-input {
-  @apply border-input;
+    @apply border-input;
 }
 
 /* Theme-aware link styling */
 .link-theme {
-  @apply text-primary hover:text-primary/90;
+    @apply text-primary hover:text-primary/90;
 }
 
 .link-theme-secondary {
-  @apply text-foreground hover:text-foreground/80;
+    @apply text-foreground hover:text-foreground/80;
 }
 
 /* Theme-aware button styling */
 .btn-theme {
-  @apply bg-primary text-primary-foreground hover:bg-primary/90;
+    @apply bg-primary text-primary-foreground hover:bg-primary/90;
 }
 
 .btn-theme-secondary {
-  @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
 }
 
 .btn-theme-outline {
-  @apply border border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground;
+    @apply border border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground;
 }
 
 /* Theme-aware cards */
 .card-theme {
-  @apply border border-border bg-card text-card-foreground;
+    @apply border border-border bg-card text-card-foreground;
 }
 
 /* Theme-aware tables */
 .table-theme {
-  @apply text-foreground;
+    @apply text-foreground;
 }
 
 .table-theme th {
-  @apply text-muted-foreground bg-muted;
+    @apply bg-muted text-muted-foreground;
 }
 
 .table-theme td {
-  @apply text-foreground;
+    @apply text-foreground;
 }
 
 .table-theme tr {
-  @apply border-border;
+    @apply border-border;
 }
 
 .table-theme tr:hover {
-  @apply bg-muted/50;
+    @apply bg-muted/50;
 }
 
 /* Theme-aware inputs */
 .input-theme {
-  @apply border-border bg-background text-foreground placeholder:text-muted-foreground;
+    @apply border-border bg-background text-foreground placeholder:text-muted-foreground;
 }
 
 .input-theme:focus {
-  @apply ring-ring;
+    @apply ring-ring;
 }
 
 /* Theme-aware badges */
 .badge-theme {
-  @apply bg-primary text-primary-foreground;
+    @apply bg-primary text-primary-foreground;
 }
 
 .badge-theme-secondary {
-  @apply bg-secondary text-secondary-foreground;
+    @apply bg-secondary text-secondary-foreground;
 }
 
 .badge-theme-outline {
-  @apply border border-border text-foreground;
+    @apply border border-border text-foreground;
 }
 
 /* Responsive utilities */
 @media (min-width: 768px) {
-  .container-theme {
-    @apply mx-auto max-w-7xl;
-  }
+    .container-theme {
+        @apply mx-auto max-w-7xl;
+    }
 }
 
 /* Dark mode specific overrides */
 .dark {
-  /* Any dark-mode-specific overrides can go here */
+    /* Any dark-mode-specific overrides can go here */
 }
 
 /* Light mode specific overrides */
 :not(.dark) {
-  /* Any light-mode-specific overrides can go here */
+    /* Any light-mode-specific overrides can go here */
 }
 
 /* Focus states for accessibility */
 .focus-theme {
-  @apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none;
+    @apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none;
 }
 
 /* Selection states */
 .selection-theme {
-  @apply selection:bg-primary selection:text-primary-foreground;
+    @apply selection:bg-primary selection:text-primary-foreground;
 }
 
 /* Animation utilities */
 .animate-theme {
-  @apply transition-colors duration-200 ease-in-out;
+    @apply transition-colors duration-200 ease-in-out;
 }
 
 .hover-theme {
-  @apply hover:bg-accent hover:text-accent-foreground;
+    @apply hover:bg-accent hover:text-accent-foreground;
 }

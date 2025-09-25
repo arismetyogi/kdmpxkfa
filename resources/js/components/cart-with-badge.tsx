@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { ShoppingCart } from 'lucide-react';
 
-export default function CartWithBadge({ itemCount } : {itemCount: number}) {
+export default function CartWithBadge({ itemCount }: { itemCount: number }) {
     return (
         <div className="relative">
             <ShoppingCart className="h-6 w-6" />

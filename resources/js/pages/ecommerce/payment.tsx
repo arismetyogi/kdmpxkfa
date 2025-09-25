@@ -1,12 +1,12 @@
-import HeaderLayout from '@/layouts/header-layout';
-import React, { useState, useEffect } from 'react';
-import { Head, router } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import HeaderLayout from '@/layouts/header-layout';
+import { Head, router } from '@inertiajs/react';
 import { CreditCard, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import PriceDisplay from "@/components/priceDisplay";
+import React, { useEffect, useState } from 'react';
 
 interface CartItem {
     id: string | number;
@@ -48,26 +48,22 @@ interface PaymentProps {
     };
 }
 
-export default function PaymentPage({
-    billing,
-    shipping,
-}: PaymentProps) {
+export default function PaymentPage({ billing, shipping }: PaymentProps) {
     const [sourceOfFund] = useState('pinjaman');
     const [paymentType, setPaymentType] = useState('CAD');
     const [isProcessing, setIsProcessing] = useState(false);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
-    
+
     const storedData = localStorage.getItem('creditLimitData') || 'null';
     const parsedData = JSON.parse(storedData);
     const creditLimit = parsedData?.creditLimit ?? 0;
 
     useEffect(() => {
-        const storedCart = localStorage.getItem("cart");
-        if (!storedCart){
-            localStorage.setItem("cartmsg", "Your cart is empty.");
+        const storedCart = localStorage.getItem('cart');
+        if (!storedCart) {
+            localStorage.setItem('cartmsg', 'Your cart is empty.');
             window.location.href = route('cart');
-        } else
-        setCartItems(JSON.parse(storedCart));
+        } else setCartItems(JSON.parse(storedCart));
     }, []);
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -133,8 +129,8 @@ export default function PaymentPage({
                                     {/* ... Mandiri and BCA divs ... */}
                                     <div className="cursor-not-allowed rounded-xl p-4 flex items-center justify-between border-2 border-border opacity-50">
                                         <div className="flex items-center gap-3">
-                                            <div className="bg-yellow-400 p-3 rounded-full">
-                                                <CreditCard className="w-6 h-6 text-white" />
+                                            <div className="rounded-full bg-yellow-400 p-3">
+                                                <CreditCard className="h-6 w-6 text-white" />
                                             </div>
                                             <div>
                                                 <h3 className="font-semibold text-card-foreground">Bank Mandiri</h3>
@@ -144,8 +140,8 @@ export default function PaymentPage({
                                     </div>
                                     <div className="cursor-not-allowed rounded-xl p-4 flex items-center justify-between border-2 border-border opacity-50">
                                         <div className="flex items-center gap-3">
-                                            <div className="bg-blue-500 p-3 rounded-full">
-                                                <CreditCard className="w-6 h-6 text-white" />
+                                            <div className="rounded-full bg-blue-500 p-3">
+                                                <CreditCard className="h-6 w-6 text-white" />
                                             </div>
                                             <div>
                                                 <h3 className="font-semibold text-card-foreground">Bank BCA</h3>
@@ -155,7 +151,7 @@ export default function PaymentPage({
                                     </div>
                                     
                                     <div
-                                        className={`rounded-xl p-4 flex flex-col gap-3 border-2 transition-all duration-200 ${
+                                        className={`flex flex-col gap-3 rounded-xl border-2 p-4 transition-all duration-200 ${
                                             sourceOfFund === 'pinjaman' ? 'border-primary bg-primary/10' : 'border-border'
                                         }`}
                                     >
@@ -165,9 +161,7 @@ export default function PaymentPage({
                                             </div>
                                             <div>
                                                 <h3 className="font-semibold text-card-foreground">Kredit Koperasi</h3>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Remaining Credits: Rp {creditLimit.toLocaleString()}
-                                                </p>
+                                                <p className="text-sm text-muted-foreground">Remaining Credits: Rp {creditLimit.toLocaleString()}</p>
                                             </div>
                                         </div>
                                         <div className="mt-2 pl-12">
@@ -177,9 +171,13 @@ export default function PaymentPage({
                                                     <SelectValue placeholder="Select payment type" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="CAD">Cash on Delivery</SelectItem>
-                                                    <SelectItem value="TOP 30" disabled>Term of Payment 30 Days</SelectItem>
-                                                    <SelectItem value="TOP 60" disabled>Term of Payment 60 Days</SelectItem>
+                                                    <SelectItem value="cad">Cash after Delivery</SelectItem>
+                                                    <SelectItem value="va" disabled>
+                                                        Virtual Account
+                                                    </SelectItem>
+                                                    <SelectItem value="top30" disabled>
+                                                        Term of Payment 30 Days
+                                                    </SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
@@ -228,13 +226,13 @@ export default function PaymentPage({
 
                     {/* ... Order Summary ... */}
                     <div className="lg:col-span-1">
-                        <div className="rounded-lg bg-card text-card-foreground p-6 shadow-sm">
+                        <div className="rounded-lg bg-card p-6 text-card-foreground shadow-sm">
                             <h2 className="mb-4 text-lg font-semibold">Order Summary</h2>
                             <div className="space-y-4">
                                 <div className="max-h-60 overflow-y-auto pr-2">
                                     {cartItems.map((item) => (
                                         <div key={item.id} className="flex items-start justify-between py-2">
-                                            <div className='flex-1'>
+                                            <div className="flex-1">
                                                 <p className="text-sm font-medium">{item.name}</p>
                                                 <p className="text-xs text-muted-foreground">Qty: {item.quantity} {item.order_unit}</p>
                                             </div>

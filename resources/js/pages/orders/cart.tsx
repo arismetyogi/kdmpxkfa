@@ -8,13 +8,13 @@ import PriceDisplay from "@/components/priceDisplay";
 import { Item } from "@radix-ui/react-dropdown-menu";
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: "Dashboard", href: "/dashboard" },
-  { title: "Medicines", href: "/orders/products" },
-  { title: "Cart", href: "#" },
+    { title: 'Dashboard', href: '/dashboard' },
+    { title: 'Medicines', href: '/orders/products' },
+    { title: 'Cart', href: '#' },
 ];
 
 export default function Cart() {
-  const [cart, setCart] = useState<CartItem[]>([]);
+    const [cart, setCart] = useState<CartItem[]>([]);
 
   useEffect(() => {
     const storedCart = localStorage.getItem("cart");
@@ -27,33 +27,33 @@ export default function Cart() {
     }
   }, []);
 
-  const updateQuantity = (sku: string, delta: number) => {
-    const updated = cart
-      .map((item) =>
-        item.sku === sku
-          ? {
-              ...item,
-              quantity: Math.max(0, item.quantity + delta),
-              total: Math.max(0, item.quantity + delta) * Number(item.price),
-            }
-          : item
-      )
-      .filter((item) => item.quantity > 0);
+    const updateQuantity = (sku: string, delta: number) => {
+        const updated = cart
+            .map((item) =>
+                item.sku === sku
+                    ? {
+                          ...item,
+                          quantity: Math.max(0, item.quantity + delta),
+                          total: Math.max(0, item.quantity + delta) * Number(item.price),
+                      }
+                    : item,
+            )
+            .filter((item) => item.quantity > 0);
 
-    setCart(updated);
-    localStorage.setItem("cart", JSON.stringify(updated));
-  };
+        setCart(updated);
+        localStorage.setItem('cart', JSON.stringify(updated));
+    };
 
-  const removeItem = (sku: string) => {
-    const updated = cart.filter((item) => item.sku !== sku);
-    setCart(updated);
-    localStorage.setItem("cart", JSON.stringify(updated));
-  };
+    const removeItem = (sku: string) => {
+        const updated = cart.filter((item) => item.sku !== sku);
+        setCart(updated);
+        localStorage.setItem('cart', JSON.stringify(updated));
+    };
 
-  const clearCart = () => {
-    setCart([]);
-    localStorage.removeItem("cart");
-  };
+    const clearCart = () => {
+        setCart([]);
+        localStorage.removeItem('cart');
+    };
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity * item.content, 0);
   const ppn = subtotal * 0.11;

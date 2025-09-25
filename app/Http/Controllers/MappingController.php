@@ -13,10 +13,9 @@ use Inertia\Inertia;
 
 class MappingController extends Controller
 {
-
     public function index(Request $request)
     {
-        if (!$request->user()->can('view users')) {
+        if (! $request->user()->can('view users')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -29,7 +28,6 @@ class MappingController extends Controller
             ->latest()
             ->paginate(15);
 
-
         return Inertia::render('admin/mapping/index', [
             'users' => PaginatedResourceResponse::make($users, UserResource::class),
             'allUsers' => User::count(),
@@ -38,13 +36,12 @@ class MappingController extends Controller
         ]);
     }
 
-
     /**
      * Map a user to an apotek.
      */
     public function mapUser(Request $request, ?User $user)
     {
-        if (!$user) {
+        if (! $user) {
             Log::error('User not found during mapUser', [
                 'userId' => null,
                 'url' => $request->fullUrl(),
@@ -56,10 +53,9 @@ class MappingController extends Controller
             ], 404);
         }
 
-        if (!$request->user()->can('update users')) {
+        if (! $request->user()->can('update users')) {
             abort(403, 'Unauthorized action.');
         }
-
 
         if ($user->status !== 'approved') {
             return back()->with('error', 'User belum di-approve. Tidak bisa di-mapping.');

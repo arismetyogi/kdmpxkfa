@@ -1,5 +1,7 @@
 import ProductDeleteModal from '@/components/admin/product-delete-modal';
 import ProductFormModal from '@/components/admin/product-form-modal';
+import ProductShowModal from '@/components/admin/product-show-modal';
+import { CustomPagination } from '@/components/custom-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,9 +12,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, Category, Paginated, Product } from '@/types';
 import { router } from '@inertiajs/react';
 import { Edit, PackageX, Plus, Search, Trash2, X } from 'lucide-react';
-import React, { useState, useCallback } from 'react';
-import ProductShowModal from "@/components/admin/product-show-modal";
-import { CustomPagination } from '@/components/custom-pagination';
+import React, { useCallback, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -47,8 +47,8 @@ export default function AdminProducts({ products, categories, allProducts, activ
 
     const handleShowProduct = (product: Product) => {
         setSelectedProduct(product);
-        setIsShowModalOpen(true)
-    }
+        setIsShowModalOpen(true);
+    };
 
     const handleCreateProduct = () => {
         setSelectedProduct(null);
@@ -93,10 +93,14 @@ export default function AdminProducts({ products, categories, allProducts, activ
         setSelectedCategory('');
         setStatusFilter('');
 
-        router.get(route('admin.products.index'), {}, {
-            preserveState: true,
-            preserveScroll: true,
-        });
+        router.get(
+            route('admin.products.index'),
+            {},
+            {
+                preserveState: true,
+                preserveScroll: true,
+            },
+        );
     };
 
     // Handle Enter key in search input
@@ -126,7 +130,7 @@ export default function AdminProducts({ products, categories, allProducts, activ
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
                             {/* Search Input */}
                             <div className="relative">
-                                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Search className="absolute top-2.5 left-2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     placeholder="Search products..."
                                     className="pl-8"
@@ -165,7 +169,7 @@ export default function AdminProducts({ products, categories, allProducts, activ
                             </Select>
 
                             {/* Action Buttons */}
-                            <div className="flex space-x-2 max-w-fit ms-auto">
+                            <div className="ms-auto flex max-w-fit space-x-2">
                                 <Button onClick={applyFilters} className="w-full">
                                     Apply
                                 </Button>
@@ -185,9 +189,7 @@ export default function AdminProducts({ products, categories, allProducts, activ
                         <CardContent>
                             <div className="text-2xl font-bold">{allProducts}</div>
                             <p className="text-xs text-gray-600">
-                                {searchTerm || selectedCategory || statusFilter
-                                    ? "Filtered products"
-                                    : "Total products in the system"}
+                                {searchTerm || selectedCategory || statusFilter ? 'Filtered products' : 'Total products in the system'}
                             </p>
                         </CardContent>
                     </Card>
@@ -198,9 +200,7 @@ export default function AdminProducts({ products, categories, allProducts, activ
                         <CardContent>
                             <div className="text-2xl font-bold">{activeProducts}</div>
                             <p className="text-xs text-gray-600">
-                                {searchTerm || selectedCategory || statusFilter
-                                    ? "Filtered active products"
-                                    : "Total active products"}
+                                {searchTerm || selectedCategory || statusFilter ? 'Filtered active products' : 'Total active products'}
                             </p>
                         </CardContent>
                     </Card>
@@ -212,9 +212,7 @@ export default function AdminProducts({ products, categories, allProducts, activ
                         <CardContent>
                             <div className="text-2xl font-bold">{allProducts - activeProducts}</div>
                             <p className="text-xs text-gray-600">
-                                {searchTerm || selectedCategory || statusFilter
-                                    ? "Filtered inactive products"
-                                    : "Total inactive products"}
+                                {searchTerm || selectedCategory || statusFilter ? 'Filtered inactive products' : 'Total inactive products'}
                             </p>
                         </CardContent>
                     </Card>
@@ -241,7 +239,7 @@ export default function AdminProducts({ products, categories, allProducts, activ
                             <TableBody>
                                 {products.data.map((product) => (
                                     <TableRow key={product.id}>
-                                        <TableCell onClick={() => handleShowProduct(product)} className='cursor-pointer'>
+                                        <TableCell onClick={() => handleShowProduct(product)} className="cursor-pointer">
                                             {product.image ? (
                                                 <img src={product.image} alt={product.name} className="h-16 w-16 rounded-lg object-cover" />
                                             ) : (
@@ -250,10 +248,10 @@ export default function AdminProducts({ products, categories, allProducts, activ
                                                 </div>
                                             )}
                                         </TableCell>
-                                        <TableCell onClick={() => handleShowProduct(product)} className='cursor-pointer'>
+                                        <TableCell onClick={() => handleShowProduct(product)} className="cursor-pointer">
                                             <span className="font-medium">{product.name}</span>
                                         </TableCell>
-                                        <TableCell onClick={() => handleShowProduct(product)} className='cursor-pointer'>
+                                        <TableCell onClick={() => handleShowProduct(product)} className="cursor-pointer">
                                             <span className="text-sm text-gray-600">{product.sku}</span>
                                         </TableCell>
                                         <TableCell>
@@ -304,27 +302,13 @@ export default function AdminProducts({ products, categories, allProducts, activ
             </div>
 
             {/* Show Product Modal */}
-            <ProductShowModal
-                isOpen={isShowModalOpen}
-                onClose={closeModals}
-                product={selectedProduct}
-            />
+            <ProductShowModal isOpen={isShowModalOpen} onClose={closeModals} product={selectedProduct} />
 
             {/* Create Product Modal */}
-            <ProductFormModal
-                isOpen={isCreateModalOpen}
-                onClose={closeModals}
-                product={null}
-                categories={categories}
-            />
+            <ProductFormModal isOpen={isCreateModalOpen} onClose={closeModals} product={null} categories={categories} />
 
             {/* Edit Product Modal */}
-            <ProductFormModal
-                isOpen={isEditModalOpen}
-                onClose={closeModals}
-                product={selectedProduct}
-                categories={categories}
-            />
+            <ProductFormModal isOpen={isEditModalOpen} onClose={closeModals} product={selectedProduct} categories={categories} />
 
             {/* Delete Product Modal */}
             <ProductDeleteModal isOpen={isDeleteModalOpen} onClose={closeModals} product={selectedProduct} />

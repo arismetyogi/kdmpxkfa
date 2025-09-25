@@ -13,8 +13,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
-use function PHPUnit\Framework\isNull;
-
 class OrderController extends Controller
 {
     protected $orderService;
@@ -62,6 +60,7 @@ class OrderController extends Controller
             'orderStatuses' => OrderStatusEnum::toArray(),
         ]);
     }
+
     /**
      * Display the specified resource.
      */
@@ -81,6 +80,7 @@ class OrderController extends Controller
             'order' => $order,
         ]);
     }
+
     /**
      * Update the specified resource in storage.
      */
@@ -93,35 +93,35 @@ class OrderController extends Controller
             'order_items.*.qty_delivered' => 'required|integer|min:0',
         ]);
 
-    // Update qty_delivered di masing-masing order item
-    foreach ($request->order_items as $itemData) {
-        $orderItem = $order->orderItems->where('id', $itemData['id'])->first();
-        if ($orderItem) {
-            $orderItem->qty_delivered = $itemData['qty_delivered'];
-            $orderItem->save();
+        // Update qty_delivered di masing-masing order item
+        foreach ($request->order_items as $itemData) {
+            $orderItem = $order->orderItems->where('id', $itemData['id'])->first();
+            if ($orderItem) {
+                $orderItem->qty_delivered = $itemData['qty_delivered'];
+                $orderItem->save();
+            }
         }
+
+        // Update status pesanan jadi "delivering"
+        $order->status = OrderStatusEnum::DELIVERY->value;
+        $order->shipped_at = now();
+        $order->save();
+
+        // Siapkan data transaksi utk Digikoperasi
+        $transactionData = $this->prepareTransactionData($order);
+
+        // Kirim ke Digikoperasi
+        $response = $this->digikopTransactionService->sendTransaction($transactionData);
+
+        if (! $response['success']) {
+            \Log::error('Failed to send transaction to Digikoperasi', [
+                'order_id' => $order->id,
+                'error' => $response['message'],
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Order updated successfully.');
     }
-
-    // Update status pesanan jadi "delivering"
-    $order->status = OrderStatusEnum::DELIVERY->value;
-    $order->shipped_at = now();
-    $order->save();
-
-    // Siapkan data transaksi utk Digikoperasi
-    $transactionData = $this->prepareTransactionData($order);
-
-    // Kirim ke Digikoperasi
-    $response = $this->digikopTransactionService->sendTransaction($transactionData);
-
-    if (! $response['success']) {
-        \Log::error('Failed to send transaction to Digikoperasi', [
-            'order_id' => $order->id,
-            'error' => $response['message'],
-        ]);
-    }
-
-    return redirect()->back()->with('success', 'Order updated successfully.');
-}
 
     /**
      * Prepare transaction data according to Digikoperasi API documentation

@@ -1,14 +1,14 @@
+import SearchableSelect from '@/components/searchable-select';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Apotek, Role, User } from '@/types';
 import { useForm } from '@inertiajs/react';
 import { Loader2, Save } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { toast } from 'sonner';
-import SearchableSelect from '@/components/searchable-select';
-import { Apotek, Role, User } from '@/types';
 
 interface UserFormModalProps {
     isOpen: boolean;

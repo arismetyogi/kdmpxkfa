@@ -2,11 +2,11 @@ import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, Sideba
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 
-export function NavMain({ items = [], label }: { items: NavItem[], label: string }) {
+export function NavMain({ items = [], label }: { items: NavItem[]; label: string }) {
     const page = usePage();
     return (
         <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel>{ label }</SidebarGroupLabel>
+            <SidebarGroupLabel>{label}</SidebarGroupLabel>
             <SidebarMenu>
                 {items.map((item) => (
                     <SidebarMenuItem key={item.title}>

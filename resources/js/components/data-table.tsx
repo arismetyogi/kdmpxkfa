@@ -1,7 +1,7 @@
+import DeleteModal from '@/components/delete-modal';
 import { router, usePage } from '@inertiajs/react';
 import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import React, { useState } from 'react';
-import DeleteModal from '@/components/delete-modal';
 
 interface TableColumn {
     width: React.CSSProperties | undefined;
@@ -13,22 +13,22 @@ interface TableColumn {
 }
 
 export default function DataTable({
-                                      data,
-                                      columns = [],
-                                      resourceName = '',
-                                      singularName = '',
-                                      routeName = '',
-                                      filters = {},
-                                      viewRoute = '',
-                                      canViewResource = false,
-                                      canCreateResource = false,
-                                      canEditResource = false,
-                                      canDeleteResource = false,
-                                      icon: Icon,
-                                      createRoute = '',
-                                      editRoute = '',
-                                      onDelete,
-                                  }: {
+    data,
+    columns = [],
+    resourceName = '',
+    singularName = '',
+    routeName = '',
+    filters = {},
+    viewRoute = '',
+    canViewResource = false,
+    canCreateResource = false,
+    canEditResource = false,
+    canDeleteResource = false,
+    icon: Icon,
+    createRoute = '',
+    editRoute = '',
+    onDelete,
+}: {
     data: any;
     columns: any;
     resourceName: string;
@@ -279,17 +279,17 @@ export default function DataTable({
                 <div className="overflow-hidden rounded-lg border border-gray-200 shadow dark:border-gray-700">
                     <table className="min-w-full divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
                         <thead>
-                        <tr className="bg-gray-50 dark:bg-gray-800">
-                            {tableColumns.map((column) => (
-                                <th
-                                    key={column.key}
-                                    className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
-                                    style={column.width ? { width: column.width } : {}}
-                                >
-                                    {column.sortable !== false ? (
-                                        <button className="group inline-flex items-center" onClick={() => handleSort(column.key)}>
-                                            {column.label}
-                                            <span className="ml-2">
+                            <tr className="bg-gray-50 dark:bg-gray-800">
+                                {tableColumns.map((column) => (
+                                    <th
+                                        key={column.key}
+                                        className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
+                                        style={column.width ? { width: column.width } : {}}
+                                    >
+                                        {column.sortable !== false ? (
+                                            <button className="group inline-flex items-center" onClick={() => handleSort(column.key)}>
+                                                {column.label}
+                                                <span className="ml-2">
                                                     {sort === column.key ? (
                                                         direction === 'asc' ? (
                                                             <ArrowUp className="h-4 w-4 text-blue-500 dark:text-blue-400" />
@@ -302,39 +302,39 @@ export default function DataTable({
                                                         </span>
                                                     )}
                                                 </span>
-                                        </button>
-                                    ) : (
-                                        column.label
-                                    )}
-                                </th>
-                            ))}
-                        </tr>
+                                            </button>
+                                        ) : (
+                                            column.label
+                                        )}
+                                    </th>
+                                ))}
+                            </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                        {data.data.length > 0 ? (
-                            data.data.map((item: any, index: number) => (
-                                <tr key={item.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
-                                    {tableColumns.map((column) => (
-                                        <td
-                                            key={`${item.id}-${column.key}`}
-                                            className="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-300"
-                                        >
-                                            {renderCell(item, column, index)}
-                                        </td>
-                                    ))}
+                            {data.data.length > 0 ? (
+                                data.data.map((item: any, index: number) => (
+                                    <tr key={item.id} className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+                                        {tableColumns.map((column) => (
+                                            <td
+                                                key={`${item.id}-${column.key}`}
+                                                className="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-300"
+                                            >
+                                                {renderCell(item, column, index)}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={tableColumns.length} className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                                        <div className="flex flex-col items-center justify-center">
+                                            {Icon && <Icon className="mb-2 h-10 w-10 text-gray-400 dark:text-gray-600" />}
+                                            <p className="font-medium">No {resourceName.toLowerCase()} Found</p>
+                                            <p className="mt-1 text-gray-400 dark:text-gray-500">Try adjusting your search criteria</p>
+                                        </div>
+                                    </td>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={tableColumns.length} className="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
-                                    <div className="flex flex-col items-center justify-center">
-                                        {Icon && <Icon className="mb-2 h-10 w-10 text-gray-400 dark:text-gray-600" />}
-                                        <p className="font-medium">No {resourceName.toLowerCase()} Found</p>
-                                        <p className="mt-1 text-gray-400 dark:text-gray-500">Try adjusting your search criteria</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        )}
+                            )}
                         </tbody>
                     </table>
                 </div>
