@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('latitude', 15, 8);
             $table->decimal('longitude', 15, 8);
             $table->decimal('elevation', 15, 8);
-            $table->decimal('area', 15, 8);
+            $table->decimal('area', 15, 8)->nullable();
             $table->integer('population')->default(0);
             $table->integer('timezone')->nullable();
             $table->longText('path')->nullable();
