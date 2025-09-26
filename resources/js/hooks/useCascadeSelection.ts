@@ -4,8 +4,7 @@ interface CascadeData {
   provinces: string[];
   cities: string[];
   districts: string[];
-  villages: string[];
-  names: string[];
+  names: { id: number | string; name: string }[]; // Changed to handle id-name objects
 }
 
 export const useCascadeSelection = () => {

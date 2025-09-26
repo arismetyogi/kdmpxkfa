@@ -17,7 +17,7 @@ type FormFields = {
     kabupatenKota: string;
     kecamatan: string;
     kelurahanDesa: string;
-    namaKoperasi: string;
+    koperasiId: number | string; // Changed to accept ID instead of name
     suratPeminatan: File | null;
     selfAssessment: File | null;
     fotoDalam: File | null;
@@ -41,7 +41,7 @@ export default function PermohonanForm() {
         kabupatenKota: '',
         kecamatan: '',
         kelurahanDesa: '',
-        namaKoperasi: '',
+        koperasiId: '', // Changed from namaKoperasi to koperasiId
         suratPeminatan: null,
         selfAssessment: null,
         fotoDalam: null,
@@ -72,7 +72,7 @@ export default function PermohonanForm() {
                 kabupatenKota: '',
                 kecamatan: '',
                 kelurahanDesa: '',
-                namaKoperasi: '',
+                koperasiId: '',
             });
         }
     }, [data.provinsi]);
@@ -87,7 +87,7 @@ export default function PermohonanForm() {
                 kabupatenKota: '',
                 kecamatan: '',
                 kelurahanDesa: '',
-                namaKoperasi: '',
+                koperasiId: '',
             });
         }
     }, [data.kabupatenKota]);
@@ -101,7 +101,7 @@ export default function PermohonanForm() {
                 ...data,
                 kecamatan: '',
                 kelurahanDesa: '',
-                namaKoperasi: '',
+                koperasiId: '',
             });
         }
     }, [data.kecamatan]);
@@ -113,7 +113,7 @@ export default function PermohonanForm() {
             // Reset names when village is cleared
             setData({
                 ...data,
-                namaKoperasi: '',
+                koperasiId: '',
             });
         }
     }, [data.kelurahanDesa]);
@@ -141,6 +141,7 @@ export default function PermohonanForm() {
             provinsi: 'Provinsi',
             kabupatenKota: 'Kabupaten/Kota',
             kelurahanDesa: 'Kelurahan/Desa',
+            koperasiId: 'Nama Koperasi',
             namaKoperasi: 'Nama Koperasi',
             suratPeminatan: 'Surat Peminatan',
             selfAssessment: 'Self Assessment',
@@ -161,9 +162,10 @@ export default function PermohonanForm() {
         post(route('cooperation.store'), {
             forceFormData: true,
             preserveScroll: true,
+            preserveState: false,
             onSuccess: () => {
                 // Optionally reset files after success
-                reset('suratPeminatan', 'selfAssessment', 'fotoDalam', 'fotoLuar', 'suratPernyataanApoteker', 'video360');
+                reset();
                 // Show success toast
                 toast.success('Pengajuan koperasi berhasil dikirim!');
                 isSubmitting.current = false;
@@ -308,11 +310,11 @@ export default function PermohonanForm() {
                                 </div>
                             </div>
                             <div>
-                                <Label htmlFor="namaKoperasi">Pilih Nama Koperasi</Label>
+                                <Label htmlFor="koperasiId">Pilih Nama Koperasi</Label>
                                 <SearchableSelect
-                                    options={cascadeData.names.map((k) => ({ label: k, value: k }))}
-                                    value={data.namaKoperasi}
-                                    onChange={(v) => setData('namaKoperasi', String(v))}
+                                    options={cascadeData.names.map((k) => ({ label: k.name, value: k.id }))}
+                                    value={data.koperasiId}
+                                    onChange={(v) => setData('koperasiId', v)}
                                     placeholder={loading.names ? 'Memuat...' : 'Pilih nama koperasi'}
                                     disabled={!data.kelurahanDesa || loading.names}
                                 />
