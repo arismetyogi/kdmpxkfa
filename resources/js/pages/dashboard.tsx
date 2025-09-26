@@ -112,7 +112,9 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                         <Link href={route('orders.products', { categories : [cat.name] })}>
                                             <Card className="group rounded-2xl border bg-white transition-all duration-300 hover:shadow-xl dark:bg-slate-800">
                                                 <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-                                                    <div className={`${cat.color} mb-4 rounded-full p-4 transition-transform group-hover:scale-110`}>
+                                                    <div
+                                                        className={`${cat.color} mb-4 rounded-full p-4 transition-transform group-hover:scale-110`}
+                                                    >
                                                         <cat.icon className="h-6 w-6" />
                                                     </div>
                                                     <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{cat.name}</h3>
@@ -146,10 +148,16 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                                     />
                                                 </div>
                                                 <CardContent className="p-6">
-                                                    <h3 className="mb-2 line-clamp-1 font-bold text-slate-800 dark:text-slate-100">{p.name}</h3>
-                                                    <p className="mb-3 line-clamp-2 text-sm text-slate-500 dark:text-slate-400">{p.description}</p>
+                                                    <h3 className="mb-2 line-clamp-1 font-bold text-slate-800 dark:text-slate-100">
+                                                        {p.name}
+                                                    </h3>
+                                                    <p className="mb-3 line-clamp-2 text-sm text-slate-500 dark:text-slate-400">
+                                                        {p.description}
+                                                    </p>
                                                     <div className="mb-3 flex items-baseline gap-2">
-                                                        <span className="text-lg font-bold text-blue-600">Rp {p.price.toLocaleString('id-ID')}</span>
+                                                        <span className="text-lg font-bold text-blue-600">
+                                                            Rp {p.price.toLocaleString('id-ID')}
+                                                        </span>
                                                     </div>
                                                 </CardContent>
                                             </Card>
@@ -258,10 +266,16 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                             />
                                         </div>
                                         <CardContent className="flex flex-1 flex-col p-6">
-                                            <h3 className="mb-2 line-clamp-1 font-bold text-slate-800 dark:text-slate-100">{p.name}</h3>
-                                            <p className="mb-3 line-clamp-2 flex-1 text-sm text-slate-500 dark:text-slate-400">{p.description}</p>
+                                            <h3 className="mb-2 line-clamp-1 font-bold text-slate-800 dark:text-slate-100">
+                                                {p.name}
+                                            </h3>
+                                            <p className="mb-3 line-clamp-2 flex-1 text-sm text-slate-500 dark:text-slate-400">
+                                                {p.description}
+                                            </p>
                                             <div className="mb-3 flex items-baseline gap-2">
-                                                <span className="text-lg font-bold text-blue-600">Rp {p.price.toLocaleString('id-ID')}</span>
+                                                <span className="text-lg font-bold text-blue-600">
+                                                    Rp {p.price.toLocaleString('id-ID')}
+                                                </span>
                                             </div>
                                             <Button
                                                 asChild
