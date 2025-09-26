@@ -42,40 +42,42 @@ class AdminController extends Controller
     /**
      * Display the admin dashboard.
      */
-    public function dashboard(Request $request)
-    {
-        $user = $request->user();
+   public function dashboard(Request $request)
+{
+    $user = $request->user();
 
-        // 🔹 cek role daripada permission
-        if (! $user->hasAnyRole(['super-admin', 'admin-apotek', 'admin-busdev'])) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $stats = [];
-
-        if ($user->hasRole('super-admin')) {
-            $stats = [
-                'total_users' => User::count(),
-                'total_roles' => Role::count(),
-                'total_permissions' => Permission::count(),
-            ];
-        } elseif ($user->hasRole('admin-apotek')) {
-            $stats = [
-                'total_orders' => \App\Models\Order::count(),
-                'pending_orders' => \App\Models\Order::where('status', 'pending')->count(),
-            ];
-        } elseif ($user->hasRole('admin-busdev')) {
-            $stats = [
-                'total_mapping' => \App\Models\User::count(),
-                'total_accounts' => \App\Models\User::count(),
-            ];
-        }
-
-        return Inertia::render('admin/dashboard', [
-            'user' => $user->load('roles', 'permissions'),
-            'stats' => $stats,
-        ]);
+    // 🔹 cek role daripada permission
+    if (! $user->hasAnyRole(['super-admin', 'admin-apotek', 'admin-busdev'])) {
+        abort(403, 'Unauthorized action.');
     }
+
+    $stats = [];
+
+    if ($user->hasRole('super-admin')) {
+        $stats = [
+            'total_users' => User::count(),
+            'total_roles' => Role::count(),
+            'total_permissions' => Permission::count(),
+        ];
+    } elseif ($user->hasRole('admin-apotek')) {
+        $stats = [
+            'total_orders' => \App\Models\Order::count(),
+            'pending_orders' => \App\Models\Order::where('status', 'pending')->count(),
+        ];
+    } elseif ($user->hasRole('admin-busdev')) {
+        $stats = [
+            'total_mapping' => \App\Models\User::count(),
+            'total_accounts' => \App\Models\User::count(),
+        ];
+    }
+
+    return Inertia::render('admin/dashboard', [
+        'user' => $user->load('roles', 'permissions'),
+        'stats' => $stats,
+    ]);
+}
+
+
 
     /**
      * Display the roles management page.

@@ -23,30 +23,16 @@ import { useEffect, useState } from 'react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
+// --- Constants remain the same ---
 const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/dashboard',
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Products',
-        href: '/orders/products',
-        icon: Package,
-    },
-    {
-        title: 'Orders History',
-        href: '/orders/history',
-        icon: History,
-    },
+    { title: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
+    { title: 'Paket Merah Putih', href: '/packages', icon: Package },
+    { title: 'Products', href: '/orders/products', icon: Package },
+    { title: 'Orders History', href: '/orders/history', icon: History },
 ];
 
 const rightNavItems: NavItem[] = [
-    {
-        title: 'Cart',
-        href: route('cart'),
-        icon: ShoppingCart,
-    },
+    { title: 'Cart', href: route('cart'), icon: ShoppingCart },
 ];
 
 const activeItemStyles = 'text-neutral-900 dark:text-neutral-100';
@@ -59,105 +45,96 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const page = usePage<SharedData>();
     const { auth } = page.props;
     const getInitials = useInitials();
-
     const [cartCount, setCartCount] = useState(0);
 
-    // Load cart count from localStorage
+    // This cart logic is good, but for better reusability, consider moving it to a custom hook like `useCart()`.
+    // For this refactor, we'll keep it as is.
     useEffect(() => {
         const updateCartCount = () => {
             const storedCart = localStorage.getItem('cart');
-            if (storedCart) {
-                const cartItems: CartItem[] = JSON.parse(storedCart);
-                const count = cartItems.reduce((total, item) => total + item.quantity, 0);
-                setCartCount(count);
-            } else {
-                setCartCount(0);
-            }
+            const cartItems: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
+            const count = cartItems.reduce((total, item) => total + item.quantity, 0);
+            setCartCount(count);
         };
 
-        // Initial load
         updateCartCount();
 
-        // Listen for storage changes
-        const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === 'cart') {
-                updateCartCount();
-            }
-        };
-
-        window.addEventListener('storage', handleStorageChange);
-
-        // Also check for changes in the same tab
-        const interval = setInterval(updateCartCount, 1000);
+        // A custom 'cart-updated' event is often more performant than an interval.
+        window.addEventListener('storage', updateCartCount);
+        window.addEventListener('cart-updated', updateCartCount); // Listen for same-tab updates
 
         return () => {
-            window.removeEventListener('storage', handleStorageChange);
-            clearInterval(interval);
+            window.removeEventListener('storage', updateCartCount);
+            window.removeEventListener('cart-updated', updateCartCount);
         };
     }, []);
 
     return (
         <>
             <header className="sticky top-0 z-50 w-full border-b border-sidebar-border/80 bg-background/95 backdrop-blur-sm">
-                <div className="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
-                    {/* Mobile Menu */}
-                    <div className="lg:hidden">
-                        <Sheet>
-                            <SheetTrigger asChild>
-                                <Button variant="ghost" size="icon" className="mr-2 h-9 w-9">
-                                    <Menu className="h-5 w-5 text-foreground" />
-                                    <span className="sr-only">Toggle menu</span>
-                                </Button>
-                            </SheetTrigger>
-                            <SheetContent side="left" className="flex h-full w-64 flex-col items-stretch justify-between bg-sidebar p-0">
-                                <SheetHeader className="border-b p-4">
-                                    <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                                    <AppLogoIcon className="mx-auto size-40 fill-current text-foreground" />
-                                </SheetHeader>
-                                <div className="flex h-full flex-1 flex-col space-y-4 p-4">
-                                    <div className="flex h-full flex-col justify-between text-sm">
-                                        <div className="flex flex-col space-y-4">
-                                            {mainNavItems.map((item) => (
-                                                <Link
-                                                    key={item.title}
-                                                    href={item.href}
-                                                    className="flex items-center space-x-2 rounded-md px-3 py-2 font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                                                >
-                                                    {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
-                                                    <span>{item.title}</span>
-                                                </Link>
-                                            ))}
-                                        </div>
+                {/* ======================= CHANGE 1: Add `relative` ======================= */}
+                {/* This makes the header the positioning context for the absolutely positioned navigation menu. */}
+                <div className="relative mx-auto flex h-16 items-center justify-between px-4 md:max-w-7xl">
+
+                    {/* Left side of the header */}
+                    <div className="flex items-center">
+                        {/* Mobile Menu */}
+                        <div className="lg:hidden">
+                            <Sheet>
+                                <SheetTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="mr-2 h-9 w-9">
+                                        <Menu className="h-5 w-5 text-foreground" />
+                                        <span className="sr-only">Toggle menu</span>
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent side="left" className="flex h-full w-64 flex-col items-stretch justify-between bg-sidebar p-0">
+                                    <SheetHeader className="border-b p-4">
+                                        <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                                        <AppLogoIcon className="mx-auto size-40 fill-current text-foreground" />
+                                    </SheetHeader>
+                                    <div className="flex h-full flex-1 flex-col space-y-4 p-4">
+                                        <nav className="flex h-full flex-col justify-between text-sm">
+                                            <div className="flex flex-col space-y-4">
+                                                {mainNavItems.map((item) => (
+                                                    <Link key={item.title} href={item.href} className="flex items-center space-x-2 rounded-md px-3 py-2 font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground">
+                                                        <Icon iconNode={item.icon} className="h-5 w-5" />
+                                                        <span>{item.title}</span>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </nav>
                                     </div>
-                                </div>
-                            </SheetContent>
-                        </Sheet>
+                                </SheetContent>
+                            </Sheet>
+                        </div>
+
+                        <Link href="/dashboard" className="flex items-center space-x-2">
+                            <AppLogo />
+                        </Link>
                     </div>
 
-                    <Link href="/dashboard" prefetch className="flex items-center space-x-2">
-                        <AppLogo />
-                    </Link>
-
-                    {/* Desktop Navigation */}
-                    <div className="ml-6 hidden h-full items-center space-x-6 lg:flex">
-                        <NavigationMenu className="flex h-full items-stretch">
-                            <NavigationMenuList className="flex h-full items-stretch space-x-2">
+                    {/* ======================= CHANGE 2: Center the Navigation ======================= */}
+                    {/* Positioned absolutely to the center of the `relative` parent. */}
+                    {/* Hidden on mobile, visible on large screens (`lg:block`). */}
+                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden lg:block">
+                        <NavigationMenu>
+                            <NavigationMenuList className="space-x-2">
                                 {mainNavItems.map((item, index) => (
-                                    <NavigationMenuItem key={index} className="relative flex h-full items-center">
+                                    <NavigationMenuItem key={index} className="relative">
                                         <NavigationMenuLink asChild>
                                             <Link
                                                 href={item.href}
                                                 className={cn(
                                                     navigationMenuTriggerStyle(),
-                                                    page.url === item.href && activeItemStyles,
+                                                    page.url.startsWith(item.href) && activeItemStyles,
                                                     'h-9 cursor-pointer px-3 text-foreground',
                                                 )}
                                             >
-                                                {item.icon && <Icon iconNode={item.icon} className="mr-2 h-4 w-4" />}
+                                                <Icon iconNode={item.icon} className="mr-2 h-4 w-4" />
                                                 {item.title}
                                             </Link>
                                         </NavigationMenuLink>
-                                        {page.url === item.href && (
+                                        {page.url.startsWith(item.href) && (
                                             <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-foreground"></div>
                                         )}
                                     </NavigationMenuItem>
@@ -166,54 +143,51 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                         </NavigationMenu>
                     </div>
 
-                    <div className="ml-auto flex items-center space-x-2">
+                    {/* Right side of the header */}
+                    {/* `justify-between` on the parent pushes this group to the right. */}
+                    <div className="flex items-center space-x-2">
                         <div className="relative flex items-center space-x-1">
                             <Button variant="ghost" size="icon" className="group h-9 w-9">
                                 <Search className="!size-5 text-foreground opacity-80 group-hover:opacity-100" />
                                 <span className="sr-only">Search</span>
                             </Button>
-                            <div className="flex flex-col space-y-4 lg:hidden">
-                                {rightNavItems.map((item) => (
-                                    <a
-                                        key={item.title}
-                                        href={item.href}
-                                        rel="noopener noreferrer"
-                                        className="flex items-center rounded-md py-2 font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                                    >
-                                        {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
-                                        {item.title === 'Cart' && cartCount > 0 && (
-                                            <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"></span>
-                                        )}
-                                    </a>
-                                ))}
+
+                            {/* Mobile cart icon */}
+                            <div className="relative lg:hidden">
+                                <Link
+                                    href={rightNavItems[0].href}
+                                    className="group inline-flex h-9 w-9 items-center justify-center rounded-md bg-transparent p-0 text-foreground"
+                                >
+                                    <Icon iconNode={ShoppingCart} className="size-5" />
+                                    {cartCount > 0 && (
+                                    <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                                    </span>
+                                    )}
+                                </Link>
                             </div>
+
+                            {/* Desktop cart icon with tooltip */}
                             <div className="hidden lg:flex">
-                                {rightNavItems.map((item) => (
-                                    <TooltipProvider key={item.title} delayDuration={0}>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Link
-                                                    href={item.href}
-                                                    className="group ml-1 inline-flex h-9 w-9 items-center justify-center rounded-md bg-transparent p-0 text-sm font-medium text-foreground/80 ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
-                                                >
-                                                    <span className="sr-only">{item.title}</span>
-                                                    {item.icon && (
-                                                        <Icon
-                                                            iconNode={item.icon}
-                                                            className="size-5 text-foreground opacity-80 group-hover:opacity-100"
-                                                        />
-                                                    )}
-                                                    {item.title === 'Cart' && cartCount > 0 && (
-                                                        <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"></span>
-                                                    )}
-                                                </Link>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>{item.title}</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-                                ))}
+                                <TooltipProvider delayDuration={0}>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Link
+                                                href={rightNavItems[0].href}
+                                                className="group relative ml-1 inline-flex h-9 w-9 items-center justify-center rounded-md bg-transparent p-0 text-sm font-medium text-foreground/80 transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none"
+                                            >
+                                                <span className="sr-only">Cart</span>
+                                                <Icon iconNode={ShoppingCart} className="size-5 text-foreground opacity-80 group-hover:opacity-100" />
+                                                {cartCount > 0 && (
+                                                <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                                                </span>
+                                                )}
+                                            </Link>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Cart</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                             </div>
                         </div>
                         <DarkModeToggle />

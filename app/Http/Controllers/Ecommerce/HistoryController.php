@@ -16,7 +16,7 @@ class HistoryController extends Controller
     public function history()
     {
         $orders = Order::with([
-            'products',
+            'orderItems.product',
             'user.apotek', // eager load relasi apotek dari user
         ])->latest()->get();
 
@@ -30,7 +30,7 @@ class HistoryController extends Controller
     public function show($transaction_number)
     {
         $order = Order::with([
-            'products',
+            'orderItems.product',
             'user.apotek', // eager load relasi apotek dari user
         ])->where('transaction_number', $transaction_number)->firstOrFail();
 

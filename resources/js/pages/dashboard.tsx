@@ -6,6 +6,7 @@ import AppHeaderLayout from '@/layouts/app/app-header-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import Autoplay from 'embla-carousel-autoplay';
+import HeroCarousel from "@/components/HeroCarousel";
 import { motion } from 'framer-motion';
 import { HeartPulse, Pill, RefreshCw, ShieldCheck, ShoppingBag, ShoppingCart, Syringe, Truck } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -78,6 +79,8 @@ export default function Dashboard({ products }: { products?: Product[] }) {
         );
     }
 
+    
+    
     return (
         <AppHeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="KFA" />
@@ -85,54 +88,11 @@ export default function Dashboard({ products }: { products?: Product[] }) {
             <div className="min-h-screen from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
                 <div className="mx-auto flex max-w-7xl flex-col gap-20 p-4 md:p-8">
                     {/* Hero Section */}
-                    <motion.div
-                        initial={{ opacity: 0, y: -40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                        className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-orange-700 via-orange-500 to-orange-700 shadow-2xl"
-                    >
-                        <div className="absolute inset-0 bg-[url('/display.jpeg')] bg-cover bg-center opacity-20"></div>
-                        <div className="relative z-10 flex flex-col items-center justify-between gap-12 px-8 pt-5 md:flex-row md:px-16 lg:pt-0">
-                            <motion.div
-                                initial={{ opacity: 0, x: -60 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 1, delay: 0.2 }}
-                                className="max-w-2xl text-center md:text-left"
-                            >
-                                <h1 className="mb-6 text-5xl leading-tight font-extrabold text-white md:text-6xl">
-                                    Premium <span className="text-yellow-400">Health</span> <br />
-                                    <span className="text-white">Experience</span>
-                                </h1>
-                                <p className="mb-8 text-lg leading-relaxed text-white/80 md:text-xl">Pilihan terbaik untuk kesehatan keluarga Anda</p>
-                                <div className="flex flex-col justify-center gap-4 sm:flex-row md:justify-start">
-                                    <Link href={route('packages.index')}>
-                                        <Button
-                                            variant="default"
-                                            className="gap-2 rounded-full bg-yellow-400 px-8 py-6 text-lg font-bold text-slate-900 shadow-lg hover:bg-yellow-500"
-                                        >
-                                            <ShoppingBag className="h-5 w-5" /> Beli Paket
-                                        </Button>
-                                    </Link>
-                                    <Button
-                                        variant="outline"
-                                        className="rounded-full border-2 border-white/40 px-8 py-6 text-lg font-semibold text-black backdrop-blur-sm hover:bg-white/10 dark:text-white"
-                                    >
-                                        Lanjut Belanja
-                                    </Button>
-                                </div>
-                            </motion.div>
+            <main className="relative min-h-[400px] p-2">
+                <HeroCarousel />
+            </main>
 
-                            <motion.div
-                                initial={{ opacity: 0, x: 60, scale: 0.8 }}
-                                animate={{ opacity: 1, x: 0, scale: 1 }}
-                                transition={{ duration: 1, delay: 0.4 }}
-                            >
-                                <img src="/Model2.png" alt="Premium Pharmacy" className="h-full w-[280px] drop-shadow-2xl md:w-[420px]" />
-                            </motion.div>
-                        </div>
-                    </motion.div>
-
-                    {/* Kategori Cards */}
+                        {/* Kategori Cards */}
                     <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }}>
                         <div className="mb-8 text-center">
                             <h2 className="mb-2 text-3xl font-bold text-slate-800 dark:text-slate-100">Kategori Pilihan</h2>
@@ -149,10 +109,12 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                         whileHover={{ y: -8, scale: 1.05 }}
                                         className="w-full max-w-xs"
                                     >
-                                        <Link href={route('orders.products', { categories: cat.name })}>
+                                        <Link href={route('orders.products', { categories : [cat.name] })}>
                                             <Card className="group rounded-2xl border bg-white transition-all duration-300 hover:shadow-xl dark:bg-slate-800">
                                                 <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-                                                    <div className={`${cat.color} mb-4 rounded-full p-4 transition-transform group-hover:scale-110`}>
+                                                    <div
+                                                        className={`${cat.color} mb-4 rounded-full p-4 transition-transform group-hover:scale-110`}
+                                                    >
                                                         <cat.icon className="h-6 w-6" />
                                                     </div>
                                                     <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{cat.name}</h3>
@@ -186,10 +148,16 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                                     />
                                                 </div>
                                                 <CardContent className="p-6">
-                                                    <h3 className="mb-2 line-clamp-1 font-bold text-slate-800 dark:text-slate-100">{p.name}</h3>
-                                                    <p className="mb-3 line-clamp-2 text-sm text-slate-500 dark:text-slate-400">{p.description}</p>
+                                                    <h3 className="mb-2 line-clamp-1 font-bold text-slate-800 dark:text-slate-100">
+                                                        {p.name}
+                                                    </h3>
+                                                    <p className="mb-3 line-clamp-2 text-sm text-slate-500 dark:text-slate-400">
+                                                        {p.description}
+                                                    </p>
                                                     <div className="mb-3 flex items-baseline gap-2">
-                                                        <span className="text-lg font-bold text-blue-600">Rp {p.price.toLocaleString('id-ID')}</span>
+                                                        <span className="text-lg font-bold text-blue-600">
+                                                            Rp {p.price.toLocaleString('id-ID')}
+                                                        </span>
                                                     </div>
                                                 </CardContent>
                                             </Card>
@@ -298,10 +266,16 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                             />
                                         </div>
                                         <CardContent className="flex flex-1 flex-col p-6">
-                                            <h3 className="mb-2 line-clamp-1 font-bold text-slate-800 dark:text-slate-100">{p.name}</h3>
-                                            <p className="mb-3 line-clamp-2 flex-1 text-sm text-slate-500 dark:text-slate-400">{p.description}</p>
+                                            <h3 className="mb-2 line-clamp-1 font-bold text-slate-800 dark:text-slate-100">
+                                                {p.name}
+                                            </h3>
+                                            <p className="mb-3 line-clamp-2 flex-1 text-sm text-slate-500 dark:text-slate-400">
+                                                {p.description}
+                                            </p>
                                             <div className="mb-3 flex items-baseline gap-2">
-                                                <span className="text-lg font-bold text-blue-600">Rp {p.price.toLocaleString('id-ID')}</span>
+                                                <span className="text-lg font-bold text-blue-600">
+                                                    Rp {p.price.toLocaleString('id-ID')}
+                                                </span>
                                             </div>
                                             <Button
                                                 asChild

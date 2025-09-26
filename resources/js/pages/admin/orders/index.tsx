@@ -9,6 +9,7 @@ import { Head, Link } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { CheckCircle, Clock, Package, Truck, XCircle } from 'lucide-react';
 import { useState } from 'react';
+import { idrFormatter, currency} from '@/lib/utils';
 
 const breadcrumbs = [
     { title: 'Dashboard', href: route('admin.dashboard') },
@@ -159,7 +160,7 @@ export default function OrdersIndex({
                                                 <TableCell className="text-foreground">
                                                     {format(new Date(order.created_at), 'MMM dd, yyyy')}
                                                 </TableCell>
-                                                <TableCell className="text-foreground">Rp{Number(order.total_price).toLocaleString()}</TableCell>
+                                                <TableCell className="text-foreground">{idrFormatter.format(order.total_price)}</TableCell>
                                                 <TableCell>
                                                     <Badge
                                                         className={`${statusStyle[order.status] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'} flex items-center gap-1`}
