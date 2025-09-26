@@ -4,12 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
+import { idrFormatter } from '@/lib/utils';
 import { Order, OrderItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { CheckCircle, Clock, MapPin, Package, Truck, User, XCircle } from 'lucide-react';
 import { route } from 'ziggy-js';
-
 const breadcrumbs = (orderId: string) => [
     { title: 'Dashboard', href: route('admin.dashboard') },
     { title: 'Orders', href: route('admin.orders.index') },
@@ -246,7 +246,7 @@ export default function OrderShow({ order }: OrderShowProps) {
                                                 )}
                                             </TableCell>
                                             <TableCell className="text-sm font-medium">{item.product_name || 'N/A'}</TableCell>
-                                            <TableCell className="text-right">Rp{Number(item.unit_price).toLocaleString()}</TableCell>
+                                            <TableCell className="text-right">{idrFormatter.format(item.unit_price)}</TableCell>
                                             <TableCell className="text-center">
                                                 {item.quantity} {item.product?.order_unit}
                                                 <br />
@@ -271,11 +271,11 @@ export default function OrderShow({ order }: OrderShowProps) {
                                                 )}
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                Rp
-                                                {Number(
+
+                                                {idrFormatter.format(
                                                     item.unit_price *
                                                         (isDeliverable ? data.order_items[index]?.qty_delivered || 0 : item.qty_delivered || 0),
-                                                ).toLocaleString()}
+                                                )}
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -285,19 +285,19 @@ export default function OrderShow({ order }: OrderShowProps) {
                                         <TableCell colSpan={6} className="text-right font-medium">
                                             Subtotal
                                         </TableCell>
-                                        <TableCell className="text-right">Rp{subtotal.toLocaleString()}</TableCell>
+                                        <TableCell className="text-right">  {idrFormatter.format(subtotal)}</TableCell>
                                     </TableRow>
                                     <TableRow>
                                         <TableCell colSpan={6} className="text-right font-medium">
                                             Tax (11%)
                                         </TableCell>
-                                        <TableCell className="text-right">Rp{tax.toLocaleString()}</TableCell>
+                                        <TableCell className="text-right">{idrFormatter.format(tax)}</TableCell>
                                     </TableRow>
                                     <TableRow>
                                         <TableCell colSpan={6} className="text-right font-bold">
                                             Total
                                         </TableCell>
-                                        <TableCell className="text-right font-bold">Rp{total.toLocaleString()}</TableCell>
+                                        <TableCell className="text-right font-bold">{idrFormatter.format(total)}</TableCell>
                                     </TableRow>
                                 </TableFooter>
                             </Table>
