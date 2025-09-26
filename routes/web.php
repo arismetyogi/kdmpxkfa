@@ -70,6 +70,11 @@ Route::get('sso/decrypt', function () {
     ]);
 });
 Route::post('refresh', [SsoController::class, 'refresh']);
+Route::get('form-koperasi', function () {
+    return Inertia::render('cooperation-request');
+})->name('cooperation-request');
+Route::post('form-koperasi', [App\Http\Controllers\CooperationController::class, 'store'])->name('cooperation.store');
+
 
 /*
 |--------------------------------------------------------------------------
