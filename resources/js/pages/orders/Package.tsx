@@ -1,5 +1,5 @@
 import PriceDisplay from '@/components/priceDisplay';
-import ScrollToTopButton from '@/components/scrolltoTop';
+import ScrollToTopButton from "@/components/ScrollToTop";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
