@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\RoleEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PaginatedResourceResponse;
 use App\Http\Resources\UserResource;
@@ -22,8 +23,8 @@ class AdminController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $admins = User::query()->whereDoesntHave('roles', function ($q) {
-            $q->where('name', 'user');
+        $admins = User::query()->whereHas('roles', function ($q) {
+            $q->whereIn('name', RoleEnum::adminRoles());
         });
 
         $paginatedAdmins = $admins->latest()->paginate(15);
