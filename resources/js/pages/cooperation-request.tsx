@@ -10,6 +10,7 @@ import { useEffect, useState, useRef } from 'react';
 import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
 import { p } from '@/components/ui/p';
+import ToggleDarkMode from '@/components/toggle-dark-mode';
 
 type FormFields = {
     provinsi: string;
@@ -215,19 +216,22 @@ export default function PermohonanForm() {
     const contohGmaps = 'https://maps.app.goo.gl/9XcZExampleLink123';
 
     return (
-        <>
+        <div className="max-w-3xl mx-auto my-4 relative">
             <Toaster />
-            <Card className="mx-auto !max-w-5xl bg-card text-card-foreground">
+            <div className="absolute top-2 right-4">
+                <ToggleDarkMode/>
+            </div>
+            <Card className="mx-auto max-w-5xl bg-secondary/20 text-card-foreground">
                 <CardHeader>
-                    <CardTitle className="text-balance">Form Pengajuan Koperasi</CardTitle>
+                    <CardTitle className="text-balance">Form Pengajuan Kerjasama Koperasi - Apotek</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={onSubmit} className="space-y-8">
+                    <form onSubmit={onSubmit} className="space-y-2">
                         {/* Lokasi */}
-                        <fieldset className="space-y-4 rounded-lg bg-card-foreground/10 p-4">
-                            <legend className="font-medium">Lokasi</legend>
+                        <fieldset className="space-y-2 rounded-lg bg-card p-4">
+                            <legend className="font-semibold text-xl text-primary">Lokasi</legend>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-2">
                                 <div>
                                     <Label htmlFor="provinsi">Pilih Provinsi</Label>
                                     <SearchableSelect
@@ -316,8 +320,8 @@ export default function PermohonanForm() {
                         </fieldset>
 
                         {/* Dokumen */}
-                        <fieldset className="space-y-6 rounded-lg bg-white/5 p-4">
-                            <legend className="font-medium">Dokumen</legend>
+                        <fieldset className="space-y-2 rounded-lg bg-card p p-4">
+                            <legend className="font-semibold text-xl text-primary">Dokumen</legend>
 
                             <div className="space-y-2">
                                 <Label htmlFor="suratPeminatan">Upload Surat Peminatan</Label>
@@ -387,8 +391,8 @@ export default function PermohonanForm() {
                         </fieldset>
 
                         {/* Foto & Video */}
-                        <fieldset className="space-y-6 rounded-lg bg-white/5 p-4">
-                            <legend className="font-medium">Foto & Video</legend>
+                        <fieldset className="space-y-2 rounded-lg bg-card p-4">
+                            <legend className="font-semibold text-xl text-primary">Foto & Video</legend>
 
                             <div className="space-y-2">
                                 <Label htmlFor="fotoDalam">Upload Foto Tampilan Dalam Bangunan</Label>
@@ -458,8 +462,8 @@ export default function PermohonanForm() {
                         </fieldset>
 
                         {/* Titik Google Maps */}
-                        <fieldset className="space-y-2 rounded-lg bg-white/5 p-4">
-                            <legend className="font-medium">Titik Google Maps</legend>
+                        <fieldset className="space-y-2 rounded-lg bg-card p-4">
+                            <legend className="font-semibold text-xl text-primary">Titik Google Maps</legend>
                             <Label htmlFor="gmapsLink">Link Google Maps</Label>
                             <div className="flex items-center gap-2">
                                 <Input
@@ -497,6 +501,6 @@ export default function PermohonanForm() {
                     </form>
                 </CardContent>
             </Card>
-        </>
+        </div>
     );
 }

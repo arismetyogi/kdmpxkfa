@@ -74,6 +74,7 @@ class CooperationController extends Controller
             ->where('province', $province)
             ->where('city', $city)
             ->where('district', $district)
+            ->where('village', $village)
             ->orderBy('name')
             ->pluck('name');
 

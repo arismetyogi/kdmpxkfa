@@ -68,10 +68,10 @@ export default function OnboardingPage({ prefilled_data }: OnboardingPageProps) 
                         <CardDescription>Please complete your onboarding details below:</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={submit} className="space-y-4">
+                        <form onSubmit={submit} className="md:grid grid-cols-2 space-y-4 gap-x-2">
                             {/* Name */}
                             <div className="space-y-2">
-                                <Label htmlFor="name">Full Name</Label>
+                                <Label htmlFor="name">Nama Lengkap</Label>
                                 <Input id="name" type="text" value={data.name} onChange={(e) => setData('name', e.target.value)} />
                                 {errors.name && (
                                     <Alert variant="destructive">
@@ -97,7 +97,7 @@ export default function OnboardingPage({ prefilled_data }: OnboardingPageProps) 
 
                             {/* Phone */}
                             <div className="space-y-2">
-                                <Label htmlFor="phone">Phone Number</Label>
+                                <Label htmlFor="phone">No Telp</Label>
                                 <Input id="phone" type="text" value={data.phone} onChange={(e) => setData('phone', e.target.value)} />
                                 {errors.phone && (
                                     <Alert variant="destructive">
@@ -110,7 +110,7 @@ export default function OnboardingPage({ prefilled_data }: OnboardingPageProps) 
 
                             {/* Tenant ID */}
                             <div className="space-y-2">
-                                <Label htmlFor="tenant_id">Tenant ID</Label>
+                                <Label htmlFor="tenant_id">NIK Koperasi</Label>
                                 <Input
                                     id="tenant_id"
                                     type="text"
@@ -122,7 +122,7 @@ export default function OnboardingPage({ prefilled_data }: OnboardingPageProps) 
 
                             {/* Tenant Name */}
                             <div className="space-y-2">
-                                <Label htmlFor="tenant_name">Tenant Name</Label>
+                                <Label htmlFor="tenant_name">Nama Koperasi</Label>
                                 <Input
                                     id="tenant_name"
                                     type="text"
@@ -133,20 +133,22 @@ export default function OnboardingPage({ prefilled_data }: OnboardingPageProps) 
                             </div>
 
                             {/* Cascading Region Select */}
-                            <CascadingRegionSelect
-                                onProvinceChange={(value) => setData('province_code', value)}
-                                onCityChange={(value) => setData('city_code', value)}
-                                onDistrictChange={(value) => setData('district_code', value)}
-                                onVillageChange={(value) => setData('village_code', value)}
-                                initialProvince={data.province_code}
-                                initialCity={data.city_code}
-                                initialDistrict={data.district_code}
-                                initialVillage={data.village_code}
-                            />
+                            <div className="col-span-full">
+                                <CascadingRegionSelect
+                                    onProvinceChange={(value) => setData('province_code', value)}
+                                    onCityChange={(value) => setData('city_code', value)}
+                                    onDistrictChange={(value) => setData('district_code', value)}
+                                    onVillageChange={(value) => setData('village_code', value)}
+                                    initialProvince={data.province_code}
+                                    initialCity={data.city_code}
+                                    initialDistrict={data.district_code}
+                                    initialVillage={data.village_code}
+                                />
+                            </div>
 
                             {/* Address */}
                             <div className="space-y-2">
-                                <Label htmlFor="address">Address</Label>
+                                <Label htmlFor="address">Alamat</Label>
                                 <Input
                                     id="address"
                                     type="text"
@@ -166,13 +168,13 @@ export default function OnboardingPage({ prefilled_data }: OnboardingPageProps) 
 
                             {/* Zipcode */}
                             <div className="space-y-2">
-                                <Label htmlFor="zipcode">Zipcode</Label>
+                                <Label htmlFor="zipcode">Kode Pos</Label>
                                 <Input
                                     id="zipcode"
                                     type="text"
                                     value={data.zipcode}
                                     onChange={(e) => setData('zipcode', e.target.value)}
-                                    placeholder="Enter zipcode"
+                                    placeholder="10123"
                                 />
                                 {errors.zipcode && (
                                     <Alert variant="destructive">
@@ -185,13 +187,13 @@ export default function OnboardingPage({ prefilled_data }: OnboardingPageProps) 
 
                             {/* SIA Number */}
                             <div className="space-y-2">
-                                <Label htmlFor="sia_number">SIA Number</Label>
+                                <Label htmlFor="sia_number">Nomor SIA</Label>
                                 <Input
                                     id="sia_number"
                                     type="text"
                                     value={data.sia_number}
                                     onChange={(e) => setData('sia_number', e.target.value)}
-                                    placeholder="Enter your SIA number"
+                                    placeholder="Input No. SIA"
                                     required
                                 />
                                 {errors.sia_number && (
@@ -205,7 +207,7 @@ export default function OnboardingPage({ prefilled_data }: OnboardingPageProps) 
 
                             {/* SIA Document */}
                             <div className="space-y-2">
-                                <Label htmlFor="sia_document">SIA Document</Label>
+                                <Label htmlFor="sia_document">Upload File SIA</Label>
                                 <Input id="sia_document" type="file" onChange={handleFileChange} accept=".pdf,.jpg,.jpeg,.png" required />
                                 {errors.sia_document && (
                                     <Alert variant="destructive">
