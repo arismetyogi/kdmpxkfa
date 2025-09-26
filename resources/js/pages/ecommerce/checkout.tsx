@@ -1,12 +1,11 @@
+import PriceDisplay from '@/components/priceDisplay';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import HeaderLayout from '@/layouts/header-layout';
 import { type BreadcrumbItem } from '@/types';
-import PriceDisplay from '@/components/priceDisplay'
 import { router } from '@inertiajs/react';
-import React, { useEffect, useState } from 'react';
-
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 interface CartItem {
     id: string | number;
@@ -85,15 +84,15 @@ export default function CheckoutPage({ billingData, shippingData }: CheckoutProp
         shipping_country: shippingData?.country || billingData?.country || 'Indonesia',
     });
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
             [name]: value,
         }));
-    };
+    }, []);
 
-    const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleCheckboxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, checked } = e.target;
         setFormData((prev) => ({
             ...prev,
@@ -113,9 +112,9 @@ export default function CheckoutPage({ billingData, shippingData }: CheckoutProp
                 shipping_zip: prev.zip,
             }));
         }
-    };
+    }, []);
 
-    const handleClearBilling = () => {
+    const handleClearBilling = useCallback(() => {
         setFormData((prev) => ({
             ...prev,
             first_name: '',
@@ -128,9 +127,9 @@ export default function CheckoutPage({ billingData, shippingData }: CheckoutProp
             zip: '',
             notes: '',
         }));
-    };
+    }, []);
 
-    const handleClearShipping = () => {
+    const handleClearShipping = useCallback(() => {
         setFormData((prev) => ({
             ...prev,
             shipping_first_name: '',
@@ -142,12 +141,15 @@ export default function CheckoutPage({ billingData, shippingData }: CheckoutProp
             shipping_state: '',
             shipping_zip: '',
         }));
-    };
+    }, []);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        router.post(route('checkout.process'), formData);
-    };
+    const handleSubmit = useCallback(
+        (e: React.FormEvent) => {
+            e.preventDefault();
+            router.post(route('checkout.process'), formData);
+        },
+        [formData],
+    );
 
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     useEffect(() => {
@@ -170,10 +172,42 @@ export default function CheckoutPage({ billingData, shippingData }: CheckoutProp
         };
     }, []);
 
-    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity * item.content, 0);
-    const ppn = subtotal * 0.11;
-    const grandTotal = subtotal + ppn;
+    // Use useMemo to calculate totals only when cartItems change
+    const { subtotal, ppn, grandTotal } = useMemo(() => {
+        const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity * item.content, 0);
+        const ppn = subtotal * 0.11;
+        const grandTotal = subtotal + ppn;
+        return { subtotal, ppn, grandTotal };
+    }, [cartItems]);
+
     const shipping = 0;
+
+    // Memoize cart items to prevent re-rendering of the entire table when possible
+    const cartItemRows = useMemo(
+        () =>
+            cartItems.map((item) => (
+                <TableRow key={item.id}>
+                    <TableCell>
+                        <img src={item.image} alt={item.name} className="h-12 w-12 rounded object-cover" />
+                    </TableCell>
+                    <TableCell className="text-xs font-medium">{item.name}</TableCell>
+                    <TableCell className="text-xs">
+                        {item.quantity} {item.order_unit}
+                        {/* --- THEME CHANGE #6: Use muted color --- */}
+                        <span className="block text-muted-foreground">
+                            ({item.quantity * item.content} {item.base_uom})
+                        </span>
+                    </TableCell>
+                    <TableCell className="text-xs">
+                        <PriceDisplay price={item.price} />
+                    </TableCell>
+                    <TableCell className="text-right text-xs">
+                        <PriceDisplay price={item.price * item.quantity * item.content} />
+                    </TableCell>
+                </TableRow>
+            )),
+        [cartItems],
+    );
 
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
@@ -485,25 +519,7 @@ export default function CheckoutPage({ billingData, shippingData }: CheckoutProp
                                         <TableHead className="text-right text-xs">Subtotal</TableHead>
                                     </TableRow>
                                 </TableHeader>
-                                <TableBody>
-                                    {cartItems.map((item) => (
-                                        <TableRow key={item.id}>
-                                            <TableCell>
-                                                <img src={item.image} alt={item.name} className="h-12 w-12 rounded object-cover" />
-                                            </TableCell>
-                                            <TableCell className="text-xs font-medium">{item.name}</TableCell>
-                                            <TableCell className="text-xs">
-                                                {item.quantity} {item.order_unit}
-                                                {/* --- THEME CHANGE #6: Use muted color --- */}
-                                                <span className="block text-muted-foreground">
-                                                    ({item.quantity * item.content} {item.base_uom})
-                                                </span>
-                                            </TableCell>
-                                            <TableCell className="text-xs"><PriceDisplay price={item.price} /></TableCell>
-                                            <TableCell className="text-right text-xs"><PriceDisplay price={(item.price * item.quantity * item.content)}/></TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
+                                <TableBody>{cartItemRows}</TableBody>
                             </Table>
                         </div>
                     </div>
@@ -511,7 +527,7 @@ export default function CheckoutPage({ billingData, shippingData }: CheckoutProp
                     {/* Order Summary */}
                     <div className="md:col-span-1">
                         {/* --- THEME CHANGE #7: Use card colors for summary --- */}
-                        <div className="border bg-card text-card-foreground rounded-2xl p-5 shadow-lg lg:sticky lg:top-32 self-start ">
+                        <div className="self-start rounded-2xl border bg-card p-5 text-card-foreground shadow-lg lg:sticky lg:top-32">
                             <h2 className="mb-2 text-sm font-semibold">Order Summary</h2>
                             <div className="space-y-3">
                                 <div className="space-y-1">
@@ -532,9 +548,7 @@ export default function CheckoutPage({ billingData, shippingData }: CheckoutProp
                                     </div>
                                     <div className="mt-3 flex justify-between border-t pt-5">
                                         <span className="text-sm font-semibold text-primary">Total</span>
-                                        <PriceDisplay 
-                                        price={grandTotal}
-                                        className="text-lg font-semibold text-primary" />
+                                        <PriceDisplay price={grandTotal} className="text-lg font-semibold text-primary" />
                                     </div>
                                 </div>
                                 <button

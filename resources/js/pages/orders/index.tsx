@@ -1,8 +1,3 @@
-import { Head, router } from '@inertiajs/react';
-import pickBy from 'lodash/pickBy'; // Helper to remove empty values from an object
-import { useEffect, useState } from 'react';
-import { useDebounce } from 'use-debounce'; // A great library for debouncing input
-
 import Filters from '@/components/Filters';
 import FloatingCart from '@/components/FloatingCart';
 import { CustomPagination } from '@/components/custom-pagination';
@@ -10,7 +5,11 @@ import ProductCard from '@/components/product-card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import HeaderLayout from '@/layouts/header-layout';
 import { type BreadcrumbItem, CartItem, Paginated, Product } from '@/types';
+import { Head, router } from '@inertiajs/react';
+import pickBy from 'lodash/pickBy'; // Helper to remove empty values from an object
 import { Package } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDebounce } from 'use-debounce'; // A great library for debouncing input
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -37,7 +36,7 @@ interface IndexProps {
 }
 
 export default function OrdersIndexPage({ products, allCategories, allPackages, filters: initialFilters }: IndexProps) {
-    console.log('Props received from server:', { allCategories, allPackages });
+    // console.log('Props received from server:', { allCategories, allPackages });
     const [search, setSearch] = useState(initialFilters.search || '');
     const [sortBy, setSortBy] = useState(initialFilters.sort_by || 'name-asc');
     const [filters, setFilters] = useState({
@@ -105,59 +104,73 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
         return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
-    const updateCartItems = () => {
+    const updateCartItems = useCallback(() => {
         const storedCart = localStorage.getItem('cart');
         setCartItems(storedCart ? JSON.parse(storedCart) : []);
-    };
+    }, []);
 
     useEffect(() => {
         setAnimationTrigger((prev) => prev + 1);
     }, [cartItems]);
 
-    const totalItems = cartItems.length;
+    const totalItems = useMemo(() => cartItems.length, [cartItems]);
 
-    const addToCart = (product: Product) => {
-        if (!product.is_active) return;
+    const addToCart = useCallback(
+        (product: Product) => {
+            if (!product.is_active) return;
 
-        const newItem: CartItem = {
-            id: product.id,
-            sku: product.sku,
-            name: product.name,
-            price: product.price, // Use price per order unit
-            image: product.image,
-            order_unit: product.order_unit,
-            weight: product.weight,
-            quantity: 1,
-            content: product.content,
-            base_uom: product.base_uom,
-        };
-
-        // Get current cart from localStorage
-        const storedCart = localStorage.getItem('cart');
-        const cart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
-
-        // Check if item already exists in cart
-        const existingItemIndex = cart.findIndex((item) => item.sku === product.sku);
-
-        let updatedCart;
-        if (existingItemIndex >= 0) {
-            // Update quantity if item exists
-            updatedCart = [...cart];
-            updatedCart[existingItemIndex] = {
-                ...updatedCart[existingItemIndex],
-                quantity: updatedCart[existingItemIndex].quantity + 1,
+            const newItem: CartItem = {
+                id: product.id,
+                sku: product.sku,
+                name: product.name,
+                price: product.price,
+                image: product.image,
+                order_unit: product.order_unit,
+                weight: product.weight,
+                quantity: 1,
+                content: product.content,
+                base_uom: product.base_uom,
             };
-        } else {
-            // Add new item to cart
-            updatedCart = [...cart, newItem];
-        }
 
-        // Update localStorage
-        localStorage.setItem('cart', JSON.stringify(updatedCart));
+            // Get current cart from localStorage
+            const storedCart = localStorage.getItem('cart');
+            const cart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
 
-        // Notify parent component to update cart items
-        updateCartItems();
-    };
+            // Check if item already exists in cart
+            const existingItemIndex = cart.findIndex((item) => item.sku === product.sku);
+
+            let updatedCart;
+            if (existingItemIndex >= 0) {
+                // Update quantity if item exists
+                updatedCart = [...cart];
+                updatedCart[existingItemIndex] = {
+                    ...updatedCart[existingItemIndex],
+                    quantity: updatedCart[existingItemIndex].quantity + 1,
+                };
+            } else {
+                // Add new item to cart
+                updatedCart = [...cart, newItem];
+            }
+
+            // Update localStorage
+            localStorage.setItem('cart', JSON.stringify(updatedCart));
+
+            // Notify parent component to update cart items
+            updateCartItems();
+        },
+        [updateCartItems],
+    );
+
+    // Memoize the product cards to prevent unnecessary re-renders
+    const productCards = useMemo(
+        () =>
+            products.data.map((p) => (
+                <div key={p.id} className="cursor-pointer">
+                    <ProductCard product={p} addToCart={addToCart} updateCartItems={updateCartItems} />
+                </div>
+            )),
+        [products.data, addToCart, updateCartItems],
+    );
 
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
@@ -208,13 +221,7 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
                         </div>
                     ) : (
                         <>
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                                {products.data.map((p) => (
-                                    <div key={p.id} className="cursor-pointer">
-                                        <ProductCard product={p} addToCart={addToCart} updateCartItems={updateCartItems} />
-                                    </div>
-                                ))}
-                            </div>
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">{productCards}</div>
                             {/* Add Custom Pagination */}
                             <CustomPagination pagination={products} className="mt-6" />
                         </>

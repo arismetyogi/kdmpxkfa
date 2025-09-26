@@ -1,12 +1,12 @@
+import PriceDisplay from '@/components/priceDisplay';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import HeaderLayout from '@/layouts/header-layout';
 import { Head, router } from '@inertiajs/react';
 import { CreditCard, Wallet } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import PriceDisplay from "@/components/priceDisplay";
-import React, { useEffect, useState } from 'react';
 
 interface CartItem {
     id: string | number;
@@ -50,7 +50,7 @@ interface PaymentProps {
 
 export default function PaymentPage({ billing, shipping }: PaymentProps) {
     const [sourceOfFund] = useState('pinjaman');
-    const [paymentType, setPaymentType] = useState('CAD');
+    const [paymentType, setPaymentType] = useState('cad');
     const [isProcessing, setIsProcessing] = useState(false);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
@@ -66,50 +66,79 @@ export default function PaymentPage({ billing, shipping }: PaymentProps) {
         } else setCartItems(JSON.parse(storedCart));
     }, []);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsProcessing(true);
+    const handleSubmit = useCallback(
+        (e: React.FormEvent) => {
+            e.preventDefault();
+            setIsProcessing(true);
 
-        const cartData = localStorage.getItem("cart") || "[]";
-        
-        router.post(route('payment.process'), {
-            source_of_fund: sourceOfFund,
-            payment_type: paymentType,
-            cart: JSON.parse(cartData)
-        }, {
-            onSuccess: () => {
-                localStorage.removeItem("cart");
-            },
-            onError: (errors) => {
-                if (errors.credit_limit_error) {
-                    toast.error("Saldo Kredit Anda Kurang!, Cek kembali Saldo Kredit yang Anda miliki!", { 
-                        duration: 5000
-                    });
-                } else if (errors.mapping_error) {
-                    toast.error("Koperasi belum dimapping dengan Apotek KF, Silakan hubungi administrator.", { 
-                        duration: 5000
-                    });
-                } else if (errors.generic_payment_error) {
-                    toast.error("A technical error occurred. Our team has been notified. Please try again later.", { 
-                        duration: 5000
-                    });
-                } else {
-                    toast.error("Payment Failed", { 
-                        description: "An unknown error occurred. Please check your details and try again.",
-                        duration: 10000
-                    });
-                }
-            },
-            onFinish: () => {
-                setIsProcessing(false);
-            }
-        });
-    };
+            const cartData = localStorage.getItem('cart') || '[]';
 
-    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity * item.content, 0);
-    const ppn = subtotal * 0.11;
-    const grandTotal = subtotal + ppn;
+            router.post(
+                route('payment.process'),
+                {
+                    source_of_fund: sourceOfFund,
+                    payment_type: paymentType,
+                    cart: JSON.parse(cartData),
+                },
+                {
+                    onSuccess: () => {
+                        localStorage.removeItem('cart');
+                    },
+                    onError: (errors) => {
+                        if (errors.credit_limit_error) {
+                            toast.error('Saldo Kredit Anda Kurang!, Cek kembali Saldo Kredit yang Anda miliki!', {
+                                duration: 5000,
+                            });
+                        } else if (errors.mapping_error) {
+                            toast.error('Koperasi belum dimapping dengan Apotek KF, Silakan hubungi administrator.', {
+                                duration: 5000,
+                            });
+                        } else if (errors.generic_payment_error) {
+                            toast.error('A technical error occurred. Our team has been notified. Please try again later.', {
+                                duration: 5000,
+                            });
+                        } else {
+                            toast.error('Payment Failed', {
+                                description: 'An unknown error occurred. Please check your details and try again.',
+                                duration: 10000,
+                            });
+                        }
+                    },
+                    onFinish: () => {
+                        setIsProcessing(false);
+                    },
+                },
+            );
+        },
+        [sourceOfFund, paymentType],
+    );
+
+    // Use useMemo to calculate totals only when cartItems change
+    const { subtotal, ppn, grandTotal } = useMemo(() => {
+        const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity * item.content, 0);
+        const ppn = subtotal * 0.11;
+        const grandTotal = subtotal + ppn;
+        return { subtotal, ppn, grandTotal };
+    }, [cartItems]);
+
     const shipping_amount = 0;
+
+    // Memoize the cart items for the order summary to prevent re-rendering
+    const cartItemElements = useMemo(
+        () =>
+            cartItems.map((item) => (
+                <div key={item.id} className="flex items-start justify-between py-2">
+                    <div className="flex-1">
+                        <p className="text-sm font-medium">{item.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                            Qty: {item.quantity} {item.order_unit}
+                        </p>
+                    </div>
+                    <p className="text-sm font-medium whitespace-nowrap">Rp{(item.price * item.quantity).toLocaleString()}</p>
+                </div>
+            )),
+        [cartItems],
+    );
 
     return (
         <HeaderLayout>
@@ -127,7 +156,7 @@ export default function PaymentPage({ billing, shipping }: PaymentProps) {
                             <CardContent>
                                 <form id="payment-form" onSubmit={handleSubmit} className="space-y-4">
                                     {/* ... Mandiri and BCA divs ... */}
-                                    <div className="cursor-not-allowed rounded-xl p-4 flex items-center justify-between border-2 border-border opacity-50">
+                                    <div className="flex cursor-not-allowed items-center justify-between rounded-xl border-2 border-border p-4 opacity-50">
                                         <div className="flex items-center gap-3">
                                             <div className="rounded-full bg-yellow-400 p-3">
                                                 <CreditCard className="h-6 w-6 text-white" />
@@ -138,7 +167,7 @@ export default function PaymentPage({ billing, shipping }: PaymentProps) {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="cursor-not-allowed rounded-xl p-4 flex items-center justify-between border-2 border-border opacity-50">
+                                    <div className="flex cursor-not-allowed items-center justify-between rounded-xl border-2 border-border p-4 opacity-50">
                                         <div className="flex items-center gap-3">
                                             <div className="rounded-full bg-blue-500 p-3">
                                                 <CreditCard className="h-6 w-6 text-white" />
@@ -149,15 +178,15 @@ export default function PaymentPage({ billing, shipping }: PaymentProps) {
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div
                                         className={`flex flex-col gap-3 rounded-xl border-2 p-4 transition-all duration-200 ${
                                             sourceOfFund === 'pinjaman' ? 'border-primary bg-primary/10' : 'border-border'
                                         }`}
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="bg-secondary p-3 rounded-full">
-                                                <Wallet className="w-6 h-6 text-secondary-foreground" />
+                                            <div className="rounded-full bg-secondary p-3">
+                                                <Wallet className="h-6 w-6 text-secondary-foreground" />
                                             </div>
                                             <div>
                                                 <h3 className="font-semibold text-card-foreground">Kredit Koperasi</h3>
@@ -183,7 +212,7 @@ export default function PaymentPage({ billing, shipping }: PaymentProps) {
                                         </div>
                                     </div>
 
-                                    <div className="pt-4 hidden lg:block">
+                                    <div className="hidden pt-4 lg:block">
                                         <button
                                             type="submit"
                                             disabled={isProcessing}
@@ -198,26 +227,34 @@ export default function PaymentPage({ billing, shipping }: PaymentProps) {
 
                         {/* ... Billing & Shipping Info ... */}
                         <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-                             <div className="rounded-lg bg-card text-card-foreground p-6 shadow-sm">
-                                <h3 className="mb-3 text-md font-semibold">Billing Address</h3>
-                                <div className="text-sm text-muted-foreground space-y-1">
-                                    <p className="text-card-foreground">{billing.first_name} {billing.last_name}</p>
+                            <div className="rounded-lg bg-card p-6 text-card-foreground shadow-sm">
+                                <h3 className="text-md mb-3 font-semibold">Billing Address</h3>
+                                <div className="space-y-1 text-sm text-muted-foreground">
+                                    <p className="text-card-foreground">
+                                        {billing.first_name} {billing.last_name}
+                                    </p>
                                     <p>{billing.email}</p>
                                     <p>{billing.phone}</p>
                                     <p className="mt-2">{billing.address}</p>
-                                    <p>{billing.city}, {billing.state} {billing.zip}</p>
+                                    <p>
+                                        {billing.city}, {billing.state} {billing.zip}
+                                    </p>
                                     <p>{billing.country}</p>
                                     {billing.notes && <p className="mt-2 italic">Notes: {billing.notes}</p>}
                                 </div>
                             </div>
-                            <div className="rounded-lg bg-card text-card-foreground p-6 shadow-sm">
+                            <div className="rounded-lg bg-card p-6 text-card-foreground shadow-sm">
                                 <h3 className="text-md mb-3 font-semibold">Shipping Address</h3>
-                                <div className="text-sm text-muted-foreground space-y-1">
-                                    <p className="text-card-foreground">{shipping.first_name} {shipping.last_name}</p>
+                                <div className="space-y-1 text-sm text-muted-foreground">
+                                    <p className="text-card-foreground">
+                                        {shipping.first_name} {shipping.last_name}
+                                    </p>
                                     <p>{shipping.email}</p>
                                     <p>{shipping.phone}</p>
                                     <p className="mt-2">{shipping.address}</p>
-                                    <p>{shipping.city}, {shipping.state} {shipping.zip}</p>
+                                    <p>
+                                        {shipping.city}, {shipping.state} {shipping.zip}
+                                    </p>
                                     <p>{shipping.country}</p>
                                 </div>
                             </div>
@@ -229,51 +266,52 @@ export default function PaymentPage({ billing, shipping }: PaymentProps) {
                         <div className="rounded-lg bg-card p-6 text-card-foreground shadow-sm">
                             <h2 className="mb-4 text-lg font-semibold">Order Summary</h2>
                             <div className="space-y-4">
-                                <div className="max-h-60 overflow-y-auto pr-2">
-                                    {cartItems.map((item) => (
-                                        <div key={item.id} className="flex items-start justify-between py-2">
-                                            <div className="flex-1">
-                                                <p className="text-sm font-medium">{item.name}</p>
-                                                <p className="text-xs text-muted-foreground">Qty: {item.quantity} {item.order_unit}</p>
-                                            </div>
-                                            <p className="text-sm font-medium whitespace-nowrap">Rp{(item.price * item.quantity).toLocaleString()}</p>
-                                        </div>
-                                    ))}
-                                </div>
+                                <div className="max-h-60 overflow-y-auto pr-2">{cartItemElements}</div>
                                 <div className="border-t border-border pt-4">
                                     <div className="space-y-2">
-                                        <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><PriceDisplay price={subtotal} /></div>
-                                        <div className="flex justify-between"><span className="text-muted-foreground">Shipping</span><span className="font-medium text-green-600 dark:text-green-400">{shipping_amount === 0 ? 'Free' : <PriceDisplay price={shipping_amount} />}</span></div>
-                                        <div className="flex justify-between"><span className="text-muted-foreground">Tax (11%)</span><PriceDisplay price={ppn} /></div>
-                                        <div className="flex justify-between border-t border-border pt-2 mt-2"><span className="text-lg font-semibold text-primary">Total</span>                                        <PriceDisplay 
-                                        price={grandTotal}
-                                        className="text-lg font-semibold text-primary" /></div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Subtotal</span>
+                                            <PriceDisplay price={subtotal} />
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Shipping</span>
+                                            <span className="font-medium text-green-600 dark:text-green-400">
+                                                {shipping_amount === 0 ? 'Free' : <PriceDisplay price={shipping_amount} />}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Tax (11%)</span>
+                                            <PriceDisplay price={ppn} />
+                                        </div>
+                                        <div className="mt-2 flex justify-between border-t border-border pt-2">
+                                            <span className="text-lg font-semibold text-primary">Total</span>{' '}
+                                            <PriceDisplay price={grandTotal} className="text-lg font-semibold text-primary" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>  
+                </div>
             </div>
 
-            {/* NEW: Mobile Sticky Footer with Centered Layout */}
-            <div className="block lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)] pt-2 pb-3 px-4">
-                <div className="flex flex-col items-center gap-2 max-w-screen-xl mx-auto">
+            {/* Mobile Sticky Footer - Vertical Layout */}
+            <div className="fixed right-0 bottom-0 left-0 block border-t bg-card px-4 pt-3 pb-4 shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)] lg:hidden">
+                <div className="mx-auto flex max-w-screen-xl flex-col items-center gap-3">
                     {/* Total Information */}
                     <div className="text-center">
                         <span className="text-xs text-muted-foreground">Total Payment</span>
-                        <p className="text-lg font-bold text-primary">
-                            Rp {grandTotal.toLocaleString()}
-                        </p>
+                        {/* Added 'block' class to ensure PriceDisplay takes its own line */}
+                        <PriceDisplay price={grandTotal} className="block text-xl font-bold text-primary" />
                     </div>
-                    
+
                     {/* Checkout Button */}
                     <div className="w-full max-w-sm">
-                        <button 
+                        <button
                             type="submit"
                             form="payment-form"
                             disabled={isProcessing}
-                            className="w-full rounded-md bg-primary px-4 py-3 text-primary-foreground hover:bg-primary/90 disabled:opacity-50 text-sm font-semibold"
+                            className="w-full rounded-md bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
                         >
                             {isProcessing ? 'Processing...' : 'Place Order'}
                         </button>
