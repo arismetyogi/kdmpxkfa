@@ -38,4 +38,13 @@ enum RoleEnum: string
     {
         return in_array($this, $roles, true);
     }
+
+    public static function adminRoles()
+    {
+        return [
+            RoleEnum::SUPER_ADMIN,
+            RoleEnum::ADMIN_BUSDEV,
+            RoleEnum::ADMIN_APOTEK,
+        ];
+    }
 }
