@@ -12,8 +12,8 @@ abstract class TestCase extends BaseTestCase
     protected function migrateFreshUsing()
     {
         return [
-            '--path' => 'tests/database/migrations',
-            '--database' => 'sqlite_testing',
+            '--path' => 'database/migrations',
+            '--database' => 'database/database.sqlite',
         ];
     }
 }
