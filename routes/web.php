@@ -29,7 +29,13 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-Route::get('sso/callback', [SsoController::class, 'callback']);
+//Route::get('sso/callback', [SsoController::class, 'callback']);
+Route::get('sso/callback', function () {
+    return Inertia::render('sso/callback', [
+        'ssoBaseUrl' => config('sso.allowed_origins.digikoperasi.url')
+    ]);
+})->name('sso.callback');
+
 Route::get('sso/decrypt', function () {
     // Sample data from the notes/decription.md
     $sampleData = [
@@ -65,7 +71,7 @@ Route::get('sso/decrypt', function () {
         'npwp_file' => 'https://storage.googleapis.com/kopdes-merah-putih-dev/npwp_file/npwp_1757660750.pdf',
     ];
 
-    return Inertia::render('Sso/Decrypt', [
+    return Inertia::render('sso/decrypt', [
         'sampleData' => $sampleData,
     ]);
 });
@@ -128,7 +134,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |--------------------------------------------------------------------------
     | Semua rute untuk admin berada di dalam group ini dengan middleware khusus.
     */
-    Route::middleware('permission:' . \App\Enums\PermissionEnum::VIEW_ADMIN_DASHBOARD->value)->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('permission:'.\App\Enums\PermissionEnum::VIEW_ADMIN_DASHBOARD->value)->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
         // Rute untuk manajemen Pembelian (Purchase Orders)
@@ -159,7 +165,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
 
         // Rute dengan permission spesifik untuk Orders
-        Route::middleware('permission:' . \App\Enums\PermissionEnum::VIEW_ORDERS->value)->group(function () {
+        Route::middleware('permission:'.\App\Enums\PermissionEnum::VIEW_ORDERS->value)->group(function () {
             Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
         });
 
@@ -199,5 +205,5 @@ Route::bind('order', function ($value) {
     return Order::findOrFail($value);
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';
