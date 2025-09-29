@@ -86,7 +86,7 @@ export default function OrderShow({ order }: OrderShowProps) {
     const subtotal = isDeliverable
         ? data.order_items.reduce((sum, item, index) => {
               const orderItem = order.order_items?.[index];
-              return sum + (orderItem ? orderItem.unit_price * (item.qty_delivered || 0) : 0);
+              return sum + (orderItem ? orderItem.unit_price * orderItem.content * (item.qty_delivered || 0) : 0);
           }, 0)
         : (order.order_items ?? []).reduce((sum, item) => {
               return sum + item.unit_price * (item.qty_delivered || 0);
@@ -246,7 +246,7 @@ export default function OrderShow({ order }: OrderShowProps) {
                                                 )}
                                             </TableCell>
                                             <TableCell className="text-sm font-medium">{item.product_name || 'N/A'}</TableCell>
-                                            <TableCell className="text-right">{idrFormatter.format(item.unit_price)}</TableCell>
+                                            <TableCell className="text-right">{idrFormatter.format(item.unit_price * item.content)}</TableCell>
                                             <TableCell className="text-center">
                                                 {item.quantity} {item.product?.order_unit}
                                                 <br />
@@ -271,9 +271,9 @@ export default function OrderShow({ order }: OrderShowProps) {
                                                 )}
                                             </TableCell>
                                             <TableCell className="text-right">
-
                                                 {idrFormatter.format(
                                                     item.unit_price *
+                                                        item.content *
                                                         (isDeliverable ? data.order_items[index]?.qty_delivered || 0 : item.qty_delivered || 0),
                                                 )}
                                             </TableCell>
@@ -285,7 +285,7 @@ export default function OrderShow({ order }: OrderShowProps) {
                                         <TableCell colSpan={6} className="text-right font-medium">
                                             Subtotal
                                         </TableCell>
-                                        <TableCell className="text-right">  {idrFormatter.format(subtotal)}</TableCell>
+                                        <TableCell className="text-right"> {idrFormatter.format(subtotal)}</TableCell>
                                     </TableRow>
                                     <TableRow>
                                         <TableCell colSpan={6} className="text-right font-medium">

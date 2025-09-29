@@ -34,30 +34,29 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface QuantityInputProps {
     value: number;
     onChange: (newValue: number) => void;
-    min?: number;
-    max?: number;
     decrementDisabled?: boolean;
     incrementDisabled?: boolean;
 }
 
-const QuantityInput: React.FC<QuantityInputProps> = ({ value, onChange, min, max, decrementDisabled, incrementDisabled }) => (
-    <div className="relative flex max-w-[120px] items-center">
+const QuantityInput: React.FC<QuantityInputProps> = ({ value, onChange, decrementDisabled, incrementDisabled }) => (
+    <div className="justify-cente flex items-center">
         <Button
             type="button"
             size="icon"
             variant="outline"
             onClick={() => onChange(value - 1)}
             disabled={decrementDisabled}
-            className="h-9 w-9 rounded-r-none"
+            className="h-8 w-8 rounded-full"
         >
             <Minus className="h-4 w-4" />
         </Button>
-        <Input
-            className="h-9 w-12 rounded-none text-center focus-visible:ring-0"
+        <input
             value={value}
-            onChange={(e) => onChange(parseInt(e.target.value, 10) || 0)}
-            min={min}
-            max={max}
+            onChange={(e) => {
+                const newValue = Number(e.target.value);
+                if (!isNaN(newValue)) onChange(newValue);
+            }}
+            className="w-8 rounded-md text-center text-lg"
         />
         <Button
             type="button"
@@ -65,7 +64,7 @@ const QuantityInput: React.FC<QuantityInputProps> = ({ value, onChange, min, max
             variant="outline"
             onClick={() => onChange(value + 1)}
             disabled={incrementDisabled}
-            className="h-9 w-9 rounded-l-none"
+            className="h-8 w-8 rounded-full"
         >
             <Plus className="h-4 w-4" />
         </Button>
@@ -101,8 +100,8 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
     const pricePerBox = product.price * product.content;
 
     return (
-        <TableRow className={cn('transition-all', isExcluded && 'bg-muted/50 opacity-60')}>
-            <TableCell className="hidden p-2 sm:table-cell">
+        <TableRow className={cn('transition-all', isExcluded && 'bg-muted/50')}>
+            <TableCell className={cn('hidden p-2 md:table-cell', isExcluded && 'opacity-60')}>
                 <img
                     src={product.image || '/products/Placeholder_Medicine.png'}
                     alt={product.name}
@@ -112,32 +111,26 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
                     }}
                 />
             </TableCell>
-            <TableCell className="px-4 py-2 font-medium">
-                <p className="line-clamp-2 text-sm sm:text-base">{product.name}</p>
+            <TableCell className={cn('px-2 py-2 font-medium sm:px-4', isExcluded && 'opacity-60')}>
+                <p className="line-clamp-2 text-sm font-medium sm:text-base">{product.name}</p>
 
-                {/* MODIFICATION: Price info visible on mobile only */}
                 <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground sm:hidden">
                     <PriceDisplay price={pricePerBox} currency="" decimal="hidden" />
                     <span>/ {product.order_unit}</span>
                 </div>
 
-                {/* MODIFICATION: Order unit visible on sm screens and up */}
                 <p className="hidden text-xs text-muted-foreground sm:block">{product.order_unit}</p>
             </TableCell>
-
-            {/* MODIFICATION: Price column hidden on mobile */}
-            <TableCell className="hidden text-center whitespace-nowrap sm:table-cell">
+            <TableCell className={cn('hidden px-2 text-center sm:table-cell', isExcluded && 'opacity-60')}>
                 <PriceDisplay price={pricePerBox} />
             </TableCell>
-            <TableCell className="hidden p-2 text-center lg:table-cell">{maxBoxQuantity}</TableCell>
-            <TableCell className="p-2">
+            <TableCell className={cn('hidden p-2 text-center lg:table-cell', isExcluded && 'opacity-60')}>{maxBoxQuantity}</TableCell>
+            <TableCell className={cn('p-2', isExcluded && 'opacity-60')}>
                 <div className="flex justify-center">
                     <div className="hidden lg:flex">
                         <QuantityInput
                             value={assignedBoxQuantity}
                             onChange={handleBoxQuantityUpdate}
-                            min={0}
-                            max={maxBoxQuantity}
                             decrementDisabled={product.assignedQuantity <= 0}
                             incrementDisabled={product.assignedQuantity >= product.maxQuantity}
                         />
@@ -153,18 +146,18 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
                     </div>
                 </div>
             </TableCell>
-
-            <TableCell className="text-center font-medium whitespace-nowrap">
-                <PriceDisplay price={product.price * product.assignedQuantity} currency="" className="lg:hidden" />
+            <TableCell className={cn('px-2 text-center font-medium', isExcluded && 'opacity-60')}>
+                <PriceDisplay price={product.price * product.assignedQuantity} currency="" className="text-xs lg:hidden" />
                 <PriceDisplay price={product.price * product.assignedQuantity} className="hidden lg:block" />
             </TableCell>
-            <TableCell className="pl-6 text-center">
+            <TableCell className="px-2 text-center">
                 {isExcluded ? (
-                    <Button variant="default" size="sm" onClick={handleInclude} className="whitespace-nowrap">
+                    // The `opacity-100` class is no longer needed here but doesn't hurt to keep.
+                    <Button variant="default" size="sm" onClick={handleInclude} className="px-2">
                         Include
                     </Button>
                 ) : (
-                    <Button variant="destructive" size="sm" onClick={handleExclude}>
+                    <Button variant="destructive" size="sm" onClick={handleExclude} className="px-2">
                         Exclude
                     </Button>
                 )}
@@ -180,16 +173,16 @@ interface ProductListTableProps {
 }
 
 const ProductListTable: React.FC<ProductListTableProps> = ({ products, onQuantityChange }) => (
-    <Table className="border-1">
+    <Table className="w-full table-fixed border">
         <TableHeader>
             <TableRow>
-                <TableHead className="hidden w-[80px] sm:table-cell">Image</TableHead>
-                <TableHead>Product Name</TableHead>
-                <TableHead className="hidden text-center whitespace-nowrap sm:table-cell">Price</TableHead>
-                <TableHead className="hidden text-center lg:table-cell">Max</TableHead>
-                <TableHead className="w-[75px] text-center sm:w-[100px] lg:w-[140px]">Qty</TableHead>
-                <TableHead className="text-center whitespace-nowrap">Subtotal</TableHead>
-                <TableHead className="w-[90px] text-center sm:w-[110px]">Action</TableHead>
+                <TableHead className="hidden w-[80px] p-2 md:table-cell">Image</TableHead>
+                <TableHead className="px-2 sm:px-4">Product Name</TableHead>
+                <TableHead className="hidden w-[100px] px-2 text-center sm:table-cell">Price</TableHead>
+                <TableHead className="hidden w-[70px] px-2 text-center lg:table-cell">Max</TableHead>
+                <TableHead className="w-[65px] px-2 text-center lg:w-[150px]">Qty</TableHead>
+                <TableHead className="w-[100px] px-2 text-center">Subtotal</TableHead>
+                <TableHead className="w-[80px] px-2 text-center">Action</TableHead>
             </TableRow>
         </TableHeader>
         <TableBody>
@@ -214,11 +207,11 @@ interface OrderSummaryCardProps {
 }
 
 const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, summary, onCheckout }) => (
-    <div className="sticky top-8">
+    <div className="sticky top-24">
         <Card>
-            <CardContent className="p-6">
+            <CardContent className="px-6">
                 <h2 className="mb-4 text-xl font-bold">Order Summary</h2>
-                <ScrollArea className="-mr-4 h-96 pr-4">
+                <ScrollArea className="-mr-4 h-66 pr-4">
                     <div className="space-y-4">
                         {activeProducts.length > 0 ? (
                             activeProducts.map((product) => (
@@ -264,7 +257,7 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, sum
     </div>
 );
 
-// --- UPDATED Sub-component: Mobile Checkout Bar ---
+// --- Mobile Checkout Bar ---
 interface MobileCheckoutBarProps {
     total: number;
     onCheckout: () => void;
@@ -274,13 +267,10 @@ interface MobileCheckoutBarProps {
 const MobileCheckoutBar: React.FC<MobileCheckoutBarProps> = ({ total, onCheckout, disabled }) => (
     <div className="fixed right-0 bottom-0 left-0 z-10 border-t bg-background shadow-lg lg:hidden">
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-3 px-4 pt-3 pb-4 sm:px-6">
-            {/* Total Information - Now stacked vertically */}
             <div className="flex flex-col items-center">
                 <p className="text-sm text-muted-foreground">Total Price</p>
                 <PriceDisplay price={total} className="text-2xl font-bold text-primary" />
             </div>
-
-            {/* Checkout Button */}
             <Button onClick={onCheckout} disabled={disabled} size="lg" className="w-full max-w-sm">
                 <ShoppingCart className="mr-2 h-5 w-5" />
                 Add to Checkout
@@ -289,7 +279,7 @@ const MobileCheckoutBar: React.FC<MobileCheckoutBarProps> = ({ total, onCheckout
     </div>
 );
 
-// --- Main Page Component (Updated for Mobile) ---
+// --- Main Page Component ---
 export default function PackagePage({ products: initialProducts }: PackagePageProps) {
     const [packageProducts, setPackageProducts] = useState<PackageProduct[]>(initialProducts);
     const [searchQuery, setSearchQuery] = useState('');
