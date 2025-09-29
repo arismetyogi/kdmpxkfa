@@ -47,21 +47,33 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
         return () => clearTimeout(timer);
     }, [isAdded]);
 
-    const addToCart = (productToAdd: Product, quantityToAdd: number) => {
-        setCart((prevCart) => {
-            const existingItem = prevCart.find((item) => item.id === productToAdd.id);
-            let newCart;
-            if (existingItem) {
-                newCart = prevCart.map((item) => (item.id === productToAdd.id ? { ...item, quantity: item.quantity + quantityToAdd } : item));
-            } else {
-                const newCartItem: Omit<CartItem, 'total'> = { ...productToAdd, quantity: quantityToAdd };
-                newCart = [...prevCart, newCartItem as CartItem];
-            }
-            localStorage.setItem('cart', JSON.stringify(newCart));
-            return newCart;
-        });
-        setAnimationTrigger((prev) => prev + 1);
-    };
+  const addToCart = (productToAdd: Product, quantityToAdd: number) => {
+    // Calculate price per order unit (price * content)
+    const pricePerOrderUnit = productToAdd.price * productToAdd.content;
+    
+    setCart((prevCart) => {
+      const existingItem = prevCart.find((item) => item.id === productToAdd.id);
+      let newCart;
+      if (existingItem) {
+        newCart = prevCart.map((item) =>
+          item.id === productToAdd.id
+            ? { ...item, quantity: item.quantity + quantityToAdd }
+            : item,
+        );
+      } else {
+        // Create new cart item with the price per order unit
+        const newCartItem: Omit<CartItem, 'total'> = { 
+          ...productToAdd, 
+          price: pricePerOrderUnit, // Use price per order unit
+          quantity: quantityToAdd 
+        };
+        newCart = [...prevCart, newCartItem as CartItem];
+      }
+      localStorage.setItem('cart', JSON.stringify(newCart));
+      return newCart;
+    });
+    setAnimationTrigger(prev => prev + 1);
+  };
 
     const handleQuantityChange = (amount: number) => {
         setQuantity((prev) => Math.max(1, prev + amount));

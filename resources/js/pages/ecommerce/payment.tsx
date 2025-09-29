@@ -1,10 +1,11 @@
+import PriceDisplay from '@/components/priceDisplay';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import HeaderLayout from '@/layouts/header-layout';
 import { Head, router } from '@inertiajs/react';
 import { CreditCard, Wallet } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 interface CartItem {
@@ -49,7 +50,7 @@ interface PaymentProps {
 
 export default function PaymentPage({ billing, shipping }: PaymentProps) {
     const [sourceOfFund] = useState('pinjaman');
-    const [paymentType, setPaymentType] = useState('CAD');
+    const [paymentType, setPaymentType] = useState('cad');
     const [isProcessing, setIsProcessing] = useState(false);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
@@ -65,54 +66,79 @@ export default function PaymentPage({ billing, shipping }: PaymentProps) {
         } else setCartItems(JSON.parse(storedCart));
     }, []);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsProcessing(true);
+    const handleSubmit = useCallback(
+        (e: React.FormEvent) => {
+            e.preventDefault();
+            setIsProcessing(true);
 
-        const cartData = localStorage.getItem('cart') || '[]';
+            const cartData = localStorage.getItem('cart') || '[]';
 
-        router.post(
-            route('payment.process'),
-            {
-                source_of_fund: sourceOfFund,
-                payment_type: paymentType,
-                cart: JSON.parse(cartData),
-            },
-            {
-                onSuccess: () => {
-                    localStorage.removeItem('cart');
+            router.post(
+                route('payment.process'),
+                {
+                    source_of_fund: sourceOfFund,
+                    payment_type: paymentType,
+                    cart: JSON.parse(cartData),
                 },
-                onError: (errors) => {
-                    if (errors.credit_limit_error) {
-                        toast.error('Saldo Kredit Anda Kurang!, Cek kembali Saldo Kredit yang Anda miliki!', {
-                            duration: 5000,
-                        });
-                    } else if (errors.mapping_error) {
-                        toast.error('Koperasi belum dimapping dengan Apotek KF, Silakan hubungi administrator.', {
-                            duration: 5000,
-                        });
-                    } else if (errors.generic_payment_error) {
-                        toast.error('A technical error occurred. Our team has been notified. Please try again later.', {
-                            duration: 5000,
-                        });
-                    } else {
-                        toast.error('Payment Failed', {
-                            description: 'An unknown error occurred. Please check your details and try again.',
-                            duration: 10000,
-                        });
-                    }
+                {
+                    onSuccess: () => {
+                        localStorage.removeItem('cart');
+                    },
+                    onError: (errors) => {
+                        if (errors.credit_limit_error) {
+                            toast.error('Saldo Kredit Anda Kurang!, Cek kembali Saldo Kredit yang Anda miliki!', {
+                                duration: 5000,
+                            });
+                        } else if (errors.mapping_error) {
+                            toast.error('Koperasi belum dimapping dengan Apotek KF, Silakan hubungi administrator.', {
+                                duration: 5000,
+                            });
+                        } else if (errors.generic_payment_error) {
+                            toast.error('A technical error occurred. Our team has been notified. Please try again later.', {
+                                duration: 5000,
+                            });
+                        } else {
+                            toast.error('Payment Failed', {
+                                description: 'An unknown error occurred. Please check your details and try again.',
+                                duration: 10000,
+                            });
+                        }
+                    },
+                    onFinish: () => {
+                        setIsProcessing(false);
+                    },
                 },
-                onFinish: () => {
-                    setIsProcessing(false);
-                },
-            },
-        );
-    };
+            );
+        },
+        [sourceOfFund, paymentType],
+    );
 
-    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const ppn = subtotal * 0.11;
-    const grandTotal = subtotal + ppn;
+    // Use useMemo to calculate totals only when cartItems change
+    const { subtotal, ppn, grandTotal } = useMemo(() => {
+        const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity * item.content, 0);
+        const ppn = subtotal * 0.11;
+        const grandTotal = subtotal + ppn;
+        return { subtotal, ppn, grandTotal };
+    }, [cartItems]);
+
     const shipping_amount = 0;
+
+    // Memoize the cart items for the order summary to prevent re-rendering
+    const cartItemElements = useMemo(
+        () =>
+            cartItems.map((item) => (
+                <div key={item.id} className="flex items-start justify-between py-2">
+                    <div className="flex-1">
+                        <p className="text-sm font-medium">{item.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                            Qty: {item.quantity} {item.order_unit}
+                        </p>
+                    </div>
+                    <p className="text-sm font-medium whitespace-nowrap">Rp{(item.price * item.quantity).toLocaleString()}</p>
+                </div>
+            )),
+        [cartItems],
+    );
 
     return (
         <HeaderLayout>
@@ -240,38 +266,26 @@ export default function PaymentPage({ billing, shipping }: PaymentProps) {
                         <div className="rounded-lg bg-card p-6 text-card-foreground shadow-sm">
                             <h2 className="mb-4 text-lg font-semibold">Order Summary</h2>
                             <div className="space-y-4">
-                                <div className="max-h-60 overflow-y-auto pr-2">
-                                    {cartItems.map((item) => (
-                                        <div key={item.id} className="flex items-start justify-between py-2">
-                                            <div className="flex-1">
-                                                <p className="text-sm font-medium">{item.name}</p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    Qty: {item.quantity} {item.order_unit}
-                                                </p>
-                                            </div>
-                                            <p className="text-sm font-medium whitespace-nowrap">Rp{(item.price * item.quantity).toLocaleString()}</p>
-                                        </div>
-                                    ))}
-                                </div>
+                                <div className="max-h-60 overflow-y-auto pr-2">{cartItemElements}</div>
                                 <div className="border-t border-border pt-4">
                                     <div className="space-y-2">
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">Subtotal</span>
-                                            <span className="font-medium">Rp{subtotal.toLocaleString()}</span>
+                                            <PriceDisplay price={subtotal} />
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">Shipping</span>
                                             <span className="font-medium text-green-600 dark:text-green-400">
-                                                {shipping_amount === 0 ? 'Free' : `Rp${(shipping_amount as number).toLocaleString()}`}
+                                                {shipping_amount === 0 ? 'Free' : <PriceDisplay price={shipping_amount} />}
                                             </span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">Tax (11%)</span>
-                                            <span className="font-medium">Rp{ppn.toLocaleString()}</span>
+                                            <PriceDisplay price={ppn} />
                                         </div>
                                         <div className="mt-2 flex justify-between border-t border-border pt-2">
-                                            <span className="text-lg font-semibold text-primary">Total</span>
-                                            <span className="text-lg font-semibold text-primary">Rp{grandTotal.toLocaleString()}</span>
+                                            <span className="text-lg font-semibold text-primary">Total</span>{' '}
+                                            <PriceDisplay price={grandTotal} className="text-lg font-semibold text-primary" />
                                         </div>
                                     </div>
                                 </div>
@@ -281,13 +295,14 @@ export default function PaymentPage({ billing, shipping }: PaymentProps) {
                 </div>
             </div>
 
-            {/* NEW: Mobile Sticky Footer with Centered Layout */}
-            <div className="fixed right-0 bottom-0 left-0 block border-t bg-card px-4 pt-2 pb-3 shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)] lg:hidden">
-                <div className="mx-auto flex max-w-screen-xl flex-col items-center gap-2">
+            {/* Mobile Sticky Footer - Vertical Layout */}
+            <div className="fixed right-0 bottom-0 left-0 block border-t bg-card px-4 pt-3 pb-4 shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)] lg:hidden">
+                <div className="mx-auto flex max-w-screen-xl flex-col items-center gap-3">
                     {/* Total Information */}
                     <div className="text-center">
                         <span className="text-xs text-muted-foreground">Total Payment</span>
-                        <p className="text-lg font-bold text-primary">Rp {grandTotal.toLocaleString()}</p>
+                        {/* Added 'block' class to ensure PriceDisplay takes its own line */}
+                        <PriceDisplay price={grandTotal} className="block text-xl font-bold text-primary" />
                     </div>
 
                     {/* Checkout Button */}

@@ -3,6 +3,7 @@ import HeaderLayout from '@/layouts/header-layout';
 import { Order } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { CheckCircle } from 'lucide-react';
+import PriceDisplay from '@/components/priceDisplay';
 
 interface OrderCompletedProps {
     order: Order;
@@ -90,8 +91,10 @@ export default function OrderCompletedPage({ order }: OrderCompletedProps) {
                                         </p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-sm font-medium">Rp{item?.total_price.toLocaleString()}</p>
-                                        <p className="text-sm text-muted-foreground">Rp{item?.unit_price.toLocaleString()} each</p>
+                                        <PriceDisplay price={item.total_price} />
+                                        <p className="text-sm text-muted-foreground">
+                                            Rp{item?.unit_price.toLocaleString()} each
+                                        </p>
                                     </div>
                                 </div>
                             ))}
