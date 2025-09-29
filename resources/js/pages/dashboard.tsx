@@ -78,28 +78,29 @@ export default function Dashboard({ products }: { products?: Product[] }) {
             </AppHeaderLayout>
         );
     }
-
-    
     
     return (
         <AppHeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="KFA" />
 
             <div className="min-h-screen from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
-                <div className="mx-auto flex max-w-7xl flex-col gap-20 p-4 md:p-8">
+             
+                <div className="mx-auto flex max-w-7xl flex-col gap-12 p-4 md:gap-20 md:p-8">
                     {/* Hero Section */}
-            <main className="relative min-h-[400px] p-2">
-                <HeroCarousel />
-            </main>
+                    <main className="relative">
+                        <HeroCarousel />
+                    </main>
 
-                        {/* Kategori Cards */}
+                    {/* Kategori Cards */}
                     <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }}>
                         <div className="mb-8 text-center">
-                            <h2 className="mb-2 text-3xl font-bold text-slate-800 dark:text-slate-100">Kategori Pilihan</h2>
+                          
+                            <h2 className="mb-2 text-2xl font-bold text-slate-800 dark:text-slate-100 md:text-3xl">Kategori Pilihan</h2>
                             <p className="text-slate-600 dark:text-slate-400">Pilihan terbaik untuk kesehatan keluarga Anda</p>
                         </div>
                         <div className="flex justify-center">
-                            <div className="grid w-full max-w-6xl grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+                          
+                            <div className="grid w-full max-w-6xl grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 md:grid-cols-3">
                                 {categoryCards.map((cat, idx) => (
                                     <motion.div
                                         key={idx}
@@ -112,9 +113,7 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                         <Link href={route('orders.products', { categories : [cat.name] })}>
                                             <Card className="group rounded-2xl border bg-white transition-all duration-300 hover:shadow-xl dark:bg-slate-800">
                                                 <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-                                                    <div
-                                                        className={`${cat.color} mb-4 rounded-full p-4 transition-transform group-hover:scale-110`}
-                                                    >
+                                                    <div className={`${cat.color} mb-4 rounded-full p-4 transition-transform group-hover:scale-110`}>
                                                         <cat.icon className="h-6 w-6" />
                                                     </div>
                                                     <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{cat.name}</h3>
@@ -131,33 +130,29 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                     {/* Carousel Produk */}
                     <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }}>
                         <div className="mb-8 text-center">
-                            <h2 className="mb-2 text-3xl font-bold text-slate-800 dark:text-slate-100">Produk Terlaris</h2>
+                          
+                            <h2 className="mb-2 text-2xl font-bold text-slate-800 dark:text-slate-100 md:text-3xl">Produk Terlaris</h2>
                             <p className="text-slate-600 dark:text-slate-400">Pilihan favorit pelanggan premium kami</p>
                         </div>
                         <Carousel opts={{ align: 'start', loop: true }} plugins={[Autoplay({ delay: 4000 })]} className="w-full">
                             <CarouselContent className="-ml-4">
                                 {products?.map((p) => (
+                                 
                                     <CarouselItem key={p.id} className="basis-1/2 pl-4 md:basis-1/3 lg:basis-1/4">
                                         <motion.div whileHover={{ y: -4 }} className="group h-full">
-                                            <Card className="relative h-full overflow-hidden rounded-3xl border-0 bg-white shadow-lg backdrop-blur-sm hover:shadow-2xl dark:bg-slate-800">
+                                            <Card className="relative h-full overflow-hidden rounded-2xl border-0 bg-white shadow-lg backdrop-blur-sm hover:shadow-2xl dark:bg-slate-800 md:rounded-3xl">
                                                 <div className="relative overflow-hidden">
                                                     <img
                                                         src={p.image || '/placeholder.jpg'}
                                                         alt={p.image_alt || p.name}
-                                                        className="h-48 w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                        className="h-40 w-full object-cover transition-transform duration-700 group-hover:scale-110 sm:h-48"
                                                     />
                                                 </div>
-                                                <CardContent className="p-6">
-                                                    <h3 className="mb-2 line-clamp-1 font-bold text-slate-800 dark:text-slate-100">
-                                                        {p.name}
-                                                    </h3>
-                                                    <p className="mb-3 line-clamp-2 text-sm text-slate-500 dark:text-slate-400">
-                                                        {p.description}
-                                                    </p>
-                                                    <div className="mb-3 flex items-baseline gap-2">
-                                                        <span className="text-lg font-bold text-blue-600">
-                                                            Rp {p.price.toLocaleString('id-ID')}
-                                                        </span>
+                                                <CardContent className="p-4 md:p-6">
+                                                    <h3 className="mb-1 line-clamp-1 font-bold text-slate-800 dark:text-slate-100 md:mb-2">{p.name}</h3>
+                                                    <p className="mb-2 line-clamp-2 text-sm text-slate-500 dark:text-slate-400 md:mb-3">{p.description}</p>
+                                                    <div className="flex items-baseline gap-2">
+                                                        <span className="text-base font-bold text-blue-600 md:text-lg">Rp {p.price.toLocaleString('id-ID')}</span>
                                                     </div>
                                                 </CardContent>
                                             </Card>
@@ -165,45 +160,39 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                     </CarouselItem>
                                 ))}
                             </CarouselContent>
-                            <CarouselPrevious className="left-0 border-0 bg-white shadow-lg backdrop-blur-sm dark:bg-slate-700/80" />
-                            <CarouselNext className="right-0 border-0 bg-white shadow-lg backdrop-blur-sm dark:bg-slate-700/80" />
+                         
+                            <CarouselPrevious className="hidden border-0 bg-white shadow-lg backdrop-blur-sm dark:bg-slate-700/80 sm:flex" />
+                            <CarouselNext className="hidden border-0 bg-white shadow-lg backdrop-blur-sm dark:bg-slate-700/80 sm:flex" />
                         </Carousel>
                     </motion.div>
 
-                    <Card className="rounded-3xl bg-white p-8 shadow-xl ring-1 ring-slate-900/5 md:p-12 dark:bg-slate-800/50">
+                    
+                    <Card className="rounded-3xl bg-white p-6 shadow-xl ring-1 ring-slate-900/5 md:p-12 dark:bg-slate-800/50">
                         <motion.div
                             initial={{ opacity: 0, y: 40 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, delay: 0.4 }}
                             className="grid items-center gap-8 md:grid-cols-2 lg:gap-12"
                         >
-                            {/* Image on the left */}
-                            <div className="">
-                                <img src="/Package (2).png" alt="Paket Koperasi Merah Putih" className="h-full w-full rounded-3xl object-cover" />
+                            <div className="max-w-md mx-auto">
+                                <img src="/Package (2).png" alt="Paket Koperasi Merah Putih" className="h-full w-full rounded-2xl object-cover md:rounded-3xl" />
                             </div>
-
-                            {/* Content on the right */}
                             <div className="flex flex-col text-center md:text-left">
-                                <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-slate-800 md:text-5xl dark:text-white">
+                               
+                                <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-slate-800 sm:text-4xl md:text-5xl dark:text-white">
                                     Paket Koperasi Merah Putih
                                 </h2>
-                                <p className="mb-6 text-lg text-slate-600 dark:text-slate-300">Paket Obat lengkap senilai 30 juta untuk mengisi</p>
-
-                                {/* CTA Button */}
+                                <p className="mb-6 text-base text-slate-600 dark:text-slate-300 md:text-lg">Paket Obat lengkap senilai 30 juta untuk mengisi</p>
                                 <div className="flex justify-center md:justify-start">
                                     <Link href={route('packages.index')}>
-                                        <Button
-                                            size="lg"
-                                            className="rounded-xl bg-blue-600 py-7 text-lg font-bold text-white shadow-lg hover:bg-blue-700"
-                                        >
-                                            <ShoppingCart className="mr-3 h-5 w-5" />
+                                        
+                                        <Button size="lg" className="rounded-xl bg-blue-600 px-6 py-5 text-base font-bold text-white shadow-lg hover:bg-blue-700 md:px-8 md:py-7 md:text-lg">
+                                            <ShoppingCart className="mr-2 h-5 w-5" />
                                             Buy Package Now
                                         </Button>
                                     </Link>
                                 </div>
-
-                                {/* Features */}
-                                <div className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-slate-600 md:justify-start dark:text-slate-400">
+                                <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-4 text-sm text-slate-600 md:justify-start md:gap-x-8 dark:text-slate-400">
                                     <div className="flex items-center gap-2">
                                         <Truck className="h-5 w-5 text-slate-400" />
                                         <span>Free shipping</span>
@@ -224,17 +213,17 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                     {/* Grid Produk */}
                     <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.5 }}>
                         <div className="mb-8 text-center">
-                            <h2 className="mb-2 text-3xl font-bold text-slate-800 dark:text-slate-100">Katalog Premium</h2>
+                            
+                            <h2 className="mb-2 text-2xl font-bold text-slate-800 dark:text-slate-100 md:text-3xl">Katalog Premium</h2>
                             <p className="text-slate-600 dark:text-slate-400">Jelajahi koleksi lengkap produk berkualitas tinggi</p>
                         </div>
-
-                        {/* Category buttons */}
-                        <div className="mb-8 flex flex-wrap justify-center gap-3">
+                        <div className="mb-8 flex flex-wrap justify-center gap-2 md:gap-3">
                             {(categories ?? []).map((cat) => (
+                             
                                 <Button
                                     key={cat}
                                     variant={activeCategory === cat ? 'default' : 'outline'}
-                                    className={`rounded-full px-6 py-3 font-semibold transition-all duration-300 ${
+                                    className={`rounded-full px-5 py-2 text-sm font-semibold transition-all duration-300 md:px-6 md:py-3 md:text-base ${
                                         activeCategory === cat
                                             ? 'scale-105 bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
                                             : 'border-2 border-blue-200 text-slate-700 hover:bg-blue-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800'
@@ -245,9 +234,8 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                 </Button>
                             ))}
                         </div>
-
-                        {/* Product grid */}
-                        <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4">
+                      
+                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:gap-6 lg:grid-cols-4">
                             {(filteredProducts ?? []).map((p, idx) => (
                                 <motion.div
                                     key={p.id}
@@ -257,30 +245,21 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                     whileHover={{ y: -8, scale: 1.02 }}
                                     className="group"
                                 >
-                                    <Card className="relative flex h-full flex-col overflow-hidden rounded-3xl border-0 bg-white shadow-xl backdrop-blur-sm hover:shadow-2xl dark:bg-slate-800">
+                                    <Card className="relative flex h-full flex-col overflow-hidden rounded-2xl border-0 bg-white shadow-xl backdrop-blur-sm hover:shadow-2xl dark:bg-slate-800 md:rounded-3xl">
                                         <div className="relative overflow-hidden">
                                             <img
                                                 src={p.image ? `/storage/${p.image}` : '/placeholder.jpg'}
                                                 alt={p.name}
-                                                className="h-48 w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                className="h-40 w-full object-cover transition-transform duration-700 group-hover:scale-110 sm:h-48"
                                             />
                                         </div>
-                                        <CardContent className="flex flex-1 flex-col p-6">
-                                            <h3 className="mb-2 line-clamp-1 font-bold text-slate-800 dark:text-slate-100">
-                                                {p.name}
-                                            </h3>
-                                            <p className="mb-3 line-clamp-2 flex-1 text-sm text-slate-500 dark:text-slate-400">
-                                                {p.description}
-                                            </p>
-                                            <div className="mb-3 flex items-baseline gap-2">
-                                                <span className="text-lg font-bold text-blue-600">
-                                                    Rp {p.price.toLocaleString('id-ID')}
-                                                </span>
+                                        <CardContent className="flex flex-1 flex-col p-4 md:p-6">
+                                            <h3 className="mb-1 line-clamp-1 font-bold text-slate-800 dark:text-slate-100 md:mb-2">{p.name}</h3>
+                                            <p className="mb-2 line-clamp-2 flex-1 text-sm text-slate-500 dark:text-slate-400 md:mb-3">{p.description}</p>
+                                            <div className="flex items-baseline gap-2">
+                                                <span className="text-base font-bold text-blue-600 md:text-lg">Rp {p.price.toLocaleString('id-ID')}</span>
                                             </div>
-                                            <Button
-                                                asChild
-                                                className="mt-auto w-full rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 font-semibold text-white shadow-md hover:from-blue-700 hover:to-blue-800"
-                                            >
+                                            <Button asChild className="mt-auto w-full rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 py-2.5 text-sm font-semibold text-white shadow-md hover:from-blue-700 hover:to-blue-800 md:rounded-2xl md:text-base">
                                                 <Link href="#">
                                                     <ShoppingBag className="mr-2 h-4 w-4" /> Lihat Detail
                                                 </Link>
@@ -293,8 +272,8 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                     </motion.div>
                 </div>
             </div>
-
             <Footer />
         </AppHeaderLayout>
     );
 }
+

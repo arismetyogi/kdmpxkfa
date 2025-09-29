@@ -7,7 +7,6 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { ArrowLeft, ArrowRight, CheckCircle, Package, ShoppingBag, Truck } from 'lucide-react';
 import React from 'react';
-import { currency } from '@/lib/utils';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -199,27 +198,6 @@ export default function Detail() {
                                 <CardTitle>Order Summary</CardTitle>
                             </CardHeader>
                             <CardContent>
-<<<<<<< HEAD
-                                    {(() => {
-                                        // ✅ Subtotal (sum of price × quantity)
-                                        const subtotal =
-                                        order.products?.reduce((sum, item) => {
-                                            const qty = item.pivot?.qty_delivered ?? item.pivot?.quantity ?? 1;
-                                            return sum + item.price * qty;
-                                        }, 0) ?? 0;
-
-                                        // ✅ Tax (11%)
-                                        const tax = subtotal * 0.11;
-
-                                        // ✅ Shipping cost (fallback 0 if not available)
-                                        const shipping = order.shipping_amount ?? 0;
-
-                                        // ✅ Discount (fallback 0 if not available)
-                                        const discount = order.discount_amount ?? 0;
-
-                                        // ✅ Final total
-                                        const total = subtotal + tax;
-=======
                                 {(() => {
                                     const subtotal =
                                         order.order_items?.reduce((sum, item) => {
@@ -233,9 +211,8 @@ export default function Detail() {
                                     const shipping = Number(order.shipping_amount) || 0;
                                     const discount = Number(order.discount_amount) || 0;
                                     const total = subtotal + tax + shipping - discount;
->>>>>>> source/master
 
-                                        return (
+                                    return (
                                         <div className="grid grid-cols-2 gap-2 text-sm">
                                             <div>Product Price</div>
                                             <div className="text-right">
@@ -257,20 +234,6 @@ export default function Detail() {
                                                 -<PriceDisplay price={discount} />
                                             </div>
 
-<<<<<<< HEAD
-                                            <div className="font-semibold text-base">
-                                            Total
-                                            </div>
-                                            <div className="text-right font-semibold text-base">
-                                            {currency(order.total_price)}
-                                            </div>
-                                        </div>
-                                        );
-                                    })()}
-                                    </CardContent>
-
-                                </Card>
-=======
                                             <div className="text-base font-semibold">Total</div>
                                             <div className="text-right text-base font-semibold">
                                                 <PriceDisplay price={total} />
@@ -280,7 +243,6 @@ export default function Detail() {
                                 })()}
                             </CardContent>
                         </Card>
->>>>>>> source/master
 
                         {order.status === 'dalam-pengiriman' && (
                             <Card>
@@ -299,23 +261,11 @@ export default function Detail() {
                                                     { status: 'diterima' },
                                                 );
                                             }}
-<<<<<<< HEAD
-                                           className="w-full bg-green-600 text-white hover:bg-green-700 sm:flex-1"
-
-                                        >
-                                            Paket Sudah Diterima
-                                        </Button>
-                                        <Button
-                                            variant="destructive"
-                                            className="w-full text-white sm:flex-1" 
-                                        >
-=======
                                             className="w-full bg-green-600 text-white hover:bg-green-700 sm:flex-1"
                                         >
                                             Paket Sudah Diterima
                                         </Button>
                                         <Button variant="destructive" className="w-full text-white sm:flex-1">
->>>>>>> source/master
                                             Laporkan
                                         </Button>
                                     </div>

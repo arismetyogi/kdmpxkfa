@@ -1,5 +1,5 @@
 import PriceDisplay from '@/components/priceDisplay';
-import ScrollToTopButton from "@/components/ScrollToTop";
+import ScrollToTopButton from '@/components/ScrollToTop';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -34,38 +34,30 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface QuantityInputProps {
     value: number;
     onChange: (newValue: number) => void;
-    min?: number;
-    max?: number;
     decrementDisabled?: boolean;
     incrementDisabled?: boolean;
 }
 
-const QuantityInput: React.FC<QuantityInputProps> = ({ value, onChange, min, max, decrementDisabled, incrementDisabled }) => (
-    <div className="relative flex max-w-[120px] items-center">
+const QuantityInput: React.FC<QuantityInputProps> = ({ value, onChange, decrementDisabled, incrementDisabled }) => (
+    <div className="justify-cente flex items-center">
         <Button
             type="button"
             size="icon"
             variant="outline"
             onClick={() => onChange(value - 1)}
             disabled={decrementDisabled}
-            className="h-9 w-9 rounded-r-none"
+            className="h-8 w-8 rounded-full"
         >
             <Minus className="h-4 w-4" />
         </Button>
-        <Input
-            className="h-9 w-12 rounded-none text-center focus-visible:ring-0"
-            value={value}
-            onChange={(e) => onChange(parseInt(e.target.value, 10) || 0)}
-            min={min}
-            max={max}
-        />
+        <div className="font-base w-10 text-center text-lg">{value}</div>
         <Button
             type="button"
             size="icon"
             variant="outline"
             onClick={() => onChange(value + 1)}
             disabled={incrementDisabled}
-            className="h-9 w-9 rounded-l-none"
+            className="h-8 w-8 rounded-full"
         >
             <Plus className="h-4 w-4" />
         </Button>
@@ -112,21 +104,19 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
                     }}
                 />
             </TableCell>
-            <TableCell className="px-4 py-2 font-medium">
-                <p className="line-clamp-2 text-sm sm:text-base">{product.name}</p>
+            {/* MODIFICATION: Reduced horizontal padding on smallest screens */}
+            <TableCell className="px-2 py-2 font-medium sm:px-4">
+                <p className="line-clamp-2 text-sm font-medium sm:text-base">{product.name}</p>
 
-                {/* MODIFICATION: Price info visible on mobile only */}
                 <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground sm:hidden">
                     <PriceDisplay price={pricePerBox} currency="" decimal="hidden" />
                     <span>/ {product.order_unit}</span>
                 </div>
 
-                {/* MODIFICATION: Order unit visible on sm screens and up */}
                 <p className="hidden text-xs text-muted-foreground sm:block">{product.order_unit}</p>
             </TableCell>
 
-            {/* MODIFICATION: Price column hidden on mobile */}
-            <TableCell className="hidden text-center whitespace-nowrap sm:table-cell">
+            <TableCell className="hidden px-2 text-center sm:table-cell">
                 <PriceDisplay price={pricePerBox} />
             </TableCell>
             <TableCell className="hidden p-2 text-center lg:table-cell">{maxBoxQuantity}</TableCell>
@@ -136,8 +126,6 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
                         <QuantityInput
                             value={assignedBoxQuantity}
                             onChange={handleBoxQuantityUpdate}
-                            min={0}
-                            max={maxBoxQuantity}
                             decrementDisabled={product.assignedQuantity <= 0}
                             incrementDisabled={product.assignedQuantity >= product.maxQuantity}
                         />
@@ -154,13 +142,14 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
                 </div>
             </TableCell>
 
-            <TableCell className="text-center font-medium whitespace-nowrap">
-                <PriceDisplay price={product.price * product.assignedQuantity} currency="" className="lg:hidden" />
+            <TableCell className="px-2 text-center font-medium">
+                <PriceDisplay price={product.price * product.assignedQuantity} currency="" className="text-sm lg:hidden" />
                 <PriceDisplay price={product.price * product.assignedQuantity} className="hidden lg:block" />
             </TableCell>
-            <TableCell className="pl-6 text-center">
+            {/* MODIFICATION: Reduced horizontal padding for more space */}
+            <TableCell className="px-2 text-center">
                 {isExcluded ? (
-                    <Button variant="default" size="sm" onClick={handleInclude} className="whitespace-nowrap">
+                    <Button variant="default" size="sm" onClick={handleInclude}>
                         Include
                     </Button>
                 ) : (
@@ -180,16 +169,19 @@ interface ProductListTableProps {
 }
 
 const ProductListTable: React.FC<ProductListTableProps> = ({ products, onQuantityChange }) => (
-    <Table className="border-1">
+    // MODIFICATION: Added 'table-fixed' to enforce column widths and prevent content from causing overflow.
+    <Table className="w-full table-fixed border">
         <TableHeader>
             <TableRow>
-                <TableHead className="hidden w-[80px] sm:table-cell">Image</TableHead>
-                <TableHead>Product Name</TableHead>
-                <TableHead className="hidden text-center whitespace-nowrap sm:table-cell">Price</TableHead>
-                <TableHead className="hidden text-center lg:table-cell">Max</TableHead>
-                <TableHead className="w-[75px] text-center sm:w-[100px] lg:w-[140px]">Qty</TableHead>
-                <TableHead className="text-center whitespace-nowrap">Subtotal</TableHead>
-                <TableHead className="w-[90px] text-center sm:w-[110px]">Action</TableHead>
+                {/* MODIFICATION: Explicit widths are set for most columns to control the layout. */}
+                {/* The "Product Name" column will fill the remaining space. */}
+                <TableHead className="hidden w-[80px] p-2 sm:table-cell">Image</TableHead>
+                <TableHead className="px-2 sm:px-4">Product Name</TableHead>
+                <TableHead className="hidden w-[100px] px-2 text-center sm:table-cell">Price</TableHead>
+                <TableHead className="hidden w-[70px] px-2 text-center lg:table-cell">Max</TableHead>
+                <TableHead className="w-[90px] px-2 text-center lg:w-[150px]">Qty</TableHead>
+                <TableHead className="w-[100px] px-2 text-center">Subtotal</TableHead>
+                <TableHead className="w-[100px] px-2 text-center sm:w-[110px]">Action</TableHead>
             </TableRow>
         </TableHeader>
         <TableBody>
@@ -197,6 +189,7 @@ const ProductListTable: React.FC<ProductListTableProps> = ({ products, onQuantit
                 products.map((product) => <ProductTableRow key={product.id} product={product} onQuantityChange={onQuantityChange} />)
             ) : (
                 <TableRow>
+                    {/* MODIFICATION: colSpan updated to match the new number of columns */}
                     <TableCell colSpan={7} className="h-24 text-center">
                         No products found.
                     </TableCell>
@@ -216,9 +209,9 @@ interface OrderSummaryCardProps {
 const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, summary, onCheckout }) => (
     <div className="sticky top-8">
         <Card>
-            <CardContent className="p-6">
+            <CardContent className="px-6">
                 <h2 className="mb-4 text-xl font-bold">Order Summary</h2>
-                <ScrollArea className="-mr-4 h-96 pr-4">
+                <ScrollArea className="-mr-4 h-66 pr-4">
                     <div className="space-y-4">
                         {activeProducts.length > 0 ? (
                             activeProducts.map((product) => (
@@ -264,7 +257,7 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, sum
     </div>
 );
 
-// --- UPDATED Sub-component: Mobile Checkout Bar ---
+// --- MODIFICATION: Redesigned Mobile Checkout Bar for better responsiveness ---
 interface MobileCheckoutBarProps {
     total: number;
     onCheckout: () => void;
@@ -289,7 +282,7 @@ const MobileCheckoutBar: React.FC<MobileCheckoutBarProps> = ({ total, onCheckout
     </div>
 );
 
-// --- Main Page Component (Updated for Mobile) ---
+// --- Main Page Component ---
 export default function PackagePage({ products: initialProducts }: PackagePageProps) {
     const [packageProducts, setPackageProducts] = useState<PackageProduct[]>(initialProducts);
     const [searchQuery, setSearchQuery] = useState('');
@@ -353,6 +346,7 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Health Package" />
+            {/* MODIFICATION: Increased bottom padding to prevent content from being hidden by the MobileCheckoutBar */}
             <div className="mx-auto max-w-7xl px-4 py-8 pb-32 sm:px-6 lg:px-8 lg:pb-8">
                 <div className="flex flex-col gap-8 lg:flex-row">
                     <div className="flex w-full flex-col gap-6 lg:w-2/3">

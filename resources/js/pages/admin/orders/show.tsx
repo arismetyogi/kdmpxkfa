@@ -10,6 +10,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { CheckCircle, Clock, MapPin, Package, Truck, User, XCircle } from 'lucide-react';
 import { route } from 'ziggy-js';
+import { ScrollArea } from "@/components/ui/scroll-area";
 const breadcrumbs = (orderId: string) => [
     { title: 'Dashboard', href: route('admin.dashboard') },
     { title: 'Orders', href: route('admin.orders.index') },
@@ -86,7 +87,7 @@ export default function OrderShow({ order }: OrderShowProps) {
     const subtotal = isDeliverable
         ? data.order_items.reduce((sum, item, index) => {
               const orderItem = order.order_items?.[index];
-              return sum + (orderItem ? orderItem.unit_price * (item.qty_delivered || 0) : 0);
+              return sum + (orderItem ? orderItem.unit_price * orderItem.content * (item.qty_delivered || 0) : 0);
           }, 0)
         : (order.order_items ?? []).reduce((sum, item) => {
               return sum + item.unit_price * (item.qty_delivered || 0);
@@ -216,92 +217,96 @@ export default function OrderShow({ order }: OrderShowProps) {
                             </CardTitle>
                             <CardDescription>Products included in this order</CardDescription>
                         </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead />
-                                        <TableHead>Product</TableHead>
-                                        <TableHead className="text-right">Unit Price</TableHead>
-                                        <TableHead className="text-center">Quantity</TableHead>
-                                        <TableHead className="text-center">Satuan</TableHead>
-                                        <TableHead className="text-center">Qty Delivered</TableHead>
-                                        <TableHead className="text-right">Total</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {(order.order_items ?? []).map((item: OrderItem, index: number) => (
-                                        <TableRow key={item.id}>
-                                            <TableCell>
-                                                {item.product?.image ? (
-                                                    <img
-                                                        src={item.product.image}
-                                                        alt={item.product.name}
-                                                        className="h-16 w-16 rounded-lg object-cover"
-                                                    />
-                                                ) : (
-                                                    <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-200 text-xs text-gray-500">
-                                                        No Image
-                                                    </div>
-                                                )}
-                                            </TableCell>
-                                            <TableCell className="text-sm font-medium">{item.product_name || 'N/A'}</TableCell>
-                                            <TableCell className="text-right">{idrFormatter.format(item.unit_price)}</TableCell>
-                                            <TableCell className="text-center">
-                                                {item.quantity} {item.product?.order_unit}
-                                                <br />
-                                                <span className="text-xs text-muted-foreground">
-                                                    ({item.quantity * (item.product?.content || 1)} {item.product?.base_uom})
-                                                </span>
-                                            </TableCell>
-                                            <TableCell>{item.product?.order_unit}</TableCell>
-                                            <TableCell className="text-center">
-                                                {isDeliverable ? (
-                                                    <Input
-                                                        type="number"
-                                                        min="0"
-                                                        max={item.quantity}
-                                                        step="1"
-                                                        value={data.order_items[index]?.qty_delivered || 0}
-                                                        onChange={(e) => updateQtyDelivered(index, e.target.value)}
-                                                        className="w-20 text-center"
-                                                    />
-                                                ) : (
-                                                    <span>{item.qty_delivered || 0}</span>
-                                                )}
-                                            </TableCell>
-                                            <TableCell className="text-right">
-
-                                                {idrFormatter.format(
-                                                    item.unit_price *
-                                                        (isDeliverable ? data.order_items[index]?.qty_delivered || 0 : item.qty_delivered || 0),
-                                                )}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                                <TableFooter>
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="text-right font-medium">
-                                            Subtotal
-                                        </TableCell>
-                                        <TableCell className="text-right">  {idrFormatter.format(subtotal)}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="text-right font-medium">
-                                            Tax (11%)
-                                        </TableCell>
-                                        <TableCell className="text-right">{idrFormatter.format(tax)}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="text-right font-bold">
-                                            Total
-                                        </TableCell>
-                                        <TableCell className="text-right font-bold">{idrFormatter.format(total)}</TableCell>
-                                    </TableRow>
-                                </TableFooter>
-                            </Table>
-                        </CardContent>
+                      <CardContent>
+  <ScrollArea className="h-[400px] w-full">
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead />
+          <TableHead>Product</TableHead>
+          <TableHead className="text-right">Unit Price</TableHead>
+          <TableHead className="text-center">Quantity</TableHead>
+          <TableHead className="text-center">Satuan</TableHead>
+          <TableHead className="text-center">Qty Delivered</TableHead>
+          <TableHead className="text-right">Total</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {(order.order_items ?? []).map((item: OrderItem, index: number) => (
+          <TableRow key={item.id}>
+            <TableCell>
+              {item.product?.image ? (
+                <img
+                  src={item.product.image}
+                  alt={item.product.name}
+                  className="h-16 w-16 rounded-lg object-cover"
+                />
+              ) : (
+                <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-200 text-xs text-gray-500">
+                  No Image
+                </div>
+              )}
+            </TableCell>
+            <TableCell className="text-sm font-medium">{item.product_name || "N/A"}</TableCell>
+            <TableCell className="text-right">
+              {idrFormatter.format(item.unit_price * item.content)}
+            </TableCell>
+            <TableCell className="text-center">
+              {item.quantity} {item.product?.order_unit}
+              <br />
+              <span className="text-xs text-muted-foreground">
+                ({item.quantity * (item.product?.content || 1)} {item.product?.base_uom})
+              </span>
+            </TableCell>
+            <TableCell>{item.product?.order_unit}</TableCell>
+            <TableCell className="text-center">
+              {isDeliverable ? (
+                <Input
+                  type="number"
+                  min="0"
+                  max={item.quantity}
+                  step="1"
+                  value={data.order_items[index]?.qty_delivered || 0}
+                  onChange={(e) => updateQtyDelivered(index, e.target.value)}
+                  className="w-20 text-center"
+                />
+              ) : (
+                <span>{item.qty_delivered || 0}</span>
+              )}
+            </TableCell>
+            <TableCell className="text-right">
+              {idrFormatter.format(
+                item.unit_price *
+                  item.content *
+                  (isDeliverable ? data.order_items[index]?.qty_delivered || 0 : item.qty_delivered || 0)
+              )}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+      <TableFooter>
+        <TableRow>
+          <TableCell colSpan={6} className="text-right font-medium">
+            Subtotal
+          </TableCell>
+          <TableCell className="text-right">{idrFormatter.format(subtotal)}</TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell colSpan={6} className="text-right font-medium">
+            Tax (11%)
+          </TableCell>
+          <TableCell className="text-right">{idrFormatter.format(tax)}</TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell colSpan={6} className="text-right font-bold">
+            Total
+          </TableCell>
+          <TableCell className="text-right font-bold">{idrFormatter.format(total)}</TableCell>
+        </TableRow>
+      </TableFooter>
+    </Table>
+  </ScrollArea>
+</CardContent>
                     </Card>
 
                     {/* Delivery Button */}
