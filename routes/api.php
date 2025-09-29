@@ -10,6 +10,15 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Public routes
+
+// Cooperation routes for cascade selection
+Route::prefix('cooperation')->group(function () {
+    Route::get('/provinces', [App\Http\Controllers\CooperationController::class, 'provinces']);
+    Route::get('/cities/{province}', [App\Http\Controllers\CooperationController::class, 'cities']);
+    Route::get('/districts/{province}/{city}', [App\Http\Controllers\CooperationController::class, 'districts']);
+    Route::get('/villages/{province}/{city}/{district}', [App\Http\Controllers\CooperationController::class, 'villages']);
+    Route::get('/names/{province}/{city}/{district}/{village}', [App\Http\Controllers\CooperationController::class, 'namesByVillage']);
+});
 Route::prefix('v1')->group(function () {
     // Authentication routes
     Route::prefix('auth')->group(function () {
