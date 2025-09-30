@@ -1,8 +1,5 @@
 import PriceDisplay from '@/components/priceDisplay';
-<<<<<<< HEAD
 import QuantityInput from '@/components/QuantityInput';
-=======
->>>>>>> KDMP/master
 import ScrollToTopButton from '@/components/ScrollToTop';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -49,43 +46,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Paket Merah Putih', href: '#' },
 ];
 
-<<<<<<< HEAD
-=======
-// --- Sub-component: Quantity Input ---
-interface QuantityInputProps {
-    value: number;
-    onChange: (newValue: number) => void;
-    decrementDisabled?: boolean;
-    incrementDisabled?: boolean;
-}
-
-const QuantityInput: React.FC<QuantityInputProps> = ({ value, onChange, decrementDisabled, incrementDisabled }) => (
-    <div className="justify-cente flex items-center">
-        <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            onClick={() => onChange(value - 1)}
-            disabled={decrementDisabled}
-            className="h-8 w-8 rounded-full"
-        >
-            <Minus className="h-4 w-4" />
-        </Button>
-        <div className="font-base w-10 text-center text-lg">{value}</div>
-        <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            onClick={() => onChange(value + 1)}
-            disabled={incrementDisabled}
-            className="h-8 w-8 rounded-full"
-        >
-            <Plus className="h-4 w-4" />
-        </Button>
-    </div>
-);
-
->>>>>>> KDMP/master
 // --- Sub-component: Product Table Row (Updated for Mobile) ---
 interface ProductTableRowProps {
     product: PackageProduct;
@@ -126,14 +86,8 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
                     }}
                 />
             </TableCell>
-<<<<<<< HEAD
             <TableCell className={cn('px-2 py-2 font-medium sm:px-4', isExcluded && 'opacity-60')}>
                 <p className="line-clamp-2 text-xs font-medium sm:text-base">{product.name}</p>
-=======
-            {/* MODIFICATION: Reduced horizontal padding on smallest screens */}
-            <TableCell className="px-2 py-2 font-medium sm:px-4">
-                <p className="line-clamp-2 text-sm font-medium sm:text-base">{product.name}</p>
->>>>>>> KDMP/master
 
                 <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground sm:hidden">
                     <PriceDisplay price={pricePerBox} currency="" decimal="hidden" />
@@ -142,12 +96,7 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
 
                 <p className="hidden text-xs text-muted-foreground sm:block">{product.order_unit}</p>
             </TableCell>
-<<<<<<< HEAD
             <TableCell className={cn('hidden px-2 text-center sm:table-cell', isExcluded && 'opacity-60')}>
-=======
-
-            <TableCell className="hidden px-2 text-center sm:table-cell">
->>>>>>> KDMP/master
                 <PriceDisplay price={pricePerBox} />
             </TableCell>
             <TableCell className={cn('hidden p-2 text-center lg:table-cell', isExcluded && 'opacity-60')}>{maxBoxQuantity}</TableCell>
@@ -172,7 +121,6 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
                     </div>
                 </div>
             </TableCell>
-<<<<<<< HEAD
             <TableCell className={cn('px-2 text-center font-medium', isExcluded && 'opacity-60')}>
                 <PriceDisplay price={product.price * product.assignedQuantity} currency="" className="text-xs lg:hidden" />
                 <PriceDisplay price={product.price * product.assignedQuantity} className="hidden lg:block" />
@@ -180,17 +128,6 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
             <TableCell className="px-2 text-center">
                 {isExcluded ? (
                     <Button variant="default" size="sm" onClick={handleInclude} className="px-2">
-=======
-
-            <TableCell className="px-2 text-center font-medium">
-                <PriceDisplay price={product.price * product.assignedQuantity} currency="" className="text-sm lg:hidden" />
-                <PriceDisplay price={product.price * product.assignedQuantity} className="hidden lg:block" />
-            </TableCell>
-            {/* MODIFICATION: Reduced horizontal padding for more space */}
-            <TableCell className="px-2 text-center">
-                {isExcluded ? (
-                    <Button variant="default" size="sm" onClick={handleInclude}>
->>>>>>> KDMP/master
                         Include
                     </Button>
                 ) : (
@@ -210,7 +147,6 @@ interface ProductListTableProps {
 }
 
 const ProductListTable: React.FC<ProductListTableProps> = ({ products, onQuantityChange }) => (
-<<<<<<< HEAD
     <Table className="w-full table-fixed border">
         <TableHeader>
             <TableRow>
@@ -221,21 +157,6 @@ const ProductListTable: React.FC<ProductListTableProps> = ({ products, onQuantit
                 <TableHead className="w-[65px] px-2 text-center lg:w-[150px]">Qty</TableHead>
                 <TableHead className="w-[100px] px-2 text-center">Subtotal</TableHead>
                 <TableHead className="w-[80px] px-2 text-center">Action</TableHead>
-=======
-    // MODIFICATION: Added 'table-fixed' to enforce column widths and prevent content from causing overflow.
-    <Table className="w-full table-fixed border">
-        <TableHeader>
-            <TableRow>
-                {/* MODIFICATION: Explicit widths are set for most columns to control the layout. */}
-                {/* The "Product Name" column will fill the remaining space. */}
-                <TableHead className="hidden w-[80px] p-2 sm:table-cell">Image</TableHead>
-                <TableHead className="px-2 sm:px-4">Product Name</TableHead>
-                <TableHead className="hidden w-[100px] px-2 text-center sm:table-cell">Price</TableHead>
-                <TableHead className="hidden w-[70px] px-2 text-center lg:table-cell">Max</TableHead>
-                <TableHead className="w-[90px] px-2 text-center lg:w-[150px]">Qty</TableHead>
-                <TableHead className="w-[100px] px-2 text-center">Subtotal</TableHead>
-                <TableHead className="w-[100px] px-2 text-center sm:w-[110px]">Action</TableHead>
->>>>>>> KDMP/master
             </TableRow>
         </TableHeader>
         <TableBody>
@@ -265,11 +186,7 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, sum
         <Card>
             <CardContent className="px-6">
                 <h2 className="mb-4 text-xl font-bold">Order Summary</h2>
-<<<<<<< HEAD
                 <ScrollArea className="-mr-4 h-64 pr-4">
-=======
-                <ScrollArea className="-mr-4 h-66 pr-4">
->>>>>>> KDMP/master
                     <div className="space-y-4">
                         {activeProducts.length > 0 ? (
                             activeProducts.map((product) => (
@@ -315,11 +232,7 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, sum
     </div>
 );
 
-<<<<<<< HEAD
 // --- Mobile Checkout Bar ---
-=======
-// --- MODIFICATION: Redesigned Mobile Checkout Bar for better responsiveness ---
->>>>>>> KDMP/master
 interface MobileCheckoutBarProps {
     total: number;
     onCheckout: () => void;
