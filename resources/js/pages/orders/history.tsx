@@ -34,25 +34,15 @@ interface OrderDetailCardProps {
 
 const OrderDetailCard: React.FC<OrderDetailCardProps> = ({ order, statusColors, statusFilters }) => {
     // --- 2. LIFTED STATE & OPTIMIZED WITH useMemo ---
-    const { items, calculatedTotal, showItems, moreCount } = useMemo(() => {
+    const { items, showItems, moreCount } = useMemo(() => {
         const orderItems: OrderItem[] = order.order_items ?? [];
 
         // The calculation is now done here, in a scope accessible by the whole component
-        const total = orderItems.reduce((sum, item) => {
-            const qty = item.qty_delivered ?? item.quantity ?? 1;
-            // Using unit_price * content to get price per order_unit (e.g., price per box)
-            return sum + item.unit_price * item.content * qty;
-        }, 0);
-
-        const ppn = total * 0.11;
-        const orderTotal = total + ppn;
-
         const itemsToDisplay = orderItems.slice(0, 3);
         const additionalCount = orderItems.length > 3 ? orderItems.length - 3 : 0;
 
         return {
             items: orderItems,
-            calculatedTotal: orderTotal,
             showItems: itemsToDisplay,
             moreCount: additionalCount,
         };
@@ -120,7 +110,7 @@ const OrderDetailCard: React.FC<OrderDetailCardProps> = ({ order, statusColors, 
                         <span>{paymentLabels[order.payment_method] ?? order.payment_method}</span>
                     </div>
                     {/* --- `calculatedTotal` IS NOW ACCESSIBLE HERE --- */}
-                    <p className="text-base font-semibold text-card-foreground">{currency(calculatedTotal)}</p>
+                    <p className="text-base font-semibold text-card-foreground">{currency(order.total_delivered ?? order.total_price)}</p>
                 </div>
                 <Link href={route('history.details', order.transaction_number)} className="w-full sm:w-auto">
                     <Button size="sm" className="w-full">

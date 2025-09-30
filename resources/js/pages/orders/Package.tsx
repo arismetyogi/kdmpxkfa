@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import HeaderLayout from '@/layouts/header-layout';
 import { cn } from '@/lib/utils';
-import { BreadcrumbItem, CartItem, Product } from '@/types';
+import { BreadcrumbItem, CartItemOrPackage, PackageItem, Product } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { Search, ShoppingCart } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -178,10 +178,10 @@ const ProductListTable: React.FC<ProductListTableProps> = ({ products, onQuantit
 interface OrderSummaryCardProps {
     activeProducts: PackageProduct[];
     summary: { subtotal: number; tax: number; total: number };
-    onCheckout: () => void;
+    onCart: () => void;
 }
 
-const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, summary, onCheckout }) => (
+const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, summary, onCart }) => (
     <div className="sticky top-24">
         <Card>
             <CardContent className="px-6">
@@ -222,9 +222,9 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, sum
                             <PriceDisplay price={summary.total} />
                         </div>
                     </div>
-                    <Button onClick={onCheckout} disabled={activeProducts.length === 0} className="mt-6 w-full" size="lg">
+                    <Button onClick={onCart} disabled={activeProducts.length === 0} className="mt-6 w-full" size="lg">
                         <ShoppingCart className="mr-2 h-5 w-5" />
-                        Proceed to Checkout
+                        Proceed to Cart
                     </Button>
                 </div>
             </CardContent>
@@ -232,23 +232,23 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, sum
     </div>
 );
 
-// --- Mobile Checkout Bar ---
-interface MobileCheckoutBarProps {
+// --- Mobile Cart Bar ---
+interface MobileCartBarProps {
     total: number;
-    onCheckout: () => void;
+    onCart: () => void;
     disabled: boolean;
 }
 
-const MobileCheckoutBar: React.FC<MobileCheckoutBarProps> = ({ total, onCheckout, disabled }) => (
+const MobileCartBar: React.FC<MobileCartBarProps> = ({ total, onCart, disabled }) => (
     <div className="fixed right-0 bottom-0 left-0 z-10 border-t bg-background shadow-lg lg:hidden">
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-3 px-4 pt-3 pb-4 sm:px-6">
             <div className="flex flex-col items-center">
                 <p className="text-sm text-muted-foreground">Total Price</p>
                 <PriceDisplay price={total} className="text-2xl font-bold text-primary" />
             </div>
-            <Button onClick={onCheckout} disabled={disabled} size="lg" className="w-full max-w-sm">
+            <Button onClick={onCart} disabled={disabled} size="lg" className="w-full max-w-sm">
                 <ShoppingCart className="mr-2 h-5 w-5" />
-                Proceed to Checkout
+                Proceed to Cart
             </Button>
         </div>
     </div>
@@ -297,27 +297,65 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
         return { subtotal, tax, total };
     }, [activePackageProducts]);
 
-    const addToCheckout = () => {
+    const addToCart = () => {
         try {
-            const cart: CartItem[] = activePackageProducts.map((p) => ({
-                ...p,
-                quantity: p.assignedQuantity / p.content,
-                total: p.price * p.assignedQuantity,
-            }));
-            localStorage.setItem('cart', JSON.stringify(cart));
-            router.visit(route('checkout'));
+            // Calculate the total price for the package based on active products
+            const packageTotalPrice = activePackageProducts.reduce((total, p) => total + p.price * p.assignedQuantity, 0);
+
+            // Create package item to store in cart
+            const packageItem: PackageItem = {
+                id: 'merah-putih-package-' + Date.now(), // Unique ID for the package
+                name: 'Paket Merah Putih',
+                slug: 'paket-merah-putih',
+                price: packageTotalPrice,
+                image: '/products/package-icon.png', // Placeholder for package icon
+                order_unit: 'package',
+                content: 1,
+                base_uom: 'package',
+                weight: 0, // Calculate or set default weight
+                isPackage: true,
+                packageContents: activePackageProducts.map((p) => ({
+                    product_id: p.id,
+                    name: p.name,
+                    quantity: p.assignedQuantity / p.content,
+                    price: p.price,
+                    image: p.image,
+                    order_unit: p.order_unit,
+                    content: p.content,
+                    base_uom: p.base_uom || 'unit',
+                    weight: p.weight || 0,
+                })),
+            };
+
+            // Get existing cart items
+            const existingCart = localStorage.getItem('cart');
+            let finalCart: CartItemOrPackage[] = [packageItem];
+
+            if (existingCart) {
+                const parsedExistingCart: CartItemOrPackage[] = JSON.parse(existingCart);
+                // Add the package to existing cart items
+                finalCart = [...parsedExistingCart, packageItem];
+            } else {
+                // If no existing cart, just use the package
+                finalCart = [packageItem];
+            }
+
+            // Store the merged cart in localStorage
+            localStorage.setItem('cart', JSON.stringify(finalCart));
+            router.visit(route('cart'));
         } catch (error) {
-            console.error('Error adding products to checkout:', error);
-            alert('There was an error creating your checkout. Please try again.');
+            console.error('Error adding package to Cart:', error);
+            alert('There was an error creating your Cart. Please try again.');
         }
     };
 
-    const isCheckoutDisabled = activePackageProducts.length === 0;
+    const isCartDisabled = activePackageProducts.length === 0;
+    console.log(summary);
 
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
-            <Head title="Health Package" />
-            {/* MODIFICATION: Increased bottom padding to prevent content from being hidden by the MobileCheckoutBar */}
+            <Head title="Paket Merah Putih" />
+            {/* MODIFICATION: Increased bottom padding to prevent content from being hidden by the MobileCartBar */}
             <div className="mx-auto max-w-7xl px-4 py-8 pb-32 sm:px-6 lg:px-8 lg:pb-8">
                 <div className="flex flex-col gap-8 lg:flex-row">
                     <div className="flex w-full flex-col gap-6 lg:w-2/3">
@@ -352,12 +390,12 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
                     </div>
 
                     <div className="hidden lg:block lg:w-1/3">
-                        <OrderSummaryCard activeProducts={activePackageProducts} summary={summary} onCheckout={addToCheckout} />
+                        <OrderSummaryCard activeProducts={activePackageProducts} summary={summary} onCart={addToCart} />
                     </div>
                 </div>
             </div>
 
-            <MobileCheckoutBar total={summary.total} onCheckout={addToCheckout} disabled={isCheckoutDisabled} />
+            <MobileCartBar total={summary.total} onCart={addToCart} disabled={isCartDisabled} />
 
             <ScrollToTopButton PC />
         </HeaderLayout>

@@ -3,24 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import HeaderLayout from '@/layouts/header-layout';
+import { CartItem, PackageItem, type CartItemOrPackage } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { CreditCard, Wallet } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-
-interface CartItem {
-    id: string | number;
-    product_id: number;
-    name: string;
-    slug: string;
-    quantity: number;
-    price: number;
-    base_price: number;
-    image: string;
-    order_unit: string;
-    base_uom: string;
-    content: number;
-}
 
 interface PaymentProps {
     billing: {
@@ -58,13 +45,77 @@ export default function PaymentPage({ billing, shipping }: PaymentProps) {
     const parsedData = JSON.parse(storedData);
     const creditLimit = parsedData?.creditLimit ?? 0;
 
+    // Helper function to process cart items - used in both useEffect and handleSubmit
+    const processCartItems = useCallback((parsedCart: CartItemOrPackage[]): CartItem[] => {
+        // Extract package products and merge quantities if needed
+        const itemMap = new Map<string, CartItem>();
+
+        parsedCart.forEach((item: CartItemOrPackage) => {
+            if ('isPackage' in item && item.isPackage && 'packageContents' in item) {
+                // Unwrap package items and merge with existing items
+                (item as PackageItem).packageContents.forEach((content) => {
+                    const existingItemKey = content.product_id.toString();
+                    const existingItem = itemMap.get(existingItemKey);
+
+                    if (existingItem) {
+                        // Merge quantities if item already exists
+                        itemMap.set(existingItemKey, {
+                            ...existingItem,
+                            quantity: existingItem.quantity + content.quantity,
+                            total: existingItem.price * (existingItem.quantity + content.quantity) * (existingItem.content || 1),
+                        });
+                    } else {
+                        // Add as new item
+                        const newItem: CartItem = {
+                            id: content.product_id,
+                            name: content.name,
+                            slug: content.name.toLowerCase().replace(/\s+/g, '-'),
+                            quantity: content.quantity,
+                            price: content.price,
+                            image: content.image || '/products/Placeholder_Medicine.png',
+                            order_unit: content.order_unit,
+                            base_uom: content.base_uom,
+                            content: content.content || 1,
+                        };
+                        itemMap.set(existingItemKey, newItem);
+                    }
+                });
+            } else {
+                // Handle regular items, merging if they already exist in the map
+                const regularItem = item as CartItem;
+                const itemId = regularItem.id.toString();
+
+                const existingItem = itemMap.get(itemId);
+                if (existingItem) {
+                    // Merge quantities if item already exists
+                    itemMap.set(itemId, {
+                        ...existingItem,
+                        quantity: existingItem.quantity + regularItem.quantity,
+                        total: existingItem.price * (existingItem.quantity + regularItem.quantity) * (existingItem.content || 1),
+                    });
+                } else {
+                    // Add as new item
+                    itemMap.set(itemId, regularItem);
+                }
+            }
+        });
+
+        // Convert the map back to an array
+        return Array.from(itemMap.values());
+    }, []);
+
     useEffect(() => {
         const storedCart = localStorage.getItem('cart');
         if (!storedCart) {
             localStorage.setItem('cartmsg', 'Your cart is empty.');
             window.location.href = route('cart');
-        } else setCartItems(JSON.parse(storedCart));
-    }, []);
+        } else {
+            const parsedCart: CartItemOrPackage[] = JSON.parse(storedCart);
+            
+            const processedCart = processCartItems(parsedCart);
+            setCartItems(processedCart);
+        }
+    }, [processCartItems]);
 
     const handleSubmit = useCallback(
         (e: React.FormEvent) => {
@@ -72,13 +123,16 @@ export default function PaymentPage({ billing, shipping }: PaymentProps) {
             setIsProcessing(true);
 
             const cartData = localStorage.getItem('cart') || '[]';
+            const parsedCart: CartItemOrPackage[] = JSON.parse(cartData);
+
+            const processedCart = processCartItems(parsedCart);
 
             router.post(
                 route('payment.process'),
                 {
                     source_of_fund: sourceOfFund,
                     payment_type: paymentType,
-                    cart: JSON.parse(cartData),
+                    cart: processedCart, // Inertia.js should handle this automatically
                 },
                 {
                     onSuccess: () => {
@@ -110,7 +164,7 @@ export default function PaymentPage({ billing, shipping }: PaymentProps) {
                 },
             );
         },
-        [sourceOfFund, paymentType],
+        [sourceOfFund, paymentType, processCartItems],
     );
 
     // Use useMemo to calculate totals only when cartItems change

@@ -41,6 +41,8 @@ export default function Detail() {
         diterima: 3,
     };
     const activeIndex = stepIndexByStatus[order.status] ?? 0;
+    const shipping = Number(order.shipping_amount) || 0;
+    const discount = Number(order.discount_amount) || 0;
 
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
@@ -202,41 +204,22 @@ export default function Detail() {
                                 <CardTitle>Order Summary</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                {(() => {
-                                    const subtotal =
-                                        order.order_items?.reduce((sum, item) => {
-                                            const qty = Number(item.qty_delivered ?? item.quantity) || 0;
-                                            const price = Number(item.unit_price) || 0;
-                                            const content = Number(item.content) || 1;
-                                            return sum + price * qty * content;
-                                        }, 0) ?? 0;
+                                <div className="grid grid-cols-2 gap-2 text-sm">
+                                    <div>Product Price</div>
+                                    <div className="text-right">{currency(order.subtotal_delivered ?? order.subtotal)}</div>
 
-                                    const tax = subtotal * 0.11;
-                                    const shipping = Number(order.shipping_amount) || 0;
-                                    const discount = Number(order.discount_amount) || 0;
-                                    const total = subtotal + tax + shipping - discount;
+                                    <div>Product Tax (11%)</div>
+                                    <div className="text-right">{currency(order.tax_delivered ?? order.tax_amount)}</div>
 
-                                    return (
-                                        <div className="grid grid-cols-2 gap-2 text-sm">
-                                            <div>Product Price</div>
-                                            <div className="text-right">{currency(subtotal)}</div>
+                                    <div>Shipping Cost</div>
+                                    <div className="text-right">{currency(shipping)}</div>
 
-                                            <div>Product Tax (11%)</div>
-                                            <div className="text-right">{currency(tax)}</div>
+                                    <div>Discount</div>
+                                    <div className="text-right">-{currency(discount)}</div>
 
-                                            <div>Shipping Cost</div>
-                                            <div className="text-right">{currency(shipping)}</div>
-
-                                            <div>Discount</div>
-                                            <div className="text-right">-{currency(discount)}</div>
-
-                                            <div className="text-base font-semibold">Total</div>
-                                            <div className="text-right text-base font-semibold">
-                                                <PriceDisplay price={total} />
-                                            </div>
-                                        </div>
-                                    );
-                                })()}
+                                    <div className="text-base font-semibold">Total</div>
+                                    <div className="text-right text-base font-semibold">{currency(order.total_delivered ?? order.total_price)}</div>
+                                </div>
                             </CardContent>
                         </Card>
 
