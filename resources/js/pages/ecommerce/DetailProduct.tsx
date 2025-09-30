@@ -7,13 +7,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Lens } from '@/components/ui/lens';
 import HeaderLayout from '@/layouts/header-layout';
+import { currency } from '@/lib/utils';
 import { CartItem, Product, type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import Autoplay from 'embla-carousel-autoplay';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, Minus, Plus, ShoppingCart } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { idrFormatter } from '@/lib/utils';
+import { useEffect, useMemo, useState } from 'react';
 
 const MotionButton = motion(Button);
 
@@ -29,6 +29,13 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
     const [isAdded, setIsAdded] = useState(false);
     const totalItems = cart.length;
     const [animationTrigger, setAnimationTrigger] = useState(0);
+
+    // MODIFICATION: Calculate subtotal dynamically based on quantity
+    const subtotal = useMemo(() => {
+        // The price per order unit is (base price * content)
+        const pricePerOrderUnit = product.price * product.content;
+        return pricePerOrderUnit * quantity;
+    }, [product, quantity]);
 
     // Load cart from localStorage
     useEffect(() => {
@@ -47,33 +54,29 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
         return () => clearTimeout(timer);
     }, [isAdded]);
 
-  const addToCart = (productToAdd: Product, quantityToAdd: number) => {
-    // Calculate price per order unit (price * content)
-    const pricePerOrderUnit = productToAdd.price * productToAdd.content;
-    
-    setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.id === productToAdd.id);
-      let newCart;
-      if (existingItem) {
-        newCart = prevCart.map((item) =>
-          item.id === productToAdd.id
-            ? { ...item, quantity: item.quantity + quantityToAdd }
-            : item,
-        );
-      } else {
-        // Create new cart item with the price per order unit
-        const newCartItem: Omit<CartItem, 'total'> = { 
-          ...productToAdd, 
-          price: pricePerOrderUnit, // Use price per order unit
-          quantity: quantityToAdd 
-        };
-        newCart = [...prevCart, newCartItem as CartItem];
-      }
-      localStorage.setItem('cart', JSON.stringify(newCart));
-      return newCart;
-    });
-    setAnimationTrigger(prev => prev + 1);
-  };
+    const addToCart = (productToAdd: Product, quantityToAdd: number) => {
+        // Calculate price per order unit (price * content)
+        const pricePerOrderUnit = productToAdd.price * productToAdd.content;
+
+        setCart((prevCart) => {
+            const existingItem = prevCart.find((item) => item.id === productToAdd.id);
+            let newCart;
+            if (existingItem) {
+                newCart = prevCart.map((item) => (item.id === productToAdd.id ? { ...item, quantity: item.quantity + quantityToAdd } : item));
+            } else {
+                // Create new cart item with the price per order unit
+                const newCartItem: Omit<CartItem, 'total'> = {
+                    ...productToAdd,
+                    price: pricePerOrderUnit, // Use price per order unit
+                    quantity: quantityToAdd,
+                };
+                newCart = [...prevCart, newCartItem as CartItem];
+            }
+            localStorage.setItem('cart', JSON.stringify(newCart));
+            return newCart;
+        });
+        setAnimationTrigger((prev) => prev + 1);
+    };
 
     const handleQuantityChange = (amount: number) => {
         setQuantity((prev) => Math.max(1, prev + amount));
@@ -84,7 +87,6 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
         addToCart(product, quantity);
         setIsAdded(true);
     };
-    console.log(product.category?.main_category);
 
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
@@ -120,15 +122,17 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                             </p>
                             <div className="mt-4 space-y-2">
                                 <div className="flex items-baseline gap-2">
-                                    <p className="text-3xl font-bold text-primary lg:text-4xl">{idrFormatter.format(product.price)}</p>
+                                    <p className="text-3xl font-bold text-primary lg:text-4xl">{currency(product.price * product.content)}</p>
                                     <span className="text-sm text-muted-foreground">/ {product.order_unit}</span>
                                 </div>
-                                <div className="flex items-center gap-4">
-                                    <p className="text-sm text-muted-foreground">
-                                        {product.content} {product.base_uom} / {product.order_unit}
-                                    </p>
+                                <div className="flex items-center gap-4 pt-1">
+                                    {product.content !== 1 && (
+                                        <p className="block text-xs text-muted-foreground">
+                                            {product.content} {product.base_uom} / {product.order_unit}
+                                        </p>
+                                    )}
                                     {product.is_active ? (
-                                        <Badge className="border-transparent bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/70 dark:text-green-300 dark:hover:bg-green-900">
+                                        <Badge className="border-transparent bg-green-100 text-sm text-green-800 hover:bg-green-200 dark:bg-green-900/70 dark:text-green-300 dark:hover:bg-green-900">
                                             Tersedia
                                         </Badge>
                                     ) : (
@@ -153,28 +157,9 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                                     <AccordionItem value="pharmacology">
                                         <AccordionTrigger>Farmakologi</AccordionTrigger>
                                         <AccordionContent>
-                                            {(() => {
-                                                let pharmacologyData: string[] = [];
-                                                if (typeof product.pharmacology === 'string' && product.pharmacology.startsWith('[')) {
-                                                    pharmacologyData = JSON.parse(product.pharmacology);
-                                                }
-                                                if (pharmacologyData.length > 0) {
-                                                    return (
-                                                        <ul className="list-disc space-y-1 pl-5 text-sm">
-                                                            {pharmacologyData.map((item, index) => (
-                                                                <li key={index}>{item}</li>
-                                                            ))}
-                                                        </ul>
-                                                    );
-                                                }
-                                                return (
-                                                    <p className="text-sm">
-                                                        {typeof product.pharmacology === 'string'
-                                                            ? product.pharmacology
-                                                            : 'Tidak ada informasi farmakologi untuk produk ini.'}
-                                                    </p>
-                                                );
-                                            })()}
+                                            <p className="text-sm leading-relaxed">
+                                                {product.pharmacology || 'Tidak ada deskripsi untuk produk ini.'}
+                                            </p>
                                         </AccordionContent>
                                     </AccordionItem>
 
@@ -182,31 +167,16 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                                     <AccordionItem value="dosage">
                                         <AccordionTrigger>Aturan Pakai & Dosis</AccordionTrigger>
                                         <AccordionContent>
-                                            {(() => {
-                                                let dosageData: Record<string, string> = {};
-                                                if (typeof product.dosage === 'string' && product.dosage.startsWith('{')) {
-                                                    dosageData = JSON.parse(product.dosage);
-                                                }
-                                                const dosageEntries = Object.entries(dosageData);
-                                                if (dosageEntries.length > 0) {
-                                                    return (
-                                                        <ul className="list-disc space-y-1 pl-5 text-sm">
-                                                            {dosageEntries.map(([key, value], index) => (
-                                                                <li key={index}>
-                                                                    <strong>{key}:</strong> {value}
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    );
-                                                }
-                                                return (
-                                                    <p className="text-sm">
-                                                        {typeof product.dosage === 'string' && product.dosage.length > 0
-                                                            ? product.dosage
-                                                            : 'Tidak ada informasi aturan pakai & dosis untuk produk ini.'}
-                                                    </p>
-                                                );
-                                            })()}
+                                            <p className="text-md font-bold">Aturan Pakai</p>
+                                            <p className="text-sm leading-relaxed">
+                                                {product.usage_direction || 'Tidak ada aturan pakai untuk produk ini.'}
+                                            </p>
+                                            <p className="text-md pt-2 font-bold">Larangan Konsumsi</p>
+                                            {product.contraindication ? (
+                                                <p className="text-sm leading-relaxed">{product.contraindication}</p>
+                                            ) : (
+                                                <p className="text-md font-medium">Tidak ada larangan penggunaan untuk produk ini</p>
+                                            )}
                                         </AccordionContent>
                                     </AccordionItem>
 
@@ -247,6 +217,9 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                                                             : '-'}
                                                     </span>
                                                 </div>
+                                                <p className="pt-2 text-sm leading-relaxed">
+                                                    {product.storage || 'Tidak ada anjuran penempatan product.'}
+                                                </p>
                                             </div>
                                         </AccordionContent>
                                     </AccordionItem>
@@ -256,7 +229,7 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
 
                         {/* Kolom 3: Sticky Card Harga + Quantity + Add to Cart */}
                         <div className="lg:col-span-3">
-                            <Card className="sticky top-24 mx-auto max-w-sm shadow-md">
+                            <Card className="sticky top-24 mx-auto w-full shadow-md">
                                 <CardContent className="space-y-5 pt-2">
                                     {/* Judul Cart */}
                                     <div className="flex items-center gap-2 border-b pb-2">
@@ -265,11 +238,10 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                                     </div>
 
                                     {/* Harga */}
-                                    <div className="flex items-center justify-between">
-                                        <p className="text-xl font-bold">Subtotal:</p>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <p className="text-lg font-bold">Subtotal:</p>
                                         <div className="text-right">
-                                            <p className="text-xl font-bold text-primary">{idrFormatter.format(product.price)}</p>
-                                            <p className="text-xs text-muted-foreground">/ {product.order_unit}</p>
+                                            <p className="text-lg font-bold text-primary">{currency(subtotal)}</p>
                                         </div>
                                     </div>
 
@@ -284,7 +256,23 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                                         >
                                             <Minus className="h-4 w-4" />
                                         </Button>
-                                        <span className="w-10 text-center font-semibold">{quantity}</span>
+                                        <input
+                                            value={quantity === 0 ? '' : quantity}
+                                            min={1}
+                                            onChange={(e) => {
+                                                const newValue = e.target.value;
+
+                                                if (newValue === '') {
+                                                    handleQuantityChange(-quantity);
+                                                } else {
+                                                    const num = Number(newValue);
+                                                    if (!isNaN(num) && num >= 0) {
+                                                        handleQuantityChange(num - quantity);
+                                                    }
+                                                }
+                                            }}
+                                            className="w-14 rounded-md text-center text-lg font-semibold"
+                                        />
                                         <Button variant="ghost" size="icon" className="h-10 w-full" onClick={() => handleQuantityChange(1)}>
                                             <Plus className="h-4 w-4" />
                                         </Button>

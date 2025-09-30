@@ -240,7 +240,7 @@ class CartController extends Controller
     public function processPayment(Request $request, CartService $cartService, DigikopTransactionService $transactionService)
     {
         // Check if billing information exists in session
-        if (! session('checkout.billing')) {
+        if (!session('checkout.billing')) {
             return redirect()->route('checkout')->with('error', 'Please complete billing information first.');
         }
 
@@ -288,7 +288,7 @@ class CartController extends Controller
             // Validate credit limit using tenant_id
             $creditValidation = $transactionService->validateCreditLimit($user->tenant_id, $totalAmount);
 
-            if (! $creditValidation['valid']) {
+            if (!$creditValidation['valid']) {
                 // Handle credit limit exceeded
                 throw ValidationException::withMessages([
                     'credit_limit_error' => $creditValidation['message'],
@@ -316,15 +316,15 @@ class CartController extends Controller
                 'tax_amount' => $totalAmount * 0.11, // You can calculate tax based on your business logic
                 'shipping_amount' => 0, // You can calculate shipping based on your business logic
                 'discount_amount' => 0,
-                'total_price' => $totalAmount * 1.11,
-                'billing_name' => $billingData['first_name'].' '.$billingData['last_name'],
+                'total_price' => round($totalAmount * 1.11),
+                'billing_name' => $billingData['first_name'] . ' ' . $billingData['last_name'],
                 'billing_email' => $billingData['email'],
                 'billing_phone' => $billingData['phone'],
                 'billing_address' => $billingData['address'],
                 'billing_city' => $billingData['city'],
                 'billing_state' => $billingData['state'],
                 'billing_zip' => $billingData['zip'],
-                'shipping_name' => $shippingData['first_name'].' '.$shippingData['last_name'],
+                'shipping_name' => $shippingData['first_name'] . ' ' . $shippingData['last_name'],
                 'shipping_address' => $shippingData['address'],
                 'shipping_city' => $shippingData['city'],
                 'shipping_state' => $shippingData['state'],
@@ -336,7 +336,7 @@ class CartController extends Controller
             foreach ($cartItems as $cartItem) {
                 $product = Product::find($cartItem['id']);
 
-                if (! $product) {
+                if (!$product) {
                     continue;
                 }
 
@@ -371,12 +371,14 @@ class CartController extends Controller
         } catch (\Exception $e) {
             \DB::rollBack();
 
-            \Log::error('Order creation failed with exception: '.$e->getMessage());
+            \Log::error('Order creation failed with exception: ' . $e->getMessage());
 
             // Check if this is a pharmacy mapping error
-            if (strpos($e->getMessage(), 'mapped') !== false ||
+            if (
+                strpos($e->getMessage(), 'mapped') !== false ||
                 strpos($e->getMessage(), 'pharmacy') !== false ||
-                strpos($e->getMessage(), 'apotek') !== false) {
+                strpos($e->getMessage(), 'apotek') !== false
+            ) {
                 throw ValidationException::withMessages([
                     'mapping_error' => 'Koperasi belum dimapping dengan Apotek KF, Silakan hubungi administrator.',
                 ]);
@@ -389,7 +391,7 @@ class CartController extends Controller
         } catch (\Throwable $e) {
             \DB::rollBack();
 
-            \Log::error('Order creation failed with throwable: '.$e->getMessage());
+            \Log::error('Order creation failed with throwable: ' . $e->getMessage());
 
             // Check if this is specifically a credit limit issue
             if (strpos($e->getMessage(), 'credit') !== false) {
@@ -399,9 +401,11 @@ class CartController extends Controller
             }
 
             // Check if this is a pharmacy mapping error
-            if (strpos($e->getMessage(), 'mapped') !== false ||
+            if (
+                strpos($e->getMessage(), 'mapped') !== false ||
                 strpos($e->getMessage(), 'pharmacy') !== false ||
-                strpos($e->getMessage(), 'apotek') !== false) {
+                strpos($e->getMessage(), 'apotek') !== false
+            ) {
                 throw ValidationException::withMessages([
                     'mapping_error' => 'Koperasi belum dimapping dengan Apotek KF, Silakan hubungi administrator.',
                 ]);

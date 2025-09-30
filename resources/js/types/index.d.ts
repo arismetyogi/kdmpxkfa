@@ -103,10 +103,36 @@ export interface User {
     [key: string]: unknown; // This allows for additional properties...
 }
 
+export interface PackageItem {
+    id: string;
+    name: string;
+    slug: string;
+    price: number;
+    image?: string;
+    order_unit: string;
+    content: number;
+    base_uom: string;
+    weight: number;
+    isPackage: true;
+    packageContents: Array<{
+        product_id: number;
+        name: string;
+        quantity: number;
+        price: number;
+        image?: string;
+        order_unit: string;
+        content: number;
+        base_uom: string;
+        weight: number;
+    }>;
+}
+
 export interface CartItem extends Product {
     quantity: number;
     total: number;
 }
+
+export type CartItemOrPackage = CartItem | PackageItem;
 
 export interface Product {
     id: number;
@@ -125,8 +151,10 @@ export interface Product {
     brand?: string;
     image?: string;
     description?: string;
-    dosage?: string[];
+    usage_direction: string;
     pharmacology?: string;
+    contraindication?: string;
+    storage?: string;
     image_alt?: string;
     is_active?: boolean;
     is_featured?: boolean;
@@ -157,10 +185,13 @@ export interface Order {
 
     // Pricing
     subtotal: number;
+    subtotal_delivered: number;
     tax_amount: number;
+    tax_delivered
     shipping_amount: number;
     discount_amount: number;
     total_price: number;
+    total_delivered: number;
 
     // Billing
     billing_name: string;
