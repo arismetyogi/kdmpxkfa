@@ -74,17 +74,7 @@ readonly class SsoService
                 ->withBody(json_encode($payload), 'application/json');
             $response = $client->post($url);
 
-            //            Log::debug('SSO URL: ', ['url' => $url]);
-            //            Log::debug('SSO head: ', $client->getOptions());
-            //            Log::debug('SSO Validate Request Body: ', $payload);
-            //
-            //            Log::debug('SSO Validate Response: ', [
-            //                'status' => $response->status(),
-            //                'body' => $response->body(),
-            //            ]);
-
             $responseData = $response->json();
-            //            Log::debug('Response data parsed: ', ['data' => $responseData['data']]);
 
             if (!$response->ok() || !isset($responseData['data'])) {
                 throw new \Exception('Invalid response from SSO server: ' . $response->body());

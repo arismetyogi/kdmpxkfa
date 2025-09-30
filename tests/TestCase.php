@@ -13,7 +13,7 @@ abstract class TestCase extends BaseTestCase
     {
         return [
             '--path' => 'tests/database/migrations',
-            '--database' => 'sqlite_testing',
+            '--database' => 'database/database.sqlite',
         ];
     }
 }
