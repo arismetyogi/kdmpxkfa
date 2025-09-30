@@ -56,7 +56,7 @@ readonly class SsoService
      *
      * @throws \Exception
      */
-    private function validateSSOTokenWithDigikoperasi(string $token, ?string $state): array
+    public function validateSSOTokenWithDigikoperasi(string $token, ?string $state): array
     {
         $payload = [
             'sso_token' => $token,
@@ -69,7 +69,7 @@ readonly class SsoService
             $client = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'x-api-key' => config('sso.allowed_origins.digikoperasi.api_key'),
-                'Origin' => request()->getSchemeAndHttpHost(), // or config('app.url')
+//                'Origin' => request()->getSchemeAndHttpHost(), // or config('app.url')
             ])
                 ->withBody(json_encode($payload), 'application/json');
             $response = $client->post($url);
