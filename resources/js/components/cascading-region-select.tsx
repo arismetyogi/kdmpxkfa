@@ -166,69 +166,69 @@ export default function CascadingRegionSelect({
     };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 md:grid grid-cols-2 gap-x-2">
             {/* Province Select */}
             <div className="space-y-2">
                 <label htmlFor="province" className="text-sm font-medium">
-                    Province *
+                    Provinsi *
                 </label>
                 <SearchableSelect
                     options={provinces.map((p) => ({ label: p.name, value: p.code }))}
                     value={selectedProvince}
                     onChange={handleProvinceChange}
-                    placeholder="Select province..."
-                    searchPlaceholder="Search province..."
+                    placeholder="Pilih provinsi..."
+                    searchPlaceholder="Cari nama provinsi..."
                     disabled={loadingProvinces}
                 />
-                {loadingProvinces && <p className="text-sm text-muted-foreground">Loading provinces...</p>}
+                {loadingProvinces && <p className="text-sm text-muted-foreground">Loading provinsi...</p>}
             </div>
 
             {/* City Select */}
             <div className="space-y-2">
                 <label htmlFor="city" className="text-sm font-medium">
-                    City *
+                    Kab/Kota *
                 </label>
                 <SearchableSelect
                     options={cities.map((c) => ({ label: c.name, value: c.code }))}
                     value={selectedCity}
                     onChange={handleCityChange}
-                    placeholder={selectedProvince ? 'Select city...' : 'Select a province first'}
-                    searchPlaceholder="Search city..."
+                    placeholder={selectedProvince ? 'Pilih kab/kota...' : 'Pilih provinsi...'}
+                    searchPlaceholder="Cari kab/kota..."
                     disabled={!selectedProvince || loadingCities}
                 />
-                {loadingCities && <p className="text-sm text-muted-foreground">Loading cities...</p>}
+                {loadingCities && <p className="text-sm text-muted-foreground">Loading kota...</p>}
             </div>
 
             {/* District Select */}
             <div className="space-y-2">
                 <label htmlFor="district" className="text-sm font-medium">
-                    District *
+                    Kecamatan *
                 </label>
                 <SearchableSelect
                     options={districts.map((d) => ({ label: d.name, value: d.code }))}
                     value={selectedDistrict}
                     onChange={handleDistrictChange}
-                    placeholder={selectedCity ? 'Select district...' : 'Select a city first'}
-                    searchPlaceholder="Search district..."
+                    placeholder={selectedCity ? 'Pilih kecamatan...' : 'Pilih kab/kota...'}
+                    searchPlaceholder="Cari nama kecamatan..."
                     disabled={!selectedCity || loadingDistricts}
                 />
-                {loadingDistricts && <p className="text-sm text-muted-foreground">Loading districts...</p>}
+                {loadingDistricts && <p className="text-sm text-muted-foreground">Loading kecamatan...</p>}
             </div>
 
             {/* Village Select */}
             <div className="space-y-2">
                 <label htmlFor="village" className="text-sm font-medium">
-                    Village *
+                    Kel/Desa *
                 </label>
                 <SearchableSelect
                     options={villages.map((v) => ({ label: v.name, value: v.code }))}
                     value={selectedVillage}
                     onChange={handleVillageChange}
-                    placeholder={selectedDistrict ? 'Select village...' : 'Select a district first'}
-                    searchPlaceholder="Search village..."
+                    placeholder={selectedDistrict ? 'Pilih desa/kelurahan...' : 'Pilih kecamatan...'}
+                    searchPlaceholder="Cari desa/kelurahan..."
                     disabled={!selectedDistrict || loadingVillages}
                 />
-                {loadingVillages && <p className="text-sm text-muted-foreground">Loading villages...</p>}
+                {loadingVillages && <p className="text-sm text-muted-foreground">Loading desa/kelurahan...</p>}
             </div>
         </div>
     );
