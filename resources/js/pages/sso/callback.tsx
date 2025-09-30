@@ -59,28 +59,11 @@ export default function SsoCallback(): JSX.Element {
         try {
             setMessage('Menghubungi server SSO...');
 
-            // Get SSO configuration from backend API since we need the API key which should not be exposed in frontend
-            const configResponse = await fetch('/api/v1/auth/sso/config');
-            if (!configResponse.ok) {
-                throw new Error('Failed to retrieve SSO configuration from server');
-            }
-
-            const config = await configResponse.json();
-            const ssoConfig = config?.ssoConfig?.digikoperasi;
-            console.log(config);
-
-            if (!ssoConfig || !ssoConfig.url || !ssoConfig.api_key) {
-                throw new Error('SSO configuration is incomplete or unavailable');
-            }
-
-            // Call SSO server validation endpoint
-            const url = `${ssoConfig.url}/redirect-sso/validate`;
-            const responseValidate = await fetch(url, {
+            // Call the local SSO validation API to avoid CORS issues
+            const responseValidate = await fetch('/api/v1/auth/sso/validate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-api-key': ssoConfig.api_key,
-                    Origin: window.location.origin,
                 },
                 body: JSON.stringify({
                     sso_token: ssoToken,
@@ -96,39 +79,22 @@ export default function SsoCallback(): JSX.Element {
 
             const result = await responseValidate.json();
 
-            if (!result?.data) {
-                throw new Error('Invalid response from SSO server: missing data in response');
+            if (!result.success) {
+                throw new Error(result.message || 'SSO validation failed');
             }
 
-            setMessage('Membuat sesi pengguna...');
+            setMessage('Login berhasil, mengarahkan...');
 
-            // Handle user login/create via backend API
-            const loginResponse = await fetch('/api/v1/auth/sso/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    user_data: result.data,
-                }),
-            });
+            console.log(result);
 
-            if (!loginResponse.ok) {
-                const errorData = await loginResponse.json().catch(() => ({}));
-                const errorMessage = errorData.message || errorData.error || 'Failed to create user session';
-                throw new Error(errorMessage);
-            }
-
-            const loginResult = await loginResponse.json();
-
-            if (loginResult.requires_onboarding) {
+            if (result.requires_onboarding) {
                 setMessage('Mengarahkan ke onboarding...');
-                // Redirect to onboarding with prefilled data
-                router.replace('/onboarding');
+                // Redirect to onboarding
+                router.visit(route('onboarding.create'));
             } else {
                 setMessage('Login berhasil, mengarahkan ke dashboard...');
                 // Redirect to dashboard
-                router.replace('/dashboard');
+                router.visit(route('dashboard'));
             }
 
             setStatus('success');

@@ -3,16 +3,22 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\Auth\SsoService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class SsoFrontendController extends Controller
 {
     public function __construct(
         private readonly SsoService $ssoService
-    ) {}
+    )
+    {
+    }
 
     /**
      * Get SSO configuration for frontend
@@ -43,50 +49,69 @@ class SsoFrontendController extends Controller
     }
 
     /**
-     * Handle user login after SSO validation from frontend
+     * @throws \Throwable
      */
-    public function login(Request $request)
+    public function validate(Request $request): JsonResponse
     {
-        try {
-            $userData = $request->input('user_data');
+        return DB::transaction(function () use ($request) {
+            try {
+                $ssoToken = $request->input('sso_token') ?? $request->query('sso_token');
+                $state = $request->input('state') ?? $request->query('state');
 
-            if (!$userData) {
+                if (!$ssoToken) {
+                    throw new \Exception('Missing sso_token parameter');
+                }
+
+                if (!$state) {
+                    throw new \Exception('Missing state parameter');
+                }
+
+                $result = $this->ssoService->validateSSOTokenWithDigikoperasi($ssoToken, $state);
+
+                // Find or create user based on SSO data
+                $user = $this->findOrCreateUser($result);
+
+                // Create SSO session
+                $this->createSSOSession($user, [
+                    'sso_token' => $ssoToken,
+                    'state' => $state,
+                ], $result);
+
+                $response = [
+                    'success' => true,
+                    'requires_onboarding' => !$user->onboarding_completed,
+                    'user' => $user,
+                ];
+
+                // Add prefilled data for onboarding if needed
+                if (!$user->onboarding_completed) {
+                    $response['prefilled_data'] = $this->getPrefilledData($result);
+                }
+
+                return response()->json($response);
+
+            } catch (\Exception $e) {
+                Log::error('SSO validation failed', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+
                 return response()->json([
-                    'message' => 'User data is required',
+                    'success' => false,
+                    'message' => $e->getMessage(),
                 ], 400);
+            } catch (\Throwable $e) {
+                Log::error('SSO validation failed', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ], 500);
             }
-
-            // Find or create user based on SSO data
-            $user = $this->findOrCreateUser($userData);
-
-            // Create SSO session (similar to backend implementation)
-            $this->createSSOSession($user, [
-                'sso_token' => $request->input('sso_token'),
-                'state' => $request->input('state'),
-            ], $userData);
-
-            $result = [
-                'user' => $user,
-                'requires_onboarding' => !$user->onboarding_completed,
-            ];
-
-            // Add prefilled data for onboarding if needed
-            if (!$user->onboarding_completed) {
-                $result['prefilled_data'] = $this->getPrefilledData($userData);
-            }
-
-            return response()->json($result);
-
-        } catch (\Exception $e) {
-            Log::error('SSO frontend login failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return response()->json([
-                'message' => 'SSO login failed: ' . $e->getMessage(),
-            ], 500);
-        }
+        });
     }
 
     /**
@@ -136,20 +161,20 @@ class SsoFrontendController extends Controller
      * Create user profile from SSO data
      * @throws \Exception
      */
-    private function createUserProfile($user, array $userData)
+    private function createUserProfile(User $user, array $userData)
     {
         // Decrypt sensitive fields
         $decryptedNik = $this->ssoService->decryptSsoField($userData['nik']) ?? '';
         $decryptedPicName = $this->ssoService->decryptSsoField($userData['pic_name']) ?? '';
         $decryptedPicPhone = $this->ssoService->decryptSsoField($userData['pic_phone']) ?? '';
         $decryptedNibNumber = $this->ssoService->decryptSsoField($userData['nib_number']) ?? '';
-        $decryptedBankAccount = (array) $this->ssoService->decryptSsoField($userData['bank_account']) ?? [];
+        $decryptedBankAccount = (array)$this->ssoService->decryptSsoField($userData['bank_account']) ?? [];
         $decryptedNpwp = $this->ssoService->decryptSsoField($userData['npwp_number']) ?? '';
         $decryptedSkNumber = $this->ssoService->decryptSsoField($userData['sk_number']) ?? '';
 
         // Handle latitude and longitude with proper defaults
-        $latitude = isset($userData['latitude']) ? (float) $userData['latitude'] : 0.0;
-        $longitude = isset($userData['longitude']) ? (float) $userData['longitude'] : 0.0;
+        $latitude = isset($userData['latitude']) ? (float)$userData['latitude'] : 0.0;
+        $longitude = isset($userData['longitude']) ? (float)$userData['longitude'] : 0.0;
 
         // Ensure all required string fields have values
         $profileData = [
@@ -158,10 +183,10 @@ class SsoFrontendController extends Controller
             'tenant_id' => $userData['tenant_id'] ?? '',
             'tenant_name' => $userData['tenant_name'] ?? '',
             'source_app' => $userData['source_app'] ?? '',
-            'province_code' => (string) $userData['province_code'] ?? '',
-            'city_code' => (string) $userData['regency_city_code'] ?? '',
-            'district_code' => (string) $userData['district_code'] ?? '',
-            'village_code' => (string) $userData['village_code'] ?? '',
+            'province_code' => (string)$userData['province_code'] ?? '',
+            'city_code' => (string)$userData['regency_city_code'] ?? '',
+            'district_code' => (string)$userData['district_code'] ?? '',
+            'village_code' => (string)$userData['village_code'] ?? '',
             'address' => $userData['registered_address'] ?? '',
             'latitude' => $latitude,
             'longitude' => $longitude,
@@ -193,14 +218,14 @@ class SsoFrontendController extends Controller
     /**
      * Create SSO session record
      */
-    private function createSSOSession($user, array $callbackData, array $userData): void
+    private function createSSOSession(User $user, array $callbackData, array $userData): void
     {
         // Regenerate session ID for security (avoid session fixation)
-        \Illuminate\Support\Facades\Auth::login($user);
-        \Illuminate\Support\Facades\Session::regenerate(true);
+        Auth::login($user);
+        Session::regenerate(true);
 
         // Store metadata in the Laravel session
-        \Illuminate\Support\Facades\Session::put('sso', [
+        Session::put('sso', [
             'user_id' => $user->id,
             'origin_app' => 'https://koperasi.berasumkm.id/',
             'expires_at' => now()->addSeconds(config('sso.session_expiry')),
@@ -225,8 +250,8 @@ class SsoFrontendController extends Controller
             'tenant_id' => $userData['tenant_id'] ?? null,
             'tenant_name' => $userData['tenant_name'] ?? null,
             'address' => $userData['registered_address'],
-            'latitude' => (float) $userData['latitude'] ?? null,
-            'longitude' => (float) $userData['longitude'] ?? null,
+            'latitude' => (float)$userData['latitude'] ?? null,
+            'longitude' => (float)$userData['longitude'] ?? null,
         ];
     }
 }
