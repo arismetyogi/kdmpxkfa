@@ -1,7 +1,9 @@
 import PriceDisplay from '@/components/priceDisplay';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import HeaderLayout from '@/layouts/header-layout';
+import { currency } from '@/lib/utils';
 import type { Apotek, BreadcrumbItem, Order } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
@@ -150,43 +152,45 @@ export default function Detail() {
                             <CardHeader>
                                 <CardTitle>Items</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                {order.order_items?.map((item) => {
-                                    const qty = Number(item.qty_delivered ?? item.quantity) || 0;
-                                    const price = Number(item.unit_price) || 0;
-                                    const content = Number(item.content) || 1;
+                            <CardContent>
+                                <ScrollArea className="h-128 pr-4">
+                                    <div className="space-y-4">
+                                        {order.order_items?.map((item) => {
+                                            const qty = Number(item.qty_delivered ?? item.quantity) || 0;
+                                            const price = Number(item.unit_price) || 0;
+                                            const content = Number(item.content) || 1;
 
-                                    const lineTotal = price * qty * content;
-                                    const unitTotal = price * content;
+                                            const lineTotal = price * qty * content;
+                                            const unitTotal = price * content;
 
-                                    return (
-                                        <div key={item.id} className="flex items-center gap-4">
-                                            {item.product.image ? (
-                                                <img
-                                                    src={item.product.image}
-                                                    alt={item.product.name}
-                                                    className="h-14 w-14 shrink-0 rounded object-cover"
-                                                />
-                                            ) : (
-                                                <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-gray-200">
-                                                    <ShoppingBag className="h-6 w-6 text-gray-400" />
+                                            return (
+                                                <div key={item.id} className="flex items-center gap-4">
+                                                    {item.product.image ? (
+                                                        <img
+                                                            src={item.product.image}
+                                                            alt={item.product.name}
+                                                            className="h-14 w-14 shrink-0 rounded object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-gray-200">
+                                                            <ShoppingBag className="h-6 w-6 text-gray-400" />
+                                                        </div>
+                                                    )}
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="truncate text-base font-medium">{item.product.name}</div>
+                                                        <div className="text-sm">Qty: {qty}</div>
+                                                    </div>
+                                                    <div className="shrink-0 text-right">
+                                                        <div className="font-semibold whitespace-nowrap">{currency(lineTotal)}</div>
+                                                        <div className="text-sm whitespace-nowrap text-muted-foreground">
+                                                            <PriceDisplay price={unitTotal} /> / {item.order_unit}
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            )}
-                                            <div className="min-w-0 flex-1">
-                                                <div className="truncate text-base font-medium">{item.product.name}</div>
-                                                <div className="text-sm">Qty: {qty}</div>
-                                            </div>
-                                            <div className="shrink-0 text-right">
-                                                <div className="font-semibold whitespace-nowrap">
-                                                    <PriceDisplay price={lineTotal} />
-                                                </div>
-                                                <div className="text-sm whitespace-nowrap text-muted-foreground">
-                                                    <PriceDisplay price={unitTotal} /> / {item.order_unit}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                            );
+                                        })}
+                                    </div>
+                                </ScrollArea>
                             </CardContent>
                         </Card>
                     </div>
@@ -215,24 +219,16 @@ export default function Detail() {
                                     return (
                                         <div className="grid grid-cols-2 gap-2 text-sm">
                                             <div>Product Price</div>
-                                            <div className="text-right">
-                                                <PriceDisplay price={subtotal} />
-                                            </div>
+                                            <div className="text-right">{currency(subtotal)}</div>
 
                                             <div>Product Tax (11%)</div>
-                                            <div className="text-right">
-                                                <PriceDisplay price={tax} />
-                                            </div>
+                                            <div className="text-right">{currency(tax)}</div>
 
                                             <div>Shipping Cost</div>
-                                            <div className="text-right">
-                                                <PriceDisplay price={shipping} />
-                                            </div>
+                                            <div className="text-right">{currency(shipping)}</div>
 
                                             <div>Discount</div>
-                                            <div className="text-right">
-                                                -<PriceDisplay price={discount} />
-                                            </div>
+                                            <div className="text-right">-{currency(discount)}</div>
 
                                             <div className="text-base font-semibold">Total</div>
                                             <div className="text-right text-base font-semibold">

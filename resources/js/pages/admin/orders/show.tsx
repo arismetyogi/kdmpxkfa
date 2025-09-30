@@ -89,7 +89,7 @@ export default function OrderShow({ order }: OrderShowProps) {
               return sum + (orderItem ? orderItem.unit_price * orderItem.content * (item.qty_delivered || 0) : 0);
           }, 0)
         : (order.order_items ?? []).reduce((sum, item) => {
-              return sum + item.unit_price * (item.qty_delivered || 0);
+              return sum + item.unit_price * item.content * (item.qty_delivered || 0);
           }, 0);
 
     const tax = Math.round(subtotal * 0.11);

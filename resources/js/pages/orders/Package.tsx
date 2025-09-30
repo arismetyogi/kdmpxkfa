@@ -1,4 +1,5 @@
 import PriceDisplay from '@/components/priceDisplay';
+import QuantityInput from '@/components/QuantityInput';
 import ScrollToTopButton from '@/components/ScrollToTop';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,8 +11,8 @@ import HeaderLayout from '@/layouts/header-layout';
 import { cn } from '@/lib/utils';
 import { BreadcrumbItem, CartItem, Product } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { Minus, Plus, Search, ShoppingCart } from 'lucide-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import { Search, ShoppingCart } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 // --- Type Definitions ---
 interface PackageProduct extends Product {
@@ -24,52 +25,26 @@ interface PackageProduct extends Product {
 interface PackagePageProps {
     products: PackageProduct[];
 }
+function useDebounce<T>(value: T, delay: number): T {
+    const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]); // Only re-run the effect if value or delay changes
+
+    return debouncedValue;
+}
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'Paket Merah Putih', href: '#' },
 ];
-
-// --- Sub-component: Quantity Input ---
-interface QuantityInputProps {
-    value: number;
-    onChange: (newValue: number) => void;
-    decrementDisabled?: boolean;
-    incrementDisabled?: boolean;
-}
-
-const QuantityInput: React.FC<QuantityInputProps> = ({ value, onChange, decrementDisabled, incrementDisabled }) => (
-    <div className="justify-cente flex items-center">
-        <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            onClick={() => onChange(value - 1)}
-            disabled={decrementDisabled}
-            className="h-8 w-8 rounded-full"
-        >
-            <Minus className="h-4 w-4" />
-        </Button>
-        <input
-            value={value}
-            onChange={(e) => {
-                const newValue = Number(e.target.value);
-                if (!isNaN(newValue)) onChange(newValue);
-            }}
-            className="w-8 rounded-md text-center text-lg"
-        />
-        <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            onClick={() => onChange(value + 1)}
-            disabled={incrementDisabled}
-            className="h-8 w-8 rounded-full"
-        >
-            <Plus className="h-4 w-4" />
-        </Button>
-    </div>
-);
 
 // --- Sub-component: Product Table Row (Updated for Mobile) ---
 interface ProductTableRowProps {
@@ -112,7 +87,7 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
                 />
             </TableCell>
             <TableCell className={cn('px-2 py-2 font-medium sm:px-4', isExcluded && 'opacity-60')}>
-                <p className="line-clamp-2 text-sm font-medium sm:text-base">{product.name}</p>
+                <p className="line-clamp-2 text-xs font-medium sm:text-base">{product.name}</p>
 
                 <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground sm:hidden">
                     <PriceDisplay price={pricePerBox} currency="" decimal="hidden" />
@@ -152,7 +127,6 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
             </TableCell>
             <TableCell className="px-2 text-center">
                 {isExcluded ? (
-                    // The `opacity-100` class is no longer needed here but doesn't hurt to keep.
                     <Button variant="default" size="sm" onClick={handleInclude} className="px-2">
                         Include
                     </Button>
@@ -211,7 +185,7 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, sum
         <Card>
             <CardContent className="px-6">
                 <h2 className="mb-4 text-xl font-bold">Order Summary</h2>
-                <ScrollArea className="-mr-4 h-66 pr-4">
+                <ScrollArea className="-mr-4 h-64 pr-4">
                     <div className="space-y-4">
                         {activeProducts.length > 0 ? (
                             activeProducts.map((product) => (
@@ -249,7 +223,7 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, sum
                     </div>
                     <Button onClick={onCheckout} disabled={activeProducts.length === 0} className="mt-6 w-full" size="lg">
                         <ShoppingCart className="mr-2 h-5 w-5" />
-                        Add to Checkout
+                        Proceed to Checkout
                     </Button>
                 </div>
             </CardContent>
@@ -273,7 +247,7 @@ const MobileCheckoutBar: React.FC<MobileCheckoutBarProps> = ({ total, onCheckout
             </div>
             <Button onClick={onCheckout} disabled={disabled} size="lg" className="w-full max-w-sm">
                 <ShoppingCart className="mr-2 h-5 w-5" />
-                Add to Checkout
+                Proceed to Checkout
             </Button>
         </div>
     </div>
@@ -284,6 +258,7 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
     const [packageProducts, setPackageProducts] = useState<PackageProduct[]>(initialProducts);
     const [searchQuery, setSearchQuery] = useState('');
     const [sortOrder, setSortOrder] = useState('default');
+    const debouncedSearchQuery = useDebounce(searchQuery, 500); // 500ms debounce delay
 
     const updateQuantity = useCallback((productId: number, newQuantity: number) => {
         setPackageProducts((prev) =>
@@ -299,12 +274,10 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
 
     const displayedProducts = useMemo(() => {
         let products = [...packageProducts];
-        if (searchQuery.trim() !== '') {
-            products = products.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        if (debouncedSearchQuery.trim() !== '') {
+            products = products.filter((p) => p.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()));
         }
         switch (sortOrder) {
-            case 'alphabetical':
-                return products.sort((a, b) => a.name.localeCompare(b.name));
             case 'quantity':
                 return products.sort((a, b) => {
                     if (a.assignedQuantity > 0 && b.assignedQuantity === 0) return -1;
@@ -312,9 +285,9 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
                     return b.assignedQuantity - a.assignedQuantity;
                 });
             default:
-                return products;
+                return products.sort((a, b) => a.name.localeCompare(b.name));
         }
-    }, [packageProducts, searchQuery, sortOrder]);
+    }, [packageProducts, debouncedSearchQuery, sortOrder]);
 
     const summary = useMemo(() => {
         const subtotal = activePackageProducts.reduce((total, p) => total + p.price * p.assignedQuantity, 0);
@@ -331,10 +304,10 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
                 total: p.price * p.assignedQuantity,
             }));
             localStorage.setItem('cart', JSON.stringify(cart));
-            router.visit(route('cart'));
+            router.visit(route('checkout'));
         } catch (error) {
-            console.error('Error adding products to cart:', error);
-            alert('There was an error creating your cart. Please try again.');
+            console.error('Error adding products to checkout:', error);
+            alert('There was an error creating your checkout. Please try again.');
         }
     };
 
@@ -365,8 +338,7 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
                                     <SelectValue placeholder="Sort by" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="default">Default Order</SelectItem>
-                                    <SelectItem value="alphabetical">Alphabetical (A-Z)</SelectItem>
+                                    <SelectItem value="default">Default (A-Z)</SelectItem>
                                     <SelectItem value="quantity">Included / Quantity</SelectItem>
                                 </SelectContent>
                             </Select>
@@ -385,7 +357,7 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
 
             <MobileCheckoutBar total={summary.total} onCheckout={addToCheckout} disabled={isCheckoutDisabled} />
 
-            <ScrollToTopButton />
+            <ScrollToTopButton PC />
         </HeaderLayout>
     );
 }

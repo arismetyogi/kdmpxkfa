@@ -1,5 +1,4 @@
 import FloatingCart from '@/components/FloatingCart';
-import PriceDisplay from '@/components/priceDisplay';
 import ProductCard from '@/components/product-card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
@@ -8,12 +7,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Lens } from '@/components/ui/lens';
 import HeaderLayout from '@/layouts/header-layout';
+import { currency } from '@/lib/utils';
 import { CartItem, Product, type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import Autoplay from 'embla-carousel-autoplay';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, Minus, Plus, ShoppingCart } from 'lucide-react';
-// MODIFICATION: Import useMemo
 import { useEffect, useMemo, useState } from 'react';
 
 const MotionButton = motion(Button);
@@ -123,7 +122,7 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                             </p>
                             <div className="mt-4 space-y-2">
                                 <div className="flex items-baseline gap-2">
-                                    <PriceDisplay price={product.price * product.content} className="text-3xl font-bold text-primary lg:text-4xl" />
+                                    <p className="text-3xl font-bold text-primary lg:text-4xl">{currency(product.price * product.content)}</p>
                                     <span className="text-sm text-muted-foreground">/ {product.order_unit}</span>
                                 </div>
                                 <div className="flex items-center gap-4 pt-1">
@@ -242,8 +241,7 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                                     <div className="flex items-center justify-between gap-2">
                                         <p className="text-lg font-bold">Subtotal:</p>
                                         <div className="text-right">
-                                            {/* MODIFICATION: Use the dynamic subtotal variable here */}
-                                            <PriceDisplay price={subtotal} className="text-lg font-bold text-primary" />
+                                            <p className="text-lg font-bold text-primary">{currency(subtotal)}</p>
                                         </div>
                                     </div>
 

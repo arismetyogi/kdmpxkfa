@@ -1,4 +1,5 @@
 import PriceDisplay from '@/components/priceDisplay';
+import ScrollToTopButton from '@/components/ScrollToTop';
 import HeaderLayout from '@/layouts/header-layout';
 import { type BreadcrumbItem, type CartItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -201,6 +202,7 @@ export default function Cart() {
                     </>
                 )}
             </div>
+            <ScrollToTopButton PC />
         </HeaderLayout>
     );
 }

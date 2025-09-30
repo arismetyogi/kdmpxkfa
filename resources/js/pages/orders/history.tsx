@@ -3,14 +3,14 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calender'; // Note: Corrected typo from 'calender' to 'calendar' if it exists in your project
+import { Calendar } from '@/components/ui/calender';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import { cn } from '@/lib/utils';
+import { cn, currency } from '@/lib/utils';
 import type { BreadcrumbItem, Order, OrderItem } from '@/types';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, CreditCard, Filter, Info, ShoppingBag } from 'lucide-react';
@@ -24,13 +24,6 @@ const paymentLabels: Record<string, string> = {
     cad: 'Cash After Delivery',
     va: 'Virtual Account',
 };
-
-const currency = (v: number) =>
-    new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0,
-    }).format(v ?? 0);
 
 // --- 1. EXTRACTED DETAIL CARD COMPONENT ---
 interface OrderDetailCardProps {

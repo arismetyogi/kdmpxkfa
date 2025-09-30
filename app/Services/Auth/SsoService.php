@@ -39,11 +39,11 @@ readonly class SsoService
 
             $result = [
                 'user' => $user,
-                'requires_onboarding' => ! $user->onboarding_completed,
+                'requires_onboarding' => !$user->onboarding_completed,
             ];
 
             // Add prefilled data for onboarding if needed
-            if (! $user->onboarding_completed) {
+            if (!$user->onboarding_completed) {
                 $result['prefilled_data'] = $this->getPrefilledData($userData);
             }
 
@@ -64,12 +64,12 @@ readonly class SsoService
         ];
 
         try {
-            $url = rtrim(config('sso.allowed_origins.digikoperasi.url'), '/').'/redirect-sso/validate';
+            $url = rtrim(config('sso.allowed_origins.digikoperasi.url'), '/') . '/redirect-sso/validate';
 
             $client = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'x-api-key' => config('sso.allowed_origins.digikoperasi.api_key'),
-                'Origin' => request()->getSchemeAndHttpHost(), // or config('app.url')
+                // 'Origin' => request()->getSchemeAndHttpHost(), // or config('app.url')
             ])
                 ->withBody(json_encode($payload), 'application/json');
             $response = $client->post($url);
@@ -86,8 +86,8 @@ readonly class SsoService
             $responseData = $response->json();
             //            Log::debug('Response data parsed: ', ['data' => $responseData['data']]);
 
-            if (! $response->ok() || ! isset($responseData['data'])) {
-                throw new \Exception('Invalid response from SSO server: '.$response->body());
+            if (!$response->ok() || !isset($responseData['data'])) {
+                throw new \Exception('Invalid response from SSO server: ' . $response->body());
             }
 
             return $responseData['data'];
@@ -97,7 +97,7 @@ readonly class SsoService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            throw new \Exception('SSO validation failed: '.$e->getMessage());
+            throw new \Exception('SSO validation failed: ' . $e->getMessage());
         }
     }
 
@@ -112,11 +112,11 @@ readonly class SsoService
         $email = $this->decryptSsoField($userData['email']) ?? null;
         //        Log::info('Decrypted SSO user: ' . $email);
 
-        if (! $user) {
+        if (!$user) {
             $user = User::where('email', $email)->first();
         }
 
-        if (! $user) {
+        if (!$user) {
             $user = User::create([
                 'uuid' => Str::uuid(),
                 'name' => $userData['name'],
@@ -136,7 +136,7 @@ readonly class SsoService
             $this->createUserProfile($user, $userData);
         }
 
-        if (! $user) {
+        if (!$user) {
             Log::error('User creation failed');
         }
 
@@ -193,7 +193,7 @@ readonly class SsoService
             //            Log::info('Profile created for user: ' . $user->email);
             return $user;
         } catch (\Exception $e) {
-            Log::error('Failed to create user profile: '.$e->getMessage(), [
+            Log::error('Failed to create user profile: ' . $e->getMessage(), [
                 'user_id' => $user->id,
                 'profile_data' => $profileData,
                 'trace' => $e->getTraceAsString(),
@@ -254,7 +254,7 @@ readonly class SsoService
             'timestamp' => now()->timestamp,
         ]);
 
-        return $baseUrl.'/sso/callback?'.$params;
+        return $baseUrl . '/sso/callback?' . $params;
     }
 
     /**
@@ -292,11 +292,11 @@ readonly class SsoService
             $ivHex = bin2hex($iv);
 
             // Concatenate ivHex:encryptedHex, then base64 encode
-            $data = $ivHex.':'.bin2hex($encrypted);
+            $data = $ivHex . ':' . bin2hex($encrypted);
 
             return base64_encode($data);
         } catch (\Throwable $e) {
-            Log::error('Enkripsi field SSO gagal: '.$e->getMessage());
+            Log::error('Enkripsi field SSO gagal: ' . $e->getMessage());
 
             return null;
         }
@@ -320,7 +320,7 @@ readonly class SsoService
 
             [$ivHex, $encryptedHex] = explode(':', $data, 2);
 
-            if (! $ivHex || ! $encryptedHex) {
+            if (!$ivHex || !$encryptedHex) {
                 throw new \Exception('Invalid encrypted data format');
             }
 
@@ -346,7 +346,7 @@ readonly class SsoService
 
             return json_decode($decrypted, true);
         } catch (\Throwable $e) {
-            Log::error('Dekripsi field SSO gagal: '.$e->getMessage());
+            Log::error('Dekripsi field SSO gagal: ' . $e->getMessage());
 
             return null;
         }

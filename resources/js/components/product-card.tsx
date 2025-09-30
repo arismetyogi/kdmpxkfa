@@ -1,5 +1,5 @@
 import PriceDisplay from '@/components/priceDisplay';
-import { cn } from '@/lib/utils'; // Assuming you have a utility for merging class names
+import { cn, currency } from '@/lib/utils'; // Assuming you have a utility for merging class names
 import { Product } from '@/types/index.js';
 import { motion } from 'framer-motion';
 import { ShoppingCart } from 'lucide-react';
@@ -74,7 +74,7 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
                             {content} {base_uom} per {order_unit}
                         </span>
                         <div>
-                            <PriceDisplay price={price * content} className="text-md pr-2 font-bold text-primary" />
+                            <p className="text-md pr-2 font-bold text-primary">{currency(price * content)}</p>
                         </div>
                     </div>
                 </div>
