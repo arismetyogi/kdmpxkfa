@@ -149,7 +149,7 @@ export interface Product {
     order_unit: string;
     content: number;
     brand?: string;
-    image?: string;
+    image?: Record<string> | string;
     description?: string;
     usage_direction: string;
     pharmacology?: string;

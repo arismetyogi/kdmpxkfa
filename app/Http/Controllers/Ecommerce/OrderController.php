@@ -122,6 +122,7 @@ class OrderController extends Controller
 
     public function show(Product $product)
     {
+//        dump($product);
         $product->load('category:id,subcategory1');
         // Fetch related products from the same category (limit to 4)
         $relatedProducts = Product::with('category:id,subcategory1')
@@ -131,7 +132,7 @@ class OrderController extends Controller
             ->get();
 
         return Inertia::render('ecommerce/DetailProduct', [
-            'product' => $product,
+            'product' => $product->toResource()->toArray(request()),
             'relatedProducts' => $relatedProducts,
         ]);
     }
