@@ -1,4 +1,5 @@
 import Footer from '@/components/Footer';
+import HeroCarousel from '@/components/HeroCarousel';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -6,10 +7,9 @@ import AppHeaderLayout from '@/layouts/app/app-header-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import Autoplay from 'embla-carousel-autoplay';
-import HeroCarousel from "@/components/HeroCarousel";
 import { motion } from 'framer-motion';
 import { HeartPulse, Pill, RefreshCw, ShieldCheck, ShoppingBag, ShoppingCart, Syringe, Truck } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 type Product = {
     id: number;
@@ -39,6 +39,7 @@ const categoryCards = [
         desc: 'Resep & Bebas Terlengkap',
         icon: Pill,
         color: 'text-blue-600 bg-blue-100 dark:text-blue-200 dark:bg-blue-900/40',
+        image: 'https://images.unsplash.com/photo-1577401132921-cb39bb0adcff?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     },
     {
         id: 2,
@@ -46,6 +47,7 @@ const categoryCards = [
         desc: 'Suplemen Premium Import',
         icon: HeartPulse,
         color: 'text-emerald-600 bg-emerald-100 dark:text-emerald-200 dark:bg-emerald-900/40',
+        image: 'https://plus.unsplash.com/premium_photo-1730988915408-209c1ab59554?q=80&w=2224&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     },
     {
         id: 3,
@@ -53,39 +55,23 @@ const categoryCards = [
         desc: 'Kesehatan Preventif Terbaik',
         icon: Syringe,
         color: 'text-rose-600 bg-rose-100 dark:text-rose-200 dark:bg-rose-900/40',
+        image: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     },
 ];
 
-export default function Dashboard({ products }: { products?: Product[] }) {
+export default function Dashboard({ products, top_products }: { products?: Product[]; top_products?: Product[] }) {
     const [activeCategory, setActiveCategory] = useState('Semua');
-    const [loading, setLoading] = useState<boolean>(true);
-
-    useEffect(() => {
-        setLoading(false);
-    }, []);
 
     const categories = ['Semua', ...new Set(Object.values(categoryMap))];
 
     const filteredProducts = activeCategory === 'Semua' ? products : products?.filter((p) => categoryMap[p.category_id] === activeCategory);
 
-    if (loading) {
-        return (
-            <AppHeaderLayout breadcrumbs={breadcrumbs}>
-                <Head title="KFA" />
-                <div className="flex min-h-screen items-center justify-center">
-                    <p className="text-xl text-slate-500">Memuat produk...</p>
-                </div>
-            </AppHeaderLayout>
-        );
-    }
-    
     return (
         <AppHeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="KFA" />
 
             <div className="min-h-screen from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
-             
-                <div className="mx-auto flex max-w-7xl flex-col gap-12 p-4 md:gap-20 md:p-8">
+                <div className="mx-auto flex max-w-7xl flex-col gap-12 py-4 md:gap-20">
                     {/* Hero Section */}
                     <main className="relative">
                         <HeroCarousel />
@@ -94,12 +80,11 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                     {/* Kategori Cards */}
                     <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }}>
                         <div className="mb-8 text-center">
-                          
-                            <h2 className="mb-2 text-2xl font-bold text-slate-800 dark:text-slate-100 md:text-3xl">Kategori Pilihan</h2>
+                            <h2 className="mb-2 text-2xl font-bold text-slate-800 md:text-3xl dark:text-slate-100">Kategori Pilihan</h2>
                             <p className="text-slate-600 dark:text-slate-400">Pilihan terbaik untuk kesehatan keluarga Anda</p>
                         </div>
+
                         <div className="flex justify-center">
-                          
                             <div className="grid w-full max-w-6xl grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 md:grid-cols-3">
                                 {categoryCards.map((cat, idx) => (
                                     <motion.div
@@ -107,18 +92,28 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.6, delay: 0.1 * idx }}
-                                        whileHover={{ y: -8, scale: 1.05 }}
-                                        className="w-full max-w-xs"
+                                        whileHover={{ y: -8, scale: 1.02 }}
+                                        className="w-full max-w-sm"
                                     >
-                                        <Link href={route('orders.products', { categories : [cat.name] })}>
-                                            <Card className="group rounded-2xl border bg-white transition-all duration-300 hover:shadow-xl dark:bg-slate-800">
-                                                <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-                                                    <div className={`${cat.color} mb-4 rounded-full p-4 transition-transform group-hover:scale-110`}>
-                                                        <cat.icon className="h-6 w-6" />
+                                        <Link href={route('orders.products', { categories: [cat.name] })}>
+                                            <Card className="group relative h-72 w-full cursor-pointer overflow-hidden rounded-2xl shadow-md transition-all duration-300 hover:shadow-xl">
+                                                {/* Background Image: Zooms in on hover */}
+                                                <div
+                                                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 ease-in-out group-hover:scale-105"
+                                                    style={{ backgroundImage: `url(${cat.image})` }}
+                                                />
+                                                <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/50 to-transparent p-4 transition-all duration-300 ease-in-out group-hover:opacity-0">
+                                                    <h3 className="text-xl font-bold text-white">{cat.name}</h3>
+                                                </div>
+                                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-t from-black/70 to-black/10 p-6 text-center text-white opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100">
+                                                    <div className="translate-y-4 transform transition-transform duration-500 ease-in-out group-hover:translate-y-0">
+                                                        <h3 className="text-2xl font-bold">{cat.name}</h3>
+                                                        <p className="mt-2 text-sm opacity-90">{cat.desc}</p>
+                                                        <button className="mt-6 w-fit rounded-full bg-white px-6 py-2 text-sm font-semibold text-slate-900 shadow-md transition-all duration-300 hover:scale-105 hover:bg-slate-200">
+                                                            Explore
+                                                        </button>
                                                     </div>
-                                                    <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{cat.name}</h3>
-                                                    <p className="text-sm text-slate-500 dark:text-slate-400">{cat.desc}</p>
-                                                </CardContent>
+                                                </div>
                                             </Card>
                                         </Link>
                                     </motion.div>
@@ -130,17 +125,15 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                     {/* Carousel Produk */}
                     <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }}>
                         <div className="mb-8 text-center">
-                          
-                            <h2 className="mb-2 text-2xl font-bold text-slate-800 dark:text-slate-100 md:text-3xl">Produk Terlaris</h2>
+                            <h2 className="mb-2 text-2xl font-bold text-slate-800 md:text-3xl dark:text-slate-100">Produk Terlaris</h2>
                             <p className="text-slate-600 dark:text-slate-400">Pilihan favorit pelanggan premium kami</p>
                         </div>
                         <Carousel opts={{ align: 'start', loop: true }} plugins={[Autoplay({ delay: 4000 })]} className="w-full">
                             <CarouselContent className="-ml-4">
-                                {products?.map((p) => (
-                                 
+                                {top_products?.map((p) => (
                                     <CarouselItem key={p.id} className="basis-1/2 pl-4 md:basis-1/3 lg:basis-1/4">
                                         <motion.div whileHover={{ y: -4 }} className="group h-full">
-                                            <Card className="relative h-full overflow-hidden rounded-2xl border-0 bg-white shadow-lg backdrop-blur-sm hover:shadow-2xl dark:bg-slate-800 md:rounded-3xl">
+                                            <Card className="relative h-full overflow-hidden rounded-2xl border-0 bg-white shadow-lg backdrop-blur-sm hover:shadow-2xl md:rounded-3xl dark:bg-slate-800">
                                                 <div className="relative overflow-hidden">
                                                     <img
                                                         src={p.image || '/placeholder.jpg'}
@@ -149,10 +142,16 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                                     />
                                                 </div>
                                                 <CardContent className="p-4 md:p-6">
-                                                    <h3 className="mb-1 line-clamp-1 font-bold text-slate-800 dark:text-slate-100 md:mb-2">{p.name}</h3>
-                                                    <p className="mb-2 line-clamp-2 text-sm text-slate-500 dark:text-slate-400 md:mb-3">{p.description}</p>
+                                                    <h3 className="mb-1 line-clamp-1 font-bold text-slate-800 md:mb-2 dark:text-slate-100">
+                                                        {p.name}
+                                                    </h3>
+                                                    <p className="mb-2 line-clamp-2 text-sm text-slate-500 md:mb-3 dark:text-slate-400">
+                                                        {p.description}
+                                                    </p>
                                                     <div className="flex items-baseline gap-2">
-                                                        <span className="text-base font-bold text-blue-600 md:text-lg">Rp {p.price.toLocaleString('id-ID')}</span>
+                                                        <span className="text-base font-bold text-blue-600 md:text-lg">
+                                                            Rp {p.price.toLocaleString('id-ID')}
+                                                        </span>
                                                     </div>
                                                 </CardContent>
                                             </Card>
@@ -160,13 +159,12 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                     </CarouselItem>
                                 ))}
                             </CarouselContent>
-                         
-                            <CarouselPrevious className="hidden border-0 bg-white shadow-lg backdrop-blur-sm dark:bg-slate-700/80 sm:flex" />
-                            <CarouselNext className="hidden border-0 bg-white shadow-lg backdrop-blur-sm dark:bg-slate-700/80 sm:flex" />
+
+                            <CarouselPrevious className="hidden border-0 bg-white shadow-lg backdrop-blur-sm sm:flex dark:bg-slate-700/80" />
+                            <CarouselNext className="hidden border-0 bg-white shadow-lg backdrop-blur-sm sm:flex dark:bg-slate-700/80" />
                         </Carousel>
                     </motion.div>
 
-                    
                     <Card className="rounded-3xl bg-white p-6 shadow-xl ring-1 ring-slate-900/5 md:p-12 dark:bg-slate-800/50">
                         <motion.div
                             initial={{ opacity: 0, y: 40 }}
@@ -174,19 +172,26 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                             transition={{ duration: 0.8, delay: 0.4 }}
                             className="grid items-center gap-8 md:grid-cols-2 lg:gap-12"
                         >
-                            <div className="max-w-md mx-auto">
-                                <img src="/Package (2).png" alt="Paket Koperasi Merah Putih" className="h-full w-full rounded-2xl object-cover md:rounded-3xl" />
+                            <div className="mx-auto max-w-md">
+                                <img
+                                    src="/Package (2).png"
+                                    alt="Paket Koperasi Merah Putih"
+                                    className="h-full w-full rounded-2xl object-cover md:rounded-3xl"
+                                />
                             </div>
                             <div className="flex flex-col text-center md:text-left">
-                               
                                 <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-slate-800 sm:text-4xl md:text-5xl dark:text-white">
                                     Paket Koperasi Merah Putih
                                 </h2>
-                                <p className="mb-6 text-base text-slate-600 dark:text-slate-300 md:text-lg">Paket Obat lengkap senilai 30 juta untuk mengisi</p>
+                                <p className="mb-6 text-base text-slate-600 md:text-lg dark:text-slate-300">
+                                    Paket Obat lengkap senilai 30 juta untuk mengisi
+                                </p>
                                 <div className="flex justify-center md:justify-start">
                                     <Link href={route('packages.index')}>
-                                        
-                                        <Button size="lg" className="rounded-xl bg-blue-600 px-6 py-5 text-base font-bold text-white shadow-lg hover:bg-blue-700 md:px-8 md:py-7 md:text-lg">
+                                        <Button
+                                            size="lg"
+                                            className="rounded-xl bg-blue-600 px-6 py-5 text-base font-bold text-white shadow-lg hover:bg-blue-700 md:px-8 md:py-7 md:text-lg"
+                                        >
                                             <ShoppingCart className="mr-2 h-5 w-5" />
                                             Buy Package Now
                                         </Button>
@@ -213,13 +218,11 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                     {/* Grid Produk */}
                     <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.5 }}>
                         <div className="mb-8 text-center">
-                            
-                            <h2 className="mb-2 text-2xl font-bold text-slate-800 dark:text-slate-100 md:text-3xl">Katalog Premium</h2>
+                            <h2 className="mb-2 text-2xl font-bold text-slate-800 md:text-3xl dark:text-slate-100">Katalog Premium</h2>
                             <p className="text-slate-600 dark:text-slate-400">Jelajahi koleksi lengkap produk berkualitas tinggi</p>
                         </div>
                         <div className="mb-8 flex flex-wrap justify-center gap-2 md:gap-3">
                             {(categories ?? []).map((cat) => (
-                             
                                 <Button
                                     key={cat}
                                     variant={activeCategory === cat ? 'default' : 'outline'}
@@ -234,7 +237,7 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                 </Button>
                             ))}
                         </div>
-                      
+
                         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:gap-6 lg:grid-cols-4">
                             {(filteredProducts ?? []).map((p, idx) => (
                                 <motion.div
@@ -245,7 +248,7 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                     whileHover={{ y: -8, scale: 1.02 }}
                                     className="group"
                                 >
-                                    <Card className="relative flex h-full flex-col overflow-hidden rounded-2xl border-0 bg-white shadow-xl backdrop-blur-sm hover:shadow-2xl dark:bg-slate-800 md:rounded-3xl">
+                                    <Card className="relative flex h-full flex-col overflow-hidden rounded-2xl border-0 bg-white shadow-xl backdrop-blur-sm hover:shadow-2xl md:rounded-3xl dark:bg-slate-800">
                                         <div className="relative overflow-hidden">
                                             <img
                                                 src={p.image ? `/storage/${p.image}` : '/placeholder.jpg'}
@@ -254,12 +257,19 @@ export default function Dashboard({ products }: { products?: Product[] }) {
                                             />
                                         </div>
                                         <CardContent className="flex flex-1 flex-col p-4 md:p-6">
-                                            <h3 className="mb-1 line-clamp-1 font-bold text-slate-800 dark:text-slate-100 md:mb-2">{p.name}</h3>
-                                            <p className="mb-2 line-clamp-2 flex-1 text-sm text-slate-500 dark:text-slate-400 md:mb-3">{p.description}</p>
+                                            <h3 className="mb-1 line-clamp-1 font-bold text-slate-800 md:mb-2 dark:text-slate-100">{p.name}</h3>
+                                            <p className="mb-2 line-clamp-2 flex-1 text-sm text-slate-500 md:mb-3 dark:text-slate-400">
+                                                {p.description}
+                                            </p>
                                             <div className="flex items-baseline gap-2">
-                                                <span className="text-base font-bold text-blue-600 md:text-lg">Rp {p.price.toLocaleString('id-ID')}</span>
+                                                <span className="text-base font-bold text-blue-600 md:text-lg">
+                                                    Rp {p.price.toLocaleString('id-ID')}
+                                                </span>
                                             </div>
-                                            <Button asChild className="mt-auto w-full rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 py-2.5 text-sm font-semibold text-white shadow-md hover:from-blue-700 hover:to-blue-800 md:rounded-2xl md:text-base">
+                                            <Button
+                                                asChild
+                                                className="mt-auto w-full rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 py-2.5 text-sm font-semibold text-white shadow-md hover:from-blue-700 hover:to-blue-800 md:rounded-2xl md:text-base"
+                                            >
                                                 <Link href="#">
                                                     <ShoppingBag className="mr-2 h-4 w-4" /> Lihat Detail
                                                 </Link>
@@ -276,4 +286,3 @@ export default function Dashboard({ products }: { products?: Product[] }) {
         </AppHeaderLayout>
     );
 }
-

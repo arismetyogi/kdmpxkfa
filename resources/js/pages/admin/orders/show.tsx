@@ -3,9 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { idrFormatter } from '@/lib/utils';
+import { currency } from '@/lib/utils';
 import { Order, OrderItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format } from 'date-fns';
@@ -248,7 +248,7 @@ export default function OrderShow({ order }: OrderShowProps) {
                                                     )}
                                                 </TableCell>
                                                 <TableCell className="text-sm font-medium">{item.product_name || 'N/A'}</TableCell>
-                                                <TableCell className="text-right">{idrFormatter.format(item.unit_price * item.content)}</TableCell>
+                                                <TableCell className="text-right">{currency(item.unit_price * item.content)}</TableCell>
                                                 <TableCell className="text-center">
                                                     {item.quantity} {item.product?.order_unit}
                                                     <br />
@@ -273,7 +273,7 @@ export default function OrderShow({ order }: OrderShowProps) {
                                                     )}
                                                 </TableCell>
                                                 <TableCell className="text-right">
-                                                    {idrFormatter.format(
+                                                    {currency(
                                                         item.unit_price *
                                                             item.content *
                                                             (isDeliverable ? data.order_items[index]?.qty_delivered || 0 : item.qty_delivered || 0),
@@ -282,47 +282,45 @@ export default function OrderShow({ order }: OrderShowProps) {
                                             </TableRow>
                                         ))}
                                     </TableBody>
-                                    <TableFooter>
-                                        <TableRow>
-                                            <TableCell colSpan={6} className="text-right font-medium">
-                                                Subtotal
-                                            </TableCell>
-                                            <TableCell className="text-right">{idrFormatter.format(subtotal)}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell colSpan={6} className="text-right font-medium">
-                                                Tax (11%)
-                                            </TableCell>
-                                            <TableCell className="text-right">{idrFormatter.format(tax)}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell colSpan={6} className="text-right font-bold">
-                                                Total
-                                            </TableCell>
-                                            <TableCell className="text-right font-bold">{idrFormatter.format(total)}</TableCell>
-                                        </TableRow>
-                                    </TableFooter>
                                 </Table>
                             </ScrollArea>
                         </CardContent>
                     </Card>
 
-                    {/* Delivery Button */}
-                    {isDeliverable && (
-                        <div className="mt-4 flex justify-end">
-                            <Button type="submit" disabled={processing}>
-                                {processing ? 'Updating...' : 'Mark as Shipped'}
-                            </Button>
+                    <div className="mt-4 flex flex-col items-end gap-4">
+                        {/* Left Side: Summary Table */}
+                        <div className="w-full max-w-sm">
+                            <Table>
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell className="text-right font-medium">Subtotal:</TableCell>
+                                        <TableCell className="text-right font-medium">{currency(subtotal)}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell className="text-right font-medium">Shipping:</TableCell>
+                                        <TableCell className="text-right font-medium">{currency(tax)}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell className="text-right font-bold">Total:</TableCell>
+                                        <TableCell className="text-right font-bold">{currency(total)}</TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
                         </div>
-                    )}
-                </form>
 
-                {/* Back Button */}
-                <div className="flex justify-end">
-                    <Button variant="outline" asChild>
-                        <Link href={route('admin.orders.index')}>Back to Orders</Link>
-                    </Button>
-                </div>
+                        {/* Right Side: Action Buttons */}
+                        <div className="flex shrink-0 items-center gap-4 py-4">
+                            <Button variant="outline" asChild>
+                                <Link href={route('admin.orders.index')}>Back to Orders</Link>
+                            </Button>
+                            {isDeliverable && (
+                                <Button type="submit" disabled={processing}>
+                                    {processing ? 'Updating...' : 'Mark as Shipped'}
+                                </Button>
+                            )}
+                        </div>
+                    </div>
+                </form>
             </div>
         </AppLayout>
     );
