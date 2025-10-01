@@ -1,4 +1,5 @@
 import FloatingCart from '@/components/FloatingCart';
+import { ImageCarousel } from '@/components/image-carousel';
 import ProductCard from '@/components/product-card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +14,6 @@ import Autoplay from 'embla-carousel-autoplay';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, Minus, Plus, ShoppingCart } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { Lens } from '@/components/ui/lens';
 
 const MotionButton = motion(Button);
 
@@ -98,31 +98,8 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                     <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 lg:grid-cols-12 lg:gap-14 lg:p-0">
                         {/* Kolom 1: Gambar Produk dengan Lens */}
                         <div className="lg:col-span-4">
-                            <Carousel
-                            //     opts={{
-                            //         align: 'start',
-                            //         // loop: true,
-                            //     }}
-                            >
-                                <CarouselContent>
-                                    {product.image?.map((prodImg: string, index: number) => (
-                                        <CarouselItem key={index}>
-                                            <Lens>
-                                            <img
-                                                src={prodImg}
-                                                alt={`${prodImg} ${index + 1}`}
-                                                loading="lazy"
-                                                className="aspect-square h-auto w-full rounded-lg border-1 object-cover"
-                                            />
-                                            </Lens>
-                                        </CarouselItem>
-                                    ))}
-                                </CarouselContent>
-                                <CarouselPrevious />
-                                <CarouselNext />
-                            </Carousel>
+                            <ImageCarousel images={product.image} productName={product.name} />
                         </div>
-
 
                         {/* Kolom 2: Informasi Produk */}
                         <div className="flex flex-col lg:col-span-5">
