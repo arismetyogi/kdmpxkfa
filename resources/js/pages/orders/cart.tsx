@@ -137,9 +137,22 @@ export default function Cart() {
                         {/* Action buttons for packages */}
                         <div className="flex justify-between">
                             <PriceDisplay price={item.price * 1.11} className="mt-1 text-sm font-bold text-primary sm:text-base" />
-                            <button onClick={() => removeItem(item.id)} className="text-sm text-destructive hover:text-destructive/80 sm:text-base">
-                                Remove Package
-                            </button>
+                            <div className="flex gap-2">
+                                <button 
+                                    onClick={() => {
+                                        // Store current package in localStorage to restore on package page
+                                        localStorage.setItem('editingPackage', JSON.stringify(item));
+                                        // Navigate to package page
+                                        window.location.href = route('packages.index');
+                                    }}
+                                    className="text-sm text-blue-600 hover:text-blue-800 sm:text-base"
+                                >
+                                    Edit Package
+                                </button>
+                                <button onClick={() => removeItem(item.id)} className="text-sm text-destructive hover:text-destructive/80 sm:text-base">
+                                    Remove
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -109,6 +109,8 @@ class OrderController extends Controller
         // Update status pesanan jadi "delivering"
         $order->status = OrderStatusEnum::DELIVERY->value;
         $order->shipped_at = now();
+
+        //Simpan subtotal_delivered, tax_delivered, dan total_delivered di table order
         $order->subtotal_delivered = $subtotal;
         $order->tax_delivered = $subtotal * 0.11;
         $order->total_delivered = round($subtotal * 1.11); // $subtotal*1.11;

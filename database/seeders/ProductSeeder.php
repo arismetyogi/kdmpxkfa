@@ -128,6 +128,7 @@ class ProductSeeder extends Seeder
                     'registration_number' => $item['registration_number'] ?? '',
                     'dosage_form' => $item['dosage_form'] ?? '',
                     'active_ingredients' => $item['active_ingredients'] ? json_decode($item['active_ingredients'], true) : null,
+                    'image' => json_decode($item['image']) ?? null,
                 ]
             );
         }

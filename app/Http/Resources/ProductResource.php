@@ -33,7 +33,7 @@ class ProductResource extends JsonResource
             'width' => $this->width,
             'height' => $this->height,
             'brand' => $this->brand,
-            'image' => $this->getFirstMediaUrl('images'), // 👈 provide preview URL
+            'image' => $this->image ?? $this->getFirstMediaUrl('images') ?? asset(''), // 👈 provide preview URL
             'is_active' => $this->is_active,
             'is_featured' => $this->is_featured,
         ];

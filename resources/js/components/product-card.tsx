@@ -58,7 +58,7 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
                     )}
                     <div>
                         <motion.img
-                            src={image && image !== '' ? image : '/products/Placeholder_Medicine.png'}
+                            src={image && image !== '' ? image[0] : '/products/Placeholder_Medicine.png'}
                             alt={name}
                             className="mb-6 h-46 w-full rounded-md object-cover"
                             variants={imageVariants}

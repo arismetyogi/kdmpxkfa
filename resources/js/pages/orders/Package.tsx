@@ -76,7 +76,7 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
 
     return (
         <TableRow className={cn('transition-all', isExcluded && 'bg-muted/50')}>
-            <TableCell className={cn('hidden p-2 md:table-cell', isExcluded && 'opacity-60')}>
+            <TableCell className={cn('hidden p-2 xl:table-cell', isExcluded && 'opacity-60')}>
                 <img
                     src={product.image || '/products/Placeholder_Medicine.png'}
                     alt={product.name}
@@ -96,12 +96,13 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
 
                 <p className="hidden text-xs text-muted-foreground sm:block">{product.order_unit}</p>
             </TableCell>
-            <TableCell className={cn('hidden px-2 text-center sm:table-cell', isExcluded && 'opacity-60')}>
+            <TableCell className={cn('hidden px-2 text-center sm:table-cell sm:text-xs lg:text-sm xl:text-base', isExcluded && 'opacity-60')}>
                 <PriceDisplay price={pricePerBox} />
             </TableCell>
-            <TableCell className={cn('hidden p-2 text-center lg:table-cell', isExcluded && 'opacity-60')}>{maxBoxQuantity}</TableCell>
+            <TableCell className={cn('hidden p-2 text-center xl:table-cell', isExcluded && 'opacity-60')}>{maxBoxQuantity}</TableCell>
             <TableCell className={cn('p-2', isExcluded && 'opacity-60')}>
                 <div className="flex justify-center">
+                    {/* MODIFICATION: QuantityInput now appears at LG breakpoint */}
                     <div className="hidden lg:flex">
                         <QuantityInput
                             value={assignedBoxQuantity}
@@ -110,6 +111,7 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
                             incrementDisabled={product.assignedQuantity >= product.maxQuantity}
                         />
                     </div>
+                    {/* MODIFICATION: Simple input is now hidden at LG breakpoint */}
                     <div className="lg:hidden">
                         <Input
                             className="h-9 w-12 text-center focus-visible:ring-0"
@@ -121,9 +123,9 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
                     </div>
                 </div>
             </TableCell>
-            <TableCell className={cn('px-2 text-center font-medium', isExcluded && 'opacity-60')}>
-                <PriceDisplay price={product.price * product.assignedQuantity} currency="" className="text-xs lg:hidden" />
-                <PriceDisplay price={product.price * product.assignedQuantity} className="hidden lg:block" />
+            <TableCell className={cn('px-2 text-left font-medium', isExcluded && 'opacity-60')}>
+                <PriceDisplay price={product.price * product.assignedQuantity} className="sm:text-xs lg:text-sm xl:hidden" />
+                <PriceDisplay price={product.price * product.assignedQuantity} className="hidden xl:block" />
             </TableCell>
             <TableCell className="px-2 text-center">
                 {isExcluded ? (
@@ -150,10 +152,11 @@ const ProductListTable: React.FC<ProductListTableProps> = ({ products, onQuantit
     <Table className="w-full table-fixed border">
         <TableHeader>
             <TableRow>
-                <TableHead className="hidden w-[80px] p-2 md:table-cell">Image</TableHead>
+                <TableHead className="hidden w-[80px] p-2 xl:table-cell">Image</TableHead>
                 <TableHead className="px-2 sm:px-4">Product Name</TableHead>
                 <TableHead className="hidden w-[100px] px-2 text-center sm:table-cell">Price</TableHead>
-                <TableHead className="hidden w-[70px] px-2 text-center lg:table-cell">Max</TableHead>
+                <TableHead className="hidden w-[70px] px-2 text-center xl:table-cell">Max</TableHead>
+                {/* MODIFICATION: Qty column now widens at LG to accommodate the full QuantityInput */}
                 <TableHead className="w-[65px] px-2 text-center lg:w-[150px]">Qty</TableHead>
                 <TableHead className="w-[100px] px-2 text-center">Subtotal</TableHead>
                 <TableHead className="w-[80px] px-2 text-center">Action</TableHead>
@@ -186,7 +189,7 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, sum
         <Card>
             <CardContent className="px-6">
                 <h2 className="mb-4 text-xl font-bold">Order Summary</h2>
-                <ScrollArea className="-mr-4 h-64 pr-4">
+                <ScrollArea className="-mr-4 h-50 pr-4 xl:h-64">
                     <div className="space-y-4">
                         {activeProducts.length > 0 ? (
                             activeProducts.map((product) => (
@@ -259,7 +262,42 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
     const [packageProducts, setPackageProducts] = useState<PackageProduct[]>(initialProducts);
     const [searchQuery, setSearchQuery] = useState('');
     const [sortOrder, setSortOrder] = useState('default');
+    const [editingPackageId, setEditingPackageId] = useState<string | null>(null); // Track the original package ID when editing
     const debouncedSearchQuery = useDebounce(searchQuery, 500); // 500ms debounce delay
+
+    // Check if there's an editing package in localStorage and restore state
+    useEffect(() => {
+        const editingPackage = localStorage.getItem('editingPackage');
+        if (editingPackage) {
+            const packageItem = JSON.parse(editingPackage);
+
+            // Store the original package ID to use when updating the cart
+            setEditingPackageId(packageItem.id);
+
+            // Update package products with quantities from the package item
+            setPackageProducts((prev) =>
+                prev.map((product) => {
+                    const packageContent = packageItem.packageContents.find((content: any) => content.product_id === product.id);
+
+                    if (packageContent) {
+                        // Calculate the assigned quantity based on package content and content multiplier
+                        return {
+                            ...product,
+                            assignedQuantity: Math.max(0, Math.min(packageContent.quantity * (product.content || 1), product.maxQuantity)),
+                        };
+                    } else {
+                        return {
+                            ...product,
+                            assignedQuantity: 0, // Not included in the package
+                        };
+                    }
+                }),
+            );
+
+            // Remove the editing package from localStorage after restoring
+            localStorage.removeItem('editingPackage');
+        }
+    }, []);
 
     const updateQuantity = useCallback((productId: number, newQuantity: number) => {
         setPackageProducts((prev) =>
@@ -304,7 +342,7 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
 
             // Create package item to store in cart
             const packageItem: PackageItem = {
-                id: 'merah-putih-package-' + Date.now(), // Unique ID for the package
+                id: editingPackageId || 'merah-putih-package-' + Date.now(), // Use original ID when editing, otherwise generate new ID
                 name: 'Paket Merah Putih',
                 slug: 'paket-merah-putih',
                 price: packageTotalPrice,
@@ -329,12 +367,31 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
 
             // Get existing cart items
             const existingCart = localStorage.getItem('cart');
-            let finalCart: CartItemOrPackage[] = [packageItem];
+            let finalCart: CartItemOrPackage[] = [];
 
             if (existingCart) {
                 const parsedExistingCart: CartItemOrPackage[] = JSON.parse(existingCart);
-                // Add the package to existing cart items
-                finalCart = [...parsedExistingCart, packageItem];
+
+                // Check if we're editing an existing package - if so, replace it instead of adding
+                if (editingPackageId) {
+                    // Replace the package with the same ID, keep other items
+                    finalCart = parsedExistingCart.map((item) => {
+                        if ('isPackage' in item && 'id' in item && item.id === editingPackageId) {
+                            return packageItem; // Replace with updated package
+                        }
+                        return item;
+                    });
+
+                    // If the package ID wasn't found (edge case), add it to the cart
+                    const packageExists = finalCart.some((item) => 'isPackage' in item && 'id' in item && item.id === editingPackageId);
+
+                    if (!packageExists) {
+                        finalCart = [...parsedExistingCart, packageItem];
+                    }
+                } else {
+                    // Adding new package, just append to cart
+                    finalCart = [...parsedExistingCart, packageItem];
+                }
             } else {
                 // If no existing cart, just use the package
                 finalCart = [packageItem];
@@ -342,6 +399,10 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
 
             // Store the merged cart in localStorage
             localStorage.setItem('cart', JSON.stringify(finalCart));
+
+            // Reset editing state after adding to cart
+            setEditingPackageId(null);
+
             router.visit(route('cart'));
         } catch (error) {
             console.error('Error adding package to Cart:', error);
@@ -355,8 +416,7 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Paket Merah Putih" />
-            {/* MODIFICATION: Increased bottom padding to prevent content from being hidden by the MobileCartBar */}
-            <div className="mx-auto max-w-7xl px-4 py-8 pb-32 sm:px-6 lg:px-8 lg:pb-8">
+            <div className="py- 8 mx-auto max-w-7xl px-4 pb-32 sm:px-6 xl:px-8 xl:pb-8">
                 <div className="flex flex-col gap-8 lg:flex-row">
                     <div className="flex w-full flex-col gap-6 lg:w-2/3">
                         <div>
