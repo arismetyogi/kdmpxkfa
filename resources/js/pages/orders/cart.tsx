@@ -1,8 +1,9 @@
 import PriceDisplay from '@/components/priceDisplay';
+import ScrollToTopButton from '@/components/ScrollToTop';
 import HeaderLayout from '@/layouts/header-layout';
-import { type BreadcrumbItem, type CartItem } from '@/types';
+import { type BreadcrumbItem, type CartItem, type CartItemOrPackage, type PackageItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { ShoppingBag, ShoppingBasket } from 'lucide-react';
+import { ChevronDown, ChevronUp, Package, ShoppingBag, ShoppingBasket } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -13,7 +14,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Cart() {
-    const [cart, setCart] = useState<CartItem[]>([]);
+    const [cart, setCart] = useState<CartItemOrPackage[]>([]);
 
     useEffect(() => {
         const storedCart = localStorage.getItem('cart');
@@ -26,28 +27,50 @@ export default function Cart() {
         }
     }, []);
 
-    const updateQuantity = useCallback((sku: string, delta: number) => {
+    const updateQuantity = useCallback((identifier: string, delta: number) => {
         setCart((prevCart) => {
             const updated = prevCart
-                .map((item) =>
-                    item.sku === sku
-                        ? {
-                              ...item,
-                              quantity: Math.max(0, item.quantity + delta),
-                              total: Math.max(0, item.quantity + delta) * Number(item.price),
-                          }
-                        : item,
-                )
-                .filter((item) => item.quantity > 0);
+                .map((item) => {
+                    // Handle package items - packages can't have their quantity changed directly
+                    if ('isPackage' in item && item.id === identifier) {
+                        // For packages, we can't change quantity via this function, return unchanged
+                        return item;
+                    }
+                    // Handle regular cart items
+                    else if ('sku' in item && item.sku === identifier) {
+                        const newQuantity = Math.max(0, item.quantity + delta);
+                        return {
+                            ...item,
+                            quantity: newQuantity,
+                            total: newQuantity * Number(item.price) * item.content,
+                        };
+                    }
+                    return item;
+                })
+                .filter((item) => {
+                    // Filter out items with zero quantity (except packages which can't have quantity changed this way)
+                    if ('isPackage' in item) {
+                        return true; // Packages are not filtered by quantity
+                    } else {
+                        return item.quantity > 0;
+                    }
+                });
 
             localStorage.setItem('cart', JSON.stringify(updated));
             return updated;
         });
     }, []);
 
-    const removeItem = useCallback((sku: string) => {
+    const removeItem = useCallback((identifier: string) => {
         setCart((prevCart) => {
-            const updated = prevCart.filter((item) => item.sku !== sku);
+            const updated = prevCart.filter((item) => {
+                // For package items, use id; for regular items, use sku
+                if ('isPackage' in item) {
+                    return item.id !== identifier;
+                } else {
+                    return item.sku !== identifier;
+                }
+            });
             localStorage.setItem('cart', JSON.stringify(updated));
             return updated;
         });
@@ -60,54 +83,152 @@ export default function Cart() {
 
     // Use useMemo to calculate totals only when cart changes
     const { subtotal, ppn, grandTotal } = useMemo(() => {
-        const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity * item.content, 0);
+        const subtotal = cart.reduce((sum, item) => {
+            if ('isPackage' in item && item.isPackage) {
+                // For package items, use the stored price
+                return sum + item.price;
+            } else {
+                // For regular items, calculate price * quantity * content
+                const regularItem = item as CartItem;
+                return sum + regularItem.price * regularItem.quantity * (regularItem.content || 1);
+            }
+        }, 0);
         const ppn = subtotal * 0.11;
         const grandTotal = subtotal + ppn;
         return { subtotal, ppn, grandTotal };
     }, [cart]);
 
+    // Component to display package items
+    const PackageItemComponent = ({ item, index }: { item: PackageItem; index: number }) => {
+        const [expanded, setExpanded] = useState(false);
+
+        return (
+            <div
+                key={`${item.id}-${index}`} // Use id for packages
+                className="flex flex-col justify-between rounded-xl border bg-card p-3 text-card-foreground shadow-md transition hover:shadow-lg sm:p-5"
+            >
+                {/* Package Info */}
+                <div className="flex items-center gap-4 sm:gap-5">
+                    <div className="relative">
+                        <img
+                            src={item.image || '/products/package-icon.png'}
+                            alt={item.name}
+                            className="h-16 w-16 rounded-lg object-cover shadow sm:h-20 sm:w-20"
+                            onError={({ currentTarget }) => {
+                                currentTarget.src = '/products/package-icon.png';
+                            }}
+                        />
+                        <div className="absolute -right-1 -bottom-1 rounded-full bg-primary p-1">
+                            <Package className="h-3 w-3 text-white" />
+                        </div>
+                    </div>
+                    <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-base font-semibold sm:text-lg">{item.name}</h2>
+                            <button onClick={() => setExpanded(!expanded)} className="rounded-full p-1 hover:bg-gray-100">
+                                {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                            </button>
+                        </div>
+
+                        <p className="text-sm text-muted-foreground">
+                            {item.packageContents.length} product{item.packageContents.length !== 1 ? 's' : ''} in package
+                        </p>
+
+                        {/* Action buttons for packages */}
+                        <div className="flex justify-between">
+                            <PriceDisplay price={item.price * 1.11} className="mt-1 text-sm font-bold text-primary sm:text-base" />
+                            <button onClick={() => removeItem(item.id)} className="text-sm text-destructive hover:text-destructive/80 sm:text-base">
+                                Remove Package
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Package Contents (conditionally shown) */}
+                {expanded && (
+                    <div className="mt-4 border-t pt-4">
+                        <h3 className="mb-2 font-medium">Package Contents:</h3>
+                        <div className="space-y-2">
+                            {item.packageContents.map((product, idx) => (
+                                <div key={idx} className="flex items-center justify-between text-sm">
+                                    <span>
+                                        {product.quantity}x {product.name}
+                                    </span>
+                                    <PriceDisplay price={product.price * product.quantity * (product.content || 1)} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     // Memoize cart items to prevent re-rendering of the entire list when possible
     const cartItems = useMemo(
         () =>
-            cart.map((item, i) => (
-                <div
-                    key={`${item.sku}-${i}`} // Better unique key that accounts for item position
-                    className="flex flex-col justify-between rounded-xl border bg-card p-3 text-card-foreground shadow-md transition hover:shadow-lg sm:flex-row sm:items-center sm:p-5"
-                >
-                    {/* Info Produk */}
-                    <div className="flex items-center gap-4 sm:gap-5">
-                        <img src={item.image} alt={item.name} className="h-16 w-16 rounded-lg object-cover shadow sm:h-20 sm:w-20" />
-                        <div>
-                            <h2 className="text-base font-semibold sm:text-lg">{item.name}</h2>
-                            <p className="text-sm text-muted-foreground">
-                                {item.weight} gram / {item.order_unit}
-                            </p>
-                            {/* UPDATED PRICE DISPLAY */}
-                            <PriceDisplay price={item.price * item.content} className="mt-1 text-sm font-bold text-primary sm:text-base" />
-                        </div>
-                    </div>
+            cart.map((item, i) => {
+                // Check if this is a package item
+                if ('isPackage' in item && item.isPackage) {
+                    return <PackageItemComponent key={`${item.id}-${i}`} item={item as PackageItem} index={i} />;
+                } else {
+                    // Regular cart item
+                    const regularItem = item as CartItem; // Type assertion for cleaner code
+                    return (
+                        <div
+                            key={`${regularItem.sku}-${i}`} // Better unique key that accounts for item position
+                            className="flex flex-col justify-between rounded-xl border bg-card p-3 text-card-foreground shadow-md transition hover:shadow-lg sm:flex-row sm:items-center sm:p-5"
+                        >
+                            {/* Info Produk */}
+                            <div className="flex items-center gap-4 sm:gap-5">
+                                <img
+                                    src={regularItem.image}
+                                    alt={regularItem.name}
+                                    className="h-16 w-16 rounded-lg object-cover shadow sm:h-20 sm:w-20"
+                                    onError={({ currentTarget }) => {
+                                        currentTarget.src = '/products/Placeholder_Medicine.png';
+                                    }}
+                                />
+                                <div>
+                                    <h2 className="text-base font-semibold sm:text-lg">{regularItem.name}</h2>
+                                    <p className="text-sm text-muted-foreground">
+                                        {regularItem.weight} gram / {regularItem.order_unit}
+                                    </p>
+                                    {/* UPDATED PRICE DISPLAY */}
+                                    <PriceDisplay
+                                        price={regularItem.price * (regularItem.content || 1)}
+                                        className="mt-1 text-sm font-bold text-primary sm:text-base"
+                                    />
+                                </div>
+                            </div>
 
-                    {/* Quantity & Actions */}
-                    <div className="mt-4 flex items-center gap-3 sm:mt-0">
-                        <button
-                            onClick={() => updateQuantity(item.sku, -1)}
-                            className="rounded-4xl border-1 bg-primary-foreground px-3 py-1.5 font-bold transition hover:bg-primary/80"
-                        >
-                            -
-                        </button>
-                        <span className="text-lg font-semibold text-primary">{item.quantity}</span>
-                        <button
-                            onClick={() => updateQuantity(item.sku, 1)}
-                            className="rounded-4xl border-1 bg-primary-foreground px-3 py-1.5 font-bold transition hover:bg-primary/80"
-                        >
-                            +
-                        </button>
-                        <button onClick={() => removeItem(item.sku)} className="ml-3 text-sm text-destructive hover:text-destructive/80 sm:text-base">
-                            Hapus
-                        </button>
-                    </div>
-                </div>
-            )),
+                            {/* Quantity & Actions */}
+                            <div className="mt-4 flex items-center gap-3 sm:mt-0">
+                                <button
+                                    onClick={() => updateQuantity(regularItem.sku, -1)}
+                                    className="rounded-4xl border-1 bg-primary-foreground px-3 py-1.5 font-bold transition hover:bg-primary/80"
+                                    disabled={regularItem.quantity <= 1} // Prevent quantity from going below 1
+                                >
+                                    -
+                                </button>
+                                <span className="text-lg font-semibold text-primary">{regularItem.quantity}</span>
+                                <button
+                                    onClick={() => updateQuantity(regularItem.sku, 1)}
+                                    className="rounded-4xl border-1 bg-primary-foreground px-3 py-1.5 font-bold transition hover:bg-primary/80"
+                                >
+                                    +
+                                </button>
+                                <button
+                                    onClick={() => removeItem(regularItem.sku)}
+                                    className="ml-3 text-sm text-destructive hover:text-destructive/80 sm:text-base"
+                                >
+                                    Hapus
+                                </button>
+                            </div>
+                        </div>
+                    );
+                }
+            }),
         [cart, updateQuantity, removeItem],
     );
 
@@ -201,6 +322,7 @@ export default function Cart() {
                     </>
                 )}
             </div>
+            <ScrollToTopButton PC />
         </HeaderLayout>
     );
 }

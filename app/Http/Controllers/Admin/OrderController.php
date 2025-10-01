@@ -102,9 +102,17 @@ class OrderController extends Controller
             }
         }
 
+        $subtotal = $order->orderItems->sum(function ($item) {
+            return $item->unit_price * $item->qty_delivered * $item->content;
+        });
+
         // Update status pesanan jadi "delivering"
         $order->status = OrderStatusEnum::DELIVERY->value;
         $order->shipped_at = now();
+        $order->subtotal_delivered = $subtotal;
+        $order->tax_delivered = $subtotal * 0.11;
+        $order->total_delivered = round($subtotal * 1.11); // $subtotal*1.11;
+
         $order->save();
 
         // Siapkan data transaksi utk Digikoperasi
@@ -113,7 +121,7 @@ class OrderController extends Controller
         // Kirim ke Digikoperasi
         $response = $this->digikopTransactionService->sendTransaction($transactionData);
 
-        if (! $response['success']) {
+        if (!$response['success']) {
             \Log::error('Failed to send transaction to Digikoperasi', [
                 'order_id' => $order->id,
                 'error' => $response['message'],
@@ -132,7 +140,7 @@ class OrderController extends Controller
         $productDetails = [];
         foreach ($order->orderItems as $item) {
             // Only include items with qty_delivered > 0
-            if (! isset($item->qty_delivered) || $item->qty_delivered <= 0) {
+            if (!isset($item->qty_delivered) || $item->qty_delivered <= 0) {
                 continue;
             }
 

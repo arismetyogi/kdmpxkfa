@@ -4,12 +4,12 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
+import { idrFormatter } from '@/lib/utils';
 import { Order, Paginated } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { CheckCircle, Clock, Package, Truck, XCircle } from 'lucide-react';
 import { useState } from 'react';
-import { idrFormatter, currency} from '@/lib/utils';
 
 const breadcrumbs = [
     { title: 'Dashboard', href: route('admin.dashboard') },
