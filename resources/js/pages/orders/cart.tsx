@@ -111,11 +111,11 @@ export default function Cart() {
                 <div className="flex items-center gap-4 sm:gap-5">
                     <div className="relative">
                         <img
-                            src={item.image || '/products/package-icon.png'}
+                            src={item.image || 'Package.png'}
                             alt={item.name}
                             className="h-16 w-16 rounded-lg object-cover shadow sm:h-20 sm:w-20"
                             onError={({ currentTarget }) => {
-                                currentTarget.src = '/products/package-icon.png';
+                                currentTarget.src = 'Package.png';
                             }}
                         />
                         <div className="absolute -right-1 -bottom-1 rounded-full bg-primary p-1">
@@ -138,7 +138,7 @@ export default function Cart() {
                         <div className="flex justify-between">
                             <PriceDisplay price={item.price * 1.11} className="mt-1 text-sm font-bold text-primary sm:text-base" />
                             <div className="flex gap-2">
-                                <button 
+                                <button
                                     onClick={() => {
                                         // Store current package in localStorage to restore on package page
                                         localStorage.setItem('editingPackage', JSON.stringify(item));
@@ -195,7 +195,7 @@ export default function Cart() {
                             {/* Info Produk */}
                             <div className="flex items-center gap-4 sm:gap-5">
                                 <img
-                                    src={regularItem.image}
+                                    src={regularItem.image[0] ?? ''}
                                     alt={regularItem.name}
                                     className="h-16 w-16 rounded-lg object-cover shadow sm:h-20 sm:w-20"
                                     onError={({ currentTarget }) => {
