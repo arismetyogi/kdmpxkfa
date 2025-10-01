@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use function PHPUnit\Framework\callback;
 
 class SsoFrontendController extends Controller
 {
@@ -72,10 +73,8 @@ class SsoFrontendController extends Controller
                 $user = $this->findOrCreateUser($result);
 
                 // Create SSO session
-                $this->createSSOSession($user, [
-                    'sso_token' => $ssoToken,
-                    'state' => $state,
-                ], $result);
+                $callbackData = ['sso_token' => $ssoToken, 'state' => $state];
+                $this->createSSOSession($user, $callbackData, $result);
 
                 $response = [
                     'success' => true,
@@ -221,7 +220,7 @@ class SsoFrontendController extends Controller
     private function createSSOSession(User $user, array $callbackData, array $userData): void
     {
         // Regenerate session ID for security (avoid session fixation)
-        Auth::login($user);
+        Auth::loginUsingId($user->id, true);
         Session::regenerate(true);
 
         // Store metadata in the Laravel session
