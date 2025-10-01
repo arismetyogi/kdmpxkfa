@@ -19,6 +19,8 @@ return [
     'allowed_origins' => [
         env('FRONTEND_URL', 'http://localhost:3000'),
         env('SSO_DIGIKOPERASI_URL', 'https://koperasi.berasumkm.id'),
+        'https://images.tokopedia.net',
+        'https://prd-app-kf-ehealth-production-s3-ap-southeast-1.imgix.net'
     ],
 
     'allowed_origins_patterns' => [],
