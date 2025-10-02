@@ -22,7 +22,7 @@ type Product = {
     image_alt?: string;
 };
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: '/dashboard' }];
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: route('dashboard') }];
 
 const categoryMap: Record<number, string> = {
     1: 'Obat',
@@ -151,7 +151,7 @@ export default function Dashboard({ products, top_products }: { products?: Produ
                     <Card className="relative h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md dark:border-slate-700 dark:bg-slate-800">
                     <div className="relative overflow-hidden">
                         <img
-                        src={p.image || "/placeholder.jpg"}
+                        src={Array.isArray(p.image) ? p.image[0] : '/products/Placeholder_Medicine.png'}
                         alt={p.image_alt || p.name}
                         className="h-28 w-full object-cover transition-transform duration-500 group-hover:scale-105 sm:h-32"
                         />
@@ -274,7 +274,7 @@ export default function Dashboard({ products, top_products }: { products?: Produ
                                     <Card className="relative flex h-full flex-col overflow-hidden rounded-2xl border-0 bg-white shadow-xl backdrop-blur-sm hover:shadow-2xl md:rounded-3xl dark:bg-slate-800">
                                         <div className="relative overflow-hidden">
                                             <img
-                                                src={p.image ? `/storage/${p.image}` : '/placeholder.jpg'}
+                                                src={Array.isArray(p.image) ? p.image[0] : '/products/Placeholder_Medicine.png'}
                                                 alt={p.name}
                                                 className="h-40 w-full object-cover transition-transform duration-700 group-hover:scale-110 sm:h-48"
                                             />

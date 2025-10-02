@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Product } from '@/types';
+import { Package } from 'lucide-react';
 
 interface ProductShowModalProps {
     isOpen: boolean;
@@ -29,7 +30,11 @@ export default function ProductShowModal({ isOpen, onClose, product }: ProductSh
                         </DialogHeader>
 
                         <div className="flex flex-col gap-4 sm:flex-row">
-                            <img src={product.image} alt={product.name} className="w-full rounded-lg border object-cover sm:w-1/3" />
+                            <img
+                                src={product.image ? product.image[0] : <Package />}
+                                alt={product.name}
+                                className="w-full rounded-lg border object-cover sm:w-1/3"
+                            />
                             <div className="flex-1 space-y-2">
                                 <p>
                                     <strong>Harga:</strong> Rp{product.price.toLocaleString()}

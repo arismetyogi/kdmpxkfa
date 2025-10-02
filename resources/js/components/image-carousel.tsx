@@ -12,10 +12,6 @@ interface ImageCarouselProps {
 export function ImageCarousel({ images, productName = 'Product' }: ImageCarouselProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    if (!images || images.length === 0) {
-        return null;
-    }
-
     const goToPrevious = () => {
         setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
     };
@@ -30,19 +26,22 @@ export function ImageCarousel({ images, productName = 'Product' }: ImageCarousel
             <div className="relative overflow-hidden rounded-lg">
                 <div className="aspect-square w-full">
                     <Lens>
+                        {Array.isArray(images) ? (
                         <img
-                            src={images[currentIndex] || '/placeholder.svg'}
+                            src={images.length > 0 ? images[currentIndex] : '/products/Placeholder_Medicine.png'}
                             alt={`${productName} ${currentIndex + 1}`}
                             loading="lazy"
-                            crossOrigin="anonymous"
                             className="h-full w-full rounded-lg border object-cover"
                         />
+                        ) : (
+                         <img src={'/products/Placeholder_Medicine.png'} className="h-full w-full rounded-lg border object-cover"/>
+                        )}
                     </Lens>
                 </div>
             </div>
 
             {/* Navigation Buttons - Only show if multiple images */}
-            {images.length > 1 && (
+            {(Array.isArray(images) && images.length > 1) && (
                 <>
                     {/* Previous Button */}
                     <button
@@ -66,17 +65,18 @@ export function ImageCarousel({ images, productName = 'Product' }: ImageCarousel
 
                     {/* Dot Indicators */}
                     <div className="mt-4 flex justify-center gap-2">
-                        {images.map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => setCurrentIndex(index)}
-                                className={`h-2 rounded-full transition-all focus:ring-2 focus:ring-ring focus:outline-none ${
-                                    index === currentIndex ? 'w-8 bg-foreground' : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                                }`}
-                                aria-label={`Go to image ${index + 1}`}
-                                type="button"
-                            />
-                        ))}
+                        {Array.isArray(images) &&
+                            images.map((_, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => setCurrentIndex(index)}
+                                    className={`h-2 rounded-full transition-all focus:ring-2 focus:ring-ring focus:outline-none ${
+                                        index === currentIndex ? 'w-8 bg-foreground' : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                                    }`}
+                                    aria-label={`Go to image ${index + 1}`}
+                                    type="button"
+                                />
+                            ))}
                     </div>
                 </>
             )}

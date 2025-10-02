@@ -2,15 +2,33 @@ import { usePage } from '@inertiajs/react';
 
 type AuthProps = {
     auth?: {
-        permissions?: string[];
+        user: User;
     };
 };
 
+interface User {
+    id: number;
+    name: string;
+    roles: string[];
+    permissions: string[];
+}
 export function usePermission() {
     const { props } = usePage<AuthProps>();
-    const permissions = props.auth?.permissions || [];
+    const user = props.auth?.user;
+    const permissions = props.auth?.user?.permissions || [];
+    const roles = props.auth?.user?.roles || [];
 
     const can = (permission: string): boolean => permissions.includes(permission);
 
-    return { can };
+    const hasRole = (role: string) => {
+        return roles?.includes(role) ?? false;
+    };
+
+    const hasAnyPermission = (checkPermissions: string[]): boolean =>
+        checkPermissions.some((perm) => permissions.includes(perm));
+
+    const hasAnyRole = (checkRoles: string[]): boolean =>
+        checkRoles.some((role) => roles.includes(role));
+
+    return { can, hasRole, hasAnyRole, hasAnyPermission, user };
 }

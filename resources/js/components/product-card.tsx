@@ -1,7 +1,9 @@
 import PriceDisplay from '@/components/priceDisplay';
 import { cn, currency } from '@/lib/utils'; // Assuming you have a utility for merging class names
 import { Product } from '@/types/index.js';
+import { motion } from 'framer-motion';
 import { ShoppingCart } from 'lucide-react';
+import { router } from '@inertiajs/react';
 
 interface ProductCardProps {
     product: Product;
@@ -12,11 +14,40 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, compact = false, addToCart }: ProductCardProps) {
     const { id, name, price, base_uom, order_unit, image, is_active, content, category } = product;
+    const buttonVariants = {
+        hover: { scale: 1.05 },
+        tap: { scale: 0.95 },
+    };
+
+    const cardVariants = {
+        hover: {
+            y: compact ? -3 : -5,
+            boxShadow: 'var(--shadow-md)',
+            transition: { duration: 0.2 },
+        },
+        tap: {
+            scale: 0.98,
+            transition: { duration: 0.1 },
+        },
+    };
+
+    const imageVariants = {
+        hover: {
+            scale: 1.05,
+            transition: { duration: 0.3 },
+        },
+    };
     if (compact) {
         return (
-            <div
-                className="relative flex h-full cursor-pointer flex-col justify-between rounded-lg border bg-card p-2 text-card-foreground shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
-                onClick={() => (window.location.href = route('orders.show', { id }))}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="relative flex h-full cursor-pointer flex-col justify-between rounded-lg border bg-card p-2 text-card-foreground shadow-sm"
+                onClick={() => (router.visit(route('orders.show', { id })))}
+                variants={cardVariants}
+                whileHover="hover"
+                whileTap="tap"
             >
                 <div className="relative mb-2 w-full overflow-hidden rounded-md">
                     {category?.main_category && (
@@ -26,7 +57,7 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
                     )}
                     <div>
                         <img
-                            src={image[0] ?? "/products/Placeholder_Medicine.png"}
+                            src={image ? image[0] : "/products/Placeholder_Medicine.png"}
                             alt={name}
                             className={`mb-6 h-46 w-full rounded-md object-cover transition-transform duration-300 ease-out group-hover:scale-105`}
                             onError={({ currentTarget }) => {
@@ -44,7 +75,7 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
                         </div>
                     </div>
                 </div>
-            </div>
+            </motion.div>
         );
     }
 
@@ -52,9 +83,15 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
     const pricePerOrderUnit = price * content;
 
     return (
-        <div
-            className="relative flex h-full cursor-pointer flex-col justify-between rounded-lg border bg-card p-2 text-card-foreground shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-md active:scale-[0.98]"
-            onClick={() => (window.location.href = route('orders.show', { id }))}
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="relative flex h-full cursor-pointer flex-col justify-between rounded-lg border bg-card p-3 text-card-foreground shadow-sm"
+            onClick={() => (router.visit(route('orders.show', { id })))}
+            variants={cardVariants}
+            whileHover="hover"
+            whileTap="tap"
         >
             {category?.subcategory1 && (
                 <span className="absolute top-2 right-2 rounded-full bg-blue-600 px-2 py-1 text-xs whitespace-nowrap text-white shadow">
@@ -65,7 +102,7 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
             {/* Bagian Atas */}
             <div>
                 <img
-                    src={image[0] ?? '/products/Placeholder_Medicine.png'}
+                    src={image? image[0] : '/products/Placeholder_Medicine.png'}
                     alt={name}
                     className="mb-4 h-36 w-full rounded-md object-cover"
                     onError={({ currentTarget }) => {
@@ -97,7 +134,7 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
                     <PriceDisplay price={price} /> per {base_uom}
                 </p>
 
-                <button
+                <motion.button
                     disabled={!is_active}
                     onClick={(e) => {
                         e.stopPropagation();
@@ -111,8 +148,8 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
                     )}
                 >
                     <ShoppingCart size={16} /> Add to Cart
-                </button>
+                </motion.button>
             </div>
-        </div>
+        </motion.div>
     );
 }

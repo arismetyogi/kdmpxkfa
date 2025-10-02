@@ -100,7 +100,7 @@ export default function Detail() {
                                     <Button size="sm" className="w-full sm:w-auto">
                                         Send Invoice
                                     </Button>
-                                    <Link href="/orders/history" className="w-full sm:w-auto">
+                                    <Link href={route('history.index')} className="w-full sm:w-auto">
                                         <Button size="sm" variant="outline" className="w-full sm:w-auto">
                                             <ArrowLeft className="mr-1 h-4 w-4" /> Back
                                         </Button>
@@ -169,7 +169,7 @@ export default function Detail() {
                                                 <div key={item.id} className="flex items-center gap-4">
                                                     {item.product.image ? (
                                                         <img
-                                                            src={item.product.image}
+                                                            src={item.product.image[0]}
                                                             alt={item.product.name}
                                                             className="h-14 w-14 shrink-0 rounded object-cover"
                                                         />

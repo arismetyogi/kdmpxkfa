@@ -82,7 +82,7 @@ const OrderDetailCard: React.FC<OrderDetailCardProps> = ({ order, statusColors, 
                         {showItems.map((item) => (
                             <div key={item.id} className="flex items-center gap-4">
                                 {item.product.image ? (
-                                    <img src={item.product.image} alt={item.product.name} className="h-14 w-14 rounded-lg object-cover" />
+                                    <img src={item.product.image[0] ?? '/products/Placeholder_Medicine.png'} alt={item.product.name} className="h-14 w-14 rounded-lg object-cover" />
                                 ) : (
                                     <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-muted">
                                         <ShoppingBag className="h-6 w-6 text-muted-foreground" />
