@@ -97,7 +97,7 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
                 <p className="hidden text-xs text-muted-foreground sm:block">{product.order_unit}</p>
             </TableCell>
             <TableCell className={cn('hidden px-2 text-center sm:table-cell sm:text-xs lg:text-sm xl:text-base', isExcluded && 'opacity-60')}>
-                <PriceDisplay price={pricePerBox} />
+                <PriceDisplay price={pricePerBox} className="text-sm"/>
             </TableCell>
             <TableCell className={cn('hidden p-2 text-center xl:table-cell', isExcluded && 'opacity-60')}>{maxBoxQuantity}</TableCell>
             <TableCell className={cn('p-2', isExcluded && 'opacity-60')}>

@@ -3,6 +3,7 @@ import { cn, currency } from '@/lib/utils'; // Assuming you have a utility for m
 import { Product } from '@/types/index.js';
 import { motion } from 'framer-motion';
 import { ShoppingCart } from 'lucide-react';
+import { router } from '@inertiajs/react';
 
 interface ProductCardProps {
     product: Product;
@@ -43,7 +44,7 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
                 className="relative flex h-full cursor-pointer flex-col justify-between rounded-lg border bg-card p-2 text-card-foreground shadow-sm"
-                onClick={() => (window.location.href = route('orders.show', { id }))}
+                onClick={() => (router.visit(route('orders.show', { id })))}
                 variants={cardVariants}
                 whileHover="hover"
                 whileTap="tap"
@@ -87,7 +88,7 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
             className="relative flex h-full cursor-pointer flex-col justify-between rounded-lg border bg-card p-3 text-card-foreground shadow-sm"
-            onClick={() => (window.location.href = route('orders.show', { id }))}
+            onClick={() => (router.visit(route('orders.show', { id })))}
             variants={cardVariants}
             whileHover="hover"
             whileTap="tap"
