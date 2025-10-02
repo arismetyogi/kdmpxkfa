@@ -1,14 +1,13 @@
 import AppLogoIcon from '@/components/app-logo-icon';
-import { type SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
+import { usePermission } from '@/hooks/user-permissions';
 
 export default function Welcome() {
-    const { auth } = usePage<SharedData>().props;
-    const user = auth.user;
+    const {user} = usePermission();
 
     console.log(user);
     // Check if user has admin or manager role
-    const isUser = user?.roles?.some((role) => ['user'].includes(role.name.toLowerCase()));
+    const isUser = user?.roles?.some((role) => ['user'].includes(role.toLowerCase()));
 
     const dashRoute = isUser ? 'dashboard' : 'admin.dashboard';
 
@@ -21,7 +20,7 @@ export default function Welcome() {
             <div className="flex min-h-screen flex-col items-center bg-background p-6 text-foreground lg:justify-center lg:p-8">
                 <header className="mb-6 w-full max-w-[335px] text-sm not-has-[nav]:hidden lg:max-w-4xl">
                     <nav className="flex items-center justify-end gap-4">
-                        {auth.user ? (
+                        {user ? (
                             <>
                                 <Link
                                     href={route(dashRoute)}
@@ -53,7 +52,7 @@ export default function Welcome() {
                 <div className="mb-10 text-center">
                     <AppLogoIcon className="mx-auto size-60 text-sidebar-primary dark:text-sidebar-primary" />
                     <h1 className="text-2xl font-semibold text-foreground dark:text-foreground">
-                        Selamat Datang, {auth.user?.name || 'Pengguna'} 👋
+                        Selamat Datang, {user?.name || 'Pengguna'} 👋
                     </h1>
                     <p className="mt-2 text-sm text-muted-foreground">Silakan pilih modul yang ingin Anda akses di bawah ini</p>
                 </div>
