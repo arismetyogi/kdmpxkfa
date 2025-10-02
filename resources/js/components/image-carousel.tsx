@@ -26,19 +26,22 @@ export function ImageCarousel({ images, productName = 'Product' }: ImageCarousel
             <div className="relative overflow-hidden rounded-lg">
                 <div className="aspect-square w-full">
                     <Lens>
+                        {Array.isArray(images) ? (
                         <img
                             src={images.length > 0 ? images[currentIndex] : '/products/Placeholder_Medicine.png'}
                             alt={`${productName} ${currentIndex + 1}`}
                             loading="lazy"
-                            crossOrigin="anonymous"
                             className="h-full w-full rounded-lg border object-cover"
                         />
+                        ) : (
+                         <img src={'/products/Placeholder_Medicine.png'} className="h-full w-full rounded-lg border object-cover"/>
+                        )}
                     </Lens>
                 </div>
             </div>
 
             {/* Navigation Buttons - Only show if multiple images */}
-            {images.length > 1 && (
+            {(Array.isArray(images) && images.length > 1) && (
                 <>
                     {/* Previous Button */}
                     <button
