@@ -12,10 +12,6 @@ interface ImageCarouselProps {
 export function ImageCarousel({ images, productName = 'Product' }: ImageCarouselProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    if (!images || images.length === 0) {
-        return null;
-    }
-
     const goToPrevious = () => {
         setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
     };
@@ -31,7 +27,7 @@ export function ImageCarousel({ images, productName = 'Product' }: ImageCarousel
                 <div className="aspect-square w-full">
                     <Lens>
                         <img
-                            src={images[currentIndex] || '/placeholder.svg'}
+                            src={images.length > 0 ? images[currentIndex] : '/products/Placeholder_Medicine.png'}
                             alt={`${productName} ${currentIndex + 1}`}
                             loading="lazy"
                             crossOrigin="anonymous"
