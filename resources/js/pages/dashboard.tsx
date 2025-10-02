@@ -136,7 +136,7 @@ export default function Dashboard({ products, top_products }: { products?: Produ
                                             <Card className="relative h-full overflow-hidden rounded-2xl border-0 bg-white shadow-lg backdrop-blur-sm hover:shadow-2xl md:rounded-3xl dark:bg-slate-800">
                                                 <div className="relative overflow-hidden">
                                                     <img
-                                                        src={p.image ? p.image[0] : '/products/Placeholder_Medicine.png'}
+                                                        src={Array.isArray(p.image) ? p.image[0] : '/products/Placeholder_Medicine.png'}
                                                         alt={p.image_alt || p.name}
                                                         className="h-40 w-full object-cover transition-transform duration-700 group-hover:scale-110 sm:h-48"
                                                     />
@@ -251,7 +251,7 @@ export default function Dashboard({ products, top_products }: { products?: Produ
                                     <Card className="relative flex h-full flex-col overflow-hidden rounded-2xl border-0 bg-white shadow-xl backdrop-blur-sm hover:shadow-2xl md:rounded-3xl dark:bg-slate-800">
                                         <div className="relative overflow-hidden">
                                             <img
-                                                src={p.image ? p.image[0] : '/products/Placeholder_Medicine.png'}
+                                                src={Array.isArray(p.image) ? p.image[0] : '/products/Placeholder_Medicine.png'}
                                                 alt={p.name}
                                                 className="h-40 w-full object-cover transition-transform duration-700 group-hover:scale-110 sm:h-48"
                                             />
