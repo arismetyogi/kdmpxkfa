@@ -5,6 +5,7 @@ import HeaderLayout from '@/layouts/header-layout';
 import { Order } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { CheckCircle } from 'lucide-react';
+import { currency } from '@/lib/utils';
 
 interface OrderCompletedProps {
     order: Order;
@@ -94,7 +95,7 @@ export default function OrderCompletedPage({ order }: OrderCompletedProps) {
                                         </div>
                                         <div className="text-right">
                                             <PriceDisplay price={item.total_price} />
-                                            <p className="text-sm text-muted-foreground">Rp{item?.unit_price.toLocaleString()} each</p>
+                                            <p className="text-sm text-muted-foreground">{currency(item?.unit_price)} each</p>
                                         </div>
                                     </div>
                                 ))}
@@ -107,7 +108,7 @@ export default function OrderCompletedPage({ order }: OrderCompletedProps) {
                             {/* --- THEME CHANGE #6: Use primary color for total for emphasis --- */}
                             <div className="flex justify-between">
                                 <span className="text-lg font-semibold text-primary">Total</span>
-                                <span className="text-lg font-semibold text-primary">Rp{order?.total_price.toLocaleString()}</span>
+                                <span className="text-lg font-semibold text-primary">{currency(order.total_price)}</span>
                             </div>
                         </div>
                     </div>

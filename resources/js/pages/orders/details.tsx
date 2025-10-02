@@ -169,7 +169,7 @@ export default function Detail() {
                                                 <div key={item.id} className="flex items-center gap-4">
                                                     {item.product.image ? (
                                                         <img
-                                                            src={item.product.image}
+                                                            src={item.product.image[0]}
                                                             alt={item.product.name}
                                                             className="h-14 w-14 shrink-0 rounded object-cover"
                                                         />

@@ -62,17 +62,18 @@ export function ImageCarousel({ images, productName = 'Product' }: ImageCarousel
 
                     {/* Dot Indicators */}
                     <div className="mt-4 flex justify-center gap-2">
-                        {images.map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => setCurrentIndex(index)}
-                                className={`h-2 rounded-full transition-all focus:ring-2 focus:ring-ring focus:outline-none ${
-                                    index === currentIndex ? 'w-8 bg-foreground' : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                                }`}
-                                aria-label={`Go to image ${index + 1}`}
-                                type="button"
-                            />
-                        ))}
+                        {Array.isArray(images) &&
+                            images.map((_, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => setCurrentIndex(index)}
+                                    className={`h-2 rounded-full transition-all focus:ring-2 focus:ring-ring focus:outline-none ${
+                                        index === currentIndex ? 'w-8 bg-foreground' : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                                    }`}
+                                    aria-label={`Go to image ${index + 1}`}
+                                    type="button"
+                                />
+                            ))}
                     </div>
                 </>
             )}
