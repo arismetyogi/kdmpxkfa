@@ -19,7 +19,7 @@ class ProductSeeder extends Seeder
     {
         $filePath = database_path('seeders/data/categories.csv');
 
-        if (! file_exists($filePath)) {
+        if (!file_exists($filePath)) {
             $this->command->error("CSV file not found: $filePath");
 
             return;
@@ -30,7 +30,7 @@ class ProductSeeder extends Seeder
 
         if (($handle = fopen($filePath, 'r')) !== false) {
             while (($row = fgetcsv($handle, 1000, ',')) !== false) {
-                if (! $header) {
+                if (!$header) {
                     $header = $row; // first row as header
                 } else {
                     $data[] = array_combine($header, $row);
@@ -57,7 +57,7 @@ class ProductSeeder extends Seeder
     {
         $filePath = database_path('seeders/data/products.csv');
 
-        if (! file_exists($filePath)) {
+        if (!file_exists($filePath)) {
             $this->command->error("CSV file not found: $filePath");
 
             return;
@@ -79,39 +79,23 @@ class ProductSeeder extends Seeder
         }
 
         foreach ($data as $item) {
-            $baseName = trim($item['name'] ?? 'Unknown Product');
-            $baseSlug = Str::slug($baseName);
-
-            // ensure unique name
-            $name = $baseName;
-            $counter = 1;
-            while (Product::where('name', $name)->exists()) {
-                $name = $baseName." ($counter)";
-                $counter++;
-            }
-
-            // ensure unique slug
-            $slug = $baseSlug;
-            $counter = 1;
-            while (Product::where('slug', $slug)->exists()) {
-                $slug = $baseSlug.'-'.$counter;
-                $counter++;
-            }
-
+            $name = trim($item['name'] ?? 'Unknown Product');
             Product::updateOrCreate(
-                ['sku' => $item['sku']],
                 [
-                    'sap_code' => $item['sap_code'],
+                    'sku' => $item['sku'],
+                    'sap_code' => $item['sap_code']
+                ],
+                [
                     'name' => $name,
-                    'slug' => $slug,
+                    'slug' => Str::slug($name),
                     'description' => $item['description'] ?? '',
                     'dosage' => $item['dosage'] ? json_decode($item['dosage'], true) : null,
                     'pharmacology' => $item['pharmacology'] ?? '',
-                    'price' => (float) ($item['price'] ?? 1.00),
+                    'price' => (float)($item['price'] ?? 1.00),
                     'base_uom' => $item['base_uom'] ?? '',
                     'order_unit' => $item['order_unit'] ?? '',
-                    'content' => (int) ($item['content'] ?? 1),
-                    'weight' => (int) ($item['weight'] ?? 100),
+                    'content' => (int)($item['content'] ?? 1),
+                    'weight' => (int)($item['weight'] ?? 100),
                     'length' => $item['length'] ?? null,
                     'width' => $item['width'] ?? null,
                     'height' => $item['height'] ?? null,

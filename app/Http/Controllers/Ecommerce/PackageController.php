@@ -28,13 +28,12 @@ class PackageController extends Controller
             $sapCodes = $bundles->pluck('KODE OBAT')->unique()->toArray();
 
             // Fetch all products in a single query
-            $productMap = Product::with('category')
-                ->whereIn('sap_code', $sapCodes)
+            $productMap = Product::whereIn('sap_code', $sapCodes)
                 ->get()
                 ->keyBy('sap_code');
 
-            // Build products array using the fetched data
-            $products = $bundles->map(function ($bundle) use ($productMap) {
+            // Build products array using the fetched data and return it
+            return $bundles->map(function ($bundle) use ($productMap) {
                 $sapCode = $bundle['KODE OBAT'];
                 $product = $productMap->get($sapCode);
 
@@ -57,15 +56,13 @@ class PackageController extends Controller
                     'base_uom' => $product->base_uom,
                     'order_unit' => $product->order_unit,
                     'content' => $product->content,
-                    'image' => $product->getFirstImageUrl(),
+                    'image' => $product->image,
                     'description' => $product->description,
                     'is_active' => $product->is_active,
                     'assignedQuantity' => $assignedQuantity,
                     'maxQuantity' => $maxQuantity,
                 ];
-            })->filter()->values(); // buang null
-
-            return $products;
+            })->filter()->values();
         });
 
         return Inertia::render('orders/Package', [

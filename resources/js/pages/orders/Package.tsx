@@ -78,7 +78,7 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
         <TableRow className={cn('transition-all', isExcluded && 'bg-muted/50')}>
             <TableCell className={cn('hidden p-2 xl:table-cell', isExcluded && 'opacity-60')}>
                 <img
-                    src={product.image || '/products/Placeholder_Medicine.png'}
+                    src={product.image ? product.image[0] : '/products/Placeholder_Medicine.png'}
                     alt={product.name}
                     className="h-16 w-16 rounded-md border object-cover"
                     onError={({ currentTarget }) => {
