@@ -25,10 +25,10 @@ import AppLogoIcon from './app-logo-icon';
 
 // --- Constants remain the same ---
 const mainNavItems: NavItem[] = [
-    { title: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
-    { title: 'Paket Merah Putih', href: '/packages', icon: Package },
-    { title: 'Products', href: '/orders/products', icon: Package },
-    { title: 'Orders History', href: '/orders/history', icon: History },
+    { title: 'Dashboard', href: route('dashboard'), icon: LayoutGrid },
+    { title: 'Paket Merah Putih', href: route('packages.index'), icon: Package },
+    { title: 'Products', href: route('orders.products'), icon: Package },
+    { title: 'Orders History', href: route('history.index'), icon: History },
 ];
 
 const rightNavItems: NavItem[] = [
@@ -108,7 +108,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                             </Sheet>
                         </div>
 
-                        <Link href="/dashboard" className="flex items-center space-x-2">
+                        <Link href={ route('dashboard')} className="flex items-center space-x-2">
                             <AppLogo />
                         </Link>
                     </div>
