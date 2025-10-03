@@ -16,7 +16,7 @@ interface ProductFormModalProps {
 }
 
 export default function ProductFormModal({ isOpen, onClose, product, categories }: ProductFormModalProps) {
-    const { data, setData, post, put, processing, errors, reset } = useForm({
+    const { data, setData, post, put, processing, errors } = useForm({
         name: '',
         sku: '',
         description: '',
@@ -77,7 +77,7 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
             setData('price', product.price || 0);
             setData('image', Array.isArray(product.image) ? product.image : []);
             setData('is_active', typeof product.is_active === 'boolean' ? product.is_active : true);
-            
+
             // Set image preview if product has images
             if (Array.isArray(product.image) && product.image.length > 0) {
                 setImagePreview(product.image[0]);
@@ -107,16 +107,24 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Prepare the submit data
+        // Prepare the submit data, but handle the image field specially
+        // If the image array is empty, don't include it to avoid validation issues
         const submitData = {
-            ...data,
-            image: data.image // This will be an array of image URLs
+            ...data
         };
 
+        // Only include image if it has values
+        if (data.image && Array.isArray(data.image) && data.image.length > 0) {
+            submitData.image = data.image;
+        } else {
+            delete (submitData as any).image; // Remove image from submit data if empty
+        }
+
         if (product) {
-            // Update existing product
+            // Update existing product - use post with _method to avoid PUT issues
             put(route('admin.products.update', product.id), {
                 ...submitData,
+                // _method: 'PUT', // Use POST with _method to simulate PUT
                 forceFormData: true,
                 onSuccess: () => {
                     onClose();
@@ -126,6 +134,7 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
             // Create new product
             post(route('admin.products.store'), {
                 ...submitData,
+                forceFormData: true,
                 onSuccess: () => {
                     onClose();
                 },
@@ -142,11 +151,8 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
             return;
         }
 
-        // Handle image field specially since it's an array
-        if (name === 'image') {
-            setData(name as keyof typeof data, [value] as any);
-            setImagePreview(value);
-        } else {
+        // Skip image field as it's handled differently
+        if (name !== 'image') {
             setData(name as keyof typeof data, value as any);
         }
     };
@@ -168,6 +174,30 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                 .map((d) => d.trim())
                 .filter(Boolean) as any,
         );
+    };
+
+    // Add a new image URL to the array
+    const addImageUrl = () => {
+        const urlInput = prompt('Enter the image URL:');
+        if (urlInput && urlInput.trim() !== '') {
+            const currentImages = [...data.image];
+            currentImages.push(urlInput);
+            setData('image', currentImages);
+        }
+    };
+
+    // Remove an image URL from the array by index
+    const removeImageUrl = (index: number) => {
+        const currentImages = [...data.image];
+        currentImages.splice(index, 1);
+        setData('image', currentImages);
+
+        // Update image preview if the removed image was the first one
+        if (index === 0 && currentImages.length > 0) {
+            setImagePreview(currentImages[0]);
+        } else if (currentImages.length === 0) {
+            setImagePreview(null);
+        }
     };
 
     if (!isOpen) return null;
@@ -292,45 +322,61 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                     </div>
 
                     {/* Image */}
-                    <div className="grid grid-cols-1 gap-4">
+                    <div className="space-y-4">
                         <div>
-                            <Label htmlFor="image">Product Image URL</Label>
-                            <Input 
-                                id="image" 
-                                name="image" 
-                                type="text" 
-                                value={data.image[0] || ''} 
-                                onChange={handleInputChange}
-                                placeholder="Enter image URL" 
-                            />
+                            <Label>Product Images</Label>
+                            <div className="flex gap-2 mt-2">
+                                <Input
+                                    id="image"
+                                    name="image"
+                                    type="text"
+                                    value=""
+                                    onChange={(e) => {
+                                        if (e.target.value && e.target.value.trim() !== '') {
+                                            const currentImages = [...data.image];
+                                            currentImages.push(e.target.value.trim());
+                                            setData('image', currentImages);
+                                            e.target.value = ''; // Clear the input
+                                            if (currentImages.length === 1) {
+                                                setImagePreview(currentImages[0]);
+                                            }
+                                        }
+                                    }}
+                                    placeholder="Enter image URL and press Enter"
+                                />
+                                <Button type="button" onClick={addImageUrl} variant="outline">Add</Button>
+                            </div>
                             {errors.image && <p className="mt-1 text-sm text-red-600">{errors.image}</p>}
                         </div>
-                    </div>
 
-                    {/* Image Preview */}
-                    {imagePreview && (
-                        <div>
-                            <Label>Image Preview</Label>
-                            <div className="mt-2">
-                                <img src={imagePreview} alt="Preview" className="h-32 w-32 rounded-lg object-cover" />
-                            </div>
-                        </div>
-                    )}
-                    
-                    {/* Display all image URLs if multiple exist */}
-                    {data.image.length > 1 && (
-                        <div>
-                            <Label>Additional Images</Label>
-                            <div className="mt-2 space-y-2">
-                                {data.image.slice(1).map((url, index) => (
-                                    <div key={index} className="flex items-center space-x-2">
-                                        <img src={url} alt={`Additional ${index+1}`} className="h-16 w-16 rounded-lg object-cover" />
-                                        <span className="text-sm text-gray-600 truncate max-w-xs">{url}</span>
+                        {/* Display added images with remove option */}
+                        {data.image.length > 0 && (
+                            <div className="space-y-3">
+                                <Label>Added Images</Label>
+                                {data.image.map((url, index) => (
+                                    <div key={index} className="flex items-center gap-2 p-2 border rounded">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2">
+                                                <img src={url} alt={`Product ${index + 1}`} className="h-12 w-12 rounded object-cover" />
+                                                <span className="text-sm text-gray-600 truncate max-w-xs">{url}</span>
+                                            </div>
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => removeImageUrl(index)}
+                                            className="text-red-600 hover:text-red-800"
+                                        >
+                                            Remove
+                                        </Button>
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
+
+
 
                     {/* Active toggle */}
                     <div className="flex items-center space-x-2">
