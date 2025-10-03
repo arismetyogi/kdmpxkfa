@@ -137,7 +137,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |--------------------------------------------------------------------------
     | Semua rute untuk admin berada di dalam group ini dengan middleware khusus.
     */
-    Route::middleware('permission:' . \App\Enums\PermissionEnum::VIEW_ADMIN_DASHBOARD->value)->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('permission:'.\App\Enums\PermissionEnum::VIEW_ADMIN_DASHBOARD->value)->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
         // Rute untuk manajemen Pembelian (Purchase Orders)
@@ -167,7 +167,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
 
         // Rute dengan permission spesifik untuk Orders
-        Route::middleware('permission:' . \App\Enums\PermissionEnum::VIEW_ORDERS->value)->group(function () {
+        Route::middleware('permission:'.\App\Enums\PermissionEnum::VIEW_ORDERS->value)->group(function () {
             Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
         });
 
@@ -207,5 +207,5 @@ Route::bind('order', function ($value) {
     return Order::findOrFail($value);
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';
