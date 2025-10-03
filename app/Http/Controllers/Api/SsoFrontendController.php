@@ -67,27 +67,13 @@ class SsoFrontendController extends Controller
                     throw new \Exception('Missing state parameter');
                 }
 
-                $result = $this->ssoService->validateSSOTokenWithDigikoperasi($ssoToken, $state);
+                $result = $this->ssoService->handleCallback(['sso_token' => $ssoToken, 'state' => $state]);
 
-                // Find or create user based on SSO data
-                $user = $this->findOrCreateUser($result);
-
-                // Create SSO session
-                $callbackData = ['sso_token' => $ssoToken, 'state' => $state];
-                $this->createSSOSession($user, $callbackData, $result);
-
-                $response = [
+                return response()->json([
                     'success' => true,
-                    'requires_onboarding' => !$user->onboarding_completed,
-                    'user' => $user,
-                ];
-
-                // Add prefilled data for onboarding if needed
-                if (!$user->onboarding_completed) {
-                    $response['prefilled_data'] = $this->getPrefilledData($result);
-                }
-
-                return response()->json($response);
+                    'timestamp' => time(),
+                    'data' => $result,
+                ], 200);
 
             } catch (\Exception $e) {
                 Log::error('SSO validation failed', [

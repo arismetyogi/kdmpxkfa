@@ -27,7 +27,6 @@ Route::prefix('v1')->group(function () {
 
         // Frontend SSO validation routes
         Route::get('sso/config', [SsoFrontendController::class, 'getConfig']);
-        Route::post('sso/validate', [SsoFrontendController::class, 'validate']);
         Route::post('sso/login', [SsoController::class, 'login']);
     });
 

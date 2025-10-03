@@ -59,12 +59,15 @@ export default function SsoCallback(): JSX.Element {
         try {
             setMessage('Menghubungi server SSO...');
 
-            // Call the local SSO validation API to avoid CORS issues
-            const responseValidate = await fetch('/api/v1/auth/sso/validate', {
+            // Call the local SSO validation web route to ensure session support
+            const responseValidate = await fetch('/sso/validate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                 },
+                credentials: 'same-origin', // Important to include session cookies
                 body: JSON.stringify({
                     sso_token: ssoToken,
                     state: state,
@@ -87,7 +90,12 @@ export default function SsoCallback(): JSX.Element {
 
             console.log(result);
 
-            if (result.requires_onboarding) {
+            // Wait a bit to ensure session is properly set before redirecting
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Instead of using router.visit(), we should refresh the page
+            // or make a request to fetch the user data to update the session state
+            if (result.data.requires_onboarding) {
                 setMessage('Mengarahkan ke onboarding...');
                 // Redirect to onboarding
                 router.visit(route('onboarding.create'));
