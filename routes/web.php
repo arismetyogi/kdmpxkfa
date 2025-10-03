@@ -36,6 +36,9 @@ Route::get('sso/callback', function () {
     ]);
 })->name('sso.callback');
 
+// SSO validation route that needs session support
+Route::post('sso/validate', [App\Http\Controllers\Api\SsoFrontendController::class, 'validate'])->name('sso.validate');
+
 Route::get('sso/decrypt', function () {
     // Sample data from the notes/decription.md
     $sampleData = [
