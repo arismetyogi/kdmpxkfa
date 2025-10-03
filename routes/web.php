@@ -151,7 +151,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/{user}/reject', [AccountManageController::class, 'reject'])->name('reject');
         });
 
-
         Route::prefix('mapping')->name('mapping.')->group(function () {
             Route::get('/', [MappingController::class, 'index'])->name('index');
             Route::post('/{user}/map', [MappingController::class, 'mapUser'])->name('map');

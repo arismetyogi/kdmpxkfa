@@ -111,7 +111,7 @@ export default function Cart() {
                 <div className="flex items-center gap-4 sm:gap-5">
                     <div className="relative">
                         <img
-                            src={item.image || 'Package (2).png'}
+                            src={item.image || 'Package.png'}
                             alt={item.name}
                             className="h-16 w-16 rounded-lg object-cover shadow sm:h-20 sm:w-20"
                             onError={({ currentTarget }) => {
@@ -149,10 +149,7 @@ export default function Cart() {
                                 >
                                     Edit Package
                                 </button>
-                                <button
-                                    onClick={() => removeItem(item.id)}
-                                    className="text-sm text-destructive hover:text-destructive/80 sm:text-base"
-                                >
+                                <button onClick={() => removeItem(item.id)} className="text-sm text-destructive hover:text-destructive/80 sm:text-base">
                                     Remove
                                 </button>
                             </div>
