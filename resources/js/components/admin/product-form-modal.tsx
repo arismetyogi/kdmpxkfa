@@ -32,7 +32,7 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
         height: 0,
         weight: 0,
         price: 0,
-        image: null as File | string | null,
+        image: [] as string[],
         is_active: true,
     } as {
         name: string;
@@ -50,55 +50,73 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
         height: number;
         weight: number;
         price: number;
-        image: File | string | null;
+        image: string[];
         is_active: boolean;
     });
 
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     useEffect(() => {
+        console.log('Product data:', product);
         if (product) {
-            reset({
-                ...product,
-                category_id: product.category_id?.toString() ?? '',
-                image: product.image ?? '',
-                dosage: Array.isArray(product.dosage) ? product.dosage : [],
-            });
-            // Set image preview if product has an image
-            if (typeof product.image === 'string' && product.image !== '') {
-                setImagePreview(product.image);
+            // Prepare the product data for the form
+            setData('name', product.name || '');
+            setData('sku', product.sku || '');
+            setData('description', product.description || '');
+            setData('dosage', Array.isArray(product.dosage) ? product.dosage : []);
+            setData('pharmacology', product.pharmacology || '');
+            setData('category_id', product.category_id?.toString() || '');
+            setData('base_uom', product.base_uom || '');
+            setData('order_unit', product.order_unit || '');
+            setData('content', product.content || 1);
+            setData('brand', product.brand || '');
+            setData('length', product.length || 0);
+            setData('width', product.width || 0);
+            setData('height', product.height || 0);
+            setData('weight', product.weight || 0);
+            setData('price', product.price || 0);
+            setData('image', Array.isArray(product.image) ? product.image : []);
+            setData('is_active', typeof product.is_active === 'boolean' ? product.is_active : true);
+            
+            // Set image preview if product has images
+            if (Array.isArray(product.image) && product.image.length > 0) {
+                setImagePreview(product.image[0]);
             }
         } else {
-            reset({
-                name: '',
-                sku: '',
-                description: '',
-                dosage: [],
-                pharmacology: '',
-                category_id: '',
-                base_uom: '',
-                order_unit: '',
-                content: 1,
-                brand: '',
-                length: 0,
-                width: 0,
-                height: 0,
-                weight: 0,
-                price: 0,
-                image: null,
-                is_active: true,
-            });
+            setData('name', '');
+            setData('sku', '');
+            setData('description', '');
+            setData('dosage', []);
+            setData('pharmacology', '');
+            setData('category_id', '');
+            setData('base_uom', '');
+            setData('order_unit', '');
+            setData('content', 1);
+            setData('brand', '');
+            setData('length', 0);
+            setData('width', 0);
+            setData('height', 0);
+            setData('weight', 0);
+            setData('price', 0);
+            setData('image', []);
+            setData('is_active', true);
             setImagePreview(null);
         }
-    }, [product, reset]);
+    }, [product]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
+        // Prepare the submit data
+        const submitData = {
+            ...data,
+            image: data.image // This will be an array of image URLs
+        };
+
         if (product) {
             // Update existing product
             put(route('admin.products.update', product.id), {
-                data,
+                ...submitData,
                 forceFormData: true,
                 onSuccess: () => {
                     onClose();
@@ -107,7 +125,7 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
         } else {
             // Create new product
             post(route('admin.products.store'), {
-                data,
+                ...submitData,
                 onSuccess: () => {
                     onClose();
                 },
@@ -124,23 +142,16 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
             return;
         }
 
-        setData(name as keyof typeof data, value as any);
-    };
-
-    // handle image file input
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setData('image', file as any);
-
-            // Create preview
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+        // Handle image field specially since it's an array
+        if (name === 'image') {
+            setData(name as keyof typeof data, [value] as any);
+            setImagePreview(value);
+        } else {
+            setData(name as keyof typeof data, value as any);
         }
     };
+
+
 
     // handle category select (since ShadCN Select doesn't give a real event)
     const handleCategoryChange = (value: string) => {
@@ -281,10 +292,17 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                     </div>
 
                     {/* Image */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                         <div>
-                            <Label htmlFor="image">Product Image</Label>
-                            <Input id="image" name="image" type="file" accept="image/*" onChange={handleImageChange} />
+                            <Label htmlFor="image">Product Image URL</Label>
+                            <Input 
+                                id="image" 
+                                name="image" 
+                                type="text" 
+                                value={data.image[0] || ''} 
+                                onChange={handleInputChange}
+                                placeholder="Enter image URL" 
+                            />
                             {errors.image && <p className="mt-1 text-sm text-red-600">{errors.image}</p>}
                         </div>
                     </div>
@@ -295,6 +313,21 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                             <Label>Image Preview</Label>
                             <div className="mt-2">
                                 <img src={imagePreview} alt="Preview" className="h-32 w-32 rounded-lg object-cover" />
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Display all image URLs if multiple exist */}
+                    {data.image.length > 1 && (
+                        <div>
+                            <Label>Additional Images</Label>
+                            <div className="mt-2 space-y-2">
+                                {data.image.slice(1).map((url, index) => (
+                                    <div key={index} className="flex items-center space-x-2">
+                                        <img src={url} alt={`Additional ${index+1}`} className="h-16 w-16 rounded-lg object-cover" />
+                                        <span className="text-sm text-gray-600 truncate max-w-xs">{url}</span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     )}
