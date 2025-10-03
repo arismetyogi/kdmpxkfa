@@ -122,101 +122,124 @@ export default function Dashboard({ products, top_products }: { products?: Produ
                         </div>
                     </motion.div>
 
-                    {/* Carousel Produk */}
-                    <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }}>
-                        <div className="mb-8 text-center">
-                            <h2 className="mb-2 text-2xl font-bold text-slate-800 md:text-3xl dark:text-slate-100">Produk Terlaris</h2>
-                            <p className="text-slate-600 dark:text-slate-400">Pilihan favorit pelanggan premium kami</p>
+        <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.4 }}
+        >
+        <div className="mb-6 text-center">
+            <h2 className="mb-1 text-xl font-bold text-slate-800 md:text-2xl dark:text-slate-100">
+            Produk Terlaris
+            </h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+            Pilihan favorit pelanggan premium kami
+            </p>
+        </div>
+
+        <Carousel
+            opts={{ align: "start", loop: true }}
+            plugins={[Autoplay({ delay: 4000 })]}
+            className="w-full"
+        >
+            <CarouselContent className="-ml-2">
+            {top_products?.map((p) => (
+                <CarouselItem
+                key={p.id}
+                className="basis-1/2 pl-2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6" 
+                >
+                <motion.div whileHover={{ y: -2 }} className="group h-full">
+                    <Card className="relative h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md dark:border-slate-700 dark:bg-slate-800">
+                    <div className="relative overflow-hidden">
+                        <img
+                        src={Array.isArray(p.image) ? p.image[0] : '/products/Placeholder_Medicine.png'}
+                        alt={p.image_alt || p.name}
+                        className="h-28 w-full object-cover transition-transform duration-500 group-hover:scale-105 sm:h-32"
+                        />
+                    </div>
+                    <CardContent className="p-2">
+                        <h3 className="mb-1 line-clamp-1 text-xs font-medium text-slate-800 dark:text-slate-100">
+                        {p.name}
+                        </h3>
+                        <div className="flex items-center">
+                        <span className="text-sm font-bold text-blue-600">
+                            Rp {p.price.toLocaleString("id-ID")}
+                        </span>
                         </div>
-                        <Carousel opts={{ align: 'start', loop: true }} plugins={[Autoplay({ delay: 4000 })]} className="w-full">
-                            <CarouselContent className="-ml-4">
-                                {top_products?.map((p) => (
-                                    <CarouselItem key={p.id} className="basis-1/2 pl-4 md:basis-1/3 lg:basis-1/4">
-                                        <motion.div whileHover={{ y: -4 }} className="group h-full">
-                                            <Card className="relative h-full overflow-hidden rounded-2xl border-0 bg-white shadow-lg backdrop-blur-sm hover:shadow-2xl md:rounded-3xl dark:bg-slate-800">
-                                                <div className="relative overflow-hidden">
-                                                    <img
-                                                        src={Array.isArray(p.image) ? p.image[0] : '/products/Placeholder_Medicine.png'}
-                                                        alt={p.image_alt || p.name}
-                                                        className="h-40 w-full object-cover transition-transform duration-700 group-hover:scale-110 sm:h-48"
-                                                    />
-                                                </div>
-                                                <CardContent className="p-4 md:p-6">
-                                                    <h3 className="mb-1 line-clamp-1 font-bold text-slate-800 md:mb-2 dark:text-slate-100">
-                                                        {p.name}
-                                                    </h3>
-                                                    <p className="mb-2 line-clamp-2 text-sm text-slate-500 md:mb-3 dark:text-slate-400">
-                                                        {p.description}
-                                                    </p>
-                                                    <div className="flex items-baseline gap-2">
-                                                        <span className="text-base font-bold text-blue-600 md:text-lg">
-                                                            Rp {p.price.toLocaleString('id-ID')}
-                                                        </span>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        </motion.div>
-                                    </CarouselItem>
-                                ))}
-                            </CarouselContent>
-
-                            <CarouselPrevious className="hidden border-0 bg-white shadow-lg backdrop-blur-sm sm:flex dark:bg-slate-700/80" />
-                            <CarouselNext className="hidden border-0 bg-white shadow-lg backdrop-blur-sm sm:flex dark:bg-slate-700/80" />
-                        </Carousel>
-                    </motion.div>
-
-                    <Card className="rounded-3xl bg-white p-6 shadow-xl ring-1 ring-slate-900/5 md:p-12 dark:bg-slate-800/50">
-                        <motion.div
-                            initial={{ opacity: 0, y: 40 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.8, delay: 0.4 }}
-                            className="grid items-center gap-8 md:grid-cols-2 lg:gap-12"
-                        >
-                            <div className="mx-auto max-w-md">
-                                <img
-                                    src="/Package (2).png"
-                                    alt="Paket Koperasi Merah Putih"
-                                    className="h-full w-full rounded-2xl object-cover md:rounded-3xl"
-                                />
-                            </div>
-                            <div className="flex flex-col text-center md:text-left">
-                                <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-slate-800 sm:text-4xl md:text-5xl dark:text-white">
-                                    Paket Koperasi Merah Putih
-                                </h2>
-                                <p className="mb-6 text-base text-slate-600 md:text-lg dark:text-slate-300">
-                                    Paket Obat lengkap senilai 30 juta untuk mengisi
-                                </p>
-                                <div className="flex justify-center md:justify-start">
-                                    <Link href={route('packages.index')}>
-                                        <Button
-                                            size="lg"
-                                            className="rounded-xl bg-blue-600 px-6 py-5 text-base font-bold text-white shadow-lg hover:bg-blue-700 md:px-8 md:py-7 md:text-lg"
-                                        >
-                                            <ShoppingCart className="mr-2 h-5 w-5" />
-                                            Buy Package Now
-                                        </Button>
-                                    </Link>
-                                </div>
-                                <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-4 text-sm text-slate-600 md:justify-start md:gap-x-8 dark:text-slate-400">
-                                    <div className="flex items-center gap-2">
-                                        <Truck className="h-5 w-5 text-slate-400" />
-                                        <span>Free shipping</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <RefreshCw className="h-5 w-5 text-slate-400" />
-                                        <span>30-day returns</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <ShieldCheck className="h-5 w-5 text-slate-400" />
-                                        <span>Warranty included</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
+                    </CardContent>
                     </Card>
+                </motion.div>
+                </CarouselItem>
+            ))}
+            </CarouselContent>
+
+            <CarouselPrevious className="hidden border-0 bg-white shadow-md sm:flex dark:bg-slate-700/80" />
+            <CarouselNext className="hidden border-0 bg-white shadow-md sm:flex dark:bg-slate-700/80" />
+        </Carousel>
+        </motion.div>
+
+    <section className="w-full overflow-x-hidden py-16 md:py-24">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="grid items-center gap-12 md:grid-cols-2 lg:gap-20"
+            >
+            {/* Image Section */}
+            <div className="w-full">
+                <img
+                src="/Package (2).png"
+                alt="Paket Koperasi Merah Putih"
+                className="h-full w-full max-w-full rounded-3xl object-cover shadow-lg transition-transform duration-500 hover:scale-105"
+                />
+            </div>
+
+            {/* Content Section */}
+            <div className="flex flex-col text-center md:text-left">
+                <h2 className="mb-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl dark:text-white">
+                Paket Koperasi Merah Putih
+                </h2>
+
+                <p className="mb-8 max-w-lg text-lg leading-relaxed text-slate-600 md:mx-0 dark:text-slate-300">
+                Paket Obat lengkap senilai{" "}
+                <span className="font-semibold text-blue-700 dark:text-blue-400">30 juta</span>{" "}
+                untuk mengisi kebutuhan koperasi Anda dengan produk berkualitas.
+                </p>
+
+                <div className="flex justify-center md:justify-start">
+                <Link href={route('packages.index')}>
+                    <Button
+                    size="lg"
+                    className="rounded-xl bg-blue-700 px-8 py-4 text-base font-semibold text-white shadow-md transition hover:scale-105 hover:bg-blue-600 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+                    >
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    Buy Package Now
+                    </Button>
+                </Link>
+                </div>
+
+                {/* Features */}
+                <div className="mt-12 flex flex-nowrap items-center justify-center gap-x-6 text-sm font-medium text-slate-600 md:justify-start dark:text-slate-400">
+                    <div className="flex items-center gap-2">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-slate-700 dark:text-green-400">
+                        <RefreshCw className="h-4 w-4" />
+                        </span>
+                        30-day returns
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 text-purple-600 dark:bg-slate-700 dark:text-purple-400">
+                        <ShieldCheck className="h-4 w-4" />
+                        </span>
+                        Warranty included
+                    </div>
+                    </div>
+            </div>
+            </motion.div>
+        </div>
+        </section>
 
                     {/* Grid Produk */}
-                    <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.5 }}>
+                    {/* <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.5 }}>
                         <div className="mb-8 text-center">
                             <h2 className="mb-2 text-2xl font-bold text-slate-800 md:text-3xl dark:text-slate-100">Katalog Premium</h2>
                             <p className="text-slate-600 dark:text-slate-400">Jelajahi koleksi lengkap produk berkualitas tinggi</p>
@@ -279,7 +302,7 @@ export default function Dashboard({ products, top_products }: { products?: Produ
                                 </motion.div>
                             ))}
                         </div>
-                    </motion.div>
+                    </motion.div> */}
                 </div>
             </div>
             <Footer />

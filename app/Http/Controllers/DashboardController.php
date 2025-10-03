@@ -19,7 +19,7 @@ class DashboardController extends Controller
 
         $top_products = Product::withCount('orderItems')
             ->orderByDesc('order_items_count')
-            ->take(5)
+            ->take(10)
             ->get();
 
 
