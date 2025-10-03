@@ -117,6 +117,8 @@ class ProductController extends Controller
             'dosage' => ['nullable', 'array'],
             'dosage.*' => ['string'],
             'is_active' => ['boolean'],
+            'image' => ['nullable', 'array'], // Allow image array from frontend
+            'image.*' => ['url'], // Each URL in the array should be valid
         ]);
 
         $slug = Str::slug($validated['name']);
@@ -154,6 +156,9 @@ class ProductController extends Controller
         if ($request->hasFile('image')) {
             $product->addMediaFromRequest('image')
                 ->toMediaCollection('images');
+        } elseif ($request->has('image')) {
+            // Handle image URLs from frontend
+            $product->update(['image' => $request->input('image', [])]);
         }
 
         return redirect()->route('admin.products.index')->with('success', 'Product created successfully.');
@@ -187,6 +192,8 @@ class ProductController extends Controller
             'dosage' => ['nullable', 'array'],
             'dosage.*' => ['string'],
             'is_active' => ['boolean'],
+            'image' => ['nullable', 'array'], // Allow image array from frontend
+            'image.*' => ['url'], // Each URL in the array should be valid
         ]);
 
         $slug = Str::slug($validated['name']);
@@ -224,6 +231,12 @@ class ProductController extends Controller
             // Add new image
             $product->addMediaFromRequest('image')
                 ->toMediaCollection('images');
+        } elseif ($request->has('image')) {
+            // Handle image URLs from frontend
+            $product->update(['image' => $request->input('image', [])]);
+        } elseif ($request->has('image')) {
+            // Handle image URLs from frontend
+            $product->update(['image' => $request->input('image', [])]);
         }
 
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully.');
