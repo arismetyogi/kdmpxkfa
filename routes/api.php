@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\SsoController;
+use App\Http\Controllers\Api\SsoFrontendController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,9 +23,11 @@ Route::prefix('cooperation')->group(function () {
 Route::prefix('v1')->group(function () {
     // Authentication routes
     Route::prefix('auth')->group(function () {
-        Route::get('sso/callback', [SsoController::class, 'callback']);
         Route::post('sso/decrypt', [SsoController::class, 'decrypt']);
-        Route::post('refresh', [SsoController::class, 'refresh']);
+
+        // Frontend SSO validation routes
+        Route::get('sso/config', [SsoFrontendController::class, 'getConfig']);
+        Route::post('sso/login', [SsoController::class, 'login']);
     });
 
     Route::get('/products', [\App\Http\Controllers\Api\ProductController::class, 'index']);

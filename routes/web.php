@@ -29,7 +29,16 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-Route::get('sso/callback', [SsoController::class, 'callback']);
+//Route::get('sso/callback', [SsoController::class, 'callback']);
+Route::get('sso/callback', function () {
+    return Inertia::render('sso/callback', [
+        'ssoBaseUrl' => config('sso.allowed_origins.digikoperasi.url')
+    ]);
+})->name('sso.callback');
+
+// SSO validation route that needs session support
+Route::post('sso/validate', [App\Http\Controllers\Api\SsoFrontendController::class, 'validate'])->name('sso.validate');
+
 Route::get('sso/decrypt', function () {
     // Sample data from the notes/decription.md
     $sampleData = [
@@ -65,7 +74,7 @@ Route::get('sso/decrypt', function () {
         'npwp_file' => 'https://storage.googleapis.com/kopdes-merah-putih-dev/npwp_file/npwp_1757660750.pdf',
     ];
 
-    return Inertia::render('Sso/Decrypt', [
+    return Inertia::render('sso/decrypt', [
         'sampleData' => $sampleData,
     ]);
 });
@@ -144,7 +153,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/{user}/approve', [AccountManageController::class, 'approve'])->name('approve');
             Route::post('/{user}/reject', [AccountManageController::class, 'reject'])->name('reject');
         });
-
 
         Route::prefix('mapping')->name('mapping.')->group(function () {
             Route::get('/', [MappingController::class, 'index'])->name('index');
