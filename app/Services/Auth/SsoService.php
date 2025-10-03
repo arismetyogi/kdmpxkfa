@@ -14,10 +14,12 @@ use Illuminate\Support\Str;
 readonly class SsoService
 {
     private string $stateSecret;
+    private string $ssoUrl;
 
     public function __construct()
     {
         $this->stateSecret = config('sso.allowed_origins.digikoperasi.state_secret');
+        $this->ssoUrl = rtrim(config('sso.allowed_origins.digikoperasi.url'), '/') . '/redirect-sso/validate';
     }
 
     /**
@@ -29,13 +31,14 @@ readonly class SsoService
     {
         return DB::transaction(function () use ($data) {
             $signatureSecret = config('sso.allowed_origins.digikoperasi.signature_secret') ?? null;
-            $apiKey = config('sso.allowed_origins.digikoperasi.api_key');
+            $apiKey =config('sso.allowed_origins.digikoperasi.api_key');
+//            Log::info('Api key:' . $apiKey);
             // Gunakan validasi signature jika secret tersedia
-            if ($signatureSecret) {
-                $userData = $this->validateSsoWithSignature($data['ssoToken'], $data['$state'], $signatureSecret,
-                    $apiKey) ?? null;
+            if (isset($signatureSecret)) {
+//                Log::info("Signature secret is " . $signatureSecret);
+                $userData = $this->validateSsoTokenWithSignature($data['ssoToken'], $data['$state'], $signatureSecret, $apiKey);
             } else {
-                $userData = $this->validateSSOTokenWithDigikoperasi($data['sso_token'], $data['state'] ?? null);
+                $userData = $this->validateSSOTokenWithDigikoperasi($data['sso_token'], $data['state'], $apiKey);
             }
 
             // Log::debug('Callback validate data: ', $userData);
@@ -65,7 +68,7 @@ readonly class SsoService
      *
      * @throws \Exception
      */
-    private function validateSSOTokenWithDigikoperasi(string $token, ?string $state): array
+    private function validateSSOTokenWithDigikoperasi(string $token, ?string $state, string $apiKey): array
     {
         $payload = [
             'sso_token' => $token,
@@ -73,18 +76,8 @@ readonly class SsoService
         ];
 
         try {
-            $url = rtrim(config('sso.allowed_origins.digikoperasi.url'), '/') . '/redirect-sso/validate';
-
-            $client = Http::withHeaders([
-                'Content-Type' => 'application/json',
-                'x-api-key' => config('sso.allowed_origins.digikoperasi.api_key'),
-                // 'Origin' => request()->getSchemeAndHttpHost(), // or config('app.url')
-            ])
-                ->withBody(json_encode($payload), 'application/json');
-            $response = $client->post($url);
-
-            $responseData = $response->json();
-
+            list($response, $responseData) = $this->performApiRequest($apiKey, $payload, $this->ssoUrl);
+            Log::info('Response sso: ', [$response, $responseData]);
             if (!$response->ok() || !isset($responseData['data'])) {
                 throw new \Exception('Invalid response from SSO server: ' . $response->body());
             }
@@ -105,32 +98,38 @@ readonly class SsoService
      *
      * @throws \Exception
      */
-    private function validateSsoWithSignature($ssoToken, $state, $signatureSecret,
-                                              $apiKey)
+    private function validateSsoTokenWithSignature(string $ssoToken, ?string $state, string $signatureSecret, string $apiKey): array
     {
-        $timestamp = time();
+        Log::info("SSO Token: " . $ssoToken);
+        Log::info('validate with sig: ', [$ssoToken, $state, $signatureSecret, $apiKey]);
+        $timestamp = now()->timestamp;
         $nonce = $this->generateNonce();
         $signature = $this->generateSignature($signatureSecret, $ssoToken, $state, $timestamp, $nonce);
-        $url = rtrim(config('sso.allowed_origins.digikoperasi.url'), '/') . '/redirect-sso/validate';
-        $data = [
+        $payload = [
             'sso_token' => $ssoToken,
             'state' => $state,
             'signature' => $signature,
             'timestamp' => (string)$timestamp,
             'nonce' => $nonce
         ];
-        $options = [
-            'http' => [
-                'header' => [
-                    'X-API-Key: ' . $apiKey,
-                    'Content-Type: application/json'
-                ],
-                'method' => 'POST',
-                'content' => json_encode($data)
-            ]];
-        $context = stream_context_create($options);
-        $result = file_get_contents($url, false, $context);
-        return json_decode($result, true);
+        Log::info('payload: ' . json_encode($payload));
+        try {
+            list($response, $responseData) = $this->performApiRequest($apiKey, $payload, $this->ssoUrl);
+            Log::info('Response sso with sig: ', [$response, $responseData]);
+            if (!$response->ok() || !isset($responseData['data'])) {
+                Log::error('Invalid response from SSO server: ' . $response->body());
+                throw new \Exception('Invalid response from SSO server: ' . $response->body());
+            }
+
+            return $responseData['data'];
+
+        } catch (\Exception $e) {
+            Log::error('SSO validation with signature failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw new \Exception('SSO validation wth signature failed: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -388,11 +387,12 @@ readonly class SsoService
      * generate SSO Signature
      * @throws Exception
      */
-    private function generateSignature($signatureSecret, $ssoToken, $state, $timestamp, $nonce): string
+    private function generateSignature(string $signatureSecret, string $ssoToken, string $state, string $timestamp, string $nonce): string
     {
         if (empty($signatureSecret) || empty($ssoToken) ||
             empty($state) ||
             empty($timestamp) || empty($nonce)) {
+            Log::error('Parameter tidak lengkap untuk generate signature');
             throw new Exception('Parameter yang diperlukan untuk generate signature tidak lengkap');
         }
         try {
@@ -403,6 +403,7 @@ readonly class SsoService
             // 3. Generate HMAC - SHA256
             $signature = hash_hmac('sha256', $payload, $key, true);
             // 4. Return signature yang di-encode base64
+            Log::info('Generated signature: ' . base64_encode($signature));
             return base64_encode($signature);
         } catch (Exception $e) {
             error_log('Generate signature gagal: ' . $e->getMessage());
@@ -417,7 +418,29 @@ readonly class SsoService
         for ($i = 0; $i < 16; $i++) {
             $nonce .= $chars[rand(0, strlen($chars) - 1)];
         }
+        Log::info('Generated Nonce: ' . $nonce);
         return $nonce;
+    }
+
+    /**
+     * @param $apiKey
+     * @param array $payload
+     * @param string $url
+     * @return array
+     * @throws \Illuminate\Http\Client\ConnectionException
+     */
+    public function performApiRequest(string $apiKey, array $payload, string $url): array
+    {
+        $client = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'x-api-key' => $apiKey,
+            // 'Origin' => request()->getSchemeAndHttpHost(), // or config('app.url')
+        ])
+            ->withBody(json_encode($payload), 'application/json');
+        $response = $client->post($url);
+
+        $responseData = $response->json();
+        return array($response, $responseData);
     }
 
 }
