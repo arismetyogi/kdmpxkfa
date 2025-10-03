@@ -12,7 +12,7 @@ return [
     */
     'allowed_origins' => [
         'digikoperasi' => [
-            'url' => env('SSO_DIGIKOPERASI_URL', 'https://gatekeeper-stg.berasumkm.id/login?is_tester=true'),
+            'url' => env('SSO_DIGIKOPERASI_URL', 'https://gatekeeper-stg.berasumkm.id'),
             'api_key' => env('SSO_DIGIKOPERASI_API_KEY'),
             'state_secret' => env('SSO_DIGIKOPERASI_ENCRIPTION_KEY'),
             'signature_secret' => env('SSO_DIGIKOPERASI_SIGNATURE_SECRET'),
