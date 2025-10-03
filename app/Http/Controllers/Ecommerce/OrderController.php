@@ -122,16 +122,13 @@ class OrderController extends Controller
 
     public function show(Product $product)
     {
-        $product->load('category:id,subcategory1');
-        // Fetch related products from the same category (limit to 4)
-        $relatedProducts = Product::with('category:id,subcategory1')
-            ->where('category_id', $product->category_id)
+        $relatedProducts = Product::where('category_id', $product->category_id)
             ->where('id', '!=', $product->id) // Exclude the current product
             ->limit(10)
             ->get();
 
         return Inertia::render('ecommerce/DetailProduct', [
-            'product' => $product,
+            'product' => $product->toResource()->toArray(request()),
             'relatedProducts' => $relatedProducts,
         ]);
     }

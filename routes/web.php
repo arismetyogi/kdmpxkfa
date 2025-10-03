@@ -1,21 +1,18 @@
 <?php
 
-use App\Enums\PermissionEnum;
+use App\Http\Controllers\AccountManageController;
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SsoController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\MappingController;
-use App\Http\Controllers\PurchaseController;
-use App\Http\Controllers\AccountManageController;
 use App\Http\Controllers\Ecommerce\CartController;
 use App\Http\Controllers\Ecommerce\HistoryController;
 use App\Http\Controllers\Ecommerce\OrderController;
+use App\Http\Controllers\MappingController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\TransactionController;
 use App\Models\Order;
 use App\Models\User;
@@ -153,7 +150,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/{user}/approve', [AccountManageController::class, 'approve'])->name('approve');
             Route::post('/{user}/reject', [AccountManageController::class, 'reject'])->name('reject');
         });
-
 
         Route::prefix('mapping')->name('mapping.')->group(function () {
             Route::get('/', [MappingController::class, 'index'])->name('index');

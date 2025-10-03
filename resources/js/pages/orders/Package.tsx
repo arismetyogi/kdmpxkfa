@@ -1,4 +1,5 @@
 import PriceDisplay from '@/components/priceDisplay';
+import QuantityInput from '@/components/QuantityInput';
 import ScrollToTopButton from '@/components/ScrollToTop';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,10 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import HeaderLayout from '@/layouts/header-layout';
 import { cn } from '@/lib/utils';
-import { BreadcrumbItem, CartItem, Product } from '@/types';
+import { BreadcrumbItem, CartItemOrPackage, PackageItem, Product } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { Minus, Plus, Search, ShoppingCart } from 'lucide-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import { Search, ShoppingCart } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 // --- Type Definitions ---
 interface PackageProduct extends Product {
@@ -24,45 +25,26 @@ interface PackageProduct extends Product {
 interface PackagePageProps {
     products: PackageProduct[];
 }
+function useDebounce<T>(value: T, delay: number): T {
+    const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]); // Only re-run the effect if value or delay changes
+
+    return debouncedValue;
+}
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'Paket Merah Putih', href: '#' },
 ];
-
-// --- Sub-component: Quantity Input ---
-interface QuantityInputProps {
-    value: number;
-    onChange: (newValue: number) => void;
-    decrementDisabled?: boolean;
-    incrementDisabled?: boolean;
-}
-
-const QuantityInput: React.FC<QuantityInputProps> = ({ value, onChange, decrementDisabled, incrementDisabled }) => (
-    <div className="justify-cente flex items-center">
-        <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            onClick={() => onChange(value - 1)}
-            disabled={decrementDisabled}
-            className="h-8 w-8 rounded-full"
-        >
-            <Minus className="h-4 w-4" />
-        </Button>
-        <div className="font-base w-10 text-center text-lg">{value}</div>
-        <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            onClick={() => onChange(value + 1)}
-            disabled={incrementDisabled}
-            className="h-8 w-8 rounded-full"
-        >
-            <Plus className="h-4 w-4" />
-        </Button>
-    </div>
-);
 
 // --- Sub-component: Product Table Row (Updated for Mobile) ---
 interface ProductTableRowProps {
@@ -93,10 +75,10 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
     const pricePerBox = product.price * product.content;
 
     return (
-        <TableRow className={cn('transition-all', isExcluded && 'bg-muted/50 opacity-60')}>
-            <TableCell className="hidden p-2 sm:table-cell">
+        <TableRow className={cn('transition-all', isExcluded && 'bg-muted/50')}>
+            <TableCell className={cn('hidden p-2 xl:table-cell', isExcluded && 'opacity-60')}>
                 <img
-                    src={product.image || '/products/Placeholder_Medicine.png'}
+                    src={product.image ? product.image[0] : '/products/Placeholder_Medicine.png'}
                     alt={product.name}
                     className="h-16 w-16 rounded-md border object-cover"
                     onError={({ currentTarget }) => {
@@ -104,9 +86,8 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
                     }}
                 />
             </TableCell>
-            {/* MODIFICATION: Reduced horizontal padding on smallest screens */}
-            <TableCell className="px-2 py-2 font-medium sm:px-4">
-                <p className="line-clamp-2 text-sm font-medium sm:text-base">{product.name}</p>
+            <TableCell className={cn('px-2 py-2 font-medium sm:px-4', isExcluded && 'opacity-60')}>
+                <p className="line-clamp-2 text-xs font-medium sm:text-base">{product.name}</p>
 
                 <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground sm:hidden">
                     <PriceDisplay price={pricePerBox} currency="" decimal="hidden" />
@@ -115,13 +96,13 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
 
                 <p className="hidden text-xs text-muted-foreground sm:block">{product.order_unit}</p>
             </TableCell>
-
-            <TableCell className="hidden px-2 text-center sm:table-cell">
-                <PriceDisplay price={pricePerBox} />
+            <TableCell className={cn('hidden px-2 text-center sm:table-cell sm:text-xs lg:text-sm xl:text-base', isExcluded && 'opacity-60')}>
+                <PriceDisplay price={pricePerBox} className="text-sm"/>
             </TableCell>
-            <TableCell className="hidden p-2 text-center lg:table-cell">{maxBoxQuantity}</TableCell>
-            <TableCell className="p-2">
+            <TableCell className={cn('hidden p-2 text-center xl:table-cell', isExcluded && 'opacity-60')}>{maxBoxQuantity}</TableCell>
+            <TableCell className={cn('p-2', isExcluded && 'opacity-60')}>
                 <div className="flex justify-center">
+                    {/* MODIFICATION: QuantityInput now appears at LG breakpoint */}
                     <div className="hidden lg:flex">
                         <QuantityInput
                             value={assignedBoxQuantity}
@@ -130,6 +111,7 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
                             incrementDisabled={product.assignedQuantity >= product.maxQuantity}
                         />
                     </div>
+                    {/* MODIFICATION: Simple input is now hidden at LG breakpoint */}
                     <div className="lg:hidden">
                         <Input
                             className="h-9 w-12 text-center focus-visible:ring-0"
@@ -141,19 +123,17 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
                     </div>
                 </div>
             </TableCell>
-
-            <TableCell className="px-2 text-center font-medium">
-                <PriceDisplay price={product.price * product.assignedQuantity} currency="" className="text-sm lg:hidden" />
-                <PriceDisplay price={product.price * product.assignedQuantity} className="hidden lg:block" />
+            <TableCell className={cn('px-2 text-left font-medium', isExcluded && 'opacity-60')}>
+                <PriceDisplay price={product.price * product.assignedQuantity} className="sm:text-xs lg:text-sm xl:hidden" />
+                <PriceDisplay price={product.price * product.assignedQuantity} className="hidden xl:block" />
             </TableCell>
-            {/* MODIFICATION: Reduced horizontal padding for more space */}
             <TableCell className="px-2 text-center">
                 {isExcluded ? (
-                    <Button variant="default" size="sm" onClick={handleInclude}>
+                    <Button variant="default" size="sm" onClick={handleInclude} className="px-2">
                         Include
                     </Button>
                 ) : (
-                    <Button variant="destructive" size="sm" onClick={handleExclude}>
+                    <Button variant="destructive" size="sm" onClick={handleExclude} className="px-2">
                         Exclude
                     </Button>
                 )}
@@ -169,19 +149,17 @@ interface ProductListTableProps {
 }
 
 const ProductListTable: React.FC<ProductListTableProps> = ({ products, onQuantityChange }) => (
-    // MODIFICATION: Added 'table-fixed' to enforce column widths and prevent content from causing overflow.
     <Table className="w-full table-fixed border">
         <TableHeader>
             <TableRow>
-                {/* MODIFICATION: Explicit widths are set for most columns to control the layout. */}
-                {/* The "Product Name" column will fill the remaining space. */}
-                <TableHead className="hidden w-[80px] p-2 sm:table-cell">Image</TableHead>
+                <TableHead className="hidden w-[80px] p-2 xl:table-cell">Image</TableHead>
                 <TableHead className="px-2 sm:px-4">Product Name</TableHead>
                 <TableHead className="hidden w-[100px] px-2 text-center sm:table-cell">Price</TableHead>
-                <TableHead className="hidden w-[70px] px-2 text-center lg:table-cell">Max</TableHead>
-                <TableHead className="w-[90px] px-2 text-center lg:w-[150px]">Qty</TableHead>
+                <TableHead className="hidden w-[70px] px-2 text-center xl:table-cell">Max</TableHead>
+                {/* MODIFICATION: Qty column now widens at LG to accommodate the full QuantityInput */}
+                <TableHead className="w-[65px] px-2 text-center lg:w-[150px]">Qty</TableHead>
                 <TableHead className="w-[100px] px-2 text-center">Subtotal</TableHead>
-                <TableHead className="w-[100px] px-2 text-center sm:w-[110px]">Action</TableHead>
+                <TableHead className="w-[80px] px-2 text-center">Action</TableHead>
             </TableRow>
         </TableHeader>
         <TableBody>
@@ -203,15 +181,15 @@ const ProductListTable: React.FC<ProductListTableProps> = ({ products, onQuantit
 interface OrderSummaryCardProps {
     activeProducts: PackageProduct[];
     summary: { subtotal: number; tax: number; total: number };
-    onCheckout: () => void;
+    onCart: () => void;
 }
 
-const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, summary, onCheckout }) => (
-    <div className="sticky top-8">
+const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, summary, onCart }) => (
+    <div className="sticky top-24">
         <Card>
             <CardContent className="px-6">
                 <h2 className="mb-4 text-xl font-bold">Order Summary</h2>
-                <ScrollArea className="-mr-4 h-66 pr-4">
+                <ScrollArea className="-mr-4 h-50 pr-4 xl:h-64">
                     <div className="space-y-4">
                         {activeProducts.length > 0 ? (
                             activeProducts.map((product) => (
@@ -247,9 +225,9 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, sum
                             <PriceDisplay price={summary.total} />
                         </div>
                     </div>
-                    <Button onClick={onCheckout} disabled={activeProducts.length === 0} className="mt-6 w-full" size="lg">
+                    <Button onClick={onCart} disabled={activeProducts.length === 0} className="mt-6 w-full" size="lg">
                         <ShoppingCart className="mr-2 h-5 w-5" />
-                        Add to Checkout
+                        Proceed to Cart
                     </Button>
                 </div>
             </CardContent>
@@ -257,26 +235,23 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, sum
     </div>
 );
 
-// --- MODIFICATION: Redesigned Mobile Checkout Bar for better responsiveness ---
-interface MobileCheckoutBarProps {
+// --- Mobile Cart Bar ---
+interface MobileCartBarProps {
     total: number;
-    onCheckout: () => void;
+    onCart: () => void;
     disabled: boolean;
 }
 
-const MobileCheckoutBar: React.FC<MobileCheckoutBarProps> = ({ total, onCheckout, disabled }) => (
+const MobileCartBar: React.FC<MobileCartBarProps> = ({ total, onCart, disabled }) => (
     <div className="fixed right-0 bottom-0 left-0 z-10 border-t bg-background shadow-lg lg:hidden">
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-3 px-4 pt-3 pb-4 sm:px-6">
-            {/* Total Information - Now stacked vertically */}
             <div className="flex flex-col items-center">
                 <p className="text-sm text-muted-foreground">Total Price</p>
                 <PriceDisplay price={total} className="text-2xl font-bold text-primary" />
             </div>
-
-            {/* Checkout Button */}
-            <Button onClick={onCheckout} disabled={disabled} size="lg" className="w-full max-w-sm">
+            <Button onClick={onCart} disabled={disabled} size="lg" className="w-full max-w-sm">
                 <ShoppingCart className="mr-2 h-5 w-5" />
-                Add to Checkout
+                Proceed to Cart
             </Button>
         </div>
     </div>
@@ -287,6 +262,42 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
     const [packageProducts, setPackageProducts] = useState<PackageProduct[]>(initialProducts);
     const [searchQuery, setSearchQuery] = useState('');
     const [sortOrder, setSortOrder] = useState('default');
+    const [editingPackageId, setEditingPackageId] = useState<string | null>(null); // Track the original package ID when editing
+    const debouncedSearchQuery = useDebounce(searchQuery, 500); // 500ms debounce delay
+
+    // Check if there's an editing package in localStorage and restore state
+    useEffect(() => {
+        const editingPackage = localStorage.getItem('editingPackage');
+        if (editingPackage) {
+            const packageItem = JSON.parse(editingPackage);
+
+            // Store the original package ID to use when updating the cart
+            setEditingPackageId(packageItem.id);
+
+            // Update package products with quantities from the package item
+            setPackageProducts((prev) =>
+                prev.map((product) => {
+                    const packageContent = packageItem.packageContents.find((content: any) => content.product_id === product.id);
+
+                    if (packageContent) {
+                        // Calculate the assigned quantity based on package content and content multiplier
+                        return {
+                            ...product,
+                            assignedQuantity: Math.max(0, Math.min(packageContent.quantity * (product.content || 1), product.maxQuantity)),
+                        };
+                    } else {
+                        return {
+                            ...product,
+                            assignedQuantity: 0, // Not included in the package
+                        };
+                    }
+                }),
+            );
+
+            // Remove the editing package from localStorage after restoring
+            localStorage.removeItem('editingPackage');
+        }
+    }, []);
 
     const updateQuantity = useCallback((productId: number, newQuantity: number) => {
         setPackageProducts((prev) =>
@@ -302,12 +313,10 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
 
     const displayedProducts = useMemo(() => {
         let products = [...packageProducts];
-        if (searchQuery.trim() !== '') {
-            products = products.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        if (debouncedSearchQuery.trim() !== '') {
+            products = products.filter((p) => p.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()));
         }
         switch (sortOrder) {
-            case 'alphabetical':
-                return products.sort((a, b) => a.name.localeCompare(b.name));
             case 'quantity':
                 return products.sort((a, b) => {
                     if (a.assignedQuantity > 0 && b.assignedQuantity === 0) return -1;
@@ -315,9 +324,9 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
                     return b.assignedQuantity - a.assignedQuantity;
                 });
             default:
-                return products;
+                return products.sort((a, b) => a.name.localeCompare(b.name));
         }
-    }, [packageProducts, searchQuery, sortOrder]);
+    }, [packageProducts, debouncedSearchQuery, sortOrder]);
 
     const summary = useMemo(() => {
         const subtotal = activePackageProducts.reduce((total, p) => total + p.price * p.assignedQuantity, 0);
@@ -326,28 +335,88 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
         return { subtotal, tax, total };
     }, [activePackageProducts]);
 
-    const addToCheckout = () => {
+    const addToCart = () => {
         try {
-            const cart: CartItem[] = activePackageProducts.map((p) => ({
-                ...p,
-                quantity: p.assignedQuantity / p.content,
-                total: p.price * p.assignedQuantity,
-            }));
-            localStorage.setItem('cart', JSON.stringify(cart));
+            // Calculate the total price for the package based on active products
+            const packageTotalPrice = activePackageProducts.reduce((total, p) => total + p.price * p.assignedQuantity, 0);
+
+            // Create package item to store in cart
+            const packageItem: PackageItem = {
+                id: editingPackageId || 'merah-putih-package-' + Date.now(), // Use original ID when editing, otherwise generate new ID
+                name: 'Paket Merah Putih',
+                slug: 'paket-merah-putih',
+                price: packageTotalPrice,
+                image: '/products/package-icon.png', // Placeholder for package icon
+                order_unit: 'package',
+                content: 1,
+                base_uom: 'package',
+                weight: 0, // Calculate or set default weight
+                isPackage: true,
+                packageContents: activePackageProducts.map((p) => ({
+                    product_id: p.id,
+                    name: p.name,
+                    quantity: p.assignedQuantity / p.content,
+                    price: p.price,
+                    image: p.image,
+                    order_unit: p.order_unit,
+                    content: p.content,
+                    base_uom: p.base_uom || 'unit',
+                    weight: p.weight || 0,
+                })),
+            };
+
+            // Get existing cart items
+            const existingCart = localStorage.getItem('cart');
+            let finalCart: CartItemOrPackage[] = [];
+
+            if (existingCart) {
+                const parsedExistingCart: CartItemOrPackage[] = JSON.parse(existingCart);
+
+                // Check if we're editing an existing package - if so, replace it instead of adding
+                if (editingPackageId) {
+                    // Replace the package with the same ID, keep other items
+                    finalCart = parsedExistingCart.map((item) => {
+                        if ('isPackage' in item && 'id' in item && item.id === editingPackageId) {
+                            return packageItem; // Replace with updated package
+                        }
+                        return item;
+                    });
+
+                    // If the package ID wasn't found (edge case), add it to the cart
+                    const packageExists = finalCart.some((item) => 'isPackage' in item && 'id' in item && item.id === editingPackageId);
+
+                    if (!packageExists) {
+                        finalCart = [...parsedExistingCart, packageItem];
+                    }
+                } else {
+                    // Adding new package, just append to cart
+                    finalCart = [...parsedExistingCart, packageItem];
+                }
+            } else {
+                // If no existing cart, just use the package
+                finalCart = [packageItem];
+            }
+
+            // Store the merged cart in localStorage
+            localStorage.setItem('cart', JSON.stringify(finalCart));
+
+            // Reset editing state after adding to cart
+            setEditingPackageId(null);
+
             router.visit(route('cart'));
         } catch (error) {
-            console.error('Error adding products to cart:', error);
-            alert('There was an error creating your cart. Please try again.');
+            console.error('Error adding package to Cart:', error);
+            alert('There was an error creating your Cart. Please try again.');
         }
     };
 
-    const isCheckoutDisabled = activePackageProducts.length === 0;
+    const isCartDisabled = activePackageProducts.length === 0;
+    console.log(summary);
 
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
-            <Head title="Health Package" />
-            {/* MODIFICATION: Increased bottom padding to prevent content from being hidden by the MobileCheckoutBar */}
-            <div className="mx-auto max-w-7xl px-4 py-8 pb-32 sm:px-6 lg:px-8 lg:pb-8">
+            <Head title="Paket Merah Putih" />
+            <div className="py- 8 mx-auto max-w-7xl px-4 pb-32 sm:px-6 xl:px-8 xl:pb-8">
                 <div className="flex flex-col gap-8 lg:flex-row">
                     <div className="flex w-full flex-col gap-6 lg:w-2/3">
                         <div>
@@ -369,8 +438,7 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
                                     <SelectValue placeholder="Sort by" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="default">Default Order</SelectItem>
-                                    <SelectItem value="alphabetical">Alphabetical (A-Z)</SelectItem>
+                                    <SelectItem value="default">Default (A-Z)</SelectItem>
                                     <SelectItem value="quantity">Included / Quantity</SelectItem>
                                 </SelectContent>
                             </Select>
@@ -382,14 +450,14 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
                     </div>
 
                     <div className="hidden lg:block lg:w-1/3">
-                        <OrderSummaryCard activeProducts={activePackageProducts} summary={summary} onCheckout={addToCheckout} />
+                        <OrderSummaryCard activeProducts={activePackageProducts} summary={summary} onCart={addToCart} />
                     </div>
                 </div>
             </div>
 
-            <MobileCheckoutBar total={summary.total} onCheckout={addToCheckout} disabled={isCheckoutDisabled} />
+            <MobileCartBar total={summary.total} onCart={addToCart} disabled={isCartDisabled} />
 
-            <ScrollToTopButton />
+            <ScrollToTopButton PC />
         </HeaderLayout>
     );
 }

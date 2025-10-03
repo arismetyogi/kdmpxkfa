@@ -11,8 +11,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, Category, Paginated, Product } from '@/types';
 import { router } from '@inertiajs/react';
-import { Edit, PackageX, Plus, Search, Trash2, X } from 'lucide-react';
+import { Edit, Package, PackageX, Plus, Search, Trash2, X } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
+import { usePermission } from '@/hooks/user-permissions';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -110,6 +111,8 @@ export default function AdminProducts({ products, categories, allProducts, activ
         }
     };
 
+    const { can, user } = usePermission();
+    console.log(user);
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
@@ -118,10 +121,12 @@ export default function AdminProducts({ products, categories, allProducts, activ
                         <h1 className="text-2xl font-bold tracking-tight">Product Management</h1>
                         <p className="text-gray-600">Manage product details</p>
                     </div>
-                    <Button onClick={handleCreateProduct}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Create Product
-                    </Button>
+                    {can('create products') && (
+                        <Button onClick={handleCreateProduct}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Create Product
+                        </Button>
+                    )}
                 </div>
 
                 {/* Search and Filter Section */}
@@ -241,10 +246,10 @@ export default function AdminProducts({ products, categories, allProducts, activ
                                     <TableRow key={product.id}>
                                         <TableCell onClick={() => handleShowProduct(product)} className="cursor-pointer">
                                             {product.image ? (
-                                                <img src={product.image} alt={product.name} className="h-16 w-16 rounded-lg object-cover" />
+                                                <img src={product.image[0]} alt={product.name} className="h-16 w-16 aspect-square rounded-lg object-cover" />
                                             ) : (
                                                 <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-200 text-xs text-gray-500">
-                                                    No Image
+                                                    <Package/>
                                                 </div>
                                             )}
                                         </TableCell>
@@ -278,17 +283,21 @@ export default function AdminProducts({ products, categories, allProducts, activ
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center space-x-2">
-                                                <Button variant="outline" size="sm" onClick={() => handleEditProduct(product)}>
-                                                    <Edit className="h-4 w-4" />
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="text-red-600 hover:text-red-700"
-                                                    onClick={() => handleDeleteProduct(product)}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                                                {can('update products') && (
+                                                    <Button variant="outline" size="sm" onClick={() => handleEditProduct(product)}>
+                                                        <Edit className="h-4 w-4" />
+                                                    </Button>
+                                                )}
+                                                {can('delete products') && (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="text-red-600 hover:text-red-700"
+                                                        onClick={() => handleDeleteProduct(product)}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                )}
                                             </div>
                                         </TableCell>
                                     </TableRow>

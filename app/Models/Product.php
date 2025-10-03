@@ -38,6 +38,7 @@ class Product extends Model implements HasMedia
 
     protected $casts = [
         'dosage' => 'array',
+        'image' => 'array',
     ];
 
     public function category(): BelongsTo

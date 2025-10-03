@@ -3,23 +3,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import HeaderLayout from '@/layouts/header-layout';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, type CartItem, type CartItemOrPackage } from '@/types';
 import { router } from '@inertiajs/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
-interface CartItem {
-    id: string | number;
-    product_id: number;
-    name: string;
-    slug: string;
-    quantity: number;
-    price: number;
-    base_price: number;
-    image: string;
-    order_unit: string;
-    base_uom: string;
-    content: number;
-}
 
 interface CheckoutProps {
     cartItems: CartItem[];
@@ -157,7 +143,73 @@ export default function CheckoutPage({ billingData, shippingData }: CheckoutProp
         if (!storedCart) {
             localStorage.setItem('cartmsg', 'Your cart is empty.');
             window.location.href = route('cart');
-        } else setCartItems(JSON.parse(storedCart));
+        } else {
+            const parsedCart: CartItemOrPackage[] = JSON.parse(storedCart);
+
+            // Create a map to store items by product_id for quantity merging
+            const itemMap = new Map<string, CartItem>();
+
+            parsedCart.forEach((item) => {
+                if ('isPackage' in item && item.isPackage) {
+                    // Unwrap package items and merge with existing items
+                    item.packageContents.forEach((content) => {
+                        const existingItemKey = content.product_id.toString();
+                        const existingItem = itemMap.get(existingItemKey);
+
+                        if (existingItem) {
+                            // Merge quantities if item already exists
+                            itemMap.set(existingItemKey, {
+                                ...existingItem,
+                                quantity: existingItem.quantity + content.quantity,
+                                total: existingItem.price * (existingItem.quantity + content.quantity) * (existingItem.content || 1),
+                            });
+                        } else {
+                            // Add as new item
+                            const newItem: CartItem = {
+                                id: content.product_id.toString(),
+                                product_id: content.product_id,
+                                name: content.name,
+                                slug: content.name.toLowerCase().replace(/\s+/g, '-'),
+                                quantity: content.quantity,
+                                price: content.price,
+                                base_price: content.price,
+                                image: content.image || '/products/Placeholder_Medicine.png',
+                                order_unit: content.order_unit,
+                                base_uom: content.base_uom,
+                                content: content.content || 1,
+                                weight: content.weight || 0,
+                                total: content.price * content.quantity * (content.content || 1),
+                                usage_direction: '',
+                                description: '',
+                                category_id: 0,
+                            };
+                            itemMap.set(existingItemKey, newItem);
+                        }
+                    });
+                } else {
+                    // Handle regular items, merging if they already exist in the map
+                    const regularItem = item as CartItem;
+                    // Use product_id if available, otherwise use id - convert to string for map key
+                    const itemId = regularItem.product_id ? regularItem.product_id.toString() : regularItem.id.toString();
+
+                    const existingItem = itemMap.get(itemId);
+                    if (existingItem) {
+                        // Merge quantities if item already exists (from a package)
+                        itemMap.set(itemId, {
+                            ...existingItem,
+                            quantity: existingItem.quantity + regularItem.quantity,
+                            total: existingItem.price * (existingItem.quantity + regularItem.quantity) * (existingItem.content || 1),
+                        });
+                    } else {
+                        // Add as new item
+                        itemMap.set(itemId, regularItem);
+                    }
+                }
+            });
+
+            // Convert the map back to an array
+            setCartItems(Array.from(itemMap.values()));
+        }
     }, []);
 
     useEffect(() => {
@@ -174,7 +226,7 @@ export default function CheckoutPage({ billingData, shippingData }: CheckoutProp
 
     // Use useMemo to calculate totals only when cartItems change
     const { subtotal, ppn, grandTotal } = useMemo(() => {
-        const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity * item.content, 0);
+        const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity * (item.content || 1), 0);
         const ppn = subtotal * 0.11;
         const grandTotal = subtotal + ppn;
         return { subtotal, ppn, grandTotal };
@@ -195,19 +247,20 @@ export default function CheckoutPage({ billingData, shippingData }: CheckoutProp
                         {item.quantity} {item.order_unit}
                         {/* --- THEME CHANGE #6: Use muted color --- */}
                         <span className="block text-muted-foreground">
-                            ({item.quantity * item.content} {item.base_uom})
+                            ({item.quantity * (item.content || 1)} {item.base_uom})
                         </span>
                     </TableCell>
                     <TableCell className="text-xs">
                         <PriceDisplay price={item.price} />
                     </TableCell>
                     <TableCell className="text-right text-xs">
-                        <PriceDisplay price={item.price * item.quantity * item.content} />
+                        <PriceDisplay price={item.price * item.quantity * (item.content || 1)} />
                     </TableCell>
                 </TableRow>
             )),
         [cartItems],
     );
+    console.log(grandTotal);
 
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>

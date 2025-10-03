@@ -89,7 +89,7 @@ class ProductController extends Controller
             'products' => PaginatedResourceResponse::make($paginatedProducts, ProductResource::class),
             'allProducts' => $allProductsQuery->count(),
             'activeProducts' => $activeProductsQuery->count(),
-            'categories' => Category::all(),
+            'categories' => Category::withCount('products')->having('products_count', '>', 0)->get(),
         ]);
     }
 

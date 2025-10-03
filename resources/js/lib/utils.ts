@@ -10,7 +10,12 @@ export const idrFormatter = new Intl.NumberFormat('id-ID', {
     currency: 'IDR',
 });
 
-export const currency = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'IDR',
-})
+export const currency = (v: number) =>
+    new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0,
+    }).format(v ?? 0);
+
+
+
