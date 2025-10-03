@@ -3,6 +3,7 @@
 namespace App\Services\Auth;
 
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -27,9 +28,17 @@ readonly class SsoService
     public function handleCallback(array $data): array
     {
         return DB::transaction(function () use ($data) {
-            $userData = $this->validateSSOTokenWithDigikoperasi($data['sso_token'], $data['state'] ?? null);
+            $signatureSecret = config('sso.allowed_origins.digikoperasi.signature_secret') ?? null;
+            $apiKey = config('sso.allowed_origins.digikoperasi.api_key');
+            // Gunakan validasi signature jika secret tersedia
+            if ($signatureSecret) {
+                $userData = $this->validateSsoWithSignature($data['ssoToken'], $data['$state'], $signatureSecret,
+                    $apiKey) ?? null;
+            } else {
+                $userData = $this->validateSSOTokenWithDigikoperasi($data['sso_token'], $data['state'] ?? null);
+            }
 
-            //            Log::debug('Callback validate data: ', $userData);
+            // Log::debug('Callback validate data: ', $userData);
 
             // Find or create user
             $user = $this->findOrCreateUser($userData);
@@ -92,6 +101,39 @@ readonly class SsoService
     }
 
     /**
+     * Validate SSO token with Digikoperasi backend with signature
+     *
+     * @throws \Exception
+     */
+    private function validateSsoWithSignature($ssoToken, $state, $signatureSecret,
+                                              $apiKey)
+    {
+        $timestamp = time();
+        $nonce = $this->generateNonce();
+        $signature = $this->generateSignature($signatureSecret, $ssoToken, $state, $timestamp, $nonce);
+        $url = rtrim(config('sso.allowed_origins.digikoperasi.url'), '/') . '/redirect-sso/validate';
+        $data = [
+            'sso_token' => $ssoToken,
+            'state' => $state,
+            'signature' => $signature,
+            'timestamp' => (string)$timestamp,
+            'nonce' => $nonce
+        ];
+        $options = [
+            'http' => [
+                'header' => [
+                    'X-API-Key: ' . $apiKey,
+                    'Content-Type: application/json'
+                ],
+                'method' => 'POST',
+                'content' => json_encode($data)
+            ]];
+        $context = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+        return json_decode($result, true);
+    }
+
+    /**
      * Find existing user or create new one
      *
      * @throws \Exception
@@ -136,20 +178,20 @@ readonly class SsoService
     /**
      * @throws \Exception
      */
-    private function createUserProfile(User $user, array $userData): User
+    private function createUserProfile(User $user, array $userData): void
     {
         // Decrypt sensitive fields
         $decryptedNik = $this->decryptSsoField($userData['nik']) ?? '';
         $decryptedPicName = $this->decryptSsoField($userData['pic_name']) ?? '';
         $decryptedPicPhone = $this->decryptSsoField($userData['pic_phone']) ?? '';
         $decryptedNibNumber = $this->decryptSsoField($userData['nib_number']) ?? '';
-        $decryptedBankAccount = (array) $this->decryptSsoField($userData['bank_account']) ?? [];
+        $decryptedBankAccount = (array)$this->decryptSsoField($userData['bank_account']) ?? [];
         $decryptedNpwp = $this->decryptSsoField($userData['npwp_number']) ?? '';
         $decryptedSkNumber = $this->decryptSsoField($userData['sk_number']) ?? '';
 
         // Handle latitude and longitude with proper defaults
-        $latitude = isset($userData['latitude']) ? (float) $userData['latitude'] : 0.0;
-        $longitude = isset($userData['longitude']) ? (float) $userData['longitude'] : 0.0;
+        $latitude = isset($userData['latitude']) ? (float)$userData['latitude'] : 0.0;
+        $longitude = isset($userData['longitude']) ? (float)$userData['longitude'] : 0.0;
 
         // Ensure all required string fields have values
         $profileData = [
@@ -158,10 +200,10 @@ readonly class SsoService
             'tenant_id' => $userData['tenant_id'] ?? '',
             'tenant_name' => $userData['tenant_name'] ?? '',
             'source_app' => $userData['source_app'] ?? '',
-            'province_code' => (string) $userData['province_code'] ?? '',
-            'city_code' => (string) $userData['regency_city_code'] ?? '',
-            'district_code' => (string) $userData['district_code'] ?? '',
-            'village_code' => (string) $userData['village_code'] ?? '',
+            'province_code' => (string)$userData['province_code'] ?? '',
+            'city_code' => (string)$userData['regency_city_code'] ?? '',
+            'district_code' => (string)$userData['district_code'] ?? '',
+            'village_code' => (string)$userData['village_code'] ?? '',
             'address' => $userData['registered_address'] ?? '',
             'latitude' => $latitude,
             'longitude' => $longitude,
@@ -181,7 +223,7 @@ readonly class SsoService
             $user->userProfile()->updateOrCreate($profileData);
 
             //            Log::info('Profile created for user: ' . $user->email);
-            return $user;
+            return;
         } catch (\Exception $e) {
             Log::error('Failed to create user profile: ' . $e->getMessage(), [
                 'user_id' => $user->id,
@@ -227,8 +269,8 @@ readonly class SsoService
             'tenant_id' => $userData['tenant_id'] ?? null,
             'tenant_name' => $userData['tenant_name'] ?? null,
             'address' => $userData['registered_address'],
-            'latitude' => (float) $userData['latitude'] ?? null,
-            'longitude' => (float) $userData['longitude'] ?? null,
+            'latitude' => (float)$userData['latitude'] ?? null,
+            'longitude' => (float)$userData['longitude'] ?? null,
         ];
     }
 
@@ -341,4 +383,41 @@ readonly class SsoService
             return null;
         }
     }
+
+    /**
+     * generate SSO Signature
+     * @throws Exception
+     */
+    private function generateSignature($signatureSecret, $ssoToken, $state, $timestamp, $nonce): string
+    {
+        if (empty($signatureSecret) || empty($ssoToken) ||
+            empty($state) ||
+            empty($timestamp) || empty($nonce)) {
+            throw new Exception('Parameter yang diperlukan untuk generate signature tidak lengkap');
+        }
+        try {
+            // 1. Buat payload dengan menggabungkan komponen-komponen
+            $payload = $ssoToken . $state . $timestamp . $nonce;
+            // 2. Buat 32-byte key dari signature secret
+            $key = hash('sha256', $signatureSecret, true);
+            // 3. Generate HMAC - SHA256
+            $signature = hash_hmac('sha256', $payload, $key, true);
+            // 4. Return signature yang di-encode base64
+            return base64_encode($signature);
+        } catch (Exception $e) {
+            error_log('Generate signature gagal: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    private function generateNonce(): string
+    {
+        $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        $nonce = '';
+        for ($i = 0; $i < 16; $i++) {
+            $nonce .= $chars[rand(0, strlen($chars) - 1)];
+        }
+        return $nonce;
+    }
+
 }
