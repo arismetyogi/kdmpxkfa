@@ -32,11 +32,17 @@ readonly class SsoService
         return DB::transaction(function () use ($data) {
             $signatureSecret = config('sso.allowed_origins.digikoperasi.signature_secret') ?? null;
             $apiKey =config('sso.allowed_origins.digikoperasi.api_key');
-//            Log::info('Api key:' . $apiKey);
+//            Log::info('Api key: ' . $apiKey);
+//            Log::info('Signature secret present: ' . ($signatureSecret ? 'yes' : 'no'));
+//            Log::info('Data keys: ' . implode(', ', array_keys($data)));
             // Gunakan validasi signature jika secret tersedia
             if (isset($signatureSecret)) {
 //                Log::info("Signature secret is " . $signatureSecret);
-                $userData = $this->validateSsoTokenWithSignature($data['ssoToken'], $data['$state'], $signatureSecret, $apiKey);
+                // Try both possible field names for sso token
+                $ssoToken = $data['ssoToken'] ?? $data['sso_token'] ?? null;
+                $state = $data['state'] ?? null;
+//                Log::info('Using ssoToken: ' . ($ssoToken ?? 'NULL') . ', state: ' . ($state ?? 'NULL'));
+                $userData = $this->validateSsoTokenWithSignature($ssoToken, $state, $signatureSecret, $apiKey);
             } else {
                 $userData = $this->validateSSOTokenWithDigikoperasi($data['sso_token'], $data['state'], $apiKey);
             }
@@ -98,10 +104,15 @@ readonly class SsoService
      *
      * @throws \Exception
      */
-    private function validateSsoTokenWithSignature(string $ssoToken, ?string $state, string $signatureSecret, string $apiKey): array
+    private function validateSsoTokenWithSignature(?string $ssoToken, ?string $state, string $signatureSecret, string $apiKey): array
     {
-        Log::info("SSO Token: " . $ssoToken);
-        Log::info('validate with sig: ', [$ssoToken, $state, $signatureSecret, $apiKey]);
+//        Log::info("SSO Token: " . ($ssoToken ?? 'NULL'));
+//        Log::info("State: " . ($state ?? 'NULL'));
+//        Log::info('validate with sig: ', [$ssoToken, $state, $signatureSecret, $apiKey]);
+
+        if (empty($ssoToken)) {
+            throw new \Exception('SSO token is required for signature validation');
+        }
         $timestamp = now()->timestamp;
         $nonce = $this->generateNonce();
         $signature = $this->generateSignature($signatureSecret, $ssoToken, $state, $timestamp, $nonce);
@@ -387,12 +398,18 @@ readonly class SsoService
      * generate SSO Signature
      * @throws Exception
      */
-    private function generateSignature(string $signatureSecret, string $ssoToken, string $state, string $timestamp, string $nonce): string
+    private function generateSignature(string $signatureSecret, ?string $ssoToken, ?string $state, string $timestamp, string $nonce): string
     {
         if (empty($signatureSecret) || empty($ssoToken) ||
             empty($state) ||
             empty($timestamp) || empty($nonce)) {
-            Log::error('Parameter tidak lengkap untuk generate signature');
+            Log::error('Parameter tidak lengkap untuk generate signature', [
+                'signatureSecret' => !empty($signatureSecret),
+                'ssoToken' => !empty($ssoToken),
+                'state' => !empty($state),
+                'timestamp' => !empty($timestamp),
+                'nonce' => !empty($nonce)
+            ]);
             throw new Exception('Parameter yang diperlukan untuk generate signature tidak lengkap');
         }
         try {
