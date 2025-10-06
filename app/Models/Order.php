@@ -87,8 +87,8 @@ class Order extends Model
     {
         $prefix = 'TKF';
         $apotekCode = auth()->user()->apotek->sap_id;
-        $date = now()->format('Ymd');
-        $random = strtoupper(substr(uniqid(), -6));
+        $date = now()->format('ymd');
+        $random = substr(uniqid(), -8);
 
         return "{$prefix}{$apotekCode}{$date}{$random}";
     }
