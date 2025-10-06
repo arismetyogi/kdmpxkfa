@@ -16,7 +16,7 @@ interface ProductFormModalProps {
 }
 
 export default function ProductFormModal({ isOpen, onClose, product, categories }: ProductFormModalProps) {
-    const { data, setData, post, put, processing, errors, reset } = useForm({
+    const { data, setData, post, put, processing, errors } = useForm({
         name: '',
         sku: '',
         description: '',
@@ -32,7 +32,7 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
         height: 0,
         weight: 0,
         price: 0,
-        image: null as File | string | null,
+        image: [] as string[],
         is_active: true,
     } as {
         name: string;
@@ -50,55 +50,81 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
         height: number;
         weight: number;
         price: number;
-        image: File | string | null;
+        image: string[];
         is_active: boolean;
     });
 
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     useEffect(() => {
+        console.log('Product data:', product);
         if (product) {
-            reset({
-                ...product,
-                category_id: product.category_id?.toString() ?? '',
-                image: product.image ?? '',
-                dosage: Array.isArray(product.dosage) ? product.dosage : [],
-            });
-            // Set image preview if product has an image
-            if (typeof product.image === 'string' && product.image !== '') {
-                setImagePreview(product.image);
+            // Prepare the product data for the form
+            setData('name', product.name || '');
+            setData('sku', product.sku || '');
+            setData('description', product.description || '');
+            setData('dosage', Array.isArray(product.dosage) ? product.dosage : []);
+            setData('pharmacology', product.pharmacology || '');
+            setData('category_id', product.category_id?.toString() || '');
+            setData('base_uom', product.base_uom || '');
+            setData('order_unit', product.order_unit || '');
+            setData('content', product.content || 1);
+            setData('brand', product.brand || '');
+            setData('length', product.length || 0);
+            setData('width', product.width || 0);
+            setData('height', product.height || 0);
+            setData('weight', product.weight || 0);
+            setData('price', product.price || 0);
+            setData('image', Array.isArray(product.image) ? product.image : []);
+            setData('is_active', typeof product.is_active === 'boolean' ? product.is_active : true);
+
+            // Set image preview if product has images
+            if (Array.isArray(product.image) && product.image.length > 0) {
+                setImagePreview(product.image[0]);
             }
         } else {
-            reset({
-                name: '',
-                sku: '',
-                description: '',
-                dosage: [],
-                pharmacology: '',
-                category_id: '',
-                base_uom: '',
-                order_unit: '',
-                content: 1,
-                brand: '',
-                length: 0,
-                width: 0,
-                height: 0,
-                weight: 0,
-                price: 0,
-                image: null,
-                is_active: true,
-            });
+            setData('name', '');
+            setData('sku', '');
+            setData('description', '');
+            setData('dosage', []);
+            setData('pharmacology', '');
+            setData('category_id', '');
+            setData('base_uom', '');
+            setData('order_unit', '');
+            setData('content', 1);
+            setData('brand', '');
+            setData('length', 0);
+            setData('width', 0);
+            setData('height', 0);
+            setData('weight', 0);
+            setData('price', 0);
+            setData('image', []);
+            setData('is_active', true);
             setImagePreview(null);
         }
-    }, [product, reset]);
+    }, [product]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
+        // Prepare the submit data, but handle the image field specially
+        // If the image array is empty, don't include it to avoid validation issues
+        const submitData = {
+            ...data
+        };
+
+        // Only include image if it has values
+        if (data.image && Array.isArray(data.image) && data.image.length > 0) {
+            submitData.image = data.image;
+        } else {
+            delete (submitData as any).image; // Remove image from submit data if empty
+        }
+
         if (product) {
-            // Update existing product
+            // Update existing product - use post with _method to avoid PUT issues
             put(route('admin.products.update', product.id), {
-                data,
+                ...submitData,
+                // _method: 'PUT', // Use POST with _method to simulate PUT
                 forceFormData: true,
                 onSuccess: () => {
                     onClose();
@@ -107,7 +133,8 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
         } else {
             // Create new product
             post(route('admin.products.store'), {
-                data,
+                ...submitData,
+                forceFormData: true,
                 onSuccess: () => {
                     onClose();
                 },
@@ -124,23 +151,13 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
             return;
         }
 
-        setData(name as keyof typeof data, value as any);
-    };
-
-    // handle image file input
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setData('image', file as any);
-
-            // Create preview
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+        // Skip image field as it's handled differently
+        if (name !== 'image') {
+            setData(name as keyof typeof data, value as any);
         }
     };
+
+
 
     // handle category select (since ShadCN Select doesn't give a real event)
     const handleCategoryChange = (value: string) => {
@@ -157,6 +174,30 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                 .map((d) => d.trim())
                 .filter(Boolean) as any,
         );
+    };
+
+    // Add a new image URL to the array
+    const addImageUrl = () => {
+        const urlInput = prompt('Enter the image URL:');
+        if (urlInput && urlInput.trim() !== '') {
+            const currentImages = [...data.image];
+            currentImages.push(urlInput);
+            setData('image', currentImages);
+        }
+    };
+
+    // Remove an image URL from the array by index
+    const removeImageUrl = (index: number) => {
+        const currentImages = [...data.image];
+        currentImages.splice(index, 1);
+        setData('image', currentImages);
+
+        // Update image preview if the removed image was the first one
+        if (index === 0 && currentImages.length > 0) {
+            setImagePreview(currentImages[0]);
+        } else if (currentImages.length === 0) {
+            setImagePreview(null);
+        }
     };
 
     if (!isOpen) return null;
@@ -281,23 +322,61 @@ export default function ProductFormModal({ isOpen, onClose, product, categories 
                     </div>
 
                     {/* Image */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-4">
                         <div>
-                            <Label htmlFor="image">Product Image</Label>
-                            <Input id="image" name="image" type="file" accept="image/*" onChange={handleImageChange} />
+                            <Label>Product Images</Label>
+                            <div className="flex gap-2 mt-2">
+                                <Input
+                                    id="image"
+                                    name="image"
+                                    type="text"
+                                    value=""
+                                    onChange={(e) => {
+                                        if (e.target.value && e.target.value.trim() !== '') {
+                                            const currentImages = [...data.image];
+                                            currentImages.push(e.target.value.trim());
+                                            setData('image', currentImages);
+                                            e.target.value = ''; // Clear the input
+                                            if (currentImages.length === 1) {
+                                                setImagePreview(currentImages[0]);
+                                            }
+                                        }
+                                    }}
+                                    placeholder="Enter image URL and press Enter"
+                                />
+                                <Button type="button" onClick={addImageUrl} variant="outline">Add</Button>
+                            </div>
                             {errors.image && <p className="mt-1 text-sm text-red-600">{errors.image}</p>}
                         </div>
+
+                        {/* Display added images with remove option */}
+                        {data.image.length > 0 && (
+                            <div className="space-y-3">
+                                <Label>Added Images</Label>
+                                {data.image.map((url, index) => (
+                                    <div key={index} className="flex items-center gap-2 p-2 border rounded">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2">
+                                                <img src={url} alt={`Product ${index + 1}`} className="h-12 w-12 rounded object-cover" />
+                                                <span className="text-sm text-gray-600 truncate max-w-xs">{url}</span>
+                                            </div>
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => removeImageUrl(index)}
+                                            className="text-red-600 hover:text-red-800"
+                                        >
+                                            Remove
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
-                    {/* Image Preview */}
-                    {imagePreview && (
-                        <div>
-                            <Label>Image Preview</Label>
-                            <div className="mt-2">
-                                <img src={imagePreview} alt="Preview" className="h-32 w-32 rounded-lg object-cover" />
-                            </div>
-                        </div>
-                    )}
+
 
                     {/* Active toggle */}
                     <div className="flex items-center space-x-2">

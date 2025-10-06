@@ -11,19 +11,19 @@ export default function HeroCarousel() {
                 </>
             ),
             desc: "Kami hadir untuk memberikan solusi kesehatan terlengkap dan tepercaya bagi Anda dan keluarga.",
-            link: "/products",
+            link: `${route('packages.index')}`,
             overlay: "bg-[url('/bg-kf.png')]",
         },
         {
             title: (
                 <>
-                    Promo <span className="text-yellow-400">Spesial</span> Bulan Ini!
+                    Produk <span className="text-yellow-400">Asli</span> dan Terjamin!
                     <br />
-                    <span className="text-white">Diskon Hingga 30%</span>
+                    <span className="text-white">Dari Brand Terkemuka di Indonesia</span>
                 </>
             ),
             desc: "Nikmati penawaran terbatas untuk berbagai produk vitamin dan suplemen pilihan. Jaga imunitas tubuh sekarang!",
-            link: "/packages",
+            link: `${route('packages.index')}`,
             overlay: "bg-[url('/bg-kf.png')]",
         },
         {
@@ -35,7 +35,7 @@ export default function HeroCarousel() {
                 </>
             ),
             desc: "Dapatkan produk kesehatan Anda dengan mudah dan cepat. Kepuasan Anda adalah prioritas utama kami.",
-            link: "/about",
+            link: `${route('dashboard')}`,
             overlay: "bg-[url('/bg-kf.png')]",
         },
     ];
@@ -84,9 +84,9 @@ export default function HeroCarousel() {
                                         className="flex items-center justify-center gap-2 rounded-xl bg-yellow-400 px-8 py-4 text-lg font-bold text-slate-900 shadow-lg transition-all duration-300 hover:bg-yellow-500 hover:scale-105 hover:shadow-xl"
                                     >
                                         <ShoppingBag className="h-5 w-5" />
-                                        {index === 1 ? "Lihat Promo" : "Beli Paket"}
+                                        {index === 1 ? "Lihat Produk" : "Beli Paket"}
                                     </a>
-                                    <a href="/products" className="rounded-xl border-2 border-white/40 px-8 py-4 text-lg font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white/10 hover:border-white/60">
+                                    <a href={route('orders.products')} className="rounded-xl border-2 border-white/40 px-8 py-4 text-lg font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white/10 hover:border-white/60">
                                         Lanjut Belanja
                                     </a>
                                 </div>

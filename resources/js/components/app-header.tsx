@@ -108,7 +108,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                             </Sheet>
                         </div>
 
-                        <Link href={ route('dashboard')} className="flex items-center space-x-2">
+                        <Link href={ route('home')} className="flex items-center space-x-2">
                             <AppLogo />
                         </Link>
                     </div>
