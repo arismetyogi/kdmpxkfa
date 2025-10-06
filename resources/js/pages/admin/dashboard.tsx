@@ -235,7 +235,7 @@ export default function Dashboard({ user, stats }: DashboardProps) {
       <Head title="Dashboard" />
       <Toaster position="top-right" richColors />
 
-      {isApotek && renderNotificationIcon()}
+      {/*{isApotek && renderNotificationIcon()}*/}
 
       <div className="flex flex-col gap-6 p-4">
         {isSuperAdmin && renderSuperAdminDashboard()}
