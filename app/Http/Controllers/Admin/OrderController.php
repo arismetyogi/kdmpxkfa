@@ -196,9 +196,9 @@ class OrderController extends Controller
             'is_for_sale' => true, // Optional field
             'source_of_fund' => $order->source_of_fund ?? 'pinjaman',
             'account_no' => (string)$order->user->userProfile->bank_account['nomor_rekening'] ?? '',
-            'account_bank' => $order->user->userProfile->bank_account['nomor_rekening'] ?? '',
+            'account_bank' => $order->user->userProfile->bank_account['nama_bank'] ?? '',
             'payment_type' => $order->payment_type ?? 'cad',
-            'payment_method' => $order->payment_method ?? 'Mandiri', // Default to Mandiri
+            'payment_method' => $order->payment_method ?? 'mandiri', // Default to mandiri
             'va_number' => $order->user->apotek->bankAccount->account_number ?? '0000000000000', // WARNING! No Rek KFA per BM
             'timestamp' => $order->shipped_at ? $order->shipped_at->toIso8601String() : now()->toIso8601String(), // Use shipped_at timestamp or current time
             'product_detail' => $productDetails,
