@@ -2,17 +2,18 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class ApotekSeeder extends Seeder
+class BankAccountSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        $filePath = database_path('seeders/data/apoteks.csv');
+        $filePath = database_path('seeders/data/bank_accounts.csv');
 
         if (! file_exists($filePath)) {
             $this->command->error("CSV file not found: $filePath");
@@ -22,7 +23,7 @@ class ApotekSeeder extends Seeder
 
         // Get total number of rows for progress tracking
         $totalRows = $this->getTotalRows($filePath) - 1; // Subtract 1 for header
-        $this->command->info("Processing $totalRows apoteks...");
+        $this->command->info("Processing $totalRows Bank Accounts...");
 
         $header = null;
         $batch = [];
@@ -32,34 +33,24 @@ class ApotekSeeder extends Seeder
         if (($handle = fopen($filePath, 'r')) !== false) {
             while (($row = fgetcsv($handle, 1000, ',')) !== false) {
                 if (! $header) {
-                    $header = array_map(function ($h) {
-                        return trim(preg_replace('/^\xEF\xBB\xBF/', '', $h)); // hapus BOM kalau ada
-                        }, $row);
-                    //$this->command->info('CSV Header: '.json_encode($header));
-                    //$header = $row; // first row as header
+                    $header = $row; // first row as header
                 } else {
                     $data = array_combine($header, $row);
 
                     // Prepare data for insert
-                    $apotekData = [
-                        'branch_code' => (string)$data['branch_code'] ?? null,
-                        'branch' => $data['branch'] ?? null,
-                        'sap_id' => $data['sap_id'] ?? null,
-                        'name' => $data['name'] ?? null,
-                        'address' => $data['address'] ?? null,
-                        'phone' => $data['phone'] ?? null,
-                        'longitude' => (float)$data['longitude'] ?? null,
-                        'latitude' => (float)$data['latitude'] ?? null,
-                        'zipcode' => $data['zipcode'] ?? null,
+                    $regionData = [
+                        'branch_code' => $data['branch_code'] ?? null,
+                        'account_number' => $data['account_no'] ?? null,
+                        'account_name' => $data['account_name'] ?? null,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
 
-                    $batch[] = $apotekData;
+                    $batch[] = $regionData;
 
                     // When batch reaches desired size, insert it
                     if (count($batch) >= $batchSize) {
-                        $this->insertOrIgnoreApoteks($batch);
+                        $this->insertOrIgnoreBankAccounts($batch);
                         $processed += count($batch);
                         $this->command->getOutput()->write("\rProgress: $processed/$totalRows");
                         $batch = [];
@@ -69,7 +60,7 @@ class ApotekSeeder extends Seeder
 
             // Insert remaining records
             if (!empty($batch)) {
-                $this->insertOrIgnoreApoteks($batch);
+                $this->insertOrIgnoreBankAccounts($batch);
                 $processed += count($batch);
                 $this->command->getOutput()->write("\rProgress: $processed/$totalRows");
             }
@@ -77,7 +68,7 @@ class ApotekSeeder extends Seeder
             fclose($handle);
         }
 
-        $this->command->info("\nApoteks seeded successfully! ($processed records)");
+        $this->command->info("\nBank Accounts seeded successfully! ($processed records)");
     }
 
     private function getTotalRows(string $filePath): int
@@ -93,12 +84,12 @@ class ApotekSeeder extends Seeder
         return $count;
     }
 
-    private function insertOrIgnoreApoteks(array $batch): void
+    private function insertOrIgnoreBankAccounts(array $batch): void
     {
-        DB::table('apoteks')->upsert(
+        DB::table('bank_accounts')->upsert(
             $batch,
-            ['sap_id'], // unique columns to check for conflicts
-            ['branch_code', 'branch', 'name', 'address', 'phone', 'longitude', 'latitude', 'zipcode', 'updated_at'] // columns to update if conflict occurs
+            ['branch_code'], // unique columns to check for conflicts
+            ['account_number' , 'account_name',  'updated_at'] // columns to update if conflict occurs
         );
     }
 }
