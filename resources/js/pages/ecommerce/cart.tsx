@@ -69,15 +69,13 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
         },
     ];
 
-    const message = localStorage.getItem('cartmsg');
-    console.log(message);
     useEffect(() => {
+        const message = localStorage.getItem('cartmsg');
         if (message) {
             toast.error(message);
-            localStorage.removeItem('cartRedirectMessage');
-            console.log(message);
+            localStorage.removeItem('cartmsg'); // konsisten
         }
-    });
+    }, []);
 
     if (cartItems.length === 0) {
         return (
@@ -86,7 +84,12 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
                 <div className="container mx-auto px-4 py-8">
                     <div className="text-center">
                         <div className="mb-6">
-                            <svg className="mx-auto h-24 w-24 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg
+                                className="mx-auto h-24 w-24 text-gray-300"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
                                 <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
@@ -97,7 +100,10 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
                         </div>
                         <h2 className="mb-4 text-2xl font-bold text-gray-800">Your cart is empty</h2>
                         <p className="mb-8 text-gray-600">Looks like you haven't added any items to your cart yet.</p>
-                        <Link href="/" className="inline-flex items-center rounded-md bg-indigo-600 px-6 py-3 text-white hover:bg-indigo-700">
+                        <Link
+                            href="/"
+                            className="inline-flex items-center rounded-md bg-indigo-600 px-6 py-3 text-white hover:bg-indigo-700"
+                        >
                             <ArrowLeft className="mr-2 h-5 w-5" />
                             Continue Shopping
                         </Link>
@@ -116,7 +122,9 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
                     <div className="lg:col-span-2">
                         <div className="rounded-lg bg-white shadow-sm">
                             <div className="border-b px-6 py-4">
-                                <h1 className="text-xl font-semibold text-gray-800">Shopping Cart ({cartCount} items)</h1>
+                                <h1 className="text-xl font-semibold text-gray-800">
+                                    Shopping Cart ({cartCount} items)
+                                </h1>
                             </div>
                             <div className="divide-y">
                                 {cartItems.map((item) => {
@@ -126,29 +134,28 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
                                     return (
                                         <div key={itemKey} className="p-6">
                                             <div className="flex items-center">
-                                                <img src={item.image} alt={item.name} className="h-20 w-20 rounded-md object-cover" />
+                                                <img
+                                                    src={item.image}
+                                                    alt={item.name}
+                                                    className="h-20 w-20 rounded-md object-cover"
+                                                />
                                                 <div className="ml-4 flex-1">
-                                                    <h3 className="text-lg font-medium text-gray-800">
-                                                        <Link
-                                                            // href={route('product.detail', { slug: item.slug })}
-                                                            className="hover:text-indigo-600"
-                                                        >
-                                                            {item.name}
-                                                        </Link>
-                                                    </h3>
+                                                    <h3 className="text-lg font-medium text-gray-800">{item.name}</h3>
                                                     <div className="mt-1 text-sm text-gray-600">
                                                         {item.content} {item.base_uom} per {item.order_unit}
                                                     </div>
                                                     <div className="mt-1 text-sm font-medium text-gray-600">
                                                         {item.quantity} {item.order_unit}
                                                         <span className="text-gray-500">
-                                                            {' '}
                                                             ({item.quantity * item.content} {item.base_uom})
                                                         </span>
                                                     </div>
                                                     <div className="mt-2 text-lg font-semibold text-indigo-600">
                                                         Rp{item.price.toLocaleString()}
-                                                        <span className="text-sm font-normal text-gray-500"> per {item.order_unit}</span>
+                                                        <span className="text-sm font-normal text-gray-500">
+                                                            {' '}
+                                                            per {item.order_unit}
+                                                        </span>
                                                     </div>
                                                     <div className="text-sm text-gray-500">
                                                         Rp{item.base_price.toLocaleString()} per {item.base_uom}
@@ -156,15 +163,30 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
                                                 </div>
                                                 <div className="ml-4 flex items-center space-x-2">
                                                     <button
-                                                        onClick={() => updateQuantity(item, item.quantity - 1)}
+                                                        onClick={() =>
+                                                            updateQuantity(item, item.quantity - 1)
+                                                        }
                                                         disabled={isUpdating}
                                                         className="rounded-md border p-1 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
                                                     >
                                                         <Minus className="h-4 w-4" />
                                                     </button>
-                                                    <span className="w-12 text-center text-gray-800">{item.quantity}</span>
+                                                    <input
+                                                        type="number"
+                                                        value={item.quantity}
+                                                        min={1}
+                                                        onChange={(e) => {
+                                                            const num = Number(e.target.value);
+                                                            if (!isNaN(num) && num >= 1) {
+                                                                updateQuantity(item, num);
+                                                            }
+                                                        }}
+                                                        className="w-14 rounded-md text-center text-lg font-semibold"
+                                                    />
                                                     <button
-                                                        onClick={() => updateQuantity(item, item.quantity + 1)}
+                                                        onClick={() =>
+                                                            updateQuantity(item, item.quantity + 1)
+                                                        }
                                                         disabled={isUpdating}
                                                         className="rounded-md border p-1 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
                                                     >
@@ -176,9 +198,13 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
                                                         Rp{(item.price * item.quantity).toLocaleString()}
                                                     </div>
                                                     <div className="text-sm text-gray-500">
-                                                        ({item.base_price * item.quantity * item.content} {item.base_uom})
+                                                        ({item.base_price * item.quantity * item.content}{' '}
+                                                        {item.base_uom})
                                                     </div>
-                                                    <button onClick={() => removeItem(item)} className="mt-2 text-sm text-red-600 hover:text-red-800">
+                                                    <button
+                                                        onClick={() => removeItem(item)}
+                                                        className="mt-2 text-sm text-red-600 hover:text-red-800"
+                                                    >
                                                         <Trash2 className="h-4 w-4" />
                                                     </button>
                                                 </div>
@@ -206,7 +232,9 @@ export default function CartPage({ cartItems, cartCount }: CartProps) {
                                 <div className="border-t pt-3">
                                     <div className="flex justify-between">
                                         <span className="text-lg font-semibold text-gray-800">Total</span>
-                                        <span className="text-lg font-semibold text-gray-800">Rp{total.toLocaleString()}</span>
+                                        <span className="text-lg font-semibold text-gray-800">
+                                            Rp{total.toLocaleString()}
+                                        </span>
                                     </div>
                                 </div>
                             </div>

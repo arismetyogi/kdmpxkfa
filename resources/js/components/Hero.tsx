@@ -18,8 +18,8 @@ export default function HeroCarousel() {
             title: (
                 <>
                     Produk <span className="text-yellow-400">Asli</span> dan Terjamin!
-                    <br />
-                    <span className="text-white">Dari Brand Terkemuka di Indonesia</span>
+                   
+                   
                 </>
             ),
             desc: "Nikmati penawaran terbatas untuk berbagai produk vitamin dan suplemen pilihan. Jaga imunitas tubuh sekarang!",
@@ -30,8 +30,8 @@ export default function HeroCarousel() {
             title: (
                 <>
                     Layanan Cepat & <span className="text-yellow-400">Profesional</span>
-                    <br />
-                    <span className="text-white">Siap Membantu</span>
+                    
+                    
                 </>
             ),
             desc: "Dapatkan produk kesehatan Anda dengan mudah dan cepat. Kepuasan Anda adalah prioritas utama kami.",
@@ -62,41 +62,48 @@ export default function HeroCarousel() {
                     }`}
                 >
                     <div className="relative h-full w-full">
-                        {/* Overlay background image */}
+                        {/* Background Overlay */}
                         <div
                             className={`absolute inset-0 bg-cover bg-center ${slide.overlay}`}
                         ></div>
 
                         {/* Content */}
-                        <div className="relative z-10 flex h-full flex-col items-center justify-center gap-8 px-6 text-center md:flex-row md:justify-between md:px-20 md:text-left">
+                        <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center md:flex-row md:items-center md:justify-between md:px-20 md:text-left">
                             {/* Text Section */}
-                            <div className="max-w-2xl">
-                                <h1 className="mb-4 text-4xl font-extrabold leading-tight text-white sm:text-5xl md:text-6xl">
+                            <div className="flex-1 max-w-2xl pt-20 md:pt-0 space-y-4 md:space-y-6">
+                                <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight text-white">
                                     {slide.title}
                                 </h1>
-                                <p className="mb-6 text-base leading-relaxed text-white/80 sm:text-lg md:mb-8 md:text-xl">
+                                <p className="text-base sm:text-lg md:text-xl leading-relaxed text-white/80">
                                     {slide.desc}
                                 </p>
 
-                                <div className="flex flex-col justify-center gap-4 sm:flex-row md:justify-start">
+                                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 md:gap-8 sm:items-center md:items-start">
                                     <a
                                         href={slide.link}
-                                        className="flex items-center justify-center gap-2 rounded-xl bg-yellow-400 px-8 py-4 text-lg font-bold text-slate-900 shadow-lg transition-all duration-300 hover:bg-yellow-500 hover:scale-105 hover:shadow-xl"
+                                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-yellow-400 px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-bold text-slate-900 shadow-md hover:bg-yellow-500 hover:scale-105 transition-transform duration-300"
                                     >
-                                        <ShoppingBag className="h-5 w-5" />
+                                        <ShoppingBag className="w-5 h-5" />
                                         {index === 1 ? "Lihat Produk" : "Beli Paket"}
                                     </a>
-                                    <a href={route('orders.products')} className="rounded-xl border-2 border-white/40 px-8 py-4 text-lg font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white/10 hover:border-white/60">
+                                    <a
+                                        href={route("orders.products")}
+                                        className="inline-flex items-center justify-center rounded-xl border border-white/30 px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-semibold text-white backdrop-blur-sm hover:bg-white/10 hover:border-white/60 transition-all duration-300"
+                                    >
                                         Lanjut Belanja
                                     </a>
                                 </div>
                             </div>
 
-                            {/* Image Section (hidden, as per your code) */}
-                            <div className="hidden md:block">
-                                {/* You can add an image here if needed */}
-                                {/* <img src={slide.image} alt="image" className="w-[320px] md:w-[420px] lg:w-[480px] drop-shadow-2xl" /> */}
+                           {/* Image Section */}
+                            <div className="hidden md:flex flex-1 items-end justify-center h-full">
+                                <img
+                                    src="/modelhero.png"
+                                    alt="Hero"
+                                    className="w-full max-w-[420px] sm:max-w-[520px] md:max-w-[600px] lg:max-w-[700px] xl:max-w-[800px] object-contain drop-shadow-2xl max-h-[90vh]"
+                                />
                             </div>
+
                         </div>
                     </div>
                 </div>

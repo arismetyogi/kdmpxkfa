@@ -309,16 +309,27 @@ export default function OrderShow({ order }: OrderShowProps) {
                         </div>
 
                         {/* Right Side: Action Buttons */}
-                        <div className="flex shrink-0 items-center gap-4 py-4">
+                   <div className="flex shrink-0 items-center gap-4 py-4">
                             <Button variant="outline" asChild>
                                 <Link href={route('admin.orders.index')}>Back to Orders</Link>
                             </Button>
+
                             {isDeliverable && (
                                 <Button type="submit" disabled={processing}>
                                     {processing ? 'Updating...' : 'Mark as Shipped'}
                                 </Button>
                             )}
+
+                           
+                            {order.status === 'dalam-pengiriman' && order.invoice && (
+                                <Button asChild>
+                            <a href={route('admin.invoices.download', order.invoice.id)}>
+                                Download Faktur
+                            </a>
+                        </Button>
+                            )}
                         </div>
+
                     </div>
                 </form>
             </div>

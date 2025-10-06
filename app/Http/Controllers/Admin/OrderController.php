@@ -66,7 +66,7 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        $order->load(['user', 'user.apotek', 'orderItems.product.category']);
+        $order->load(['user', 'user.apotek', 'invoice','orderItems.product.category']);
         $user = Auth::user();
 
         // Check if user has permission to view this order
@@ -85,53 +85,70 @@ class OrderController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, Order $order)
-    {
-        // Validate the request
-        $request->validate([
-            'order_items' => 'array',
-            'order_items.*.id' => 'required|exists:order_items,id',
-            'order_items.*.qty_delivered' => 'required|integer|min:0',
-        ]);
+{
+    // Validasi request
+    $request->validate([
+        'order_items' => 'array',
+        'order_items.*.id' => 'required|exists:order_items,id',
+        'order_items.*.qty_delivered' => 'required|integer|min:0',
+    ]);
 
-        // Update qty_delivered di masing-masing order item
-        foreach ($request->order_items as $itemData) {
-            $orderItem = $order->orderItems->where('id', $itemData['id'])->first();
-            if ($orderItem) {
-                $orderItem->qty_delivered = $itemData['qty_delivered'];
-                $orderItem->save();
-            }
+    // Update qty_delivered di masing-masing order item
+    foreach ($request->order_items as $itemData) {
+        $orderItem = $order->orderItems->where('id', $itemData['id'])->first();
+        if ($orderItem) {
+            $orderItem->qty_delivered = $itemData['qty_delivered'];
+            $orderItem->save();
         }
-
-        $subtotal = $order->orderItems->sum(function ($item) {
-            return $item->unit_price * $item->qty_delivered * $item->content;
-        });
-
-        // Update status pesanan jadi "delivering"
-        $order->status = OrderStatusEnum::DELIVERY->value;
-        $order->shipped_at = now();
-
-        //Simpan subtotal_delivered, tax_delivered, dan total_delivered di table order
-        $order->subtotal_delivered = $subtotal;
-        $order->tax_delivered = $subtotal * 0.11;
-        $order->total_delivered = round($subtotal * 1.11); // $subtotal*1.11;
-
-        $order->save();
-
-        // Siapkan data transaksi utk Digikoperasi
-        $transactionData = $this->prepareTransactionData($order);
-
-        // Kirim ke Digikoperasi
-        $response = $this->digikopTransactionService->sendTransaction($transactionData);
-
-        if (!$response['success']) {
-            \Log::error('Failed to send transaction to Digikoperasi', [
-                'order_id' => $order->id,
-                'error' => $response['message'],
-            ]);
-        }
-
-        return redirect()->back()->with('success', 'Order updated successfully.');
     }
+
+    $subtotal = $order->orderItems->sum(function ($item) {
+        return $item->unit_price * $item->qty_delivered * $item->content;
+    });
+
+    // Update status pesanan jadi "delivering"
+    $order->status = OrderStatusEnum::DELIVERY->value;
+    $order->shipped_at = now();
+
+    // Simpan subtotal_delivered, tax_delivered, dan total_delivered
+    $order->subtotal_delivered = $subtotal;
+    $order->tax_delivered = $subtotal * 0.11;
+    $order->total_delivered = round($subtotal * 1.11);
+
+    $order->save();
+
+    // ============================
+    // INVOICE CREATE
+    // ============================
+    if (!$order->invoice) {
+        $invoiceNumber = 'INV-' . now()->format('Ymd') . '-' . str_pad($order->id, 5, '0', STR_PAD_LEFT);
+
+        $order->invoice()->create([
+            'invoice_number' => $invoiceNumber,
+            'invoice_date'   => now(),
+            'subtotal'       => $order->subtotal_delivered,
+            'tax'            => $order->tax_delivered,
+            'total'          => $order->total_delivered,
+        ]);
+    }
+
+    // ============================
+    // Kirim data transaksi ke Digikoperasi
+    // ============================
+    $transactionData = $this->prepareTransactionData($order);
+
+    $response = $this->digikopTransactionService->sendTransaction($transactionData);
+
+    if (!$response['success']) {
+        \Log::error('Failed to send transaction to Digikoperasi', [
+            'order_id' => $order->id,
+            'error' => $response['message'],
+        ]);
+    }
+
+    return redirect()->back()->with('success', 'Order updated successfully. Invoice generated.');
+}
+
 
     /**
      * Prepare transaction data according to Digikoperasi API documentation

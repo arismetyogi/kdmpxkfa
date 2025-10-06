@@ -171,6 +171,10 @@ export interface Order {
     transaction_number: string;
     user_id: number;
     tenant_id: string;
+    invoice?: {
+    id: number;
+    invoice_number: string;
+    };
 
     // Status
     status: string; // contoh: "On Delivery"

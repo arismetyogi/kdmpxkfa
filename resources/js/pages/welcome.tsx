@@ -106,7 +106,7 @@ export default function Welcome() {
              </main>
 
         <LogoLoop logos={partners} speed={100} fadeOut scaleOnHover logoHeight={60} gap={48} />
-
+        <h1>oioaksbk</h1>
         
       
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SsoController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\InvoiceController; // ✅ tambah
 use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Ecommerce\CartController;
@@ -98,51 +99,58 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |--------------------------------------------------------------------------
     | Semua rute untuk admin berada di dalam group ini dengan middleware khusus.
     */
-    Route::middleware('permission:'.\App\Enums\PermissionEnum::VIEW_ADMIN_DASHBOARD->value)->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::middleware('permission:'.\App\Enums\PermissionEnum::VIEW_ADMIN_DASHBOARD->value)
+        ->prefix('admin')
+        ->name('admin.')
+        ->group(function () {
+            Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
-        // Rute untuk manajemen Pembelian (Purchase Orders)
-        Route::prefix('purchase')->name('purchase.')->group(function () {
-            Route::get('/', [PurchaseController::class, 'index'])->name('index');
-            Route::get('/{purchase}', [PurchaseController::class, 'show'])->name('show');
-            Route::post('/{purchase}/accept', [PurchaseController::class, 'accept'])->name('accept');
-            Route::post('/{purchase}/reject', [PurchaseController::class, 'reject'])->name('reject');
+            // Rute untuk manajemen Pembelian (Purchase Orders)
+            Route::prefix('purchase')->name('purchase.')->group(function () {
+                Route::get('/', [PurchaseController::class, 'index'])->name('index');
+                Route::get('/{purchase}', [PurchaseController::class, 'show'])->name('show');
+                Route::post('/{purchase}/accept', [PurchaseController::class, 'accept'])->name('accept');
+                Route::post('/{purchase}/reject', [PurchaseController::class, 'reject'])->name('reject');
+            });
+
+            Route::prefix('admin/account')->name('account.')->group(function () {
+                Route::get('/', [AccountManageController::class, 'index'])->name('index');
+                Route::post('/{user}/approve', [AccountManageController::class, 'approve'])->name('approve');
+                Route::post('/{user}/reject', [AccountManageController::class, 'reject'])->name('reject');
+            });
+
+            Route::prefix('mapping')->name('mapping.')->group(function () {
+                Route::get('/', [MappingController::class, 'index'])->name('index');
+                Route::post('/{user}/map', [MappingController::class, 'mapUser'])->name('map');
+            });
+
+            // Rute CRUD Resources
+            Route::resource('permissions', PermissionController::class)->except(['show', 'edit']);
+            Route::resource('admins', AdminController::class);
+            Route::resource('users', UserController::class)->except('edit');
+            Route::resource('products', ProductController::class);
+            Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
+
+            // Rute dengan permission spesifik untuk Orders
+            Route::middleware('permission:'.\App\Enums\PermissionEnum::VIEW_ORDERS->value)->group(function () {
+                Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
+
+                // ✅ Rute untuk Invoices
+                Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+                Route::get('invoices/{invoice}/download', [InvoiceController::class, 'download'])->name('invoices.download');
+            });
+
+            // Rute untuk manajemen Roles
+            Route::prefix('roles')->name('roles.')->group(function () {
+                Route::get('/', [AdminController::class, 'roles'])->name('index');
+                Route::post('/', [AdminController::class, 'storeRole'])->name('store');
+                Route::put('/{role}', [AdminController::class, 'updateRole'])->name('update');
+                Route::delete('/{role}', [AdminController::class, 'destroyRole'])->name('destroy');
+            });
+
+            // Rute lain-lain
+            Route::post('users/{user}/map', [UserController::class, 'mapUser'])->name('users.map');
         });
-
-        Route::prefix('admin/account')->name('account.')->group(function () {
-            Route::get('/', [AccountManageController::class, 'index'])->name('index');
-            Route::post('/{user}/approve', [AccountManageController::class, 'approve'])->name('approve');
-            Route::post('/{user}/reject', [AccountManageController::class, 'reject'])->name('reject');
-        });
-
-        Route::prefix('mapping')->name('mapping.')->group(function () {
-            Route::get('/', [MappingController::class, 'index'])->name('index');
-            Route::post('/{user}/map', [MappingController::class, 'mapUser'])->name('map');
-        });
-
-        // Rute CRUD Resources
-        Route::resource('permissions', PermissionController::class)->except(['show', 'edit']);
-        Route::resource('admins', AdminController::class);
-        Route::resource('users', UserController::class)->except('edit');
-        Route::resource('products', ProductController::class);
-        Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
-
-        // Rute dengan permission spesifik untuk Orders
-        Route::middleware('permission:'.\App\Enums\PermissionEnum::VIEW_ORDERS->value)->group(function () {
-            Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
-        });
-
-        // Rute untuk manajemen Roles
-        Route::prefix('roles')->name('roles.')->group(function () {
-            Route::get('/', [AdminController::class, 'roles'])->name('index');
-            Route::post('/', [AdminController::class, 'storeRole'])->name('store');
-            Route::put('/{role}', [AdminController::class, 'updateRole'])->name('update');
-            Route::delete('/{role}', [AdminController::class, 'destroyRole'])->name('destroy');
-        });
-
-        // Rute lain-lain
-        Route::post('users/{user}/map', [UserController::class, 'mapUser'])->name('users.map');
-    });
 });
 
 /*
