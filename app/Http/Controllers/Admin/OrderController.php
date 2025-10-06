@@ -195,7 +195,7 @@ class OrderController extends Controller
             'total_nominal' => $order->total_delivered,
             'is_for_sale' => true, // Optional field
             'source_of_fund' => $order->source_of_fund ?? 'pinjaman',
-            'account_no' => $order->user->userProfile->bank_account['nomor_rekening'] ?? '',
+            'account_no' => (string)$order->user->userProfile->bank_account['nomor_rekening'] ?? '',
             'account_bank' => $order->user->userProfile->bank_account['nomor_rekening'] ?? '',
             'payment_type' => $order->payment_type ?? 'cad',
             'payment_method' => $order->payment_method ?? 'Mandiri', // Default to Mandiri
