@@ -170,7 +170,7 @@ export default function OrdersIndex({
                                                     </Badge>
                                                 </TableCell>
                                                 <TableCell className="text-right">
-                                                    <Link href={route('admin.orders.show', order.id)} className="text-primary hover:text-primary/80">
+                                                    <Link href={route('admin.orders.show', order.transaction_number)} className="text-primary hover:text-primary/80">
                                                         View Details
                                                     </Link>
                                                 </TableCell>

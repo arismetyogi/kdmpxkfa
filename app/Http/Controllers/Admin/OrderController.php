@@ -64,8 +64,9 @@ class OrderController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Order $order)
+    public function show(string $transaction_number)
     {
+        $order = Order::where('transaction_number', $transaction_number)->firstOrFail();
         $order->load(['user', 'user.apotek', 'orderItems.product.category']);
         $user = Auth::user();
 

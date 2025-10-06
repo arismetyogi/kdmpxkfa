@@ -62,7 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard untuk pengguna biasa
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/credit-limit', [TransactionController::class, 'creditLimit'])->name('credit.limit');
-    
+
     // Notification routes
     Route::prefix('notifications')->group(function () {
         Route::get('/unread-count', [\App\Http\Controllers\Api\NotificationController::class, 'unreadCount']);
@@ -172,9 +172,9 @@ Route::bind('user', function ($value) {
     return User::findOrFail($value);
 });
 
-Route::bind('order', function ($value) {
-    return Order::findOrFail($value);
-});
+//Route::bind('order', function ($value) {
+//    return Order::findOrFail($value);
+//});
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

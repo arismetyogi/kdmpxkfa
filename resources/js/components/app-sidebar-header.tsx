@@ -22,7 +22,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                     },
                 });
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     setUnreadNotificationCount(data.unread_count || 0);
@@ -47,12 +47,12 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                 <SidebarTrigger className="-ml-1" />
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="fixed top-5 right-1/36 items-center gap-2">
                 {/* Notification bell with tooltip */}
                 <TooltipProvider delayDuration={0}>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <NotificationSheet 
+                            <NotificationSheet
                                 newNotifications={unreadNotificationCount}
                             />
                         </TooltipTrigger>
