@@ -25,7 +25,7 @@ return new class extends Migration
 
             // Pricing
             $table->integer('quantity');
-            $table->decimal('unit_price', 20, 2)->nullable();
+            $table->float('unit_price')->nullable();
             $table->decimal('total_price', 20, 2)->nullable();
 
             $table->timestamps();

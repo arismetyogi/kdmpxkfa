@@ -307,11 +307,11 @@ class CartController extends Controller
                 'tenant_id' => auth()->user()->tenant_id,
                 'source_of_fund' => $request->source_of_fund,
                 'status' => OrderStatusEnum::CREATED->value,
-                'account_no' => '', // This would need to be set based on your business logic
-                'account_bank' => '', // This would need to be set based on your business logic
+                'account_no' => auth()->user()->userProfile->bank_account['nomor_rekening'] ?? '', // This would need to be set based on your business logic
+                'account_bank' => auth()->user()->userProfile->bank_account['nomor_rekening'] ?? '', // This would need to be set based on your business logic
                 'payment_type' => $request->payment_type, // todo! no other payment available currently, subjects to change
                 'payment_method' => 'mandiri',
-                'va_number' => '00112233445566', // No Rek KFA -> branch
+                'va_number' => auth()->user()->apotek->bankAccount->account_number ?? '0000000000000', // No Rek KFA -> branch
                 'subtotal' => $totalAmount,
                 'tax_amount' => $totalAmount * 0.11, // You can calculate tax based on your business logic
                 'shipping_amount' => 0, // You can calculate shipping based on your business logic
