@@ -2,16 +2,13 @@ import PriceDisplay from '@/components/priceDisplay';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import HeaderLayout from '@/layouts/header-layout';
-import { Order } from '@/types';
-import { Head, Link } from '@inertiajs/react';
-import { CheckCircle } from 'lucide-react';
 import { currency } from '@/lib/utils';
+import { Order } from '@/types';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { CheckCircle } from 'lucide-react';
 
-interface OrderCompletedProps {
-    order: Order;
-}
-
-export default function OrderCompletedPage({ order }: OrderCompletedProps) {
+export default function OrderCompletedPage() {
+    const order = usePage<{ order: Order }>().props.order;
     return (
         <HeaderLayout>
             <Head title="Order Completed" />
@@ -76,8 +73,8 @@ export default function OrderCompletedPage({ order }: OrderCompletedProps) {
                             <div className="space-y-4">
                                 {order.order_items?.map((item) => (
                                     <div key={item.id} className="flex items-center">
-                                        {item.product_image ? (
-                                            <img src={item.product_image} alt={item.product_name} className="h-16 w-16 rounded-md object-cover" />
+                                        {item.product.image ? (
+                                            <img src={item.product?.image[0]} alt={item.product.name} className="h-16 w-16 rounded-md object-cover" />
                                         ) : (
                                             // --- THEME CHANGE #5: Themed image placeholder ---
                                             <div className="flex h-16 w-16 items-center justify-center rounded-md bg-muted">
@@ -85,7 +82,7 @@ export default function OrderCompletedPage({ order }: OrderCompletedProps) {
                                             </div>
                                         )}
                                         <div className="ml-4 flex-1">
-                                            <h4 className="text-sm font-medium">{item.product_name}</h4>
+                                            <h4 className="text-sm font-medium">{item.product.name}</h4>
                                             <p className="text-sm text-muted-foreground">
                                                 {item.quantity} {item.product.order_unit}
                                                 <span className="block">

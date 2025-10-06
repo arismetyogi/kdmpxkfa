@@ -28,19 +28,26 @@ import PropTypes from 'prop-types';
 import { Card } from '@/components/ui/card';
 
 const PillButton = ({ icon: Icon, label, isSelected, onClick }) => (
-    <button
-        onClick={onClick}
-        className={cn(
-            'flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200',
-            'hover:shadow-sm hover:bg-accent hover:text-white',
-            isSelected
-                ? 'bg-primary text-white border-primary hover:bg-primary/90'
-                : 'bg-background text-foreground border-border',
-        )}
-    >
-        <Icon className={cn('h-4 w-4 hover:text-white', isSelected ? 'text-white' : 'text-muted-foreground')} />
-        <span>{label}</span>
-    </button>
+  <button
+    onClick={onClick}
+    className={cn(
+      'group flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200',
+      'hover:shadow-sm hover:bg-primary hover:text-white',
+      isSelected
+        ? 'bg-primary text-white border-primary hover:bg-primary/90'
+        : 'bg-background text-foreground border-border',
+    )}
+  >
+    <Icon
+      className={cn(
+        'h-4 w-4 transition-colors duration-200',
+        isSelected
+          ? 'text-white'
+          : 'text-muted-foreground group-hover:text-white',
+      )}
+    />
+    <span>{label}</span>
+  </button>
 );
 
 PillButton.propTypes = {

@@ -1,5 +1,6 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Icon } from '@/components/icon';
+import SearchCommand from '@/components/search-command';
 import DarkModeToggle from '@/components/toggle-dark-mode';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { History, LayoutGrid, Menu, Package, Search, ShoppingCart } from 'lucide-react';
+import React from 'react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
@@ -44,6 +46,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const { auth } = page.props;
     const getInitials = useInitials();
     const { cartCount } = useCart();
+    const [isSearchOpen, setIsSearchOpen] = React.useState(false);
 
     // This cart logic is good, but for better reusability, consider moving it to a custom hook like `useCart()`.
     // For this refactor, we'll keep it as is.
@@ -129,11 +132,12 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     {/* `justify-between` on the parent pushes this group to the right. */}
                     <div className="flex items-center space-x-2">
                         <div className="relative flex items-center space-x-1">
-                            <Button variant="ghost" size="icon" className="group h-9 w-9">
+                            <Button variant="ghost" size="icon" className="group h-9 w-9" onClick={() => setIsSearchOpen(true)}>
                                 <Search className="!size-5 text-foreground opacity-80 group-hover:opacity-100" />
                                 <span className="sr-only">Search</span>
                             </Button>
 
+                            <SearchCommand open={isSearchOpen} onOpenChange={setIsSearchOpen} />
                             {/* Mobile cart icon */}
                             <div className="relative lg:hidden">
                                 <Link

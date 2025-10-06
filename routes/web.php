@@ -15,6 +15,7 @@ use App\Http\Controllers\MappingController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\TransactionController;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -98,7 +99,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |--------------------------------------------------------------------------
     | Semua rute untuk admin berada di dalam group ini dengan middleware khusus.
     */
-    Route::middleware('permission:'.\App\Enums\PermissionEnum::VIEW_ADMIN_DASHBOARD->value)->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('permission:' . \App\Enums\PermissionEnum::VIEW_ADMIN_DASHBOARD->value)->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
         // Rute untuk manajemen Pembelian (Purchase Orders)
@@ -128,7 +129,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
 
         // Rute dengan permission spesifik untuk Orders
-        Route::middleware('permission:'.\App\Enums\PermissionEnum::VIEW_ORDERS->value)->group(function () {
+        Route::middleware('permission:' . \App\Enums\PermissionEnum::VIEW_ORDERS->value)->group(function () {
             Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class);
         });
 
@@ -142,6 +143,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Rute lain-lain
         Route::post('users/{user}/map', [UserController::class, 'mapUser'])->name('users.map');
+    });
+});
+
+// API routes for search - accessible to authenticated users
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/api/products/search', function () {
+        $query = request()->input('q');
+        if (!$query) {
+            return response()->json([]);
+        }
+
+        $products = Product::where('name', 'like', "%{$query}%")
+            ->orWhere('sku', 'like', "%{$query}%")
+            ->limit(6)
+            ->get(['id', 'name', 'sku', 'slug']);
+
+        return response()->json($products);
     });
 });
 
@@ -168,5 +186,9 @@ Route::bind('order', function ($value) {
     return Order::findOrFail($value);
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+Route::bind('product', function ($value) {
+    return Product::findOrFail($value);
+});
+
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';
