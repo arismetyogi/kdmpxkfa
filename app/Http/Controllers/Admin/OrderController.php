@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\PaginatedResourceResponse;
 use App\Models\Order;
+use App\Notifications\OrderDeliveredNotification;
 use App\Services\Admin\OrderService;
 use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
@@ -114,21 +115,23 @@ class OrderController extends Controller
         });
 
         // Update status pesanan jadi "delivering"
-        $order->status = OrderStatusEnum::DELIVERY->value;
-        $order->shipped_at = now();
-
-        //Simpan subtotal_delivered, tax_delivered, dan total_delivered di table order
-        $order->subtotal_delivered = $subtotal;
-        $order->tax_delivered = $subtotal * 0.11;
-        $order->total_delivered = round($subtotal * 1.11); // $subtotal*1.11;
-
-        $order->save();
+        $order->update([
+            'status' => OrderStatusEnum::DELIVERY->value,
+            'shipped_at' => now(),
+            //Simpan subtotal_delivered, tax_delivered, dan total_delivered di table order
+            'subtotal_delivered' => $subtotal,
+            'tax_delivered' => $subtotal * 0.11,
+            'total_delivered' => round($subtotal * 1.11), // $subtotal*1.11;
+        ]);
 
         // Siapkan data transaksi utk Digikoperasi
         $transactionData = $this->prepareTransactionData($order);
 
         // Kirim ke Digikoperasi
         $response = $this->digikopTransactionService->sendTransaction($transactionData);
+
+        $user = $order->user; // Get the user who placed the order
+        $user->notify(new OrderDeliveredNotification($order));
 
         if (!$response['success']) {
             \Log::error('Failed to send transaction to Digikoperasi', [
@@ -169,7 +172,7 @@ class OrderController extends Controller
                 'kategori' => $categoryName,
                 'quantity' => $baseQtyDelivered,
                 'harga_per_unit' => $hargaSatuanPpn,
-                'total' => (int) round(($hargaSatuanPpn * $baseQtyDelivered)),
+                'total' => (int)round(($hargaSatuanPpn * $baseQtyDelivered)),
                 'satuan' => $item->base_uom ?? 'PCS',
                 'berat' => $item->product->weight ?? 0,
                 'dimensi' => [

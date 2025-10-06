@@ -155,7 +155,7 @@ export default function NotificationSheet({ newNotifications = 0 }: Notification
                             <SheetTitle>Notifications</SheetTitle>
                             <div className="flex items-center gap-2">
                                 {hasUnread && (
-                                    <Button variant="ghost" size="sm" onClick={markAllAsRead} className="mr-4 h-7 px-2 text-xs">
+                                    <Button variant="ghost" size="sm" onClick={markAllAsRead} className="h-7 px-2 mr-4 text-xs">
                                         Mark all as read
                                     </Button>
                                 )}
@@ -172,14 +172,23 @@ export default function NotificationSheet({ newNotifications = 0 }: Notification
                             <div className="divide-y">
                                 {notifications.map((notification) => (
                                     <div key={notification.id} className={`p-4 ${!notification.read_at ? 'bg-accent/30' : ''}`}>
-                                        <Link href={ route('admin.orders.show', notification.data.order_number) }>
+                                        <Link
+                                            href={
+                                                (user?.roles && (
+                                                    user.roles.includes('admin-apotek') ||
+                                                    user.roles.includes('admin') ||
+                                                    user.roles.includes('super-admin')
+                                                ))
+                                                    ? route('admin.orders.show', notification.data.order_number)
+                                                    : route('history.show', notification.data.order_number)
+                                            }
+                                        >
                                             <div className="flex items-start justify-between">
                                                 <div className="min-w-0 flex-1">
                                                     <p className="text-sm font-medium">{notification.data.message}</p>
                                                     <p className="mt-1 text-xs text-muted-foreground">
                                                         Order #{notification.data.order_number} • {formatDate(notification.created_at)}
                                                     </p>
-                                                    <p className="text-xs text-muted-foreground">By: {notification.data.customer_name}</p>
                                                 </div>
                                                 {!notification.read_at && (
                                                     <Button
