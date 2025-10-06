@@ -73,6 +73,7 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                 newCart = [...prevCart, newCartItem as CartItem];
             }
             localStorage.setItem('cart', JSON.stringify(newCart));
+            window.dispatchEvent(new Event('cart-updated'));
             return newCart;
         });
         setAnimationTrigger((prev) => prev + 1);

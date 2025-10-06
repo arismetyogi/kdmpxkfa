@@ -155,6 +155,8 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
             // Update localStorage
             localStorage.setItem('cart', JSON.stringify(updatedCart));
 
+            window.dispatchEvent(new Event('cart-updated'));
+
             // Notify parent component to update cart items
             updateCartItems();
         },

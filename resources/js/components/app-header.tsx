@@ -14,12 +14,12 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { UserMenuContent } from '@/components/user-menu-content';
+import { useCart } from '@/context/CartContext';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
-import { CartItem, type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
+import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { History, LayoutGrid, Menu, Package, Search, ShoppingCart } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
@@ -31,9 +31,7 @@ const mainNavItems: NavItem[] = [
     { title: 'Orders History', href: route('history.index'), icon: History },
 ];
 
-const rightNavItems: NavItem[] = [
-    { title: 'Cart', href: route('cart'), icon: ShoppingCart },
-];
+const rightNavItems: NavItem[] = [{ title: 'Cart', href: route('cart'), icon: ShoppingCart }];
 
 const activeItemStyles = 'text-neutral-900 dark:text-neutral-100';
 
@@ -45,29 +43,10 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const page = usePage<SharedData>();
     const { auth } = page.props;
     const getInitials = useInitials();
-    const [cartCount, setCartCount] = useState(0);
+    const { cartCount } = useCart();
 
     // This cart logic is good, but for better reusability, consider moving it to a custom hook like `useCart()`.
     // For this refactor, we'll keep it as is.
-    useEffect(() => {
-        const updateCartCount = () => {
-            const storedCart = localStorage.getItem('cart');
-            const cartItems: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
-            const count = cartItems.reduce((total, item) => total + item.quantity, 0);
-            setCartCount(count);
-        };
-
-        updateCartCount();
-
-        // A custom 'cart-updated' event is often more performant than an interval.
-        window.addEventListener('storage', updateCartCount);
-        window.addEventListener('cart-updated', updateCartCount); // Listen for same-tab updates
-
-        return () => {
-            window.removeEventListener('storage', updateCartCount);
-            window.removeEventListener('cart-updated', updateCartCount);
-        };
-    }, []);
 
     return (
         <>
@@ -75,7 +54,6 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                 {/* ======================= CHANGE 1: Add `relative` ======================= */}
                 {/* This makes the header the positioning context for the absolutely positioned navigation menu. */}
                 <div className="relative mx-auto flex h-16 items-center justify-between px-4 md:max-w-7xl">
-
                     {/* Left side of the header */}
                     <div className="flex items-center">
                         {/* Mobile Menu */}
@@ -96,7 +74,11 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                         <nav className="flex h-full flex-col justify-between text-sm">
                                             <div className="flex flex-col space-y-4">
                                                 {mainNavItems.map((item) => (
-                                                    <Link key={item.title} href={item.href} className="flex items-center space-x-2 rounded-md px-3 py-2 font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground">
+                                                    <Link
+                                                        key={item.title}
+                                                        href={item.href}
+                                                        className="flex items-center space-x-2 rounded-md px-3 py-2 font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                                                    >
                                                         <Icon iconNode={item.icon} className="h-5 w-5" />
                                                         <span>{item.title}</span>
                                                     </Link>
@@ -108,7 +90,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                             </Sheet>
                         </div>
 
-                        <Link href={ route('home')} className="flex items-center space-x-2">
+                        <Link href={route('home')} className="flex items-center space-x-2">
                             <AppLogo />
                         </Link>
                     </div>
@@ -116,7 +98,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     {/* ======================= CHANGE 2: Center the Navigation ======================= */}
                     {/* Positioned absolutely to the center of the `relative` parent. */}
                     {/* Hidden on mobile, visible on large screens (`lg:block`). */}
-                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden lg:block">
+                    <div className="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 lg:block">
                         <NavigationMenu>
                             <NavigationMenuList className="space-x-2">
                                 {mainNavItems.map((item, index) => (
@@ -160,8 +142,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 >
                                     <Icon iconNode={ShoppingCart} className="size-5" />
                                     {cartCount > 0 && (
-                                    <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-                                    </span>
+                                        <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"></span>
                                     )}
                                 </Link>
                             </div>
@@ -178,8 +159,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                 <span className="sr-only">Cart</span>
                                                 <Icon iconNode={ShoppingCart} className="size-5 text-foreground opacity-80 group-hover:opacity-100" />
                                                 {cartCount > 0 && (
-                                                <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-                                                </span>
+                                                    <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"></span>
                                                 )}
                                             </Link>
                                         </TooltipTrigger>

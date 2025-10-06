@@ -31,32 +31,42 @@ export default function Cart() {
         setCart((prevCart) => {
             const updated = prevCart
                 .map((item) => {
-                    // Handle package items - packages can't have their quantity changed directly
-                    if ('isPackage' in item && item.id === identifier) {
-                        // For packages, we can't change quantity via this function, return unchanged
+                    if ('isPackage' in item) {
                         return item;
-                    }
-                    // Handle regular cart items
-                    else if ('sku' in item && item.sku === identifier) {
-                        const newQuantity = Math.max(0, item.quantity + delta);
+                    } else if ('sku' in item && item.sku === identifier) {
+                        const newQuantity = Math.max(1, item.quantity + delta); // Enforce a minimum quantity of 1
                         return {
                             ...item,
                             quantity: newQuantity,
-                            total: newQuantity * Number(item.price) * item.content,
+                            total: newQuantity * Number(item.price) * (item.content || 1),
                         };
                     }
                     return item;
                 })
-                .filter((item) => {
-                    // Filter out items with zero quantity (except packages which can't have quantity changed this way)
-                    if ('isPackage' in item) {
-                        return true; // Packages are not filtered by quantity
-                    } else {
-                        return item.quantity > 0;
-                    }
-                });
+                .filter((item) => ('isPackage' in item ? true : item.quantity > 0));
 
             localStorage.setItem('cart', JSON.stringify(updated));
+            window.dispatchEvent(new Event('cart-updated'));
+            return updated;
+        });
+    }, []);
+
+    const setItemQuantity = useCallback((identifier: string, quantity: number) => {
+        setCart((prevCart) => {
+            const updated = prevCart.map((item) => {
+                if ('sku' in item && item.sku === identifier) {
+                    // If quantity is invalid (e.g., from empty input), default to 1. Otherwise, use the new quantity.
+                    const newQuantity = isNaN(quantity) || quantity < 1 ? 1 : quantity;
+                    return {
+                        ...item,
+                        quantity: newQuantity,
+                        total: newQuantity * Number(item.price) * (item.content || 1),
+                    };
+                }
+                return item;
+            });
+            localStorage.setItem('cart', JSON.stringify(updated));
+            window.dispatchEvent(new Event('cart-updated'));
             return updated;
         });
     }, []);
@@ -64,7 +74,6 @@ export default function Cart() {
     const removeItem = useCallback((identifier: string) => {
         setCart((prevCart) => {
             const updated = prevCart.filter((item) => {
-                // For package items, use id; for regular items, use sku
                 if ('isPackage' in item) {
                     return item.id !== identifier;
                 } else {
@@ -72,6 +81,7 @@ export default function Cart() {
                 }
             });
             localStorage.setItem('cart', JSON.stringify(updated));
+            window.dispatchEvent(new Event('cart-updated'));
             return updated;
         });
     }, []);
@@ -79,16 +89,14 @@ export default function Cart() {
     const clearCart = useCallback(() => {
         setCart([]);
         localStorage.removeItem('cart');
+        window.dispatchEvent(new Event('cart-updated'));
     }, []);
 
-    // Use useMemo to calculate totals only when cart changes
     const { subtotal, ppn, grandTotal } = useMemo(() => {
         const subtotal = cart.reduce((sum, item) => {
             if ('isPackage' in item && item.isPackage) {
-                // For package items, use the stored price
                 return sum + item.price;
             } else {
-                // For regular items, calculate price * quantity * content
                 const regularItem = item as CartItem;
                 return sum + regularItem.price * regularItem.quantity * (regularItem.content || 1);
             }
@@ -98,16 +106,14 @@ export default function Cart() {
         return { subtotal, ppn, grandTotal };
     }, [cart]);
 
-    // Component to display package items
     const PackageItemComponent = ({ item, index }: { item: PackageItem; index: number }) => {
         const [expanded, setExpanded] = useState(false);
 
         return (
             <div
-                key={`${item.id}-${index}`} // Use id for packages
+                key={`${item.id}-${index}`}
                 className="flex flex-col justify-between rounded-xl border bg-card p-3 text-card-foreground shadow-md transition hover:shadow-lg sm:p-5"
             >
-                {/* Package Info */}
                 <div className="flex items-center gap-4 sm:gap-5">
                     <div className="relative">
                         <img
@@ -134,15 +140,12 @@ export default function Cart() {
                             {item.packageContents.length} product{item.packageContents.length !== 1 ? 's' : ''} in package
                         </p>
 
-                        {/* Action buttons for packages */}
                         <div className="flex justify-between">
                             <PriceDisplay price={item.price * 1.11} className="mt-1 text-sm font-bold text-primary sm:text-base" />
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => {
-                                        // Store current package in localStorage to restore on package page
                                         localStorage.setItem('editingPackage', JSON.stringify(item));
-                                        // Navigate to package page
                                         window.location.href = route('packages.index');
                                     }}
                                     className="text-sm text-blue-600 hover:text-blue-800 sm:text-base"
@@ -160,7 +163,6 @@ export default function Cart() {
                     </div>
                 </div>
 
-                {/* Package Contents (conditionally shown) */}
                 {expanded && (
                     <div className="mt-4 border-t pt-4">
                         <h3 className="mb-2 font-medium">Package Contents:</h3>
@@ -180,22 +182,18 @@ export default function Cart() {
         );
     };
 
-    // Memoize cart items to prevent re-rendering of the entire list when possible
     const cartItems = useMemo(
         () =>
             cart.map((item, i) => {
-                // Check if this is a package item
                 if ('isPackage' in item && item.isPackage) {
                     return <PackageItemComponent key={`${item.id}-${i}`} item={item as PackageItem} index={i} />;
                 } else {
-                    // Regular cart item
-                    const regularItem = item as CartItem; // Type assertion for cleaner code
+                    const regularItem = item as CartItem;
                     return (
                         <div
-                            key={`${regularItem.sku}-${i}`} // Better unique key that accounts for item position
+                            key={`${regularItem.sku}-${i}`}
                             className="flex flex-col justify-between rounded-xl border bg-card p-3 text-card-foreground shadow-md transition hover:shadow-lg sm:flex-row sm:items-center sm:p-5"
                         >
-                            {/* Info Produk */}
                             <div className="flex items-center gap-4 sm:gap-5">
                                 <img
                                     src={regularItem.image[0] ?? ''}
@@ -210,7 +208,6 @@ export default function Cart() {
                                     <p className="text-sm text-muted-foreground">
                                         {regularItem.weight} gram / {regularItem.order_unit}
                                     </p>
-                                    {/* UPDATED PRICE DISPLAY */}
                                     <PriceDisplay
                                         price={regularItem.price * (regularItem.content || 1)}
                                         className="mt-1 text-sm font-bold text-primary sm:text-base"
@@ -219,18 +216,27 @@ export default function Cart() {
                             </div>
 
                             {/* Quantity & Actions */}
-                            <div className="mt-4 flex items-center gap-3 sm:mt-0">
+                            <div className="mt-4 flex items-center justify-end gap-2 sm:mt-0 sm:justify-start">
                                 <button
                                     onClick={() => updateQuantity(regularItem.sku, -1)}
-                                    className="rounded-4xl border-1 bg-primary-foreground px-3 py-1.5 font-bold transition hover:bg-primary/80"
-                                    disabled={regularItem.quantity <= 1} // Prevent quantity from going below 1
+                                    className="flex h-8 w-8 items-center justify-center rounded-full border bg-background text-lg font-bold transition hover:bg-muted"
+                                    disabled={regularItem.quantity <= 1}
                                 >
                                     -
                                 </button>
-                                <span className="text-lg font-semibold text-primary">{regularItem.quantity}</span>
+                                <input
+                                    value={regularItem.quantity}
+                                    min={1}
+                                    onChange={(e) => {
+                                        const num = parseInt(e.target.value, 10);
+                                        setItemQuantity(regularItem.sku, num);
+                                    }}
+                                    className="w-8 rounded-md border-0 bg-transparent text-center text-lg font-semibold text-primary focus:ring-0 focus:outline-none"
+                                    aria-label={`Quantity for ${regularItem.name}`}
+                                />
                                 <button
                                     onClick={() => updateQuantity(regularItem.sku, 1)}
-                                    className="rounded-4xl border-1 bg-primary-foreground px-3 py-1.5 font-bold transition hover:bg-primary/80"
+                                    className="flex h-8 w-8 items-center justify-center rounded-full border bg-background text-lg font-bold transition hover:bg-muted"
                                 >
                                     +
                                 </button>
@@ -245,14 +251,13 @@ export default function Cart() {
                     );
                 }
             }),
-        [cart, updateQuantity, removeItem],
+        [cart, updateQuantity, removeItem, setItemQuantity],
     );
 
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Cart" />
             <div className="p-4 sm:p-6">
-                {/* Header */}
                 <div className="mb-6 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
                     <h1 className="flex gap-3 text-2xl font-bold tracking-tight text-primary sm:text-3xl">
                         <ShoppingBasket size={36} />
@@ -268,7 +273,6 @@ export default function Cart() {
                     )}
                 </div>
 
-                {/* Empty State */}
                 {cart.length === 0 ? (
                     <div className="flex h-72 flex-col items-center justify-center rounded-2xl px-4 text-center text-muted-foreground">
                         <ShoppingBag size={80} className="mb-6 opacity-50" />
@@ -281,28 +285,22 @@ export default function Cart() {
                     </div>
                 ) : (
                     <>
-                        {/* Main content grid with adjusted padding */}
                         <div className="grid grid-cols-1 gap-8 pb-32 lg:grid-cols-3 lg:pb-0">
-                            {/* Daftar Pesanan */}
                             <div className="space-y-4 lg:col-span-2">{cartItems}</div>
 
-                            {/* Ringkasan Belanja (Desktop View) */}
                             <div className="hidden self-start rounded-2xl border bg-card p-6 text-card-foreground shadow-lg lg:sticky lg:top-20 lg:block">
                                 <h2 className="mb-5 text-xl font-bold">Ringkasan Belanja</h2>
                                 <div className="space-y-3 text-sm sm:text-base">
                                     <div className="flex justify-between text-muted-foreground">
                                         <span>Subtotal</span>
-                                        {/* UPDATED SUBTOTAL DISPLAY */}
                                         <PriceDisplay price={subtotal} />
                                     </div>
                                     <div className="flex justify-between text-muted-foreground">
                                         <span>PPN (11%)</span>
-                                        {/* UPDATED PPN DISPLAY */}
                                         <PriceDisplay price={ppn} />
                                     </div>
                                     <div className="mt-3 flex justify-between border-t pt-3 text-lg font-bold text-primary sm:text-xl">
                                         <span>Total</span>
-                                        {/* UPDATED GRAND TOTAL DISPLAY */}
                                         <PriceDisplay price={grandTotal} />
                                     </div>
                                 </div>
@@ -316,17 +314,14 @@ export default function Cart() {
                             </div>
                         </div>
 
-                        {/* Redesigned Mobile Sticky Footer */}
                         {cart.length > 0 && (
                             <div className="fixed right-0 bottom-0 left-0 block border-t bg-card px-4 pt-3 pb-4 shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)] lg:hidden">
                                 <div className="mx-auto flex max-w-screen-xl flex-col items-center gap-3">
-                                    {/* Total Information - Now a vertical flex column */}
                                     <div className="flex flex-col items-center">
                                         <span className="text-sm text-muted-foreground">Total Belanja</span>
                                         <PriceDisplay price={grandTotal} className="text-xl font-bold text-primary" />
                                     </div>
 
-                                    {/* Checkout Button */}
                                     <Link href={route('checkout')} className="w-full max-w-sm">
                                         <button className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-md transition hover:bg-primary/90">
                                             Cetak Purchase Order
