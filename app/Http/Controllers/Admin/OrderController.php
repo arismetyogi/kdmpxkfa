@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\PaginatedResourceResponse;
 use App\Models\Order;
+use App\Notifications\OrderDeliveredNotification;
 use App\Services\Admin\OrderService;
 use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
@@ -64,8 +65,9 @@ class OrderController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Order $order)
+    public function show(string $transaction_number)
     {
+        $order = Order::where('transaction_number', $transaction_number)->firstOrFail();
         $order->load(['user', 'user.apotek', 'orderItems.product.category']);
         $user = Auth::user();
 
@@ -97,31 +99,39 @@ class OrderController extends Controller
         foreach ($request->order_items as $itemData) {
             $orderItem = $order->orderItems->where('id', $itemData['id'])->first();
             if ($orderItem) {
+                $netPrice = $itemData['qty_delivered'] * $orderItem->content * $orderItem->unit_price;
+
                 $orderItem->qty_delivered = $itemData['qty_delivered'];
+                //TODO!: add total_delivered value on the table for audit purposes (data sent per item to digikop)
+                $orderItem->net_delivered = $netPrice;
+                $orderItem->tax_delivered = $netPrice * 0.11;
+                $orderItem->total_delivered = round($netPrice * 1.11);
                 $orderItem->save();
             }
         }
 
         $subtotal = $order->orderItems->sum(function ($item) {
-            return $item->unit_price * $item->qty_delivered * $item->content;
+            return $item->net_delivered;
         });
 
         // Update status pesanan jadi "delivering"
-        $order->status = OrderStatusEnum::DELIVERY->value;
-        $order->shipped_at = now();
-
-        //Simpan subtotal_delivered, tax_delivered, dan total_delivered di table order
-        $order->subtotal_delivered = $subtotal;
-        $order->tax_delivered = $subtotal * 0.11;
-        $order->total_delivered = round($subtotal * 1.11); // $subtotal*1.11;
-
-        $order->save();
+        $order->update([
+            'status' => OrderStatusEnum::DELIVERY->value,
+            'shipped_at' => now(),
+            //Simpan subtotal_delivered, tax_delivered, dan total_delivered di table order
+            'subtotal_delivered' => $subtotal,
+            'tax_delivered' => $subtotal * 0.11,
+            'total_delivered' => round($subtotal * 1.11), // $subtotal*1.11;
+        ]);
 
         // Siapkan data transaksi utk Digikoperasi
         $transactionData = $this->prepareTransactionData($order);
 
         // Kirim ke Digikoperasi
         $response = $this->digikopTransactionService->sendTransaction($transactionData);
+
+        $user = $order->user; // Get the user who placed the order
+        $user->notify(new OrderDeliveredNotification($order));
 
         if (!$response['success']) {
             \Log::error('Failed to send transaction to Digikoperasi', [
@@ -152,8 +162,8 @@ class OrderController extends Controller
                 $categoryName = $item->product->category->subcategory2 ? $item->product->category->subcategory1 : 'Obat';
             }
 
-            $hargaSatuan = (int) $item->unit_price;
-            $hargaSatuanPpn = (int) ($hargaSatuan * 1.11);
+            $hargaSatuan = $item->unit_price;
+            $hargaSatuanPpn = $hargaSatuan * 1.11;
             $baseQtyDelivered = $item->qty_delivered * $item->content;
 
             $productDetails[] = [
@@ -162,8 +172,8 @@ class OrderController extends Controller
                 'kategori' => $categoryName,
                 'quantity' => $baseQtyDelivered,
                 'harga_per_unit' => $hargaSatuanPpn,
-                'total' => (int) ($hargaSatuanPpn * $baseQtyDelivered),
-                'satuan' => $item->product->base_uom ?? 'PCS',
+                'total' => (int)round(($hargaSatuanPpn * $baseQtyDelivered)),
+                'satuan' => $item->base_uom ?? 'PCS',
                 'berat' => $item->product->weight ?? 0,
                 'dimensi' => [
                     'panjang' => $item->product->length ?? 0,
@@ -182,14 +192,14 @@ class OrderController extends Controller
             'status' => OrderStatusEnum::PROCESS->value, // diproses untuk create transaksi, update status: dalam-pengiriman, diterima, dibatalkan, selesai
             'merchant_id' => 'MCH-KF-007', // From documentation
             'merchant_name' => 'Kimia Farma', // From documentation
-            'total_nominal' => $totalNominal,
+            'total_nominal' => $order->total_delivered,
             'is_for_sale' => true, // Optional field
             'source_of_fund' => $order->source_of_fund ?? 'pinjaman',
-            'account_no' => $order->account_no ?? '', // Optional field
-            'account_bank' => $order->account_bank ?? '', // Optional field
+            'account_no' => $order->user->userProfile->bank_account['nomor_rekening'] ?? '',
+            'account_bank' => $order->user->userProfile->bank_account['nomor_rekening'] ?? '',
             'payment_type' => $order->payment_type ?? 'cad',
             'payment_method' => $order->payment_method ?? 'Mandiri', // Default to Mandiri
-            'va_number' => $order->va_number ?? '00112233445566', // WARNING! No Rek KFA per BM
+            'va_number' => $order->user->apotek->bankAccount->account_number ?? '0000000000000', // WARNING! No Rek KFA per BM
             'timestamp' => $order->shipped_at ? $order->shipped_at->toIso8601String() : now()->toIso8601String(), // Use shipped_at timestamp or current time
             'product_detail' => $productDetails,
         ];

@@ -21,8 +21,7 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             ApotekSeeder::class,
             RegionSeeder::class,
-            OrderSeeder::class,
-            OrderProductSeeder::class,
+            BankAccountSeeder::class,
         ]);
 
         $superAdmin = User::create([

@@ -64,6 +64,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/credit-limit', [TransactionController::class, 'creditLimit'])->name('credit.limit');
 
+    // Notification routes
+    Route::prefix('notifications')->group(function () {
+        Route::get('/unread-count', [\App\Http\Controllers\Api\NotificationController::class, 'unreadCount']);
+        Route::get('/', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+        Route::post('{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+        Route::post('read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
+    });
+
     // Region routes
     Route::prefix('regions')->group(function () {
         Route::get('/provinces', [App\Http\Controllers\RegionController::class, 'provinces']);
@@ -182,9 +190,9 @@ Route::bind('user', function ($value) {
     return User::findOrFail($value);
 });
 
-Route::bind('order', function ($value) {
-    return Order::findOrFail($value);
-});
+//Route::bind('order', function ($value) {
+//    return Order::findOrFail($value);
+//});
 
 Route::bind('product', function ($value) {
     return Product::findOrFail($value);

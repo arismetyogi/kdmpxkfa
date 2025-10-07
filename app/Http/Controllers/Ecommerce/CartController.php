@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Ecommerce;
 
 use App\Enums\OrderStatusEnum;
+use App\Enums\RoleEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\User;
+use App\Notifications\NewOrderNotification;
 use App\Services\CartService;
 use App\Services\DigikopTransactionService;
 use Illuminate\Http\Request;
@@ -307,11 +310,11 @@ class CartController extends Controller
                 'tenant_id' => auth()->user()->tenant_id,
                 'source_of_fund' => $request->source_of_fund,
                 'status' => OrderStatusEnum::CREATED->value,
-                'account_no' => '', // This would need to be set based on your business logic
-                'account_bank' => '', // This would need to be set based on your business logic
+                'account_no' => auth()->user()->userProfile->bank_account['nomor_rekening'] ?? '', // This would need to be set based on your business logic
+                'account_bank' => auth()->user()->userProfile->bank_account['nomor_rekening'] ?? '', // This would need to be set based on your business logic
                 'payment_type' => $request->payment_type, // todo! no other payment available currently, subjects to change
                 'payment_method' => 'mandiri',
-                'va_number' => '00112233445566', // No Rek KFA -> branch
+                'va_number' => auth()->user()->apotek->bankAccount->account_number ?? '0000000000000', // No Rek KFA -> branch
                 'subtotal' => $totalAmount,
                 'tax_amount' => $totalAmount * 0.11, // You can calculate tax based on your business logic
                 'shipping_amount' => 0, // You can calculate shipping based on your business logic
@@ -354,6 +357,22 @@ class CartController extends Controller
                     'base_uom' => $product->base_uom,
                     'content' => $product->content,
                 ]);
+            }
+
+            // Notify pharmacy admins about the new order
+            $orderingUser = $order->user; // Get the user who placed the order
+            if ($orderingUser && $orderingUser->apotek_id) {
+                // Find all users who are admins for this specific apotek (pharmacy admins)
+                $pharmacyAdmins = User::where('apotek_id', $orderingUser->apotek_id)
+                    ->whereHas('roles', function($query) {
+                        $query->where('name', RoleEnum::ADMIN_APOTEK->value); // Only admin-apotek role gets notifications
+                    })
+                    ->get();
+                Log::info('Pharmacy admins: ', [$pharmacyAdmins]);
+                // Send notification to each pharmacy admin
+                foreach ($pharmacyAdmins as $admin) {
+                    $admin->notify(new NewOrderNotification($order, $orderingUser));
+                }
             }
 
             // Clear cart and checkout data from session after successful payment

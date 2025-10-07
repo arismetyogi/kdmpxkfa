@@ -11,10 +11,10 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { CheckCircle, Clock, MapPin, Package, Truck, User, XCircle } from 'lucide-react';
 import { route } from 'ziggy-js';
-const breadcrumbs = (orderId: string) => [
+const breadcrumbs = (transactionNumber: string) => [
     { title: 'Dashboard', href: route('admin.dashboard') },
     { title: 'Orders', href: route('admin.orders.index') },
-    { title: `Order #${orderId}`, href: route('admin.orders.show', { order: orderId }) },
+    { title: `Order #${transactionNumber}`, href: route('admin.orders.show', { order: transactionNumber }) },
 ];
 
 const statusStyle: Record<string, string> = {
@@ -48,7 +48,7 @@ interface OrderShowProps {
 }
 
 export default function OrderShow({ order }: OrderShowProps) {
-    const breadcrumbsArray = breadcrumbs(order.id.toString());
+    const breadcrumbsArray = breadcrumbs(order.transaction_number.toString());
 
     const { data, setData, patch, processing } = useForm({
         order_items: (order.order_items ?? []).map((item: OrderItem) => ({
@@ -63,7 +63,7 @@ export default function OrderShow({ order }: OrderShowProps) {
         e.preventDefault();
         patch(route('admin.orders.update', order.id), {
             onSuccess: () => {
-                window.location.reload();
+                // window.location.reload();
             },
         });
     };

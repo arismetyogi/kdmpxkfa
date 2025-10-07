@@ -1,5 +1,6 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Icon } from '@/components/icon';
+import NotificationSheet from '@/components/notification-sheet';
 import SearchCommand from '@/components/search-command';
 import DarkModeToggle from '@/components/toggle-dark-mode';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -47,9 +48,40 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const getInitials = useInitials();
     const { cartCount } = useCart();
     const [isSearchOpen, setIsSearchOpen] = React.useState(false);
+    const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
 
     // This cart logic is good, but for better reusability, consider moving it to a custom hook like `useCart()`.
     // For this refactor, we'll keep it as is.
+
+    // Fetch unread notification count periodically
+    useEffect(() => {
+        const fetchNotificationCount = async () => {
+            try {
+                const response = await fetch('/notifications/unread-count', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    },
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setUnreadNotificationCount(data.unread_count || 0);
+                }
+            } catch (error) {
+                console.error('Error fetching notification count:', error);
+            }
+        };
+
+        // Fetch immediately
+        fetchNotificationCount();
+
+        // Set up interval to fetch notifications every 30 seconds
+        const interval = setInterval(fetchNotificationCount, 30000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <>
@@ -146,7 +178,9 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 >
                                     <Icon iconNode={ShoppingCart} className="size-5" />
                                     {cartCount > 0 && (
-                                        <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"></span>
+                                        <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                                            {cartCount > 9 ? '9+' : cartCount}
+                                        </span>
                                     )}
                                 </Link>
                             </div>
@@ -163,12 +197,28 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                 <span className="sr-only">Cart</span>
                                                 <Icon iconNode={ShoppingCart} className="size-5 text-foreground opacity-80 group-hover:opacity-100" />
                                                 {cartCount > 0 && (
-                                                    <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"></span>
+                                                    <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                                                        {cartCount > 9 ? '9+' : cartCount}
+                                                    </span>
                                                 )}
                                             </Link>
                                         </TooltipTrigger>
                                         <TooltipContent>
                                             <p>Cart</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
+
+                            {/* Desktop notification bell with tooltip */}
+                            <div className="hidden lg:flex">
+                                <TooltipProvider delayDuration={0}>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <NotificationSheet newNotifications={unreadNotificationCount} />
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Notifications</p>
                                         </TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>

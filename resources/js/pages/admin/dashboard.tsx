@@ -45,57 +45,6 @@ export default function Dashboard({ user, stats }: DashboardProps) {
     prevOrdersRef.current = stats?.new_orders || 0;
   }, [isApotek, stats?.new_orders]);
 
-  const handleMarkAsRead = () => {
-    setUnread(0);
-    setOpen(false);
-  };
-
-  // 🔔 Icon + Dropdown Notifikasi
-  const renderNotificationIcon = () => (
-    <div className="fixed top-16 right-6 z-50">
-      <div className="relative">
-        <button
-          onClick={() => setOpen(!open)}
-          className="relative p-2 rounded-full hover:bg-accent bg-background shadow-md"
-        >
-          <Bell className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-          {unread > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-              {unread}
-            </span>
-          )}
-        </button>
-
-        {open && (
-          <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-900 border border-border rounded-lg shadow-lg overflow-hidden">
-            <div className="p-3 text-sm font-semibold border-b border-border">
-              Notifikasi
-            </div>
-
-            {unread > 0 ? (
-              <div className="p-3 space-y-2">
-                <div className="text-sm text-foreground">
-                  📦 {unread} order baru belum dibaca
-                </div>
-                <a
-                  href={route('orders.index')}
-                  className="block text-center text-sm font-medium text-blue-600 hover:underline"
-                  onClick={handleMarkAsRead}
-                >
-                  Lihat Pesanan
-                </a>
-              </div>
-            ) : (
-              <div className="p-3 text-sm text-muted-foreground">
-                Tidak ada notifikasi baru
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
   // Super Admin Dashboard
   const renderSuperAdminDashboard = () => (
     <>
@@ -234,8 +183,6 @@ export default function Dashboard({ user, stats }: DashboardProps) {
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Dashboard" />
       <Toaster position="top-right" richColors />
-
-      {isApotek && renderNotificationIcon()}
 
       <div className="flex flex-col gap-6 p-4">
         {isSuperAdmin && renderSuperAdminDashboard()}
