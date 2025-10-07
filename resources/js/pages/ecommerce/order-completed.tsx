@@ -74,7 +74,7 @@ export default function OrderCompletedPage() {
                                 {order.order_items?.map((item) => (
                                     <div key={item.id} className="flex items-center">
                                         {item.product.image ? (
-                                            <img src={item.product?.image[0]} alt={item.product.name} className="h-16 w-16 rounded-md object-cover" />
+                                            <img src={item.product?.image[0]} alt={item.product_name} className="h-16 w-16 rounded-md object-cover" />
                                         ) : (
                                             // --- THEME CHANGE #5: Themed image placeholder ---
                                             <div className="flex h-16 w-16 items-center justify-center rounded-md bg-muted">
@@ -82,7 +82,7 @@ export default function OrderCompletedPage() {
                                             </div>
                                         )}
                                         <div className="ml-4 flex-1">
-                                            <h4 className="text-sm font-medium">{item.product.name}</h4>
+                                            <h4 className="text-sm font-medium">{item.product_name}</h4>
                                             <p className="text-sm text-muted-foreground">
                                                 {item.quantity} {item.product.order_unit}
                                                 <span className="block">

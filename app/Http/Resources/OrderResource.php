@@ -48,6 +48,7 @@ class OrderResource extends JsonResource
                             'order_unit' => $product->order_unit,
                             'base_uom' => $product->base_uom,
                             'content' => $product->content,
+                            'image' => $product->image,
                         ] : null,
                     ];
                 });
