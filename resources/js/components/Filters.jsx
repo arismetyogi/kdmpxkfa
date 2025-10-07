@@ -22,10 +22,8 @@ import {
     Salad, 
     Columns3,
 } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import PropTypes from 'prop-types';
-import { Card } from '@/components/ui/card';
 
 const PillButton = ({ icon: Icon, label, isSelected, onClick }) => (
   <button
@@ -91,7 +89,7 @@ const packageIcons = {
     BH: Package,
     SC: Package,
     RLL: Package,
-    'Semua Paket': Package,
+    'Semua Packaging': Package,
     default: Package,
 };
 
@@ -111,12 +109,12 @@ export default function Filters({ onFilterChange, categories, packages, activeFi
     const clearAll = () => {
         onFilterChange({
             categories: ['Semua Produk'],
-            packages: ['Semua Paket'],
+            packages: ['Semua Packaging'],
         });
     };
 
     return (
-        <div className="w-full rounded-md border p-4 lg:h-auto lg:w-64">
+        <div className="w-full rounded-md border p-4 lg:h-auto lg:w-58">
             {/* Header */}
             <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-xl font-bold">Filters</h2>
