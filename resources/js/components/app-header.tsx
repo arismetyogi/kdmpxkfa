@@ -1,4 +1,5 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
+import { CartPopover } from '@/components/cart-popover';
 import { Icon } from '@/components/icon';
 import NotificationSheet from '@/components/notification-sheet';
 import SearchCommand from '@/components/search-command';
@@ -22,11 +23,10 @@ import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { History, LayoutGrid, Menu, Package, Search, ShoppingCart } from 'lucide-react';
-import React from 'react';
+import { useEffect, useState } from 'react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
-// --- Constants remain the same ---
 const mainNavItems: NavItem[] = [
     { title: 'Dashboard', href: route('dashboard'), icon: LayoutGrid },
     { title: 'Paket Merah Putih', href: route('packages.index'), icon: Package },
@@ -47,13 +47,8 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const { auth } = page.props;
     const getInitials = useInitials();
     const { cartCount } = useCart();
-    const [isSearchOpen, setIsSearchOpen] = React.useState(false);
     const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
 
-    // This cart logic is good, but for better reusability, consider moving it to a custom hook like `useCart()`.
-    // For this refactor, we'll keep it as is.
-
-    // Fetch unread notification count periodically
     useEffect(() => {
         const fetchNotificationCount = async () => {
             try {
@@ -74,24 +69,17 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
             }
         };
 
-        // Fetch immediately
         fetchNotificationCount();
-
-        // Set up interval to fetch notifications every 30 seconds
         const interval = setInterval(fetchNotificationCount, 30000);
-
         return () => clearInterval(interval);
     }, []);
 
     return (
         <>
             <header className="sticky top-0 z-50 w-full border-b border-sidebar-border/80 bg-background/95 backdrop-blur-sm">
-                {/* ======================= CHANGE 1: Add `relative` ======================= */}
-                {/* This makes the header the positioning context for the absolutely positioned navigation menu. */}
                 <div className="relative mx-auto flex h-16 items-center justify-between px-4 md:max-w-7xl">
-                    {/* Left side of the header */}
+                    {/* Left side: No changes here */}
                     <div className="flex items-center">
-                        {/* Mobile Menu */}
                         <div className="lg:hidden">
                             <Sheet>
                                 <SheetTrigger asChild>
@@ -130,9 +118,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                         </Link>
                     </div>
 
-                    {/* ======================= CHANGE 2: Center the Navigation ======================= */}
-                    {/* Positioned absolutely to the center of the `relative` parent. */}
-                    {/* Hidden on mobile, visible on large screens (`lg:block`). */}
+                    {/* Center: No changes here */}
                     <div className="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 lg:block">
                         <NavigationMenu>
                             <NavigationMenuList className="space-x-2">
@@ -160,17 +146,17 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                         </NavigationMenu>
                     </div>
 
-                    {/* Right side of the header */}
-                    {/* `justify-between` on the parent pushes this group to the right. */}
+                    {/* Right side */}
                     <div className="flex items-center space-x-2">
                         <div className="relative flex items-center space-x-1">
-                            <Button variant="ghost" size="icon" className="group h-9 w-9" onClick={() => setIsSearchOpen(true)}>
-                                <Search className="!size-5 text-foreground opacity-80 group-hover:opacity-100" />
-                                <span className="sr-only">Search</span>
-                            </Button>
+                            <SearchCommand>
+                                <Button variant="ghost" size="icon" className="group h-9 w-9">
+                                    <Search className="!size-5 text-foreground opacity-80 group-hover:opacity-100" />
+                                    <span className="sr-only">Search</span>
+                                </Button>
+                            </SearchCommand>
 
-                            <SearchCommand open={isSearchOpen} onOpenChange={setIsSearchOpen} />
-                            {/* Mobile cart icon */}
+                            {/* Mobile cart: No changes here */}
                             <div className="relative lg:hidden">
                                 <Link
                                     href={rightNavItems[0].href}
@@ -178,39 +164,17 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 >
                                     <Icon iconNode={ShoppingCart} className="size-5" />
                                     {cartCount > 0 && (
-                                        <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-                                            {cartCount > 9 ? '9+' : cartCount}
-                                        </span>
+                                        <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"></span>
                                     )}
                                 </Link>
                             </div>
 
-                            {/* Desktop cart icon with tooltip */}
+                            {/* ======================= CHANGE 4: Implement hover-triggered Popover ======================= */}
                             <div className="hidden lg:flex">
-                                <TooltipProvider delayDuration={0}>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Link
-                                                href={rightNavItems[0].href}
-                                                className="group relative ml-1 inline-flex h-9 w-9 items-center justify-center rounded-md bg-transparent p-0 text-sm font-medium text-foreground/80 transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none"
-                                            >
-                                                <span className="sr-only">Cart</span>
-                                                <Icon iconNode={ShoppingCart} className="size-5 text-foreground opacity-80 group-hover:opacity-100" />
-                                                {cartCount > 0 && (
-                                                    <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-                                                        {cartCount > 9 ? '9+' : cartCount}
-                                                    </span>
-                                                )}
-                                            </Link>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>Cart</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
+                                <CartPopover />
                             </div>
 
-                            {/* Desktop notification bell with tooltip */}
+                            {/* Desktop notification: No changes here */}
                             <div className="hidden lg:flex">
                                 <TooltipProvider delayDuration={0}>
                                     <Tooltip>
