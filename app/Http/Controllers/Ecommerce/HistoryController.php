@@ -18,7 +18,9 @@ class HistoryController extends Controller
         $orders = Order::with([
             'orderItems.product',
             'user.apotek', // eager load relasi apotek dari user
-        ])->latest()->get();
+        ])
+        ->where('user_id', auth()->id())
+        ->latest()->get();
 
         return Inertia::render('orders/history', [
             'orders' => $orders,
@@ -32,7 +34,10 @@ class HistoryController extends Controller
         $order = Order::with([
             'orderItems.product',
             'user.apotek', // eager load relasi apotek dari user
-        ])->where('transaction_number', $transaction_number)->firstOrFail();
+        ])
+        ->where('transaction_number', $transaction_number)
+        ->where('user_id', auth()->id())
+        ->firstOrFail();
 
         // Added 'processed' step to the timeline data
         $timeline = [
@@ -67,7 +72,9 @@ class HistoryController extends Controller
             'status' => ['required', Rule::enum(OrderStatusEnum::class)],
         ]);
 
-        $order = Order::where('transaction_number', $transaction_number)->firstOrFail();
+        $order = Order::where('transaction_number', $transaction_number)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
 
         $apiService->updateTransactionStatus($order, OrderStatusEnum::tryFrom($request->status));
         $orderService->markAsDelivered($order);
