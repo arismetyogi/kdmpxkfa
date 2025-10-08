@@ -1,14 +1,13 @@
+import { useCart } from '@/context/CartContext';
 import { Link } from '@inertiajs/react';
 import { motion, useAnimationControls } from 'framer-motion';
 import { ShoppingCart } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 
-interface FloatingCartProps {
-    totalItems: number;
-    animationTrigger: number;
-}
-
-export default function FloatingCart({ totalItems, animationTrigger }: FloatingCartProps) {
+// The component no longer needs props, as it gets its state from the CartContext.
+export default function FloatingCart() {
+    // Use the useCart hook to get the number of unique items in the cart.
+    const { cartCount } = useCart();
     const controls = useAnimationControls();
     const isFirstRender = useRef(true);
 
@@ -20,14 +19,19 @@ export default function FloatingCart({ totalItems, animationTrigger }: FloatingC
         });
     };
 
+    // This effect runs whenever cartCount changes.
     useEffect(() => {
-        if (isFirstRender.current || animationTrigger === 0) {
+        // Skip the animation on the initial render.
+        if (isFirstRender.current) {
             isFirstRender.current = false;
             return;
         }
 
+        // Trigger the jiggle animation. This will only happen when a new unique item
+        // is added or an item is removed, because cartCount is cartItems.length.
+        // It will not trigger when only the quantity of an existing item changes.
         jiggleAnimation();
-    }, [animationTrigger]);
+    }, [cartCount]); // The dependency array ensures this effect runs only when cartCount changes.
 
     return (
         <div className="fixed right-4 bottom-4 sm:right-6 sm:bottom-6">
@@ -38,15 +42,17 @@ export default function FloatingCart({ totalItems, animationTrigger }: FloatingC
                     </button>
                 </motion.div>
 
-                {totalItems > 0 && (
+                {/* Show the badge only if there are items in the cart. */}
+                {cartCount > 0 && (
                     <motion.span
-                        key={totalItems}
+                        // Using cartCount as the key makes Framer Motion re-run the animation when the count changes.
+                        key={cartCount}
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ type: 'spring', stiffness: 500, damping: 20 }}
                         className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white sm:h-6 sm:w-6"
                     >
-                        {totalItems}
+                        {cartCount}
                     </motion.span>
                 )}
             </Link>
