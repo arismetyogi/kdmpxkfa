@@ -1,9 +1,9 @@
 import PriceDisplay from '@/components/priceDisplay';
 import { cn, currency } from '@/lib/utils'; // Assuming you have a utility for merging class names
 import { Product } from '@/types/index.js';
+import { router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { ShoppingCart } from 'lucide-react';
-import { router } from '@inertiajs/react';
 
 interface ProductCardProps {
     product: Product;
@@ -44,7 +44,7 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
                 className="relative flex h-full cursor-pointer flex-col justify-between rounded-lg border bg-card p-2 text-card-foreground shadow-sm"
-                onClick={() => (router.visit(route('orders.show', { id })))}
+                onClick={() => router.visit(route('orders.show', { id }))}
                 variants={cardVariants}
                 whileHover="hover"
                 whileTap="tap"
@@ -57,12 +57,12 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
                     )}
                     <div>
                         <img
-                            src={image ? image[0] : "/products/Placeholder_Medicine.png"}
+                            src={image ? image[0] : '/products/Placeholder_Medicine.png'}
                             alt={name}
                             className={`mb-6 h-46 w-full rounded-md object-cover transition-transform duration-300 ease-out group-hover:scale-105`}
                             onError={({ currentTarget }) => {
                                 currentTarget.src = '/products/Placeholder_Medicine.png';
-                                }}
+                            }}
                         />
                     </div>
                     <h3 className="mb-1 text-sm leading-tight font-semibold">{name.length > 25 ? name.slice(0, 16) + '...' : name}</h3>
@@ -88,7 +88,7 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
             className="relative flex h-full cursor-pointer flex-col justify-between rounded-lg border bg-card p-3 text-card-foreground shadow-sm"
-            onClick={() => (router.visit(route('orders.show', { id })))}
+            onClick={() => router.visit(route('orders.show', { id }))}
             variants={cardVariants}
             whileHover="hover"
             whileTap="tap"
@@ -102,7 +102,7 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
             {/* Bagian Atas */}
             <div>
                 <img
-                    src={image? image[0] : '/products/Placeholder_Medicine.png'}
+                    src={image ? image[0] : '/products/Placeholder_Medicine.png'}
                     alt={name}
                     className="mb-4 h-36 w-full rounded-md object-cover"
                     onError={({ currentTarget }) => {
@@ -127,7 +127,7 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
             </div>
 
             {/* Bagian Bawah */}
-            <div className="mt-3">
+            <div className="mt-1">
                 <PriceDisplay price={pricePerOrderUnit} className="text-lg font-bold text-blue-600 md:text-xl" decimal="hidden" />
 
                 <p className="text-xs text-muted-foreground">
@@ -143,7 +143,7 @@ export default function ProductCard({ product, compact = false, addToCart }: Pro
                     className={cn(
                         'mt-2 flex w-full items-center justify-center gap-2 rounded px-3 py-2 font-semibold transition-all duration-200',
                         is_active
-                            ? 'bg-blue-600 text-primary-foreground hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98] active:bg-blue-800' // Active state with animations
+                            ? 'bg-blue-600 text-primary-foreground hover:scale-[1.02] hover:bg-blue-700 active:scale-[0.98] active:bg-blue-800' // Active state with animations
                             : 'cursor-not-allowed bg-muted text-muted-foreground', // Disabled state
                     )}
                 >

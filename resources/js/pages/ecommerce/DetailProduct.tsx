@@ -24,28 +24,15 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function DetailProduct({ product, relatedProducts }: { product: Product; relatedProducts: Product[] }) {
-    const [cart, setCart] = useState<CartItem[]>([]);
     const [quantity, setQuantity] = useState(1);
     const [isAdded, setIsAdded] = useState(false);
-    const totalItems = cart.length;
     const [animationTrigger, setAnimationTrigger] = useState(0);
 
-    // MODIFICATION: Calculate subtotal dynamically based on quantity
     const subtotal = useMemo(() => {
-        // The price per order unit is (base price * content)
         const pricePerOrderUnit = product.price * product.content;
         return pricePerOrderUnit * quantity;
     }, [product, quantity]);
 
-    // Load cart from localStorage
-    useEffect(() => {
-        const storedCart = localStorage.getItem('cart');
-        if (storedCart) {
-            setCart(JSON.parse(storedCart));
-        }
-    }, []);
-
-    // Reset button state and hide tooltip after a delay
     useEffect(() => {
         if (!isAdded) return;
         const timer = setTimeout(() => {
@@ -54,28 +41,29 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
         return () => clearTimeout(timer);
     }, [isAdded]);
 
+    // This function now reads/writes directly to localStorage.
     const addToCart = (productToAdd: Product, quantityToAdd: number) => {
-        // Calculate price per order unit (price * content)
-        const pricePerOrderUnit = productToAdd.price * productToAdd.content;
+        const storedCart = localStorage.getItem('cart');
+        const currentCart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
 
-        setCart((prevCart) => {
-            const existingItem = prevCart.find((item) => item.id === productToAdd.id);
-            let newCart;
-            if (existingItem) {
-                newCart = prevCart.map((item) => (item.id === productToAdd.id ? { ...item, quantity: item.quantity + quantityToAdd } : item));
-            } else {
-                // Create new cart item with the price per order unit
-                const newCartItem: Omit<CartItem, 'total'> = {
-                    ...productToAdd,
-                    price: pricePerOrderUnit, // Use price per order unit
-                    quantity: quantityToAdd,
-                };
-                newCart = [...prevCart, newCartItem as CartItem];
-            }
-            localStorage.setItem('cart', JSON.stringify(newCart));
-            window.dispatchEvent(new Event('cart-updated'));
-            return newCart;
-        });
+        const existingItem = currentCart.find((item) => item.id === productToAdd.id);
+        let newCart;
+
+        if (existingItem) {
+            newCart = currentCart.map((item) => (item.id === productToAdd.id ? { ...item, quantity: item.quantity + quantityToAdd } : item));
+        } else {
+            const newCartItem: Omit<CartItem, 'total'> = {
+                ...productToAdd,
+                price: productToAdd.price,
+                quantity: quantityToAdd,
+            };
+            newCart = [...currentCart, newCartItem as CartItem];
+        }
+
+        localStorage.setItem('cart', JSON.stringify(newCart));
+
+        window.dispatchEvent(new Event('cart-updated'));
+
         setAnimationTrigger((prev) => prev + 1);
     };
 
@@ -95,14 +83,11 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
 
             <div className="py-6 md:py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    {/* Grid 3 kolom */}
                     <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 lg:grid-cols-12 lg:gap-14 lg:p-0">
-                        {/* Kolom 1: Gambar Produk dengan Lens */}
                         <div className="lg:col-span-4">
                             <ImageCarousel images={product.image} productName={product.name} />
                         </div>
 
-                        {/* Kolom 2: Informasi Produk */}
                         <div className="flex flex-col lg:col-span-5">
                             <div className="flex items-start justify-between gap-4">
                                 <h1 className="text-2xl font-extrabold tracking-tight lg:text-3xl">{product.name}</h1>
@@ -136,7 +121,6 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                                 </div>
                             </div>
 
-                            {/* Accordion Deskripsi & Info Lain */}
                             <div className="mt-8 border-t border-border">
                                 <Accordion type="single" collapsible className="w-full pt-2" defaultValue="description">
                                     <AccordionItem value="description">
@@ -147,8 +131,6 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                                             </p>
                                         </AccordionContent>
                                     </AccordionItem>
-
-                                    {/* Pharmacology Information */}
                                     <AccordionItem value="pharmacology">
                                         <AccordionTrigger>Farmakologi</AccordionTrigger>
                                         <AccordionContent>
@@ -157,8 +139,6 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                                             </p>
                                         </AccordionContent>
                                     </AccordionItem>
-
-                                    {/* Dosage Information */}
                                     <AccordionItem value="dosage">
                                         <AccordionTrigger>Aturan Pakai & Dosis</AccordionTrigger>
                                         <AccordionContent>
@@ -174,38 +154,36 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                                             )}
                                         </AccordionContent>
                                     </AccordionItem>
-
-                                    {/* Informasi Kemasan */}
                                     <AccordionItem value="packaging">
                                         <AccordionTrigger>Informasi Kemasan</AccordionTrigger>
                                         <AccordionContent>
                                             <div className="space-y-2 text-sm">
                                                 <div className="flex justify-between text-muted-foreground">
-                                                    <span className="">Brand Obat:</span>
+                                                    <span>Brand Obat:</span>
                                                     <span className="font-semibold text-foreground">{product.brand || '-'}</span>
                                                 </div>
                                                 <div className="flex justify-between text-muted-foreground">
-                                                    <span className="">Jenis Kemasan:</span>
+                                                    <span>Jenis Kemasan:</span>
                                                     <span className="font-semibold text-foreground">{product.base_uom || '-'}</span>
                                                 </div>
                                                 <div className="flex justify-between text-muted-foreground">
-                                                    <span className="">Jumlah dalam Kemasan:</span>
+                                                    <span>Jumlah dalam Kemasan:</span>
                                                     <span className="font-semibold text-foreground">
                                                         {product.content ? `${product.content} ${product.base_uom}` : '-'}
                                                     </span>
                                                 </div>
                                                 <div className="flex justify-between text-muted-foreground">
-                                                    <span className="">Packing Kemasan:</span>
+                                                    <span>Packing Kemasan:</span>
                                                     <span className="font-semibold text-foreground">{product.order_unit || '-'}</span>
                                                 </div>
                                                 <div className="flex justify-between text-muted-foreground">
-                                                    <span className="">Berat Kemasan:</span>
+                                                    <span>Berat Kemasan:</span>
                                                     <span className="font-semibold text-foreground">
                                                         {product.weight ? `${product.weight} gram` : '-'}
                                                     </span>
                                                 </div>
                                                 <div className="flex justify-between text-muted-foreground">
-                                                    <span className="">Dimensi Kemasan:</span>
+                                                    <span>Dimensi Kemasan:</span>
                                                     <span className="font-semibold text-foreground">
                                                         {product.length && product.width && product.height
                                                             ? `${product.length} x ${product.width} x ${product.height} cm`
@@ -222,25 +200,19 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                             </div>
                         </div>
 
-                        {/* Kolom 3: Sticky Card Harga + Quantity + Add to Cart */}
                         <div className="lg:col-span-3">
                             <Card className="sticky top-24 mx-auto w-full shadow-md">
                                 <CardContent className="space-y-5 pt-2">
-                                    {/* Judul Cart */}
                                     <div className="flex items-center gap-2 border-b pb-2">
                                         <ShoppingCart className="h-5 w-5 text-primary" />
                                         <h3 className="text-base font-semibold">Atur Pembelian</h3>
                                     </div>
-
-                                    {/* Harga */}
                                     <div className="flex items-center justify-between gap-2">
                                         <p className="text-lg font-bold">Subtotal:</p>
                                         <div className="text-right">
                                             <p className="text-lg font-bold text-primary">{currency(subtotal)}</p>
                                         </div>
                                     </div>
-
-                                    {/* Quantity Controller */}
                                     <div className="flex items-center justify-center gap-4 rounded-md border-1">
                                         <Button
                                             variant="ghost"
@@ -256,7 +228,6 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                                             min={1}
                                             onChange={(e) => {
                                                 const newValue = e.target.value;
-
                                                 if (newValue === '') {
                                                     handleQuantityChange(-quantity);
                                                 } else {
@@ -272,8 +243,6 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                                             <Plus className="h-4 w-4" />
                                         </Button>
                                     </div>
-
-                                    {/* Add to Cart Button */}
                                     <MotionButton
                                         size="lg"
                                         className={`h-11 w-full ${isAdded ? 'bg-emerald-500 hover:bg-emerald-600 focus:ring-emerald-400' : ''}`}
@@ -309,23 +278,13 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                 </div>
             </div>
 
-            {/* Product Recommendations */}
             {relatedProducts && relatedProducts.length > 0 && (
                 <div className="mb-8 p-6 lg:p-0">
                     <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                         <h2 className="mb-6 text-2xl font-bold">Rekomendasi Produk</h2>
-
                         <Carousel
-                            opts={{
-                                align: 'start',
-                                loop: true,
-                            }}
-                            plugins={[
-                                Autoplay({
-                                    delay: 3000, // waktu autoplay (ms)
-                                    stopOnInteraction: false,
-                                }),
-                            ]}
+                            opts={{ align: 'start', loop: true }}
+                            plugins={[Autoplay({ delay: 3000, stopOnInteraction: false })]}
                             className="w-full"
                         >
                             <CarouselContent>
@@ -335,8 +294,6 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                                     </CarouselItem>
                                 ))}
                             </CarouselContent>
-
-                            {/* Navigasi */}
                             <CarouselPrevious />
                             <CarouselNext />
                         </Carousel>
@@ -344,8 +301,8 @@ export default function DetailProduct({ product, relatedProducts }: { product: P
                 </div>
             )}
 
-            {/* Floating Cart */}
-            <FloatingCart totalItems={totalItems} animationTrigger={animationTrigger} />
+            {/* MODIFICATION: Pass cartCount from the context to the FloatingCart */}
+            <FloatingCart />
         </HeaderLayout>
     );
 }

@@ -162,10 +162,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return response()->json([]);
         }
 
-        $products = Product::where('name', 'like', "%{$query}%")
-            ->orWhere('sku', 'like', "%{$query}%")
+        $products = Product::query()->with('category')
+            ->where('products.name', 'like', "%{$query}%")
+            ->orWhere('products.sku', 'like', "%{$query}%")
             ->limit(6)
-            ->get(['id', 'name', 'sku', 'slug']);
+            ->get();
 
         return response()->json($products);
     });

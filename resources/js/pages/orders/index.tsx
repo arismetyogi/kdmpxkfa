@@ -41,7 +41,7 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
     const [sortBy, setSortBy] = useState(initialFilters.sort_by || 'name-asc');
     const [filters, setFilters] = useState({
         categories: initialFilters.categories || ['Semua Produk'],
-        packages: initialFilters.packages || ['Semua Paket'],
+        packages: initialFilters.packages || ['Semua Packaging'],
     });
 
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -68,9 +68,9 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
         }
 
         // Conditionally add packages to the request
-        // Only include it if the array is not the default ["Semua Paket"]
-        if (filters.packages && (filters.packages.length > 1 || (filters.packages.length === 1 && filters.packages[0] !== 'Semua Paket'))) {
-            activeFilters.packages = filters.packages.filter((pack) => pack !== 'Semua Paket');
+        // Only include it if the array is not the default ["Semua Packaging"]
+        if (filters.packages && (filters.packages.length > 1 || (filters.packages.length === 1 && filters.packages[0] !== 'Semua Packaging'))) {
+            activeFilters.packages = filters.packages.filter((pack) => pack !== 'Semua Packaging');
         }
 
         // Combine the base params with the active filters, then clean with pickBy
@@ -185,7 +185,7 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
                         onFilterChange={setFilters}
                         // Pass the full list of categories/packages from the controller
                         categories={['Semua Produk', ...allCategories]}
-                        packages={['Semua Paket', ...allPackages]}
+                        packages={['Semua Packaging', ...allPackages]}
                         // Pass the currently active filters to the component
                         activeFilters={filters}
                     />
@@ -231,7 +231,7 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
                 </div>
             </div>
             {/* Floating Cart */}
-            <FloatingCart totalItems={totalItems} animationTrigger={animationTrigger} />
+            <FloatingCart />
         </HeaderLayout>
     );
 }
