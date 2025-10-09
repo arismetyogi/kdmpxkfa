@@ -1,5 +1,6 @@
 import PriceDisplay from '@/components/priceDisplay';
 import ScrollToTopButton from '@/components/ScrollToTop';
+import { useCart } from '@/context/CartContext';
 import HeaderLayout from '@/layouts/header-layout';
 import { type BreadcrumbItem, type CartItem, type CartItemOrPackage, type PackageItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -15,17 +16,34 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Cart() {
     const [cart, setCart] = useState<CartItemOrPackage[]>([]);
+    const { updateCartFromStorage } = useCart();
 
     useEffect(() => {
-        const storedCart = localStorage.getItem('cart');
-        if (storedCart) setCart(JSON.parse(storedCart));
+        const loadCart = () => {
+            const storedCart = localStorage.getItem('cart');
+            if (storedCart) setCart(JSON.parse(storedCart));
+            else setCart([]);
+        };
+
+        loadCart(); // initial load
+        updateCartFromStorage(); // also update context cart count
 
         const message = localStorage.getItem('cartmsg');
         if (message) {
             toast.error(message);
             localStorage.removeItem('cartmsg');
         }
-    }, []);
+
+        // ✅ Listen to cart updates (so if other tab or component changes cart, it syncs)
+        const handleCartUpdate = () => loadCart();
+        window.addEventListener('cart-updated', handleCartUpdate);
+        window.addEventListener('storage', handleCartUpdate);
+
+        return () => {
+            window.removeEventListener('cart-updated', handleCartUpdate);
+            window.removeEventListener('storage', handleCartUpdate);
+        };
+    }, [updateCartFromStorage]);
 
     const updateQuantity = useCallback((identifier: string, delta: number) => {
         setCart((prevCart) => {
