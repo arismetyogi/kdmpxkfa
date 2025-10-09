@@ -54,7 +54,7 @@ interface ProductTableRowProps {
 
 const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, onQuantityChange }) => {
     const isExcluded = product.assignedQuantity === 0;
-    
+
     // Ensure content is at least 1 to prevent division by zero
     const safeContent = Math.max(1, product.content || 1);
 
@@ -320,17 +320,31 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
                     // Calculate the displayed quantity using the same formula used in the UI
                     const aDisplayedQuantity = a.assignedQuantity / Math.max(1, a.content || 1);
                     const bDisplayedQuantity = b.assignedQuantity / Math.max(1, b.content || 1);
-                    
+
                     // First, prioritize items that are included (displayedQuantity > 0) over excluded items (displayedQuantity === 0)
                     const aIsIncluded = aDisplayedQuantity > 0 ? 1 : 0;
                     const bIsIncluded = bDisplayedQuantity > 0 ? 1 : 0;
-                    
+
                     if (aIsIncluded !== bIsIncluded) {
                         return bIsIncluded - aIsIncluded; // Included items first
                     }
-                    
+
                     // If both are included or both are excluded, sort by displayed quantity in descending order
                     return bDisplayedQuantity - aDisplayedQuantity;
+                });
+            case 'subtotal-high':
+                return products.sort((a, b) => {
+                    // Sort by subtotal (price * assignedQuantity) in descending order
+                    const aSubtotal = a.price * a.assignedQuantity;
+                    const bSubtotal = b.price * b.assignedQuantity;
+                    return bSubtotal - aSubtotal;
+                });
+            case 'subtotal-low':
+                return products.sort((a, b) => {
+                    // Sort by subtotal (price * assignedQuantity) in ascending order
+                    const aSubtotal = a.price * a.assignedQuantity;
+                    const bSubtotal = b.price * b.assignedQuantity;
+                    return aSubtotal - bSubtotal;
                 });
             default:
                 return products.sort((a, b) => a.name.localeCompare(b.name));
@@ -432,6 +446,8 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
                                 <SelectContent>
                                     <SelectItem value="default">Default (A-Z)</SelectItem>
                                     <SelectItem value="quantity">Included / Quantity</SelectItem>
+                                    <SelectItem value="subtotal-high">Highest Subtotal</SelectItem>
+                                    <SelectItem value="subtotal-low">Lowest Subtotal</SelectItem>
                                 </SelectContent>
                             </Select>
                             <Button onClick={handleIncludeAll} variant="outline">
