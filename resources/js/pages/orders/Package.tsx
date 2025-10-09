@@ -54,12 +54,15 @@ interface ProductTableRowProps {
 
 const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, onQuantityChange }) => {
     const isExcluded = product.assignedQuantity === 0;
+    
+    // Ensure content is at least 1 to prevent division by zero
+    const safeContent = Math.max(1, product.content || 1);
 
     const handleBoxQuantityUpdate = (newBoxQuantity: number) => {
-        const rawQuantity = newBoxQuantity * product.content;
+        const rawQuantity = newBoxQuantity * safeContent;
         // MODIFICATION: Removed maxQuantity limit
         const validatedQuantity = Math.max(0, rawQuantity);
-        const finalQuantity = Math.floor(validatedQuantity / product.content) * product.content;
+        const finalQuantity = Math.floor(validatedQuantity / safeContent) * safeContent;
         onQuantityChange(product.id, finalQuantity);
     };
 
@@ -72,8 +75,8 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
     // MODIFICATION: Uses initQuantity instead of maxQuantity
     const handleInclude = () => onQuantityChange(product.id, product.initQuantity);
 
-    const assignedBoxQuantity = product.assignedQuantity / product.content;
-    const pricePerBox = product.price * product.content;
+    const assignedBoxQuantity = product.assignedQuantity / safeContent;
+    const pricePerBox = product.price * safeContent;
 
     return (
         <TableRow className={cn('transition-all', isExcluded && 'bg-muted/50')}>
@@ -195,7 +198,7 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, sum
                                     <div>
                                         <h4 className="line-clamp-2 text-sm font-medium">{product.name}</h4>
                                         <p className="text-xs text-muted-foreground">
-                                            Qty: {product.assignedQuantity / product.content} {product.order_unit}
+                                            Qty: {product.assignedQuantity / Math.max(1, product.content || 1)} {product.order_unit}
                                         </p>
                                     </div>
                                     <div className="shrink-0 pl-4 text-right">
@@ -314,9 +317,20 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
         switch (sortOrder) {
             case 'quantity':
                 return products.sort((a, b) => {
-                    if (a.assignedQuantity > 0 && b.assignedQuantity === 0) return -1;
-                    if (a.assignedQuantity === 0 && b.assignedQuantity > 0) return 1;
-                    return b.assignedQuantity - a.assignedQuantity;
+                    // Calculate the displayed quantity using the same formula used in the UI
+                    const aDisplayedQuantity = a.assignedQuantity / Math.max(1, a.content || 1);
+                    const bDisplayedQuantity = b.assignedQuantity / Math.max(1, b.content || 1);
+                    
+                    // First, prioritize items that are included (displayedQuantity > 0) over excluded items (displayedQuantity === 0)
+                    const aIsIncluded = aDisplayedQuantity > 0 ? 1 : 0;
+                    const bIsIncluded = bDisplayedQuantity > 0 ? 1 : 0;
+                    
+                    if (aIsIncluded !== bIsIncluded) {
+                        return bIsIncluded - aIsIncluded; // Included items first
+                    }
+                    
+                    // If both are included or both are excluded, sort by displayed quantity in descending order
+                    return bDisplayedQuantity - aDisplayedQuantity;
                 });
             default:
                 return products.sort((a, b) => a.name.localeCompare(b.name));
@@ -347,7 +361,7 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
                 packageContents: activePackageProducts.map((p) => ({
                     product_id: p.id,
                     name: p.name,
-                    quantity: p.assignedQuantity / p.content,
+                    quantity: p.assignedQuantity / Math.max(1, p.content || 1),
                     price: p.price,
                     image: p.image,
                     order_unit: p.order_unit,
