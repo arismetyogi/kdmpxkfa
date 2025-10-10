@@ -1,33 +1,27 @@
+import { Head, router } from '@inertiajs/react';
+import pickBy from 'lodash/pickBy';
+import { Package } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDebounce } from 'use-debounce';
+
+import { CustomPagination } from '@/components/custom-pagination';
 import Filters from '@/components/Filters';
 import FloatingCart from '@/components/FloatingCart';
-import { CustomPagination } from '@/components/custom-pagination';
 import ProductCard from '@/components/product-card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import HeaderLayout from '@/layouts/header-layout';
-import { type BreadcrumbItem, CartItem, Paginated, Product } from '@/types';
-import { Head, router } from '@inertiajs/react';
-import pickBy from 'lodash/pickBy'; // Helper to remove empty values from an object
-import { Package } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDebounce } from 'use-debounce'; // A great library for debouncing input
+import { type BreadcrumbItem, type CartItem, type Paginated, type Product } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Dashboard',
-        href: route('dashboard'),
-    },
-    {
-        title: 'Products',
-        href: '#',
-    },
+    { title: 'Dashboard', href: route('dashboard') },
+    { title: 'Products', href: '#' },
 ];
 
 interface IndexProps {
     products: Paginated<Product>;
-    allCategories: string[]; // From controller
-    allPackages: string[]; // From controller
+    allCategories: string[];
+    allPackages: string[];
     filters: {
-        // Current filters from controller
         search?: string;
         categories?: string[];
         packages?: string[];
@@ -36,85 +30,81 @@ interface IndexProps {
 }
 
 export default function OrdersIndexPage({ products, allCategories, allPackages, filters: initialFilters }: IndexProps) {
-    // console.log('Props received from server:', { allCategories, allPackages });
+    /** -------------------- STATES -------------------- **/
     const [search, setSearch] = useState(initialFilters.search || '');
     const [sortBy, setSortBy] = useState(initialFilters.sort_by || 'name-asc');
     const [filters, setFilters] = useState({
         categories: initialFilters.categories || ['Semua Produk'],
-        packages: initialFilters.packages || ['Semua Paket'],
+        packages: initialFilters.packages || ['Semua Packaging'],
     });
-
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [animationTrigger, setAnimationTrigger] = useState(0);
 
-    const [debouncedSearch] = useDebounce(search, 300); // Debounce search input
+    const [debouncedSearch] = useDebounce(search, 300);
 
-    // This effect listens for changes in filters and triggers a new Inertia request
+    /** -------------------- MEMOS & CALLBACKS -------------------- **/
+    const activeFilters = useMemo(() => {
+        const { categories, packages } = filters;
+        const result: Record<string, string[]> = {};
+
+        const isNotDefault = (arr: string[], defaultValue: string) => arr.length > 1 || (arr.length === 1 && arr[0] !== defaultValue);
+
+        if (isNotDefault(categories, 'Semua Produk')) {
+            result.categories = categories.filter((c) => c !== 'Semua Produk');
+        }
+
+        if (isNotDefault(packages, 'Semua Packaging')) {
+            result.packages = packages.filter((p) => p !== 'Semua Packaging');
+        }
+
+        return result;
+    }, [filters]);
+
+    const queryParams = useMemo(
+        () =>
+            pickBy({
+                search: debouncedSearch,
+                sort_by: sortBy,
+                ...activeFilters,
+            }),
+        [debouncedSearch, sortBy, activeFilters],
+    );
+
+    /** -------------------- EFFECTS -------------------- **/
+    // Trigger router update when filters or search change
     useEffect(() => {
-        // Start with the base parameters that are always present (even if empty)
-        const baseParams = {
-            search: debouncedSearch,
-            sort_by: sortBy,
+        router.get(route('orders.products'), queryParams, {
+            preserveState: true,
+            replace: true,
+            preserveScroll: true,
+        });
+    }, [queryParams]);
+
+    // Load cart from localStorage
+    useEffect(() => {
+        const loadCart = () => {
+            const stored = localStorage.getItem('cart');
+            setCartItems(stored ? JSON.parse(stored) : []);
         };
 
-        // ====================== THE FIX IS HERE ======================
-        // Create a copy of the filters to potentially add to the parameters
-        const activeFilters = {};
-
-        // Conditionally add categories to the request
-        // Only include it if the array is not the default ["Semua Produk"]
-        if (filters.categories && (filters.categories.length > 1 || (filters.categories.length === 1 && filters.categories[0] !== 'Semua Produk'))) {
-            activeFilters.categories = filters.categories.filter((cat) => cat !== 'Semua Produk');
-        }
-
-        // Conditionally add packages to the request
-        // Only include it if the array is not the default ["Semua Paket"]
-        if (filters.packages && (filters.packages.length > 1 || (filters.packages.length === 1 && filters.packages[0] !== 'Semua Paket'))) {
-            activeFilters.packages = filters.packages.filter((pack) => pack !== 'Semua Paket');
-        }
-
-        // Combine the base params with the active filters, then clean with pickBy
-        // pickBy will remove keys with empty/null/undefined values (like an empty search string)
-        const queryParams = pickBy({
-            ...baseParams,
-            ...activeFilters,
-        });
-
-        router.get(
-            route('orders.products'), // Make sure you have a named route for this
-            queryParams,
-            {
-                preserveState: true, // Prevents scroll position reset on filter change
-                replace: true, // Avoids polluting browser history
-                preserveScroll: true, // Keeps the scroll position
-            },
-        );
-    }, [debouncedSearch, sortBy, filters]);
-
-    // Cart logic
-    useEffect(() => {
-        const storedCart = localStorage.getItem('cart');
-        if (storedCart) setCartItems(JSON.parse(storedCart));
-
+        loadCart();
         const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === 'cart' && e.newValue) setCartItems(JSON.parse(e.newValue));
+            if (e.key === 'cart') loadCart();
         };
 
         window.addEventListener('storage', handleStorageChange);
         return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
+    // Update animation when cart changes
+    useEffect(() => setAnimationTrigger((a) => a + 1), [cartItems]);
+
     const updateCartItems = useCallback(() => {
-        const storedCart = localStorage.getItem('cart');
-        setCartItems(storedCart ? JSON.parse(storedCart) : []);
+        const stored = localStorage.getItem('cart');
+        setCartItems(stored ? JSON.parse(stored) : []);
     }, []);
 
-    useEffect(() => {
-        setAnimationTrigger((prev) => prev + 1);
-    }, [cartItems]);
-
-    const totalItems = useMemo(() => cartItems.length, [cartItems]);
-
+    /** -------------------- CART FUNCTIONS -------------------- **/
     const addToCart = useCallback(
         (product: Product) => {
             if (!product.is_active) return;
@@ -132,36 +122,23 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
                 base_uom: product.base_uom,
             };
 
-            // Get current cart from localStorage
-            const storedCart = localStorage.getItem('cart');
-            const cart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
+            const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
+            const existing = cart.findIndex((item) => item.sku === product.sku);
 
-            // Check if item already exists in cart
-            const existingItemIndex = cart.findIndex((item) => item.sku === product.sku);
-
-            let updatedCart;
-            if (existingItemIndex >= 0) {
-                // Update quantity if item exists
-                updatedCart = [...cart];
-                updatedCart[existingItemIndex] = {
-                    ...updatedCart[existingItemIndex],
-                    quantity: updatedCart[existingItemIndex].quantity + 1,
-                };
+            if (existing >= 0) {
+                cart[existing].quantity += 1;
             } else {
-                // Add new item to cart
-                updatedCart = [...cart, newItem];
+                cart.push(newItem);
             }
 
-            // Update localStorage
-            localStorage.setItem('cart', JSON.stringify(updatedCart));
-
-            // Notify parent component to update cart items
+            localStorage.setItem('cart', JSON.stringify(cart));
+            window.dispatchEvent(new Event('cart-updated'));
             updateCartItems();
         },
         [updateCartItems],
     );
 
-    // Memoize the product cards to prevent unnecessary re-renders
+    /** -------------------- UI RENDER -------------------- **/
     const productCards = useMemo(
         () =>
             products.data.map((p) => (
@@ -176,15 +153,14 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
         <HeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Products" />
             <h1 className="ml-6 text-2xl font-bold text-primary lg:ml-9">Medicine Catalog</h1>
+
             <div className="flex flex-col gap-4 p-4 lg:flex-row lg:gap-6 lg:p-6">
                 {/* Sidebar Filters */}
                 <div className="w-full lg:mr-4 lg:w-1/5">
                     <Filters
                         onFilterChange={setFilters}
-                        // Pass the full list of categories/packages from the controller
                         categories={['Semua Produk', ...allCategories]}
-                        packages={['Semua Paket', ...allPackages]}
-                        // Pass the currently active filters to the component
+                        packages={['Semua Packaging', ...allPackages]}
                         activeFilters={filters}
                     />
                 </div>
@@ -213,7 +189,6 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
                         </Select>
                     </div>
 
-                    {/* Produk */}
                     {products.data.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 text-gray-500">
                             <Package size={64} className="mb-4 text-gray-400" />
@@ -222,14 +197,13 @@ export default function OrdersIndexPage({ products, allCategories, allPackages, 
                     ) : (
                         <>
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">{productCards}</div>
-                            {/* Add Custom Pagination */}
                             <CustomPagination pagination={products} className="mt-6" />
                         </>
                     )}
                 </div>
             </div>
-            {/* Floating Cart */}
-            <FloatingCart totalItems={totalItems} animationTrigger={animationTrigger} />
+
+            <FloatingCart key={animationTrigger} />
         </HeaderLayout>
     );
 }

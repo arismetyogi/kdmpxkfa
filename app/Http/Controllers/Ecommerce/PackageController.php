@@ -39,8 +39,8 @@ class PackageController extends Controller
                     return null; // skip kalau produk tidak ada
                 }
 
-                $maxQuantity = (int)$bundle['QTY Pesan'];
-                $assignedQuantity = $maxQuantity;
+                $initQuantity = (int) $bundle['QTY Pesan'];
+                $assignedQuantity = $initQuantity;
 
                 // Prepare resource array with product data and additional fields
                 $resource = new ProductResource($product);
@@ -48,7 +48,13 @@ class PackageController extends Controller
 
                 // Add the additional fields to the resource array
                 $resourceArray['assignedQuantity'] = $assignedQuantity;
-                $resourceArray['maxQuantity'] = $maxQuantity;
+                $resourceArray['initQuantity'] = $initQuantity;
+                
+                // Ensure content is never zero to prevent division by zero
+                $resourceArray['content'] = $resourceArray['content'] ?? 1;
+                if ($resourceArray['content'] <= 0) {
+                    $resourceArray['content'] = 1;
+                }
 
                 return $resourceArray;
             })->filter()->values();

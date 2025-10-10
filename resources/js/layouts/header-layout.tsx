@@ -1,5 +1,6 @@
 import CreditLimitAlert from '@/components/credit-limit-alert';
 import { Toaster } from '@/components/ui/sonner';
+import { CartProvider } from '@/context/CartContext';
 import AppLayoutTemplate from '@/layouts/app/app-header-layout';
 import { type BreadcrumbItem } from '@/types';
 import { usePage } from '@inertiajs/react';
@@ -39,16 +40,18 @@ export default function HeaderLayout({ children, breadcrumbs, ...props }: AppLay
     }, [flash]);
 
     return (
-        <div className="relative">
-            {auth.user?.tenant_id && (
-                <div className="fixed top-20 right-4 z-50 w-fit">
-                    <CreditLimitAlert tenantId={auth.user.tenant_id} />
-                </div>
-            )}
-            <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
-                <Toaster />
-                <div className="container">{children}</div>
-            </AppLayoutTemplate>
-        </div>
+        <CartProvider>
+            <div className="relative">
+                {auth.user?.tenant_id && (
+                    <div className="fixed top-20 right-4 z-50 w-fit">
+                        <CreditLimitAlert tenantId={auth.user.tenant_id} />
+                    </div>
+                )}
+                <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
+                    <Toaster />
+                    <div className="container">{children}</div>
+                </AppLayoutTemplate>
+            </div>
+        </CartProvider>
     );
 }

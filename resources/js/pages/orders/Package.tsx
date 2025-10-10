@@ -17,7 +17,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 // --- Type Definitions ---
 interface PackageProduct extends Product {
     assignedQuantity: number;
-    maxQuantity: number;
+    initQuantity: number; // MODIFICATION: Renamed from maxQuantity
     content: number;
     order_unit: string;
 }
@@ -36,7 +36,7 @@ function useDebounce<T>(value: T, delay: number): T {
         return () => {
             clearTimeout(handler);
         };
-    }, [value, delay]); // Only re-run the effect if value or delay changes
+    }, [value, delay]);
 
     return debouncedValue;
 }
@@ -55,10 +55,14 @@ interface ProductTableRowProps {
 const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, onQuantityChange }) => {
     const isExcluded = product.assignedQuantity === 0;
 
+    // Ensure content is at least 1 to prevent division by zero
+    const safeContent = Math.max(1, product.content || 1);
+
     const handleBoxQuantityUpdate = (newBoxQuantity: number) => {
-        const rawQuantity = newBoxQuantity * product.content;
-        const validatedQuantity = Math.max(0, Math.min(rawQuantity, product.maxQuantity));
-        const finalQuantity = Math.floor(validatedQuantity / product.content) * product.content;
+        const rawQuantity = newBoxQuantity * safeContent;
+        // MODIFICATION: Removed maxQuantity limit
+        const validatedQuantity = Math.max(0, rawQuantity);
+        const finalQuantity = Math.floor(validatedQuantity / safeContent) * safeContent;
         onQuantityChange(product.id, finalQuantity);
     };
 
@@ -68,11 +72,11 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
     };
 
     const handleExclude = () => onQuantityChange(product.id, 0);
-    const handleInclude = () => onQuantityChange(product.id, product.maxQuantity);
+    // MODIFICATION: Uses initQuantity instead of maxQuantity
+    const handleInclude = () => onQuantityChange(product.id, product.initQuantity);
 
-    const assignedBoxQuantity = product.assignedQuantity / product.content;
-    const maxBoxQuantity = product.maxQuantity / product.content;
-    const pricePerBox = product.price * product.content;
+    const assignedBoxQuantity = product.assignedQuantity / safeContent;
+    const pricePerBox = product.price * safeContent;
 
     return (
         <TableRow className={cn('transition-all', isExcluded && 'bg-muted/50')}>
@@ -97,28 +101,26 @@ const ProductTableRow: React.FC<ProductTableRowProps> = React.memo(({ product, o
                 <p className="hidden text-xs text-muted-foreground sm:block">{product.order_unit}</p>
             </TableCell>
             <TableCell className={cn('hidden px-2 text-center sm:table-cell sm:text-xs lg:text-sm xl:text-base', isExcluded && 'opacity-60')}>
-                <PriceDisplay price={pricePerBox} className="text-sm"/>
+                <PriceDisplay price={pricePerBox} className="text-sm" />
             </TableCell>
-            <TableCell className={cn('hidden p-2 text-center xl:table-cell', isExcluded && 'opacity-60')}>{maxBoxQuantity}</TableCell>
+            {/* REMOVED: Max quantity column is no longer displayed */}
             <TableCell className={cn('p-2', isExcluded && 'opacity-60')}>
                 <div className="flex justify-center">
-                    {/* MODIFICATION: QuantityInput now appears at LG breakpoint */}
                     <div className="hidden lg:flex">
                         <QuantityInput
                             value={assignedBoxQuantity}
                             onChange={handleBoxQuantityUpdate}
                             decrementDisabled={product.assignedQuantity <= 0}
-                            incrementDisabled={product.assignedQuantity >= product.maxQuantity}
+                            // MODIFICATION: Removed incrementDisabled as there's no max limit
                         />
                     </div>
-                    {/* MODIFICATION: Simple input is now hidden at LG breakpoint */}
                     <div className="lg:hidden">
                         <Input
                             className="h-9 w-12 text-center focus-visible:ring-0"
                             value={assignedBoxQuantity}
                             onChange={handleMobileInputChange}
                             min={0}
-                            max={maxBoxQuantity}
+                            // MODIFICATION: Removed max attribute
                         />
                     </div>
                 </div>
@@ -155,8 +157,7 @@ const ProductListTable: React.FC<ProductListTableProps> = ({ products, onQuantit
                 <TableHead className="hidden w-[80px] p-2 xl:table-cell">Image</TableHead>
                 <TableHead className="px-2 sm:px-4">Product Name</TableHead>
                 <TableHead className="hidden w-[100px] px-2 text-center sm:table-cell">Price</TableHead>
-                <TableHead className="hidden w-[70px] px-2 text-center xl:table-cell">Max</TableHead>
-                {/* MODIFICATION: Qty column now widens at LG to accommodate the full QuantityInput */}
+                {/* REMOVED: Max quantity header */}
                 <TableHead className="w-[65px] px-2 text-center lg:w-[150px]">Qty</TableHead>
                 <TableHead className="w-[100px] px-2 text-center">Subtotal</TableHead>
                 <TableHead className="w-[80px] px-2 text-center">Action</TableHead>
@@ -167,8 +168,8 @@ const ProductListTable: React.FC<ProductListTableProps> = ({ products, onQuantit
                 products.map((product) => <ProductTableRow key={product.id} product={product} onQuantityChange={onQuantityChange} />)
             ) : (
                 <TableRow>
-                    {/* MODIFICATION: colSpan updated to match the new number of columns */}
-                    <TableCell colSpan={7} className="h-24 text-center">
+                    {/* MODIFICATION: colSpan updated from 7 to 6 */}
+                    <TableCell colSpan={6} className="h-24 text-center">
                         No products found.
                     </TableCell>
                 </TableRow>
@@ -197,7 +198,7 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({ activeProducts, sum
                                     <div>
                                         <h4 className="line-clamp-2 text-sm font-medium">{product.name}</h4>
                                         <p className="text-xs text-muted-foreground">
-                                            Qty: {product.assignedQuantity / product.content} {product.order_unit}
+                                            Qty: {product.assignedQuantity / Math.max(1, product.content || 1)} {product.order_unit}
                                         </p>
                                     </div>
                                     <div className="shrink-0 pl-4 text-right">
@@ -262,51 +263,48 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
     const [packageProducts, setPackageProducts] = useState<PackageProduct[]>(initialProducts);
     const [searchQuery, setSearchQuery] = useState('');
     const [sortOrder, setSortOrder] = useState('default');
-    const [editingPackageId, setEditingPackageId] = useState<string | null>(null); // Track the original package ID when editing
-    const debouncedSearchQuery = useDebounce(searchQuery, 500); // 500ms debounce delay
+    const [editingPackageId, setEditingPackageId] = useState<string | null>(null);
+    const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-    // Check if there's an editing package in localStorage and restore state
     useEffect(() => {
         const editingPackage = localStorage.getItem('editingPackage');
         if (editingPackage) {
             const packageItem = JSON.parse(editingPackage);
-
-            // Store the original package ID to use when updating the cart
             setEditingPackageId(packageItem.id);
 
-            // Update package products with quantities from the package item
             setPackageProducts((prev) =>
                 prev.map((product) => {
                     const packageContent = packageItem.packageContents.find((content: any) => content.product_id === product.id);
 
                     if (packageContent) {
-                        // Calculate the assigned quantity based on package content and content multiplier
                         return {
                             ...product,
-                            assignedQuantity: Math.max(0, Math.min(packageContent.quantity * (product.content || 1), product.maxQuantity)),
+                            // MODIFICATION: Removed maxQuantity limit when restoring from cart
+                            assignedQuantity: Math.max(0, packageContent.quantity * (product.content || 1)),
                         };
                     } else {
                         return {
                             ...product,
-                            assignedQuantity: 0, // Not included in the package
+                            assignedQuantity: 0,
                         };
                     }
                 }),
             );
 
-            // Remove the editing package from localStorage after restoring
             localStorage.removeItem('editingPackage');
         }
     }, []);
 
     const updateQuantity = useCallback((productId: number, newQuantity: number) => {
         setPackageProducts((prev) =>
-            prev.map((p) => (p.id === productId ? { ...p, assignedQuantity: Math.max(0, Math.min(newQuantity, p.maxQuantity)) } : p)),
+            // MODIFICATION: Removed maxQuantity limit
+            prev.map((p) => (p.id === productId ? { ...p, assignedQuantity: Math.max(0, newQuantity) } : p)),
         );
     }, []);
 
     const handleIncludeAll = () => {
-        setPackageProducts((prev) => prev.map((p) => ({ ...p, assignedQuantity: p.maxQuantity })));
+        // MODIFICATION: Uses initQuantity instead of maxQuantity
+        setPackageProducts((prev) => prev.map((p) => ({ ...p, assignedQuantity: p.initQuantity })));
     };
 
     const activePackageProducts = useMemo(() => packageProducts.filter((p) => p.assignedQuantity > 0), [packageProducts]);
@@ -319,9 +317,34 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
         switch (sortOrder) {
             case 'quantity':
                 return products.sort((a, b) => {
-                    if (a.assignedQuantity > 0 && b.assignedQuantity === 0) return -1;
-                    if (a.assignedQuantity === 0 && b.assignedQuantity > 0) return 1;
-                    return b.assignedQuantity - a.assignedQuantity;
+                    // Calculate the displayed quantity using the same formula used in the UI
+                    const aDisplayedQuantity = a.assignedQuantity / Math.max(1, a.content || 1);
+                    const bDisplayedQuantity = b.assignedQuantity / Math.max(1, b.content || 1);
+
+                    // First, prioritize items that are included (displayedQuantity > 0) over excluded items (displayedQuantity === 0)
+                    const aIsIncluded = aDisplayedQuantity > 0 ? 1 : 0;
+                    const bIsIncluded = bDisplayedQuantity > 0 ? 1 : 0;
+
+                    if (aIsIncluded !== bIsIncluded) {
+                        return bIsIncluded - aIsIncluded; // Included items first
+                    }
+
+                    // If both are included or both are excluded, sort by displayed quantity in descending order
+                    return bDisplayedQuantity - aDisplayedQuantity;
+                });
+            case 'subtotal-high':
+                return products.sort((a, b) => {
+                    // Sort by subtotal (price * assignedQuantity) in descending order
+                    const aSubtotal = a.price * a.assignedQuantity;
+                    const bSubtotal = b.price * b.assignedQuantity;
+                    return bSubtotal - aSubtotal;
+                });
+            case 'subtotal-low':
+                return products.sort((a, b) => {
+                    // Sort by subtotal (price * assignedQuantity) in ascending order
+                    const aSubtotal = a.price * a.assignedQuantity;
+                    const bSubtotal = b.price * b.assignedQuantity;
+                    return aSubtotal - bSubtotal;
                 });
             default:
                 return products.sort((a, b) => a.name.localeCompare(b.name));
@@ -337,25 +360,22 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
 
     const addToCart = () => {
         try {
-            // Calculate the total price for the package based on active products
             const packageTotalPrice = activePackageProducts.reduce((total, p) => total + p.price * p.assignedQuantity, 0);
-
-            // Create package item to store in cart
             const packageItem: PackageItem = {
-                id: editingPackageId || 'merah-putih-package-' + Date.now(), // Use original ID when editing, otherwise generate new ID
+                id: editingPackageId || 'merah-putih-package-' + Date.now(),
                 name: 'Paket Merah Putih',
                 slug: 'paket-merah-putih',
                 price: packageTotalPrice,
-                image: '/products/package-icon.png', // Placeholder for package icon
+                image: '/products/package-icon.png',
                 order_unit: 'package',
                 content: 1,
                 base_uom: 'package',
-                weight: 0, // Calculate or set default weight
+                weight: 0,
                 isPackage: true,
                 packageContents: activePackageProducts.map((p) => ({
                     product_id: p.id,
                     name: p.name,
-                    quantity: p.assignedQuantity / p.content,
+                    quantity: p.assignedQuantity / Math.max(1, p.content || 1),
                     price: p.price,
                     image: p.image,
                     order_unit: p.order_unit,
@@ -365,44 +385,31 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
                 })),
             };
 
-            // Get existing cart items
             const existingCart = localStorage.getItem('cart');
             let finalCart: CartItemOrPackage[] = [];
 
             if (existingCart) {
                 const parsedExistingCart: CartItemOrPackage[] = JSON.parse(existingCart);
-
-                // Check if we're editing an existing package - if so, replace it instead of adding
                 if (editingPackageId) {
-                    // Replace the package with the same ID, keep other items
                     finalCart = parsedExistingCart.map((item) => {
                         if ('isPackage' in item && 'id' in item && item.id === editingPackageId) {
-                            return packageItem; // Replace with updated package
+                            return packageItem;
                         }
                         return item;
                     });
-
-                    // If the package ID wasn't found (edge case), add it to the cart
                     const packageExists = finalCart.some((item) => 'isPackage' in item && 'id' in item && item.id === editingPackageId);
-
                     if (!packageExists) {
                         finalCart = [...parsedExistingCart, packageItem];
                     }
                 } else {
-                    // Adding new package, just append to cart
                     finalCart = [...parsedExistingCart, packageItem];
                 }
             } else {
-                // If no existing cart, just use the package
                 finalCart = [packageItem];
             }
 
-            // Store the merged cart in localStorage
             localStorage.setItem('cart', JSON.stringify(finalCart));
-
-            // Reset editing state after adding to cart
             setEditingPackageId(null);
-
             router.visit(route('cart'));
         } catch (error) {
             console.error('Error adding package to Cart:', error);
@@ -411,7 +418,6 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
     };
 
     const isCartDisabled = activePackageProducts.length === 0;
-    console.log(summary);
 
     return (
         <HeaderLayout breadcrumbs={breadcrumbs}>
@@ -440,6 +446,8 @@ export default function PackagePage({ products: initialProducts }: PackagePagePr
                                 <SelectContent>
                                     <SelectItem value="default">Default (A-Z)</SelectItem>
                                     <SelectItem value="quantity">Included / Quantity</SelectItem>
+                                    <SelectItem value="subtotal-high">Highest Subtotal</SelectItem>
+                                    <SelectItem value="subtotal-low">Lowest Subtotal</SelectItem>
                                 </SelectContent>
                             </Select>
                             <Button onClick={handleIncludeAll} variant="outline">
